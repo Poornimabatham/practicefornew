@@ -1,0 +1,19 @@
+getDepartment Apis
+http://127.0.0.1:3333/getDepartmentList?orgid=10
+
+getDesignation Apis
+http://127.0.0.1:3333/getdesign?orgid=10
+
+getHoliday Apis 
+http://127.0.0.1:3333/getholiday?orgid=10
+
+getShift Apis
+http://127.0.0.1:3333/get-shift?refno=10
+
+
+Deepak Rajput, Mon 14:59
+[12/06, 10:12] Shakir Sir: https://ubiattendance.ubiattendance.xyz/index.php/Att_services_getx11/DepartmentMaster?orgid=105999
+[12/06, 10:12] Shakir Sir: https://ubiattendance.ubiattendance.xyz/index.php/Att_services_getx11/DesignationMaster?orgid=105999
+[12/06, 10:12] Shakir Sir: https://ubiattendance.ubiattendance.xyz/index.php/Att_services_getx11//shiftMaster?orgid=105999
+[12/06, 10:13] Shakir Sir: https://ubiattendance.ubiattendance.xyz/index.php/Att_services_getx11/getgeofenceList?orgid=105999
+[12/06, 10:14] Shakir Sir: https://ubiattendance.ubiattendance.xyz/index.php/Att_services_getx11/getAllHoliday?orgid=105999
