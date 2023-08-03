@@ -18,7 +18,8 @@ export default class Helper {
     return str;
   }
   public static async getTimeZone(orgid: any) {
-    const query1 = await Database.query().from('ZoneMaster').select('name').where('id', Database.raw(`(select TimeZone from Organization where id =${orgid}  LIMIT 1)`));
+    const query1: any = await Database.query().from('ZoneMaster').select('name').where('id', Database.raw(`(select TimeZone from Organization where id =${orgid}  LIMIT 1)`));
+
     return query1;
 
   }
@@ -48,5 +49,14 @@ export default class Helper {
       return 0;
     }
   }
+
+  public static async getName(Id: number) {
+
+    const query = await Database.from('EmployeeMaster').select('OrganizationId').where('Id', Id);
+
+    return query[0].OrganizationId;
+  }
+
+
 }
 

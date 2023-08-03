@@ -1,6 +1,8 @@
 import Database from "@ioc:Adonis/Lucid/Database";
 import Helper from "App/Helper/Helper";
 import { DateTime } from 'luxon';
+import moment from 'moment-timezone';
+
 
 export default class DepartmentService {
 
@@ -50,8 +52,8 @@ export default class DepartmentService {
 
     if (query.length > 0) {
       result['status'] = '-1';
-      // return result;
-      return false;
+      return result['status'];
+
     }
     const query1 = await Database.insertQuery()
       .table("DepartmentMaster")
@@ -68,10 +70,12 @@ export default class DepartmentService {
 
     if (query1.length > 0) {
 
-      var zone = Helper.getTimeZone(data.OrganizationId);
-      const formatteDate = new Intl.DateTimeFormat([],);
-      const now = DateTime.local();
-      const formattedDate = now.toFormat('yy-MM-dd HH:mm:ss');
+      var zone = await Helper.getTimeZone(data.OrganizationId);
+      var timeZone = zone[0]?.name;
+      var defaulttimeZone = moment().tz(timeZone).toDate();
+      const dateTime = DateTime.fromJSDate(defaulttimeZone);    //converts the JavaScript Date object to a Luxon DateTime
+      const formattedDate = dateTime.toFormat('yy-MM-dd HH:mm:ss');
+      var actionPerformed = await Helper.getempnameById(data.Id);
       var uid = data.Id;
       var module = "Attendance app";
       var appModule = "Department";
@@ -81,6 +85,7 @@ export default class DepartmentService {
         .insert({
           LastModifiedDate: formattedDate,
           LastModifiedById: uid,
+          ActionPerformed: actionPerformed,
           Module: module,
           OrganizationId: data.OrganizationId,
           ActivityBy: activityby,
@@ -88,35 +93,102 @@ export default class DepartmentService {
           AppModule: appModule
         })
 
+      result['status'] = '1';
     }
-    result['status'] = '1';
+
     return result['status'];
 
   }
 
 
   public static async updateDepartment(data) {
-    var currentdate = new Date();
 
-    const query = await Database.from("DepartmentMaster")
+    var result = [];
+    result['status'] = '0';
+    const date = DateTime.now();
+    const formattedDate = date.toFormat('yy-MM-dd');
+    var orgid = await Helper.getName(data.Id);
+    var uid = data.Id;
+
+    var query = await Database.from("DepartmentMaster")
       .select("Id", "OrganizationId", "Name")
-      .where("Id", data.Id)
-      .andWhere("OrganizationId", data.OrganizationId)
+      .where("Id", uid)
+      .andWhere("OrganizationId", orgid)
       .andWhere("Name", data.Name);
     if (query.length > 0) {
-      return false;
+      result['status'] = '-1';
+      return result['status'];
+    }
+
+    const query1 = await Database.from('DepartmentMaster').select('Name', 'archive').where('OrganizationId', orgid).andWhere('Id', uid);
+    query = query1;
+    var name;
+    var sts1;
+
+    query1.forEach((row) => {
+      name = row.Name;
+      sts1 = row.archive;
+    })
+
+    var r;
+    if (name != data.Name) {
+      r = 2;
+    }
+    else if (name == data.Name && sts1 != data.archive) {
+      r = data.archive;
     }
 
     const query2 = await Database.query()
       .from("DepartmentMaster")
-      .where("Id", data.Id)
+      .where("Id", uid)
       .update({
         Name: data.Name,
-        LastModifiedDate: currentdate,
-        LastModifiedById: data.LastModifiedById,
+        LastModifiedDate: formattedDate,
+        LastModifiedById: uid,
         archive: data.archive,
       });
 
-    return query2;
+    var count = query.length;
+    if (count > 0) {
+      var zone = await Helper.getTimeZone(orgid);
+      var timeZone = zone[0]?.name;
+      var defaulttimeZone = moment().tz(timeZone).toDate();
+      const dateTime = DateTime.fromJSDate(defaulttimeZone);
+      const formattedDate = dateTime.toFormat('yy-MM-dd HH:mm:ss');
+      var id = uid;
+      var module = "Attendance app";
+      var appModule = "Department";
+      var actionperformed;
+
+      if (r == 2) {
+        actionperformed = await Helper.getempnameById(uid)
+
+      }
+
+      else if (r == 1) {
+        actionperformed = await Helper.getempnameById(uid)
+
+      }
+      else {
+        actionperformed = await Helper.getempnameById(uid)
+
+      }
+
+      var activityBy = 1;
+
+      const query3 = await Database.table('ActivityHistoryMaster').insert({
+        LastModifiedDate: formattedDate,
+        LastModifiedById: uid,
+        Module: module,
+        ActionPerformed: actionperformed,
+        OrganizationId: orgid,
+        ActivityBy: activityBy,
+        adminid: uid,
+        AppModule: appModule
+      })
+      result['status'] = 1
+    }
+
+    return result['status'];
   }
 }

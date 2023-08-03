@@ -50,7 +50,7 @@ export default class DepartmentValidator extends BaseValidator {
             Id: schema.number(),
             Name: schema.string(),
             LastModifiedById: schema.number.optional(),
-            archive: schema.number.optional()
+            archive: schema.number()
         }), message: BaseValidator.messages
     }
     /**
