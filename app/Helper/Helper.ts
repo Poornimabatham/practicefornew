@@ -25,7 +25,7 @@ export default class Helper {
   }
   public static async getempnameById(empid: number) {
     const query2 = await Database.query().from('EmployeeMaster').select('FirstName').where('Id', empid);
-    //const FristName = query2[0].FristName;
+
     return query2[0].FirstName;
 
   }
