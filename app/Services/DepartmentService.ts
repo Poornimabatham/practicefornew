@@ -8,13 +8,22 @@ export default class DepartmentService {
       Id: number,
       Name: string,
       OrganizationId: number,
-      archive: number
+      archive: number,
     }
 
-    const query = await Database.from('DepartmentMaster').select('Id', Database.raw(`if(LENGTH("Name") > 30, concat(SUBSTR("Name", 1, 30), '....'), Name) as Name ,'archive'`)).where('OrganizationId', data.OrganizationId).orderBy('Name');
+    var begin = (data.currentpage - 1) * data.perpage;
+    var limit;
+    var offset;
+
+    if (data.currentdate != 0 && data.pagename == 'DepartmentList') {
+      limit = data.perpage;
+      offset = begin;
+    }
+
+    const query = await Database.from('DepartmentMaster').select('Id', Database.raw(`if(LENGTH("Name") > 30, concat(SUBSTR("Name", 1, 30), '....'), Name) as Name ,'archive'`)).where('OrganizationId', data.OrganizationId).orderBy('Name').limit(limit).offset(offset);
 
 
-    var res: any[] = [];
+    var res: department[] = [];         //declared res as an empty array with type department
 
     query.forEach((row) => {
       const data: department = {
@@ -51,7 +60,7 @@ export default class DepartmentService {
         OwnerId: data.OwnerId,
         archive: data.archive,
       });
-    // console.log(query1)
+
     return query1;
   }
 
