@@ -1,6 +1,7 @@
 
 const jwt = require("jsonwebtoken");
 import Database from "@ioc:Adonis/Lucid/Database";
+import LogicsOnly from "App/Services/getAttendances_service";
 
 export default class Helper{
 
@@ -25,6 +26,8 @@ export default class Helper{
         return query1[0].name;   
     }
     public static async getempnameById(empid: number) { 
+      console.log(empid);
+      
         const query2 = await Database.query().from('EmployeeMaster').select('FirstName').where('Id', empid); 
         return query2[0].FirstName;
         
