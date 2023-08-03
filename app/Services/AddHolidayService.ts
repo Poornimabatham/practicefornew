@@ -6,9 +6,7 @@ export default class AddHolidayService {
   static async Holidayfetch(OrgId) { 
 
   const currentPage = 2;
-  
   const perPage = 10;
-  
   const begin = (currentPage - 1) * perPage;
   
   const query1 = Database.query()
@@ -70,47 +68,47 @@ const existingHoliday = await Database.query()
   .andWhere('OrganizationId', get.OrganizationId)
   .first()
     
- if (existingHoliday){
-   result.status = '2'  // Holiday already exists in database
-   return(result)
- }
+if (existingHoliday){
+  result.status = '2'  // Holiday already exists in database
+  return(result)
+}
 
-  const query =  await Database
-  .insertQuery() // 👈 gives an instance of insert query builder.
-  .table('holidaymaster')
-  .insert({Name:get.Name , Description:get.Description ,OrganizationId:get.OrganizationId,CreatedById:get.EmpId,
-    CreatedDate:CurrDate ,DivisionId:0,LastModifiedDate:CurrDate,LastModifiedById:get.EmpId,DateFrom:DateFrom, DateTo:DateTo,FiscalId:1})
+const query =  await Database
+.insertQuery() // 👈 gives an instance of insert query builder.
+.table('holidaymaster')
+.insert({Name:get.Name , Description:get.Description ,OrganizationId:get.OrganizationId,CreatedById:get.EmpId,
+  CreatedDate:CurrDate ,DivisionId:0,LastModifiedDate:CurrDate,LastModifiedById:get.EmpId,DateFrom:DateFrom, DateTo:DateTo,FiscalId:1})
 
 if(query.length > 0){
                
 const zone = await Helper.getTimeZone(get.OrganizationId);
   
-  const timezone = zone[0]?.name;
-  const date = moment().tz(timezone).toDate();
-  const uid = get.empid;
-  const EmpName = await Helper.getempnameById(get.EmpId);
-  const module = 'Attendance app';
-  const activityBy = 1
-  const appModule = 'Holiday';
-  const actionperformed = `<b>${get.Name}</b> holiday has been created by <b>${EmpName}</b> from Attendance App`;
-    
-  await Database.insertQuery()
-    .table('ActivityHistoryMaster')
-    .insert({
-      LastModifiedDate: date,
-      LastModifiedById: uid,
-      module: module,
-      ActionPerformed: actionperformed,
-      OrganizationId: get.OrganizationId,
-      activityBy: activityBy,
-      adminid: uid,
-      appmodule: appModule,
-    });
+const timezone = zone[0]?.name;
+const date = moment().tz(timezone).toDate();
+const uid = get.empid;
+const EmpName = await Helper.getempnameById(get.EmpId);
+const module = 'Attendance app';
+const activityBy = 1
+const appModule = 'Holiday';
+const actionperformed = `<b>${get.Name}</b> holiday has been created by <b>${EmpName}</b> from Attendance App`;
   
-  return 'Activity history inserted successfully';
-  }else{
+await Database.insertQuery()
+  .table('ActivityHistoryMaster')
+  .insert({
+    LastModifiedDate: date,
+    LastModifiedById: uid,
+    module: module,
+    ActionPerformed: actionperformed,
+    OrganizationId: get.OrganizationId,
+    activityBy: activityBy,
+    adminid: uid,
+    appmodule: appModule,
+  });
+
+return 'Activity history inserted successfully';
+}else{
     console.log('Error inserting activity history');
-    }
   }
+ }
 }
 
