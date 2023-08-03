@@ -11,6 +11,10 @@ export default class UsersettingsController {
 
   }
 
+    public async updateProfilePhoto({}){
+      
+    }
+
   // public async updateProfilePhoto({request,response}:HttpContextContract){
   //    await request.validate(UsersettingValidator.updateprofile)
   //    const result = await UserSettingService.updateProfilePhoto(request.all())

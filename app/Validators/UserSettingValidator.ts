@@ -1,5 +1,6 @@
 import { schema, CustomMessages } from '@ioc:Adonis/Core/Validator'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import { rules } from '@ioc:Adonis/Core/Validator'
 
 export default class UserSettingValidator {
   constructor(protected ctx: HttpContextContract) {}
@@ -34,12 +35,12 @@ export default class UserSettingValidator {
     })
   }
 
-  static updateprofile = {
-    schema:schema.create({
-       orgid : schema.string(),
-       empid: schema.string()
-    })
-  }
+  // static updateprofile = {
+  //   schema:schema.create({
+  //      orgid : schema.string(),
+  //      empid: schema.string()
+  //   })
+  // }
 
   /**
    * Custom messages for validation failures. You can make use of dot notation `(.)`

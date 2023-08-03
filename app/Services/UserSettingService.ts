@@ -25,6 +25,7 @@ export default class Usersettingservice{
        })
           data1 = res[0].sts;
       }
+     
       else
       {
          if(cpassword == npass){
@@ -33,16 +34,18 @@ export default class Usersettingservice{
           res1['status'] = "password has been  changed"
          }
        }
-       
+     
       if(query.length == 1)
       {
+        console.log('ashi')
           if(npass == rptpass)
           {
-              const qur = await Database.from('UserMaster').where('EmployeeId',empid).andWhere('OrganizationId',orgid).update({Password:rptpass}).update({Password_sts:1});
+            console.log('mini')
+              const qur = await Database.from('UserMaster').where('EmployeeId',empid).andWhere('OrganizationId',orgid).update({Password:rptpass,Password_sts:1});
               res1['status']=qur;
               if(data1 == 1)
               {
-                  const qur1 = await Database.from('admin_login').where('OrganizationId',orgid).update({password:rptpass}).update({changepasswordStatus:1});
+                  const qur1 = await Database.from('admin_login').where('OrganizationId',orgid).update({password:rptpass,changepasswordStatus:1});
                   res1['status'] = qur1;
               }
             }
