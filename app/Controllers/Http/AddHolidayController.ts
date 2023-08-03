@@ -17,7 +17,7 @@ export default class AddHolidayController {
 
     const validData = await request.validate(AddHolidayValidate.HolidayInsert)
     const result = await AddHolidayService.InsertHoliday(validData)
-    //let currDate = moment().format("YYYY-MM-DD");
+    
     return response.json(result);
   }
 
@@ -39,18 +39,7 @@ export default class AddHolidayController {
     return data
   }
 
-  public async store({ response }: HttpContextContract) {   //  fetching common data from holidaymaster & holidays
-
-    // const show = await Database
-    // .from('holidaymaster')
-    // .innerJoin('holidays',' holidaymaster.Id','holidays.HM_Id')
-    // .select("*")
-    // return "Heloo"
-    // return response.json(show)
-
-    // const show2 = await HolidayM.all()  // fetched all data from HolidayM -model
-    // return show2
-  }
+  public async store({}: HttpContextContract) {}
 
   public async show({ request, response }: HttpContextContract) {
     const userid = request.input('empId', '')
@@ -74,81 +63,7 @@ export default class AddHolidayController {
     return response.json(data)
   }
 
-  public async edit({ }: HttpContextContract) {
-
-    // import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-    // import HolidayMaster from 'App/Models/HolidayMaster'
-    // import ActivityHistoryMaster from 'App/Models/ActivityHistoryMaster'
-    // import { DateTime } from 'luxon'
-
-    //     public async addHoliday({ request, response }: HttpContextContract) {
-    //       const orgid = request.input('org_id', 0)
-    //       const empid = request.input('empid', 0)
-    //       const name = request.input('name', '')
-    //       const from = request.input('from', 0)
-    //       const to = request.input('to', 0)
-    //       const description = request.input('description', '')
-
-    //       const result = { status: '' }
-
-    //       const date = DateTime.local().toFormat('yyyy-MM-dd')
-    //       const fromDate = DateTime.fromISO(from).toFormat('yyyy-MM-dd')
-    //       const toDate = DateTime.fromISO(to).toFormat('yyyy-MM-dd')
-
-    //       const existingHoliday = await HolidayMaster.query()
-    //         .where((query) =>
-    //           query
-    //             .whereBetween('DateFrom', [fromDate, toDate])
-    //             .orWhereBetween('DateTo', [fromDate, toDate])
-    //         )
-    //         .andWhere('OrganizationId', orgid)
-    //         .first()
-
-    //       if (existingHoliday) {
-    //         result.status = '2' // Holiday already exists
-    //         return response.json(result)
-    //       }
-
-    //       const newHoliday = new HolidayMaster()
-    //       newHoliday.Name = name
-    //       newHoliday.Description = description
-    //       newHoliday.DateFrom = fromDate
-    //       newHoliday.DateTo = toDate
-    //       newHoliday.DivisionId = '0'
-    //       newHoliday.OrganizationId = orgid
-    //       newHoliday.CreatedDate = date
-    //       newHoliday.CreatedById = empid
-    //       newHoliday.LastModifiedDate = date
-    //       newHoliday.LastModifiedById = empid
-    //       newHoliday.FiscalId = 1
-    //       await newHoliday.save()
-
-    //       // Log the activity
-    //       const zone = getTimeZone(orgid) // You need to implement this function
-    //       DateTime.local().setZone(zone)
-    //       const activityDate = DateTime.local().toFormat('yy-MM-dd HH:mm:ss')
-    //       const activityBy = 1
-    //       const actionPerformed = `<b>${name}</b> holiday has been created by <b>${getEmpName(empid)}</b> from Attendance App`
-    //       const appModule = 'Holiday'
-
-    //       const activityHistory = new ActivityHistoryMaster()
-    //       activityHistory.LastModifiedDate = activityDate
-    //       activityHistory.LastModifiedById = empid
-    //       activityHistory.Module = 'Attendance app'
-    //       activityHistory.ActionPerformed = actionPerformed
-    //       activityHistory.OrganizationId = orgid
-    //       activityHistory.ActivityBy = activityBy
-    //       activityHistory.adminid = empid
-    //       activityHistory.AppModule = appModule
-    //       await activityHistory.save()
-
-    //       result.status = '1' // Holiday added successfully
-    //       return response.json(result)
-    //     }
-    //   }
-
-
-  }
+  public async edit({ }: HttpContextContract) {}
 
   public async update({ }: HttpContextContract) { }
 
