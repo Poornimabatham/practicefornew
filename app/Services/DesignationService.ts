@@ -21,7 +21,7 @@ export default class DesignationService {
 
     if (affectedRows > 0) {
       result["status"] = -1;
-      return false;
+      return 'user already exist';
     }
 
     var insertDesignation = await Database.insertQuery()
@@ -43,6 +43,7 @@ export default class DesignationService {
         sts: a.sts,
         add_sts: "YourAddStsValue",
       });
+
 
     // const res2: any = await insertDesignation;
 
@@ -74,6 +75,9 @@ export default class DesignationService {
       result["status"] = 1;
     }
     return result["status"];
+=======
+    return 'User inserted';
+>>>>>>> a8d28a6b7964d22a3b2b5ea81266d0f3a25baa83
   }
   // Fetch data method
   public static async getDesignation(a) {
@@ -133,10 +137,11 @@ export default class DesignationService {
 
   // Update designation Method
   public static async updateDesignation(c) {
+    
     const result: any[] = [];
     
     result["status"] = 0;
-
+  
     let curdate = new Date();
 
     const designationList = await Database.from("DesignationMaster")
@@ -145,10 +150,10 @@ export default class DesignationService {
       .andWhere("OrganizationId", c.Updateorgid)
       .andWhere("Id", c.Updateid);
 
-    
-    const res = designationList.length;
+    const Result: any = await query;
+    const r = Result.length;
 
-    if (res> 0) {
+    if (r > 0) {
       result["status"] = -1;
       return result["status"];
       // if dept already exists
@@ -167,55 +172,28 @@ export default class DesignationService {
     const count3 = designationList2.length;
 
 
-    var r:any = " ";
+    var res: any = "";
     if (name != c.UpdateName) {
-    r = 2;
+      res = 2;
     } else if (name == c.UpdateName && c.sts != sts1) {
-      r = c.sts;
+      res = c.sts;
     }
 
     var updateDesignaion: any = await Database.query()
       .from("DesignationMaster")
       .where("id", c.Updateid)
       .update({
-        Name: c.UpdateName,
+        Name:c.UpdateName,
         LastModifiedDate: curdate,
         LastModifiedById: c.Updateid,
         archive: c.sts,
-        OrganizationId: c.Updateorgid,
+        OrganizationId: c.UpdateName,
       });
 
-    const count = await updateDesignaion;
-    
- 
-    if (count > 0) {
-      const timezone = await Helper.getTimeZone(c.Updateid);
-      const zone = timezone[0]?.name;
-
-      const currentDateTime = moment().tz(zone);
-
-      const date = new Date();
-      const module = "Attendance app";
-      const appModule = "Designation";
-    
-      
-          var actionperformed =  await Helper.getempnameById(c.Updateid);
-      
-      
-      const activityby = 1;
-      const insertctivityHistoryMaster: any = await Database.insertQuery()
-        .table("ActivityHistoryMaster")
-        .insert({
-          ActionPerformed: actionperformed,
-          AppModule: appModule,
-        });
-      
-    }
-    else{
-      return 'user not found'
-    }
-    return result['status'];
+    const updateResponse = await updateResult;
 
     
+    
+    return updateResponse;
   }
 }

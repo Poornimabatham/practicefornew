@@ -4,6 +4,7 @@ import GetplannerController from 'App/Controllers/Http/ReportController/GetPlann
 
 Route.group(() => {
     Route.get('/fetchdata','GetplannerController.data')
- 
-  }).namespace('App/Controllers/Http/ReportController')
+    Route.post('/fetch','GetplannerController.data2')
+
+  }).namespace('App/Controllers/Http/ReportController').namespace('App/Controllers/Http/ReportController')
   

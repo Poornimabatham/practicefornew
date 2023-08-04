@@ -38,6 +38,12 @@
       }
     ]
   },
+  
+    "namespaces": {
+      "httpControllers": "App/Controllers/"
+    },
+  
+  
   "testProviders": [
     "@japa/preset-adonis/TestsProvider"
   ]
