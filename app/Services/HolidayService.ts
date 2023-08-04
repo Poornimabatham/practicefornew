@@ -2,14 +2,14 @@ import Database from "@ioc:Adonis/Lucid/Database";
 import moment from "moment-timezone";
 import Helper from "App/Helper/Helper";
 
-export default class AddHolidayService {
+export default class HolidayService {
   static async Holidayfetch(OrgId) { 
 
   const currentPage = 2;
   const perPage = 10;
   const begin = (currentPage - 1) * perPage;
   
-  const query1 = Database.query()
+  const FetchHolidays = Database.query()
   .from("holidaymaster")
   .select("Id","Name","Description","DateTo","OrganizationId",
     Database.raw("DATE(DateFrom) AS fromDate"),
@@ -28,13 +28,13 @@ export default class AddHolidayService {
   }
   const res : DefineTypes[]=[];
 
-  const FetchQuery = await query1
-  FetchQuery.forEach(function (val){
+  const FetchData = await FetchHolidays
+  FetchData.forEach(function (val){
  
   const FromDate:string =  (moment(val.DateFrom).format("YYYY/MM/DD"))
   const DateTo:String= moment(val.DateTo).format("YYYY/MM/DD")
 
-  const data:DefineTypes = {
+  const CheckData:DefineTypes = {
     Id:val.Id,
     Name:val.Name,
     Description:val.Description,
@@ -43,7 +43,7 @@ export default class AddHolidayService {
     DiffDate:val.DiffDate,
     DateTo:DateTo
   }
-   res.push(data);
+   res.push(CheckData);
   });
    return res;
   }
@@ -73,13 +73,13 @@ if (existingHoliday){
   return(result)
 }
 
-const query =  await Database
+const InsertHolidays = await Database
 .insertQuery() // 👈 gives an instance of insert query builder.
 .table('holidaymaster')
-.insert({Name:get.Name , Description:get.Description ,OrganizationId:get.OrganizationId,CreatedById:get.EmpId,
-  CreatedDate:CurrDate ,DivisionId:0,LastModifiedDate:CurrDate,LastModifiedById:get.EmpId,DateFrom:DateFrom, DateTo:DateTo,FiscalId:1})
+.insert({Name:get.Name, Description:get.Description, OrganizationId:get.OrganizationId,CreatedById:get.EmpId,
+  CreatedDate:CurrDate, DivisionId:0, LastModifiedDate:CurrDate, LastModifiedById:get.EmpId,DateFrom:DateFrom, DateTo:DateTo,FiscalId:1})
 
-if(query.length > 0){
+if(InsertHolidays.length > 0){
                
 const zone = await Helper.getTimeZone(get.OrganizationId);
   
@@ -90,7 +90,7 @@ const EmpName = await Helper.getempnameById(get.EmpId);
 const module = 'Attendance app';
 const activityBy = 1
 const appModule = 'Holiday';
-const actionperformed = `<b>${get.Name}</b> holiday has been created by <b>${EmpName}</b> from Attendance App`;
+const actionperformed = `${get.Name} holiday has been created by ${EmpName} from Attendance App`;
   
 await Database.insertQuery()
   .table('ActivityHistoryMaster')
@@ -107,7 +107,7 @@ await Database.insertQuery()
 
 return 'Activity history inserted successfully';
 }else{
-    console.log('Error inserting activity history');
+   return'Error inserting activity history';
   }
  }
 }

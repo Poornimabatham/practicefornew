@@ -26,14 +26,14 @@ export default class Helper{
         
     }
     public static async getempnameById(empid: number) { 
-      console.log(empid)
+
         const query2 = await Database.query().from('EmployeeMaster').select('FirstName').where('Id', empid); 
-        //const FristName = query2[0].FristName;
         return query2[0].FirstName;
         
     }
    public static generateToken(secretKey:string, data:any={}) {
-      try{
+      
+    try{
         const payload={
           audience:data.username,
           Id:data.empid,
@@ -50,7 +50,7 @@ export default class Helper{
       }catch(err){
           console.log(err);
           return 0;
-      }
+    }
   }
 }
 
