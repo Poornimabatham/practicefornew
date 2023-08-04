@@ -30,5 +30,6 @@ import  "../app/Routes/DepartmentRoute"
 import  "../app/Routes/GetTokenRoute"
 import  '../app/Routes/ShiftRoute'
 import  '../app/Routes/HolidayRoute'
+import '../app/Routes/DailyAttendanceRoute'
 
 

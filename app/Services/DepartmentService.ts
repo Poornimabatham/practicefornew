@@ -27,7 +27,7 @@ export default class DepartmentService {
     const departmentList = await Database.from('DepartmentMaster').select('Id', Database.raw(`if(LENGTH("Name") > 30, concat(SUBSTR("Name", 1, 30), '....'), Name) as Name ,'archive'`)).where('OrganizationId', data.OrganizationId).orderBy('Name').limit(limit).offset(offset);
 
 
-    var result: department[] = [];         //declared res as an empty array with type department
+    var result: department[] = [];         //declared result as an empty array with type department
 
     departmentList.forEach((row) => {
       const data: department = {
@@ -111,10 +111,12 @@ export default class DepartmentService {
     var uid = data.Id;
 
     var query = await Database.from("DepartmentMaster")
-      .select("Id", "OrganizationId", "Name")
+      .select("Id")
       .where("Id", uid)
       .andWhere("OrganizationId", orgid)
       .andWhere("Name", data.Name);
+
+      
     if (query.length > 0) {
       result['status'] = '-1';
       return result['status'];
@@ -134,7 +136,7 @@ export default class DepartmentService {
     if (name != data.Name) {
       r = 2;
     }
-    else if (name == data.Name && sts1 != data.archive) {
+    else if (name == data.Name || sts1 != data.archive) {
       r = data.archive;
     }
 
@@ -161,17 +163,18 @@ export default class DepartmentService {
       var actionperformed;
 
       if (r == 2) {
-        actionperformed = await Helper.getempnameById(uid)
+        actionperformed = await Helper.getempnameById(uid) + data.Name;
+        return 'yes'
 
       }
 
       else if (r == 1) {
-        actionperformed = await Helper.getempnameById(uid)
-
+        actionperformed = await Helper.getempnameById(uid) + data.Name
+        return 'no'
       }
       else {
-        actionperformed = await Helper.getempnameById(uid)
-
+        actionperformed = await Helper.getempnameById(uid) + data.Name
+        return 'too'
       }
 
       var activityBy = 1;
@@ -186,9 +189,9 @@ export default class DepartmentService {
         adminid: uid,
         AppModule: appModule
       })
-      result['status'] = 1
+      result['status'] = 1;
     }
 
-    return result['status'];
+    // return result['status'];
   }
 }
