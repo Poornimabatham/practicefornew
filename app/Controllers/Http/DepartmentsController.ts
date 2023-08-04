@@ -3,7 +3,7 @@ import DepartmentValidator from "App/Validators/DepartmentValidator";
 import DepartmentService from "App/Services/DepartmentService";
 
 
-export default class DepartmentsController {
+export default class DepartmentsControllerepartmentsController {
   public async getdepartment({request,response}: HttpContextContract) {
 
     const a = await request.validate(DepartmentValidator.getdepartment);

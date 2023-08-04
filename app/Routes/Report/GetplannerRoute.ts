@@ -6,5 +6,5 @@ Route.group(() => {
     Route.get('/fetchdata','GetplannerController.data')
     Route.post('/fetch','GetplannerController.data2')
 
-  }).namespace('App/Controllers/Http/ReportController').namespace('App/Controllers/Http/ReportController')
+  }).namespace('App/Controllers/Http/ReportController')
   
