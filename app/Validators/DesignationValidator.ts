@@ -13,9 +13,8 @@ export default class DesignationValidator  extends BaseValidator{
   
   // Insert Designation schema
     static AddDesignationschema ={
-  
    schema:schema.create({
-      uid: schema.number.optional(),
+      uid: schema.number(),
       orgid: schema.number(),
       name: schema.string(),
       sts: schema.number.optional(),
@@ -37,12 +36,12 @@ export default class DesignationValidator  extends BaseValidator{
   
   
     //  Update designation schema
-     static updateDesignationschema={
+    static updateDesignationschema={
       schema:schema.create({
-        uid:schema.number(),
-        design:schema.string(),
+        Updateid:schema.number(),
+        UpdateName:schema.string(),
         sts:schema.number.optional(),
-        orgid:schema.number()
+        Updateorgid:schema.number()
         
       })
      }

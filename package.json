@@ -1,4 +1,3 @@
-
 {
   "name": "UBIPROJECT",
   "version": "1.0.0",
@@ -26,6 +25,7 @@
     "@adonisjs/limiter": "^1.0.2",
     "@adonisjs/lucid": "^18.4.0",
     "@adonisjs/repl": "^3.1.11",
+    "dayjs": "^1.11.9",
     "jsonwebtoken": "^9.0.1",
     "luxon": "^3.3.0",
     "moment": "^2.29.4",
