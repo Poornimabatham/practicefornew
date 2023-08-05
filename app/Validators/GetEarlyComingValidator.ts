@@ -10,7 +10,7 @@ export default class GetEarlyComingValidator extends BaseValidator {
   static EarlyCommersScehma = {schema:schema.create({
     empid:schema.number.optional(),
     deptId:schema.number.optional(),
-    orgId:schema.number.optional(),
+    orgid:schema.number.optional(),
     csv: schema.string.optional(),
     currentPage: schema.number.optional(),
     perPage: schema.number.optional(),
