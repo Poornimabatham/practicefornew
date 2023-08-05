@@ -19,17 +19,9 @@ export default class GetEarlyComingsService {
     // const date = moment(zonedate).format("YYYY-MM-DD")
     // console.log(date)
 
-    const datefrom = new Date(getData.date);
-    const dateString = datefrom.toLocaleDateString("en-US");
+    const getdate = new Date(getData.date);
+    const dateString = getdate.toLocaleDateString("en-US");
     const RequestedDate = moment(dateString, "MM/DD/YYYY").format("YYYY/MM/DD");
-
-    const adminStatus = await Helper.getAdminStatus(getData.empid);
-
-    var ConditionForadminStatus = "";
-    if (adminStatus === 1) {
-      const deptId = await Helper.getDepartmentIdByEmpID(getData.empid);
-      ConditionForadminStatus = ` A.Dept_id = ${deptId}`;
-    }
 
     interface DefineTypes {
       FirstName: number;
@@ -41,7 +33,7 @@ export default class GetEarlyComingsService {
 
     const sendResponse: DefineTypes[] = [];
 
-    const getEarlyComingsdata = await Database.from("AttendanceMaster as A")
+    let getEarlyComingsdata = Database.from("AttendanceMaster as A")
       .innerJoin("EmployeeMaster as E", "A.EmployeeId", "E.Id")
       .innerJoin("ShiftMaster as S", "A.shiftId", "S.Id")
       .select(
@@ -55,20 +47,34 @@ export default class GetEarlyComingsService {
         Database.raw(`SUBSTRING_INDEX(A.EntryImage, '.com/', -1) as EntryImage,
        TIMEDIFF(
         CASE WHEN(S.TimeInGrace!='00:00:00') THEN S.TimeInGrace ELSE S.TimeIn END,A.TimeIn) as Earlyby`))
-
-      .where("E.Id", getData.empid)
-      .andWhere(" A.OrganizationId", getData.orgid)
-      .andWhere(
+      .where(
         Database.raw(
           `A.TimeIn < (CASE WHEN(S.TimeInGrace!='00:00:00') THEN S.TimeInGrace ELSE S.TimeIn END)`))
-      .andWhere(
+      .where(
         Database.raw(
           `TIMEDIFF(A.TimeIn,CASE WHEN(S.TimeInGrace!='00:00:00') THEN S.TimeInGrace ELSE S.TimeIn END) < '00:00:59'`))
-      .andWhere("A.AttendanceDate", RequestedDate).whereNotIn("A.AttendanceStatus", [2, 3, 5])
-      .whereNot("S.shifttype", 3).where("E.Is_Delete", 0).whereRaw(ConditionForadminStatus)
-      .limit(limit);
+      .whereNot("E.Is_Delete",0).whereNotIn("A.AttendanceStatus",[2,3,5]).whereNot("S.shifttype",3).orderBy("Earlyby","desc").limit(limit);
+     
+      const adminStatus = await Helper.getAdminStatus(getData.empid);
 
-    const queryResult: any = await getEarlyComingsdata;
+      var ConditionForadminStatus = "";
+
+      if (adminStatus === 2) {
+        const deptId = getData.deptId
+        ConditionForadminStatus = `A.Dept_id = ${deptId}`;
+        getEarlyComingsdata = getEarlyComingsdata.where("A.Dept_id",ConditionForadminStatus)
+      }
+      if(getData.empid!==0){
+        getEarlyComingsdata = getEarlyComingsdata.where("E.Id",getData.empid)
+      }
+      if(getData.orgid!==0){
+        getEarlyComingsdata = getEarlyComingsdata.where(" A.OrganizationId",getData.orgid)
+      }
+      if(getData.date!=0){
+        getEarlyComingsdata = getEarlyComingsdata.where("A.AttendanceDate",RequestedDate)
+      }
+
+    const queryResult = await getEarlyComingsdata;
     queryResult.forEach(function (val) {
       const data: DefineTypes = {
         FirstName: val.FirstName,
