@@ -10,9 +10,10 @@ public async getEarlyComings({request,response}:HttpContextContract){
   const ReqData = await request.validate(GetEarlyComingValidator.EarlyCommersScehma);
 
   this.data['empid'] = ReqData.empid ? ReqData.empid : 0;
+  this.data['deptId'] = ReqData.deptId ? ReqData.deptId : 0;
   this.data['orgid'] = ReqData.orgId ? ReqData.orgId : 0;
   this.data['csv'] = ReqData.csv ? ReqData.csv : " ";
-  this.data['currentPage'] = ReqData.currentPage ? ReqData.currentPage : 0;
+  this.data['currentPage'] = ReqData.currentPage ? ReqData.currentPage : 2;
   this.data['perPage'] = ReqData.perPage ? ReqData.perPage : 10;
   this.data['date'] = ReqData.date ? ReqData.date : 0;
   
