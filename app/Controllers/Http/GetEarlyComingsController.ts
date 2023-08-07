@@ -4,7 +4,7 @@ import GetEarlyComingsService from 'App/Services/GetEarlyComingsService';
 
 export default class GetEarlyComingsController {
  
-private data: any = [];
+private data = [];
 public async getEarlyComings({request,response}:HttpContextContract){
 
   const ReqData = await request.validate(GetEarlyComingValidator.EarlyCommersScehma);

@@ -68,7 +68,7 @@ export default class LogicsOnly {
 
   if(data.searchval == undefined){
       if (data.FirstDate == undefined || data.SecondDate == undefined ){
-        let currDate = moment().format("YYYY-MM-DD");
+        let currDate = moment().format("YYYY-MM-DD");   
         query = query.where("A.AttendanceDate", currDate)
         query2 = query2.where("AA.AttendanceDate", currDate)
       }
