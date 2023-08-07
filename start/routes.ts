@@ -29,8 +29,8 @@ import "../app/Routes/UserSettingRoute"
 import  "../app/Routes/DepartmentRoute"
 import  "../app/Routes/GetTokenRoute"
 import  '../app/Routes/ShiftRoute'
-import "../app/Routes/UserSettingRoute"
-
-
-
+import  '../app/Routes/HolidayRoute'
+import  '../app/Routes/GetEarlyComingsRoute'
+import "../app/Routes/LateComingRoute"
+import "../app/Routes/Report/GetplannerRoute"
 
