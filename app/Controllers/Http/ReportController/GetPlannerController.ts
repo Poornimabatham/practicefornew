@@ -1,8 +1,16 @@
 import { Request } from "@adonisjs/core/build/standalone";
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import Database from "@ioc:Adonis/Lucid/Database";
+
+const { DateTime } = require("luxon");
+const dayjs = require("dayjs");
+const moment = require('moment');
+
 export default class GetplannerController {
-  public async data({ request }: HttpContextContract) {
+  public async data({ request,response}: HttpContextContract) {
+
+    
+
     const userid = 7295;
     const refno = request.input("refno");
     const attDaten = request.input("attDate");
@@ -16,15 +24,6 @@ export default class GetplannerController {
     const shiftin = "";
     const shiftout = "";
 
-
-
-
-
-
-    interface department {
-      AttendanceDate: number,
-     
-    }
 
     const fetchdatafromTimeOFFandAttendanceMaster = await Database.from(
       "Timeoff as Toff"
@@ -40,6 +39,11 @@ export default class GetplannerController {
         "Toff.Reason",
         "Toff.TimeofDate",
         "Toff.TimeTo",
+        "AM.TimeIn",
+        "AM.TimeOut",
+        "AM.timeindate",
+        "AM.timeoutdate",
+        "AM.TimeOutApp",
         Database.raw(
           `(SELECT SEC_TO_TIME(sum(time_to_sec(TIMEDIFF(Timeoff_end, Timeoff_start)))) FROM Timeoff WHERE 
        Timeoff.EmployeeId = ${userid} AND Timeoff.ApprovalSts = 2) AS timeoffhours`
@@ -62,27 +66,86 @@ export default class GetplannerController {
       .limit(6)
       .whereIn("AttendanceStatus", [1, 2, 3, 4]);
 
-    // return fetchdatafromTimeOFFandAttendanceMaster
-    // const fetchdatafromTimeOFF  = TimeOff_data.length
-    // return fetchdatafromTimeOFF
     const result = await fetchdatafromTimeOFFandAttendanceMaster;
     const res: any[] = [];
 
-    // result.forEach(function (val) {
-    //   const data: any[] = [];
+    result.forEach((val) => {
+      const data: any = {};
+      data["status"] = parseInt(val?.AttendanceStatus ?? 0, 10);
 
-    //   data["AttendanceDate"] = val.AttendanceDate;
+      data["AttendanceDate"] = val.AttendanceDate;
+      data["loggedHours"] = val.thours;
+      data["timein"] = val.TimeIn;
+      data["timeout"] = val.TimeOut;
+      data["timeindate"] = val.timeindate;
+      data["timeoutdate"] = val.timeoutdate;
+      if(data['loggedHours'] == '00:00:00' || data['loggedHours'] == '' || data['loggedHours'] ==null){
 
-    //   res.push(data);
-    // })
+      const timeinn= 	data['timeindate']+data['timein'];
+       const timeoutt=data['timeoutdate']+data['timeout'];
+
+       const timein1 = DateTime.fromISO(timeinn);
+
+      }
+      const timeinn = data["timeindate"] + data["timein"];
+      const timeoutt = data["timeoutdate"] + data["timeout"];
+
+      const formattedDate = moment.utc(timeinn, 'ddd MMM DD YYYY HH:mm:ss [GMT]ZZ (z)').format();
+      const formattedDate2 = moment.utc(timeoutt, 'ddd MMM DD YYYY HH:mm:ss [GMT]ZZ (z)').format();
+console.log(formattedDate)
+console.log(formattedDate2)
+     var interval;
+       if(timeinn>timeoutt){
+        interval = "a"
+      }else{
+       interval = "b"
+      }
+
+      res.push(formattedDate2)
+
+
+// data['timeoffhours']=val.timeoffhours;
+// if(data['timeoffhours'] == null|| data['timeoffhours'] == ''){
+//   data['timeoffhours'] ='00:00:00';   
+// }
+
+// const loggedHours = '02:00:00'
+// const timeoffhours = '00:00:00'
+// if(data['timeoffhours'] != '00:00:00'){
+  // const timeoffResult = await Database.raw(
+  //   "SELECT SUBTIME('02:00:00', '00:00:00') AS latehours"
+  // );
+  // return timeoffResult
+//   if (timeoff && timeoff.rows.length > 0) {
+//     const { Loggedhours } = timeoff.rows[0];
+//     data['loggedHours'] = Loggedhours;
 
     
-    result.forEach((row) => {
-      const data: department = {
-        AttendanceDate :row.AttendanceDate
-      }
-      res.push(data)
+//   }
+
+// }
+
+// data['timeoutplatform'] = val.TimeOutApp
+// data['ShiftId'] = val.ShiftId
+   
+// const queryResult:any = await Database.from('ShiftMaster').where('Id',8).select('TimeIn', 'TimeOut', 
+// 'shifttype',
+// 'HoursPerDay');
+
+// if (queryResult) {
+
+    
+
+// }
+
+
+
     });
-    return res;
+    return res
+
+
   }
-}
+
+  
+
+  }
