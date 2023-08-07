@@ -97,7 +97,6 @@ export default class getEarlyLeavingsService {
       getEarlyComingsdata = getEarlyComingsdata.where("E.Id", getData.empid);
     }
     
-
     interface DefineTypes {
       FirstName: string;
       LastName: string;

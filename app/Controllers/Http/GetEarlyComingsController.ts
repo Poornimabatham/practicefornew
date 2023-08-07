@@ -3,7 +3,7 @@ import GetEarlyComingValidator from 'App/Validators/GetEarlyComingValidator';
 import GetEarlyComingsService from 'App/Services/GetEarlyComingsService';
 
 export default class GetEarlyComingsController {
- 
+  
 private data = [];
 public async getEarlyComings({request,response}:HttpContextContract){
 
