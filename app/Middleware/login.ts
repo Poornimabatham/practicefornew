@@ -9,19 +9,17 @@ export default class Login {
     next: () => Promise<void>
   ) {
     var arr = request.headers().authorization;
-    var token = arr?.split("@@")[1];
+    var token = arr ?.split("@@")[1];
     var key = process.env.secretKey;
-
     try {
       var decoded = jwt.verify(token, key);
       if (Object.keys(decoded).length > 0) {
-        let empid = await Helper.decode5t(decoded.Id);
+        let empid =  Helper.decode5t(decoded.Id);
         const query = await Database.query()
           .select("*")
           .from("Emp_key_Storage")
           .where("EmployeeId", empid)
           .andWhere("Token", "LIKE", "%" + token + "%");
-
         if (query.length > 0) {
           await next();
         } else {
@@ -31,7 +29,7 @@ export default class Login {
       } else {
         response.status(400).send({ Message: "Token Not Decoded" });
       }
-    } catch (err) {
+    }catch (err) {
       if (err) {
         if (err.name == "TokenExpiredError") {
           response.status(400).send({ Message: err.message, name:"Token Expired" });
