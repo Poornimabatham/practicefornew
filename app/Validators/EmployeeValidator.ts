@@ -49,6 +49,27 @@ export default class EmployeeValidator extends BaseValidator {
     })
     , message: BaseValidator.messages
   }
+  public static selfistatus = {
+    schema: schema.create({
+      EmpId: schema.number(),
+      Orgid: schema.number(),
+      selfistatus : schema.boolean(),
+      adminname: schema.string(),
+      EmpName: schema.string(),
+      adminid: schema.number()
+    })
+    , message: BaseValidator.messages
+  }
+  public static allowToPunchAtt = {
+    schema: schema.create({
+      EmpId: schema.number(),
+      Orgid: schema.number(),
+      allowToPunchAtt: schema.boolean(),
+      adminname: schema.string(),
+      EmpName: schema.string(),
+      adminid: schema.number()
+    })
+    , message: BaseValidator.messages
   /**
    * Custom messages for validation failures. You can make use of dot notation `(.)`
    * for targeting nested fields and array expressions `(*)` for targeting all

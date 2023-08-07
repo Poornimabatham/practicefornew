@@ -47,4 +47,39 @@ export default class EmployeesController {
             response.status(400).send({ Error: err });
         }
     }
+
+    public async updateSelfistatus({ request, response }: HttpContextContract) {
+        try{
+            const validation = await request.validate(EmployeeValidator.selfistatus);
+            this.data['empid'] = validation.EmpId;
+            this.data['Orgid'] = validation.Orgid;
+            this.data['selfistatus'] = validation.selfistatus;//true or false 
+            this.data['adminid'] = validation.adminid;
+            this.data['adminname'] = validation.adminname;
+            this.data['empname'] = validation.EmpName;
+            const result = await EmployeeService.prototype.updateSelfistatus(this.data);
+            if (result == true) {
+                response.status(200).send({ Messsage: result, Name: "Updated SuccessFully "})
+            }
+        }catch(error){
+            response.status(400).send({ Message:"Invalid Request",Error: error });
+        }
+    }
+    public async getAllowAttToUser({ request, response }: HttpContextContract) {
+        try{
+            const validation = await request.validate(EmployeeValidator.allowToPunchAtt);
+            this.data['empid'] = validation.EmpId;
+            this.data['Orgid'] = validation.Orgid;
+            this.data['attRestrictSts'] = validation.allowToPunchAtt;//true or false 
+            this.data['adminid'] = validation.adminid;
+            this.data['adminname'] = validation.adminname;
+            this.data['empname'] = validation.EmpName;
+            const result = await EmployeeService.prototype.updateAllowAttToUser(this.data);
+            if (result == true) {
+                response.status(200).send({ Messsage: result, Name: "Updated SuccessFully "})
+            }
+        }catch(error){
+            response.status(400).send({ Message:"Invalid Request",Error: error });
+        }
+    }
 }

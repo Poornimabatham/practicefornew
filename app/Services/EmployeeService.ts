@@ -108,5 +108,70 @@ export default class EmployeeService{
         return status;
     }
 
+    public async updateSelfistatus(reqdata:[]) {
+        var status = false;
+        const selfistatus:number = +reqdata['selfistatus'];
+        const zone = await Helper.getTimeZone(reqdata['Orgid']);
+        const currentDateTime = moment().tz(zone).format('YYYY-MM-DD HH:mm:ss');
+        const affectedrows:any = await Database.query()
+        .from("UserMaster")
+        .where("EmployeeId",reqdata['empid'])
+        .andWhere("OrganizationId",reqdata['Orgid'])
+        .update({Selfie:selfistatus,LastModifiedDate:currentDateTime,LastModifiedById:reqdata['adminid']});
+        if(affectedrows > 0){
+            status=true;
+            const module:string = "Attendance App"; 
+            const actionperformed:string = "<b>" + reqdata['empname'] + "</b> Selfie permission has been updated by <b>" + reqdata['adminname'] + "</b> from<b> Attendance App  </b>";
+            const activityby:any = '1';
+            const appmodule:string="Selfie";
+            const InsertActivity = await Database.table("ActivityHistoryMaster")
+                        .insert({
+                                LastModifiedDate: currentDateTime,
+                                LastModifiedById:reqdata['adminid'],
+                                Module: module,
+                                ActionPerformed:actionperformed,
+                                OrganizationId:reqdata['Orgid'],
+                                ActivityBy:activityby,
+                                adminid:reqdata['adminid'],
+                                AppModule:appmodule
+                            });
+
+        }
+        return status; 
+    }
+
+    public async updateAllowAttToUser(reqdata:[]) {
+        var status = false;
+        const attRestrictSts:number = +reqdata['attRestrictSts'];
+        const zone = await Helper.getTimeZone(reqdata['Orgid']);
+        const currentDateTime = moment().tz(zone).format('YYYY-MM-DD HH:mm:ss');
+        const update_permission:any = await Database.query()
+        .from("UserMaster")
+        .where("EmployeeId",reqdata['empid'])
+        .andWhere("OrganizationId",reqdata['Orgid'])
+        .update({Att_restrict:attRestrictSts,LastModifiedDate:currentDateTime,LastModifiedById:reqdata['adminid']});
+        if(update_permission > 0){
+            status=true;
+            const module:string = "Attendance App"; 
+            const actionperformed:string = "<b>" + reqdata['empname'] + "</b> Attendance Restrected By Permission has been updated by <b>" + reqdata['adminname'] + "</b> from<b> Attendance App  </b>";
+            const activityby:any = '1';
+            const appmodule:string="Attendance  Restrication";
+            const InsertActivity = await Database.table("ActivityHistoryMaster")
+                        .insert({
+                                LastModifiedDate: currentDateTime,
+                                LastModifiedById:reqdata['adminid'],
+                                Module: module,
+                                ActionPerformed:actionperformed,
+                                OrganizationId:reqdata['Orgid'],
+                                ActivityBy:activityby,
+                                adminid:reqdata['adminid'],
+                                AppModule:appmodule
+                            });
+
+        }
+        return status; 
+    }
+    
+
 
 }
