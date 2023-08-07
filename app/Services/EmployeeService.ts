@@ -171,6 +171,71 @@ export default class EmployeeService{
         }
         return status; 
     }
+
+    public async FacePermissionUpdate(reqdata:[]) {
+        var status = false;
+        const faceRestrictSts:number = +reqdata['faceRestrictSts'];
+        const zone = await Helper.getTimeZone(reqdata['Orgid']);
+        const currentDateTime = moment().tz(zone).format('YYYY-MM-DD HH:mm:ss');
+        const update_permission:any = await Database.query()
+        .from("UserMaster")
+        .where("EmployeeId",reqdata['empid'])
+        .andWhere("OrganizationId",reqdata['Orgid'])
+        .update({Face_Id:faceRestrictSts,LastModifiedDate:currentDateTime,LastModifiedById:reqdata['adminid']});
+        if(update_permission > 0){
+            status=true;
+            const module:string = "Attendance App"; 
+            const actionperformed:string = "<b>" + reqdata['empname'] + "</b> Face Recognition permission has been updated by <b>" + reqdata['adminname'] + "</b> from<b> Attendance App  </b>";
+            const activityby:any = '1';
+            const appmodule:string="Face Recognition";
+            const InsertActivity = await Database.table("ActivityHistoryMaster")
+                        .insert({
+                                LastModifiedDate: currentDateTime,
+                                LastModifiedById:reqdata['adminid'],
+                                Module: module,
+                                ActionPerformed:actionperformed,
+                                OrganizationId:reqdata['Orgid'],
+                                ActivityBy:activityby,
+                                adminid:reqdata['adminid'],
+                                AppModule:appmodule
+                            });
+
+        }
+        return status; 
+    }
+    
+    public async DevicePermissionUpdate(reqdata:[]) {
+        var status = false;
+        const DeviceRestrictSts:number = +reqdata['DeviceRestrictSts'];
+        const FingerPrintsts:number = +reqdata['FingerPrintSts'];
+        const zone = await Helper.getTimeZone(reqdata['Orgid']);
+        const currentDateTime = moment().tz(zone).format('YYYY-MM-DD HH:mm:ss');
+        const update_permission:any = await Database.query()
+        .from("UserMaster")
+        .where("EmployeeId",reqdata['empid'])
+        .andWhere("OrganizationId",reqdata['Orgid'])
+        .update({Device_Restriction:DeviceRestrictSts,Finger_Print:FingerPrintsts,LastModifiedDate:currentDateTime,LastModifiedById:reqdata['adminid']});
+        if(update_permission > 0){
+            status=true;
+            const module:string = "Device Restriction"; 
+            const actionperformed:string = "<b>" + reqdata['empname'] + "</b> Device Restriction permission has been updated by <b>" + reqdata['adminname'] + "</b> from<b> Attendance App  </b>";
+            const activityby:any = '1';
+            const appmodule:string="Face Recognition";
+            const InsertActivity = await Database.table("ActivityHistoryMaster")
+                        .insert({
+                                LastModifiedDate: currentDateTime,
+                                LastModifiedById:reqdata['adminid'],
+                                Module: module,
+                                ActionPerformed:actionperformed,
+                                OrganizationId:reqdata['Orgid'],
+                                ActivityBy:activityby,
+                                adminid:reqdata['adminid'],
+                                AppModule:appmodule
+                            });
+
+        }
+        return status; 
+    }
     
 
 

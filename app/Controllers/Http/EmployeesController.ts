@@ -82,4 +82,43 @@ export default class EmployeesController {
             response.status(400).send({ Message:"Invalid Request",Error: error });
         }
     }
+    public async FacePermissionUpdate({ request, response }: HttpContextContract) {
+        try{
+            const validation = await request.validate(EmployeeValidator.facepermissionSts);
+            this.data['empid'] = validation.EmpId;
+            this.data['Orgid'] = validation.Orgid;
+            this.data['faceRestrictSts'] = validation.faceRestrictSts;//true or false 
+            this.data['adminid'] = validation.adminid;
+            this.data['adminname'] = validation.adminname;
+            this.data['empname'] = validation.EmpName;
+            // console.log(this.data);
+            // return false;
+            const result = await EmployeeService.prototype.FacePermissionUpdate(this.data);
+            if (result == true) {
+                response.status(200).send({ Messsage: result, Name: "Updated SuccessFully "})
+            }
+        }catch(error){
+            response.status(400).send({ Message:"Invalid Request",Error: error });
+        }
+    }
+    public async DevicePermissionUpdate({ request, response }: HttpContextContract) {
+        try{
+            const validation = await request.validate(EmployeeValidator.Device_Restriction);
+            this.data['empid'] = validation.EmpId;
+            this.data['Orgid'] = validation.Orgid;
+            this.data['DeviceRestrictSts'] = validation.Device_Restriction_sts;//true or false 
+            this.data['FingerPrintSts'] = validation.FingerPrintSts;//true or false 
+            this.data['adminid'] = validation.adminid;
+            this.data['adminname'] = validation.adminname;
+            this.data['empname'] = validation.EmpName;
+            // console.log(this.data);
+            // return false;
+            const result = await EmployeeService.prototype.DevicePermissionUpdate(this.data);
+            if (result == true) {
+                response.status(200).send({ Messsage: result, Name: "Updated SuccessFully "})
+            }
+        }catch(error){
+            response.status(400).send({ Message:"Invalid Request",Error: error });
+        }
+    }
 }
