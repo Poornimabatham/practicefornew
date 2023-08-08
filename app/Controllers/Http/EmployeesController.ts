@@ -42,12 +42,41 @@ export default class EmployeesController {
                 if (result == true) {
                     response.status(200).send({ Messsage: result, Name: "Updated SuccessFully "})
                 }
+                if (result == false) {
+                    response.status(204).send({ Messsage: result, Name: "Updated UnsuccessFull "})
+                }
             }
         } catch (err) {
             response.status(400).send({ Error: err });
         }
     }
 
+    public async EmpDetailUpdate({ request, response }: HttpContextContract) {
+        try{
+            const validation = await request.validate(EmployeeValidator.EmpDetailUpdate);
+            this.data['f_name']= validation.f_name?validation.f_name:'';
+            this.data['username']= validation.username ? validation.username.toLowerCase():'';
+            this.data['department']=validation.department ? validation.department:'';
+            this.data['designation']=validation.designation ? validation.designation:'';
+            this.data['shift']=validation.shift ? validation.shift:'';
+            this.data['empid'] = validation.empid;
+            this.data['Orgid'] = validation.Orgid;
+            this.data['adminid'] = validation.adminid;
+            this.data['adminname'] = validation.adminname;
+            this.data['empname'] = validation.EmpName;
+            const result = await EmployeeService.prototype.EmpDetailUpdate(this.data);
+            if (result == true) {
+                response.status(200).send({ Messsage: result, Name: "Updated SuccessFully "})
+            }
+            if (result == false) {
+                response.status(204).send({ Messsage: result, Name: "Updated UnsuccessFull "})
+            }
+        }catch(error){
+            response.status(400).send({ Message:"Invalid Request",Error: error });
+        }
+    }
+
+    ///////////////////permission updated///////////////////////
     public async updateSelfistatus({ request, response }: HttpContextContract) {
         try{
             const validation = await request.validate(EmployeeValidator.selfistatus);
@@ -60,6 +89,9 @@ export default class EmployeesController {
             const result = await EmployeeService.prototype.updateSelfistatus(this.data);
             if (result == true) {
                 response.status(200).send({ Messsage: result, Name: "Updated SuccessFully "})
+            }
+            if (result == false) {
+                response.status(204).send({ Messsage: result, Name: "Updated UnsuccessFull "})
             }
         }catch(error){
             response.status(400).send({ Message:"Invalid Request",Error: error });
@@ -77,6 +109,9 @@ export default class EmployeesController {
             const result = await EmployeeService.prototype.updateAllowAttToUser(this.data);
             if (result == true) {
                 response.status(200).send({ Messsage: result, Name: "Updated SuccessFully "})
+            }
+            if (result == false) {
+                response.status(204).send({ Messsage: result, Name: "Updated UnsuccessFull "})
             }
         }catch(error){
             response.status(400).send({ Message:"Invalid Request",Error: error });
@@ -97,6 +132,9 @@ export default class EmployeesController {
             if (result == true) {
                 response.status(200).send({ Messsage: result, Name: "Updated SuccessFully "})
             }
+            if (result == false) {
+                response.status(204).send({ Messsage: result, Name: "Updated UnsuccessFull "})
+            }
         }catch(error){
             response.status(400).send({ Message:"Invalid Request",Error: error });
         }
@@ -107,18 +145,40 @@ export default class EmployeesController {
             this.data['empid'] = validation.EmpId;
             this.data['Orgid'] = validation.Orgid;
             this.data['DeviceRestrictSts'] = validation.Device_Restriction_sts;//true or false 
-            this.data['FingerPrintSts'] = validation.FingerPrintSts;//true or false 
             this.data['adminid'] = validation.adminid;
             this.data['adminname'] = validation.adminname;
             this.data['empname'] = validation.EmpName;
-            // console.log(this.data);
-            // return false;
             const result = await EmployeeService.prototype.DevicePermissionUpdate(this.data);
             if (result == true) {
                 response.status(200).send({ Messsage: result, Name: "Updated SuccessFully "})
+            }
+            if (result == false) {
+                response.status(204).send({ Messsage: result, Name: "Updated UnsuccessFull "})
             }
         }catch(error){
             response.status(400).send({ Message:"Invalid Request",Error: error });
         }
     }
+    public async FingerPrintPermissionUpdate({ request, response }: HttpContextContract) {
+        try{
+            const validation = await request.validate(EmployeeValidator.FingerPrint);
+            this.data['empid'] = validation.EmpId;
+            this.data['Orgid'] = validation.Orgid;
+            this.data['DeviceRestrictSts'] = validation.Device_Restriction_sts;//true or false 
+            this.data['FingerPrintSts'] = validation.Finger_Print_sts;//true or false 
+            this.data['adminid'] = validation.adminid;
+            this.data['adminname'] = validation.adminname;
+            this.data['empname'] = validation.EmpName;
+            const result = await EmployeeService.prototype.fingerPrintPermissionUpdate(this.data);
+            if (result == true) {
+                response.status(202).send({ Messsage: result, Name: "Updated SuccessFully "})
+            }
+            if (result == false) {
+                response.status(204).send({ Messsage: result, Name: "Updated UnsuccessFull "})
+            }
+        }catch(error){
+            response.status(400).send({ Message:"Invalid Request",Error: error });
+        }
+    }
+    ///////////////////permission updated End///////////////////////
 }
