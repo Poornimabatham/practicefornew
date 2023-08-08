@@ -161,7 +161,7 @@ export default class DepartmentService {
       var appModule = "Department";
       var actionperformed;
       var activityBy = 1;
-      var getEmpName = await Helper.getempnameById(DeptId)
+      var getEmpName = await Helper.getempnameById(DeptId)       //getemployeeName
 
       if (archiveStatus == 2) {
         actionperformed = ` ${data.Name} department has been edited by ${getEmpName} `;
