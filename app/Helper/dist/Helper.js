@@ -76,74 +76,10 @@ var Helper = /** @class */ (function () {
             var query2;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0:
-                        console.log(empid);
-                        return [4 /*yield*/, Database_1["default"].query()
-                                .from("EmployeeMaster")
-                                .select("FirstName")
-                                .where("Id", empid)];
-                    case 1:
-                        query2 = _a.sent();
-                        return [2 /*return*/, query2[0].FirstName];
-                }
-            });
-        });
-    };
-    Helper.generateToken = function (secretKey, data) {
-        if (data === void 0) { data = {}; }
-        return __awaiter(this, void 0, void 0, function () {
-            var payload, options, token;
-            return __generator(this, function (_a) {
-                try {
-                    payload = {
-                        audience: data.username,
-                        Id: data.empid
-                    };
-                    options = {
-                        expiresIn: "1m",
-                        issuer: "Ubiattendace App"
-                    };
-                    token = jwt.sign(payload, secretKey, options, {
-                        alg: "RS512",
-                        typ: "JWT"
-                    });
-                    return [2 /*return*/, token];
-                }
-                catch (err) {
-                    console.log(err);
-                    return [2 /*return*/, 0];
-                }
-                return [2 /*return*/];
-            });
-        });
-    };
-    Helper.getTimeZone = function (orgid) {
-        return __awaiter(this, void 0, void 0, function () {
-            var query1;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
                     case 0: return [4 /*yield*/, Database_1["default"].query()
-                            .from("ZoneMaster")
-                            .select("name")
-                            .where("id", Database_1["default"].raw("(select TimeZone from Organization where id =" + orgid + "  LIMIT 1)"))];
-                    case 1:
-                        query1 = _a.sent();
-                        return [2 /*return*/, query1[0].name];
-                }
-            });
-        });
-    };
-    Helper.getempnameById = function (empid) {
-        return __awaiter(this, void 0, void 0, function () {
-            var query2;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        console.log(empid);
-                        return [4 /*yield*/, Database_1["default"].query()
-                                .from("EmployeeMaster")
-                                .select("FirstName")
-                                .where("Id", empid)];
+                            .from("EmployeeMaster")
+                            .select("FirstName")
+                            .where("Id", empid)];
                     case 1:
                         query2 = _a.sent();
                         return [2 /*return*/, query2[0].FirstName];
@@ -172,28 +108,6 @@ var Helper = /** @class */ (function () {
             console.log(err);
             return 0;
         }
-    };
-    Helper.getAdminStatus = function (id) {
-        return __awaiter(this, void 0, void 0, function () {
-            var status, queryResult;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        status = 0;
-                        return [4 /*yield*/, Database_1["default"].query()
-                                .from("UserMaster")
-                                .select("appSuperviserSts")
-                                .where("EmployeeId", id)
-                                .first()];
-                    case 1:
-                        queryResult = _a.sent();
-                        if (queryResult) {
-                            status = queryResult.appSuperviserSts;
-                        }
-                        return [2 /*return*/, status];
-                }
-            });
-        });
     };
     Helper.getDepartmentIdByEmpID = function (empid) {
         return __awaiter(this, void 0, void 0, function () {
@@ -229,7 +143,10 @@ var Helper = /** @class */ (function () {
                     case 0:
                         status = 0;
                         return [4 /*yield*/, Database_1["default"].query()
-                                .from("UserMaster").select("appSuperviserSts").where("EmployeeId", id).first()];
+                                .from("UserMaster")
+                                .select("appSuperviserSts")
+                                .where("EmployeeId", id)
+                                .first()];
                     case 1:
                         queryResult = _a.sent();
                         if (queryResult) {

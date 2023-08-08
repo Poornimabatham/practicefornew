@@ -124,16 +124,16 @@ export default class GetplannerWiseSummary {
             
       
       
-      // data['timeoffhours']=val.timeoffhours;
-      // if(data['timeoffhours'] == null|| data['timeoffhours'] == ''){
-      //   data['timeoffhours'] ='00:00:00';   
-      // }
+      data['timeoffhours']=val.timeoffhours;
+      var 
+      if(data['timeoffhours'] == null|| data['timeoffhours'] == ''){
+        data['timeoffhours'] ='00:00:00';   
+      }
       
-      // const loggedHours = '02:00:00'
-      // const timeoffhours = '00:00:00'
-      // if(data['timeoffhours'] != '00:00:00'){
-      //   // const timeoffResult = await Database.raw(
-        //   "SELECT SUBTIME('02:00:00', '00:00:00') AS latehours"
+    
+      if(data['timeoffhours'] != '00:00:00'){
+        const timeoffResult = await Database.raw(
+          "SELECT SUBTIME(, '00:00:00') AS latehours"
         // );
         // return timeoffResult
         // if (timeoff && timeoff.rows.length > 0) {
