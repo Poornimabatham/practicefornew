@@ -192,8 +192,15 @@ export default class DailyAttendanceService {
                 condition = `Dept_id = ${departmentId}`;
             }
 
+            var AttendanceDate;
+            if (data.date == undefined) {
+                AttendanceDate = new Date().toISOString().split('T')[0];
+            }
+            else {
+                AttendanceDate = data.date.toFormat('yyyy-MM-dd')
+            }
             if (data.date != new Date().toISOString().split('T')[0]) {
-                const absCountQuery = await Database.from('AttendanceMaster').select('Id').where('AttendanceDate', data.date).where('OrganizatonId', data.OrganizationId).whereIn('AttendanceStatus', [2, 7]).whereIn('EmployeeId', Database.rawQuery(`(SELECT Id from EmployeeMaster where OrganizationId =${data.OrganizationId} AND Is_Delete = 0 )`)).count('Id as absCount')
+                const absCountQuery = await Database.from('AttendanceMaster').select('Id').where('AttendanceDate', AttendanceDate).where('OrganizationId', data.OrganizationId).whereIn('AttendanceStatus', [2, 7]).whereIn('EmployeeId', Database.rawQuery(`(SELECT Id from EmployeeMaster where OrganizationId =${data.OrganizationId} AND Is_Delete = 0 )`)).count('Id as abscount')
 
                 var absCount;
                 if (absCountQuery.length > 0) {
@@ -201,13 +208,14 @@ export default class DailyAttendanceService {
                 }
 
                 var absentCountQuery = await Database.from('AttendanceMaster as A').select(
-                    Database.raw("CONCAT(E.FirstName, ' ', E.LastName) as name"),
-                    Database.raw('TimeIn as -'),
-                    Database.raw('TimeOut as -'),
-                    Database.raw('SELECT ApprovalStatus FROM AppliedLeave ')
-
+                    Database.raw("CONCAT(EmployeeMaster.FirstName, ' ', EmployeeMaster.LastName) as name"),
+                    // Database.raw(`TimeIn as '-' `),
+                    // Database.raw(`TimeOut as '-' `),
+                    // Database.raw('SELECT ApprovalStatus FROM AppliedLeave WHERE EmployeeId=A.EmployeeeId AND ApprovalStatus=2 ')
                 )
-
+                // .innerJoin('EmployeeMaster as E', 'E.Id', 'A.EmployeeId')
+                // .where('Date', AttendanceDate)
+                return absentCountQuery
             }
         }
     }
