@@ -104,7 +104,7 @@ export default class DepartmentService {
   public static async updateDepartment(data) {
 
     var result = [];
-    result['status'] = '0';
+    result['status'] = '0';         // Bydefault result
     const date = DateTime.now();
     const formattedDate = date.toFormat('yy-MM-dd');
     var orgId = await Helper.getOrgId(data.Id);
