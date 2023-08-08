@@ -55,7 +55,7 @@ export default class DepartmentService {
       return result['status'];
 
     }
-    const query1 = await Database.insertQuery()
+    const insertQuery = await Database.insertQuery()
       .table("DepartmentMaster")
       .insert({
         Name: data.Name,
@@ -68,7 +68,7 @@ export default class DepartmentService {
         archive: data.archive,
       });
 
-    if (query1.length > 0) {
+    if (insertQuery.length > 0) {
 
       var zone = await Helper.getTimeZone(data.OrganizationId);
       var timeZone = zone[0]?.name;
@@ -79,16 +79,16 @@ export default class DepartmentService {
       var uid = data.Id;
       var module = "Attendance app";
       var appModule = "Department";
-      var activityby = 1;
+      var activityBy = 1;
 
-      const query2 = await Database.insertQuery().table('ActivityHistoryMaster')
+      const InsertQuery = await Database.insertQuery().table('ActivityHistoryMaster')
         .insert({
           LastModifiedDate: formattedDate,
           LastModifiedById: uid,
           ActionPerformed: actionPerformed,
           Module: module,
           OrganizationId: data.OrganizationId,
-          ActivityBy: activityby,
+          ActivityBy: activityBy,
           adminid: uid,
           AppModule: appModule
         })
@@ -107,91 +107,87 @@ export default class DepartmentService {
     result['status'] = '0';
     const date = DateTime.now();
     const formattedDate = date.toFormat('yy-MM-dd');
-    var orgid = await Helper.getName(data.Id);
-    var uid = data.Id;
+    var orgId = await Helper.getOrgId(data.Id);
+    var DeptId = data.Id;
 
-    var query = await Database.from("DepartmentMaster")
+    var selectQuery = await Database.from("DepartmentMaster")
       .select("Id")
-      .where("Id", uid)
-      .andWhere("OrganizationId", orgid)
-      .andWhere("Name", data.Name);
+      .where("Id", DeptId)
+      .andWhere("OrganizationId", orgId)
+      .andWhere("Name", data.Name)
+      .andWhere("archive", data.archive);
 
-      
-    if (query.length > 0) {
+    if (selectQuery.length > 0) {
       result['status'] = '-1';
-      return result['status'];
+      return false
     }
 
-    const query1 = await Database.from('DepartmentMaster').select('Name', 'archive').where('OrganizationId', orgid).andWhere('Id', uid);
-    query = query1;
+    const query1 = await Database.from('DepartmentMaster').select('Name', 'archive').where('OrganizationId', orgId).andWhere('Id', DeptId);
+
     var name;
-    var sts1;
+    var status;
 
     query1.forEach((row) => {
       name = row.Name;
-      sts1 = row.archive;
+      status = row.archive;
     })
 
-    var r;
+    var archiveStatus;
     if (name != data.Name) {
-      r = 2;
-    }
-    else if (name == data.Name || sts1 != data.archive) {
-      r = data.archive;
+      archiveStatus = 2;
     }
 
-    const query2 = await Database.query()
+    else if (name == data.Name && status != data.archive) {
+      archiveStatus = data.archive;
+    }
+
+    const updateQuery = await Database.query()
       .from("DepartmentMaster")
-      .where("Id", uid)
+      .where("Id", DeptId)
       .update({
         Name: data.Name,
         LastModifiedDate: formattedDate,
-        LastModifiedById: uid,
+        LastModifiedById: DeptId,
         archive: data.archive,
       });
 
-    var count = query.length;
-    if (count > 0) {
-      var zone = await Helper.getTimeZone(orgid);
+    if (updateQuery) {
+      var zone = await Helper.getTimeZone(orgId);
       var timeZone = zone[0]?.name;
       var defaulttimeZone = moment().tz(timeZone).toDate();
       const dateTime = DateTime.fromJSDate(defaulttimeZone);
       const formattedDate = dateTime.toFormat('yy-MM-dd HH:mm:ss');
-      var id = uid;
       var module = "Attendance app";
       var appModule = "Department";
       var actionperformed;
-
-      if (r == 2) {
-        actionperformed = await Helper.getempnameById(uid) + data.Name;
-        return 'yes'
-
-      }
-
-      else if (r == 1) {
-        actionperformed = await Helper.getempnameById(uid) + data.Name
-        return 'no'
-      }
-      else {
-        actionperformed = await Helper.getempnameById(uid) + data.Name
-        return 'too'
-      }
-
       var activityBy = 1;
+      var getEmpName = await Helper.getempnameById(DeptId)
 
-      const query3 = await Database.table('ActivityHistoryMaster').insert({
+      if (archiveStatus == 2) {
+        actionperformed = ` ${data.Name} department has been edited by ${getEmpName} `;
+      }
+
+      else if (archiveStatus == 1) {
+        actionperformed = `${data.Name} department has been active by ${getEmpName} `;
+      }
+
+      else {
+        actionperformed = `${data.Name} department has been inactive by ${getEmpName} `;
+      }
+
+      const insertQuery = await Database.table('ActivityHistoryMaster').insert({
         LastModifiedDate: formattedDate,
-        LastModifiedById: uid,
+        LastModifiedById: DeptId,
         Module: module,
         ActionPerformed: actionperformed,
-        OrganizationId: orgid,
+        OrganizationId: orgId,
         ActivityBy: activityBy,
-        adminid: uid,
+        adminid: DeptId,
         AppModule: appModule
       })
       result['status'] = 1;
     }
 
-    // return result['status'];
+    return result['status'];
   }
 }

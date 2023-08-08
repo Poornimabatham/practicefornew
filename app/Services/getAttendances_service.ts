@@ -3,16 +3,16 @@ import moment from "moment-timezone";
 
 export default class LogicsOnly {
 
-  public static async getAttendances__bothchange(data: any){
+  public static async getAttendances__bothchange(data: any) {
 
     let query: any = Database.from("AttendanceMainMaster as A")
-      .innerJoin("EmployeeMaster as E","A.EmployeeId","E.Id")
-      .innerJoin("DepartmentMaster as D","A.Dept_id","D.Id")
-      .innerJoin("DesignationMaster as DM","A.Desg_id","DM.Id")
-      .innerJoin("ShiftMaster as C","A.ShiftId","C.Id")
+      .innerJoin("EmployeeMaster as E", "A.EmployeeId", "E.Id")
+      .innerJoin("DepartmentMaster as D", "A.Dept_id", "D.Id")
+      .innerJoin("DesignationMaster as DM", "A.Desg_id", "DM.Id")
+      .innerJoin("ShiftMaster as C", "A.ShiftId", "C.Id")
       .select(
-      "A.Id","A.EmployeeId","D.Name","E.EmployeeCode","C.shifttype","E.FirstName","E.LastName","A.OrganizationId","A.Dept_id","A.Desg_id","A.ShiftId","E.PersonalNo","A.EntryImage","A.ExitImage","E.MultipletimeStatus","C.TimeIn","C.TimeOut","A.AttendanceDate","A.TimeInEditStatus","A.TimeOutEditStatus","A.FakeLocationStatusTimeIn","A.TotalLoggedHours","C.HoursPerDay","C.HalfdayHours"," C.HalfdayStatus",
-     Database.raw(`
+        "A.Id", "A.EmployeeId", "D.Name", "E.EmployeeCode", "C.shifttype", "E.FirstName", "E.LastName", "A.OrganizationId", "A.Dept_id", "A.Desg_id", "A.ShiftId", "E.PersonalNo", "A.EntryImage", "A.ExitImage", "E.MultipletimeStatus", "C.TimeIn", "C.TimeOut", "A.AttendanceDate", "A.TimeInEditStatus", "A.TimeOutEditStatus", "A.FakeLocationStatusTimeIn", "A.TotalLoggedHours", "C.HoursPerDay", "C.HalfdayHours", " C.HalfdayStatus",
+        Database.raw(`
       CASE
         WHEN C.shifttype = 3 THEN SUBTIME(A.TotalLoggedHours, C.HoursPerDay)
         ELSE
@@ -35,13 +35,13 @@ export default class LogicsOnly {
       `)).limit(2)
 
     let query2: any = Database.from("ArchiveAttendanceMaster as AA")
-      .innerJoin("EmployeeMaster as E","AA.EmployeeId","E.Id")
-      .innerJoin("DepartmentMaster as D","AA.Dept_id","D.Id")
-      .innerJoin("DesignationMaster as DM","AA.Desg_id","DM.Id")
-      .innerJoin("ShiftMaster as C","AA.ShiftId","C.Id")
+      .innerJoin("EmployeeMaster as E", "AA.EmployeeId", "E.Id")
+      .innerJoin("DepartmentMaster as D", "AA.Dept_id", "D.Id")
+      .innerJoin("DesignationMaster as DM", "AA.Desg_id", "DM.Id")
+      .innerJoin("ShiftMaster as C", "AA.ShiftId", "C.Id")
       .select(
-      "AA.Id","AA.EmployeeId","D.Name","E.EmployeeCode","C.shifttype","E.FirstName","E.LastName","AA.OrganizationId","AA.Dept_id","AA.Desg_id","AA.ShiftId","E.PersonalNo","AA.EntryImage","AA.ExitImage","E.MultipletimeStatus","C.TimeIn","C.TimeOut","AA.AttendanceDate","AA.TimeInEditStatus","AA.TimeOutEditStatus","AA.FakeLocationStatusTimeIn","AA.TotalLoggedHours","C.HoursPerDay","C.HalfdayHours"," C.HalfdayStatus",
-      Database.raw(`
+        "AA.Id", "AA.EmployeeId", "D.Name", "E.EmployeeCode", "C.shifttype", "E.FirstName", "E.LastName", "AA.OrganizationId", "AA.Dept_id", "AA.Desg_id", "AA.ShiftId", "E.PersonalNo", "AA.EntryImage", "AA.ExitImage", "E.MultipletimeStatus", "C.TimeIn", "C.TimeOut", "AA.AttendanceDate", "AA.TimeInEditStatus", "AA.TimeOutEditStatus", "AA.FakeLocationStatusTimeIn", "AA.TotalLoggedHours", "C.HoursPerDay", "C.HalfdayHours", " C.HalfdayStatus",
+        Database.raw(`
        CASE
          WHEN C.shifttype = 3 THEN SUBTIME(AA.TotalLoggedHours, C.HoursPerDay)
          ELSE
@@ -64,48 +64,48 @@ export default class LogicsOnly {
        `)).limit(2)
 
     const currentDateTime = moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss')
-    // console.log(currentDateTime)
 
-  if(data.searchval == undefined){
-      if (data.FirstDate == undefined || data.SecondDate == undefined ){
+
+    if (data.searchval == undefined) {
+      if (data.FirstDate == undefined || data.SecondDate == undefined) {
         let currDate = moment().format("YYYY-MM-DD");
         query = query.where("A.AttendanceDate", currDate)
         query2 = query2.where("AA.AttendanceDate", currDate)
       }
-      if(data.FirstDate!=undefined && data.SecondDate!=undefined){
+      if (data.FirstDate != undefined && data.SecondDate != undefined) {
         const startDate = data.FirstDate.toFormat('yyyy-MM-dd')
         const LastDAte = data.SecondDate.toFormat('yyyy-MM-dd')
-        query = query.whereBetween("A.AttendanceDate",[startDate,LastDAte])
-        query2 = query2.whereBetween("AA.AttendanceDate",[startDate,LastDAte])
+        query = query.whereBetween("A.AttendanceDate", [startDate, LastDAte])
+        query2 = query2.whereBetween("AA.AttendanceDate", [startDate, LastDAte])
       }
-      if(data.orgId !=undefined){
-        query = query.where("A.OrganizationId",data.orgId)
-        query2 = query2.where("AA.OrganizationId",data.orgId)
+      if (data.orgId != undefined) {
+        query = query.where("A.OrganizationId", data.orgId)
+        query2 = query2.where("AA.OrganizationId", data.orgId)
       }
-      if(data.empId !=undefined){
-        query = query.where("A.EmployeeId",data.empId)
-        query2 = query2.where("AA.EmployeeId",data.empId)
+      if (data.empId != undefined) {
+        query = query.where("A.EmployeeId", data.empId)
+        query2 = query2.where("AA.EmployeeId", data.empId)
       }
-      if(data.deptId !=undefined){
-        query = query.where("A.Dept_id",data.deptId)
-        query2 = query2.where("AA.Dept_id",data.deptId)
+      if (data.deptId != undefined) {
+        query = query.where("A.Dept_id", data.deptId)
+        query2 = query2.where("AA.Dept_id", data.deptId)
       }
-      if(data.desigId !=undefined){
-        query = query.where("A.Desg_id",data.desigId)
-        query2 = query2.where("AA.Desg_id",data.desigId)
+      if (data.desigId != undefined) {
+        query = query.where("A.Desg_id", data.desigId)
+        query2 = query2.where("AA.Desg_id", data.desigId)
       }
-      if(data.shiftId !=undefined){
-        query = query.where("A.ShiftId",data.shiftId)
-        query2 = query2.where("AA.ShiftId",data.shiftId)
+      if (data.shiftId != undefined) {
+        query = query.where("A.ShiftId", data.shiftId)
+        query2 = query2.where("AA.ShiftId", data.shiftId)
       }
-    }else{
-      query = query.where("E.FirstName",data.searchval)
-      query2 = query2.where("E.FirstName",data.searchval)
+    } else {
+      query = query.where("E.FirstName", data.searchval)
+      query2 = query2.where("E.FirstName", data.searchval)
     }
-  
-    let resp: any[] = [];  
-    
-    const queryResult:any = await query.union(query2)
+
+    let resp: any[] = [];
+
+    const queryResult: any = await query.union(query2)
     queryResult.forEach(function (val) {
       const data: any = {};
       data["Id"] = val.Id;
@@ -137,7 +137,7 @@ export default class LogicsOnly {
       data["HalfdayStatus"] = val.HalfdayStatus;
       resp.push(data);
     });
-      return resp;
+    return resp;
   }
 }
 

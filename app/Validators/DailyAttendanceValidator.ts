@@ -31,7 +31,7 @@ export default class DailyAttendanceValidator extends BaseValidator {
     OrganizationId:schema.number(),
     EmployeeId:schema.number(),
     DepartmentId:schema.number(),
-    date:schema.date(),
+    date:schema.date.optional(),
     Designation:schema.string(),
     csv:schema.string.optional(),
     dataFor:schema.string(),

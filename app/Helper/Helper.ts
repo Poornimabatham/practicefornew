@@ -50,7 +50,7 @@ export default class Helper {
     }
   }
 
-  public static async getName(Id: number) {
+  public static async getOrgId(Id: number) {
 
     const query = await Database.from('EmployeeMaster').select('OrganizationId').where('Id', Id);
 
