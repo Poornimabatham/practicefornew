@@ -3,35 +3,36 @@ import DepartmentValidator from "App/Validators/DepartmentValidator";
 import DepartmentService from "App/Services/DepartmentService";
 
 
-export default class DepartmentsControllerepartmentsController {
-  public async getdepartment({request,response}: HttpContextContract) {
+export default class DepartmentsController {
 
-    const a = await request.validate(DepartmentValidator.getdepartment);
-    const b:any = await DepartmentService.getdepartment(a);
-  
-    if(b.length > 0) 
-    {
-      response.status(200).send({ message: "Success", data: b });   
-    } else {
-      response.status(400).send({ message: "Unsuccess", data: b });
+  public async getdepartment({ request, response }: HttpContextContract) {
+
+    const requestValidate = await request.validate(DepartmentValidator.getDepartment);
+
+    const service: any = await DepartmentService.getdepartment(requestValidate);
+
+    if (service.length > 0) {
+      response.status(200).send({ message: "Success", data: service });
+     } else {
+      response.status(400).send({ message: "Unsuccess", data: service });
     }
   }
 
-  public async addDept({ request, response }: HttpContextContract) {
-    const a = await request.validate(DepartmentValidator.addepartment);
+  public async addDepartment({ request, response }: HttpContextContract) {
 
-    const b = await DepartmentService.addDept(a);
+    const requestValidate = await request.validate(DepartmentValidator.addDepartment);
 
-    console.log(b)
-    // return b;
-     return response.json(b);
+    const service = await DepartmentService.addDepartment(requestValidate);
+
+    return response.json(service);
   }
 
-  public async updatedept({ request, response }: HttpContextContract) {
-    const a = await request.validate(DepartmentValidator.updatedept);
+  public async updateDepartment({ request, response }: HttpContextContract) {
 
-    const b = await DepartmentService.updatedept(a);
+    const requestValidate = await request.validate(DepartmentValidator.updateDepartment);
 
-    return response.json(b);
+    const service = await DepartmentService.updateDepartment(requestValidate);
+
+    return response.json(service);
   }
 }

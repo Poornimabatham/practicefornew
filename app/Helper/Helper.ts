@@ -12,7 +12,6 @@ export default class Helper {
     return str;
   }
 
-  
   public static decode5t(str: string) {
     for (let i = 0; i < 5; i++) {
       str = str.split("").reverse().join("");
@@ -20,6 +19,7 @@ export default class Helper {
     }
     return str;
   }
+
 
   public static async getTimeZone(orgid: any) {
     const query1 = await Database.query()
@@ -46,7 +46,7 @@ export default class Helper {
       const payload = {
         audience: data.username,
         Id: data.empid,
-      };
+
       const options = {
         expiresIn: "1m",
         issuer: "Ubiattendace App",
@@ -61,7 +61,6 @@ export default class Helper {
       return 0;
     }
   }
-
  
   public static async getTimeZone(orgid: any) {
     const query1 = await Database.query()
@@ -150,3 +149,4 @@ export default class Helper {
     return status;
   }
 }
+

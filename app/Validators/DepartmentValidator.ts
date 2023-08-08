@@ -26,33 +26,31 @@ export default class DepartmentValidator extends BaseValidator {
      *     ])
      *    ```
      */
-    static getdepartment = {
+    static getDepartment = {
         schema: schema.create({
             OrganizationId: schema.number(),
             currentpage: schema.number(),
-            perpage:schema.number(),
-            pagename:schema.string()
+            perpage: schema.number(),
+            pagename: schema.string()
         }), message: BaseValidator.messages
     }
 
-    static addepartment = {
+    static addDepartment = {
         schema: schema.create({
+            Id: schema.number(),
             OrganizationId: schema.number(),
             Name: schema.string(),
-            CreatedbyId: schema.number.optional(),
-            LastModifiedById: schema.number.optional(),
-            OwnerId: schema.number.optional(),
             archive: schema.number.optional()
         }), message: BaseValidator.messages
     }
 
-    static updatedept = {
+    static updateDepartment = {
         schema: schema.create({
             OrganizationId: schema.number(),
             Id: schema.number(),
-            Name: schema.string(),
+            Name: schema.string.optional(),
             LastModifiedById: schema.number.optional(),
-            archive: schema.number.optional()
+            archive: schema.number()
         }), message: BaseValidator.messages
     }
     /**
