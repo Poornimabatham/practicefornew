@@ -1,6 +1,6 @@
 import Route from '@ioc:Adonis/Core/Route'
 
-Route.get('/fetch', 'DesignationsController.retreiveDesign').namespace('App/controllers/Http')
+Route.get('/fetch', 'DesignationsController.retreiveDesign')
 
 
 Route.post('/add', 'DesignationsController.AddDesign')

@@ -1,11 +1,8 @@
 import Database from "@ioc:Adonis/Lucid/Database";
-// import moment from "moment";
 import Helper from "App/Helper/Helper";
-import { Connection } from "mysql2/typings/mysql/lib/Connection";
 const moment = require("moment-timezone");
-
+import { DateTime } from "luxon";
 export default class DesignationService {
-  // Insert Designation method
   public static async AddDesignation(a) {
     const currentDate = new Date();
 
@@ -16,13 +13,12 @@ export default class DesignationService {
       .select("Id");
 
     const result: any = [];
-    // const res: any = await designationList;
 
     const affectedRows = designationList.length;
 
     if (affectedRows > 0) {
       result["status"] = -1;
-      return "user already exist";
+      return "user already exist in this list";
     }
 
     var insertDesignation = await Database.insertQuery()
@@ -45,27 +41,29 @@ export default class DesignationService {
         add_sts: "YourAddStsValue",
       });
 
-    // const res2: any = await insertDesignation;
-
     const affectedRows2 = insertDesignation.length;
 
     if (affectedRows2 > 0) {
       const timezone = await Helper.getTimeZone(a.orgid);
 
-      const currentDateTime = moment().tz(timezone);
-      const date = new Date();
+      var defaulttimeZone = moment().tz(timezone).toDate();
+      const dateTime = DateTime.fromJSDate(defaulttimeZone);
+      const formattedDate = dateTime.toFormat("yy-MM-dd HH:mm:ss");
+
       const module = "Attendance app";
       const appModule = "Designation";
       const activityby = 1;
       const actionPerformed = await Helper.getempnameById(a.uid);
+
+      const actionperformed2 = `${a.name} Designation  has been Added by  ${actionPerformed}from Attendance App`;
 
       const query2 = await Database.insertQuery()
         .table("ActivityHistoryMaster")
         .insert({
           LastModifiedDate: currentDate,
           LastModifiedById: a.uid,
-          ActionPerformed: actionPerformed,
-          Module: "poornima",
+          ActionPerformed: actionperformed2,
+          Module: module,
           OrganizationId: a.orgid,
           ActivityBy: activityby,
           adminid: a.uid,
@@ -75,7 +73,7 @@ export default class DesignationService {
     }
     return result["status"];
   }
-  // Fetch data method
+
   public static async getDesignation(a) {
     const begin = (a.currentpage - 1) * a.perpage;
 
@@ -132,18 +130,7 @@ export default class DesignationService {
     return designationList;
   }
 
-
-
-
-
-
-
-
-  // Update designation Method
   public static async updateDesignation(c) {
-
-
-   
     const result: any[] = [];
 
     result["status"] = 0;
@@ -158,10 +145,9 @@ export default class DesignationService {
 
     const Result: any = await designationList;
     const r = Result.length;
-    
 
     if (r > 0) {
-      result["status"] = -1;
+      result["status"] = "User already exist in this is id";
       return result["status"];
       // if dept already exists
       return false;
@@ -171,7 +157,6 @@ export default class DesignationService {
       .where("OrganizationId", c.Updateorgid)
       .where("Id", c.Updateid);
 
-  
     let name = "";
     let sts1 = "";
 
@@ -196,20 +181,28 @@ export default class DesignationService {
         OrganizationId: c.Updateorgid,
       });
 
-   
     const count = await updateDesignaion;
-    
-if (count > 0) {
+    if (count > 0) {
       const timezone = await Helper.getTimeZone(c.Updateorgid);
-      const zone = timezone[0]?.name;
-      console.log(zone);
-      const currentDateTime = moment().tz(zone);
 
-      const date = new Date();
+      var defaulttimeZone = moment().tz(timezone).toDate();
+      const dateTime = DateTime.fromJSDate(defaulttimeZone);
+      const formattedDate = dateTime.toFormat("yy-MM-dd HH:mm:ss");
+
       const module = "Attendance app";
       const appModule = "Designation";
 
-      let actionperformed = await Helper.getempnameById(c.Updateid);
+      let actionperformed;
+      var activityBy = 1;
+      var getempname = await Helper.getempnameById(c.Updateid);
+
+      if (res == 2) {
+        actionperformed = `${c.UpdateName} designation has been edited by ${getempname} `;
+      } else if (res == 1) {
+        actionperformed = `${c.UpdateName} designation has been active by ${getempname} `;
+      } else {
+        actionperformed = `${c.UpdateName} designation has been inactive by ${getempname} `;
+      }
 
       const activityby = 1;
       const insertctivityHistoryMaster: any = await Database.insertQuery()
@@ -217,10 +210,14 @@ if (count > 0) {
         .insert({
           ActionPerformed: actionperformed,
           AppModule: appModule,
+          LastModifiedById: c.uid,
+          Module: module,
+          OrganizationId: c.orgid,
+          ActivityBy: activityby,
+          adminid: c.uid,
         });
-      result["status"] = 1;
-      return result;
-
-    } 
+      result["status"] = "inserted in activity master";
+    }
+    return result["status"];
   }
 }

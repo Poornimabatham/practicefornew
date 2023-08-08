@@ -10,14 +10,13 @@ export default class Plannervalidator  extends BaseValidator{
 
   
   
-  
-  // Insert Designation schema
+
     static FetchPlannerchema ={
   
    schema:schema.create({
   userid:schema.number(),
   refno:schema.number(),
-  attDen:schema.number()
+  attDen:schema.date({ format: "yyyy-MM-dd" })
 
    
     })
