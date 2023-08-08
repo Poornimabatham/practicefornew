@@ -66,9 +66,9 @@ export default class LogicsOnly {
     const currentDateTime = moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss')
 
 
-    if (data.searchval == undefined) {
-      if (data.FirstDate == undefined || data.SecondDate == undefined) {
-        let currDate = moment().format("YYYY-MM-DD");
+  if(data.searchval == undefined){
+      if (data.FirstDate == undefined || data.SecondDate == undefined ){
+        let currDate = moment().format("YYYY-MM-DD");   
         query = query.where("A.AttendanceDate", currDate)
         query2 = query2.where("AA.AttendanceDate", currDate)
       }

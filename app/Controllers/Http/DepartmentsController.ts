@@ -13,7 +13,7 @@ export default class DepartmentsController {
 
     if (service.length > 0) {
       response.status(200).send({ message: "Success", data: service });
-    } else {
+     } else {
       response.status(400).send({ message: "Unsuccess", data: service });
     }
   }

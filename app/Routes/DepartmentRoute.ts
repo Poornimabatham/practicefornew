@@ -5,3 +5,4 @@ Route.get('/getdepartment', 'DepartmentsController.getdepartment')
 Route.post('/addDepartment', 'DepartmentsController.addDepartment')
 Route.post('/updateDepartment', 'DepartmentsController.updateDepartment')
 
+
