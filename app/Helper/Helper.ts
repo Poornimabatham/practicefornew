@@ -65,18 +65,18 @@ export default class Helper {
   }
 
  
-  // public static async getTimeZone(orgid: any) {
-  //   const query1 = await Database.query()
-  //     .from("ZoneMaster")
-  //     .select("name")
-  //     .where(
-  //       "id",
-  //       Database.raw(
-  //         `(select TimeZone from Organization where id =${orgid}  LIMIT 1)`
-  //       )
-  //     );
-  //   return query1[0].name;
-  // }
+  public static async getTimeZone(orgid: any) {
+    const query1 = await Database.query()
+      .from("ZoneMaster")
+      .select("name")
+      .where(
+        "id",
+        Database.raw(
+          `(select TimeZone from Organization where id =${orgid}  LIMIT 1)`
+        )
+      );
+    return query1[0].name;
+  }
   public static async getempnameById(empid: number) {
     console.log(empid);
 

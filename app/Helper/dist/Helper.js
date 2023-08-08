@@ -117,18 +117,22 @@ var Helper = /** @class */ (function () {
             });
         });
     };
-    // public static async getTimeZone(orgid: any) {
-    //   const query1 = await Database.query()
-    //     .from("ZoneMaster")
-    //     .select("name")
-    //     .where(
-    //       "id",
-    //       Database.raw(
-    //         `(select TimeZone from Organization where id =${orgid}  LIMIT 1)`
-    //       )
-    //     );
-    //   return query1[0].name;
-    // }
+    Helper.getTimeZone = function (orgid) {
+        return __awaiter(this, void 0, void 0, function () {
+            var query1;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, Database_1["default"].query()
+                            .from("ZoneMaster")
+                            .select("name")
+                            .where("id", Database_1["default"].raw("(select TimeZone from Organization where id =" + orgid + "  LIMIT 1)"))];
+                    case 1:
+                        query1 = _a.sent();
+                        return [2 /*return*/, query1[0].name];
+                }
+            });
+        });
+    };
     Helper.getempnameById = function (empid) {
         return __awaiter(this, void 0, void 0, function () {
             var query2;
