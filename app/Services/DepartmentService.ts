@@ -107,7 +107,7 @@ export default class DepartmentService {
     result['status'] = '0';         // Bydefault result
     const date = DateTime.now();
     const formattedDate = date.toFormat('yy-MM-dd');
-    var orgId = await Helper.getOrgId(data.Id);
+    var orgId = await Helper.getOrgId(data.Id);     ////make func in helper
     var DeptId = data.Id;
 
     var selectQuery = await Database.from("DepartmentMaster")
