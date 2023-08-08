@@ -1,13 +1,11 @@
-import { schema } from '@ioc:Adonis/Core/Validator'
+import { schema, CustomMessages } from '@ioc:Adonis/Core/Validator'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import BaseValidator from './BaseValidator'
 
-export default class GetEarlyComingValidator extends BaseValidator {
-  constructor(protected ctx: HttpContextContract) {
-    super()
-  }
+export default class GetEarlyLeavingValidator {
+  constructor(protected ctx: HttpContextContract) {}
 
-  static EarlyCommersScehma = {schema:schema.create({
+
+  static EarlyLeavingScehma = {schema:schema.create({
     empid:schema.number.optional(),
     deptId:schema.number.optional(),
     orgid:schema.number.optional(),
