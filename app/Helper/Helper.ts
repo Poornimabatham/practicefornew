@@ -1,6 +1,5 @@
 const jwt = require("jsonwebtoken");
 import Database from "@ioc:Adonis/Lucid/Database";
-import LogicsOnly from "App/Services/getAttendances_service";
 
 export default class Helper {
 
