@@ -281,22 +281,23 @@ export default class EmployeeService{
         const zone = await Helper.getTimeZone(reqdata['Orgid']);
         const currentDateTime = moment().tz(zone).format('YYYY-MM-DD HH:mm:ss');
         const column_value:{[key:string]:any}={}//object creation 
-        column_value['EmployeeId']=reqdata['empid'];
+        column_value['Id']=reqdata['empid'];
         column_value['LastModifiedDate']=currentDateTime;
         column_value['LastModifiedById']=reqdata['adminid'];
+        let update_EmpDetail:any;
         if(reqdata['username'] != ''){
             const username:string=Helper.encode5t(reqdata['username']); 
             const CheckUsername:any = await Database.query().select('Id','username').from("UserMaster").where({username:username,EmployeeId:reqdata['empid']});
             if(CheckUsername.length>0){
                 return 2;
             }else{
-                const update_EmpEmail:any = await Database.query()
+                update_EmpDetail  = await Database.query()
                 .from("UserMaster")
                 .where("EmployeeId",reqdata['empid'])
                 .andWhere("OrganizationId",reqdata['Orgid'])
                 .update({username:username});
+               
             }
-            column_value['username']
         }
         if(reqdata['f_name']!=''){
             column_value['FirstName'] = Helper.FirstLettercapital(reqdata['f_name']);
@@ -308,22 +309,23 @@ export default class EmployeeService{
             column_value['Designation']=reqdata['designation']; 
         }
         if(reqdata['designation'] !=''){
-            column_value['Designation']=reqdata['designation'];
+            column_value['Designation']= reqdata['designation'];
         }
-        if(reqdata['shift'] !=''){
-            column_value['Shift']=reqdata['shift'];
+        if(reqdata['shifts'] != '')
+        {
+            column_value['Shift']=reqdata['shifts'];
         }
-        const update_permission:any = await Database.query()
+        update_EmpDetail = await Database.query()
         .from("EmployeeMaster")
         .where("Id",reqdata['empid'])
         .andWhere("OrganizationId",reqdata['Orgid'])
-        .update({Device_Restriction:Device_Restriction,Finger_Print:FingerPrintSts,LastModifiedDate:currentDateTime,LastModifiedById:reqdata['adminid']});
-        if(update_permission > 0){
+        .update(column_value);
+        if(update_EmpDetail > 0){
             status=true;
             const module:string =  "Attendance App";
-            const actionperformed:string = "<b>" + reqdata['empname'] + "</b> Touch ID permission has been updated by <b>" + reqdata['adminname'] + "</b> from<b> Attendance App  </b>";
+            const actionperformed:string = "<b>" + reqdata['empname'] + "</b> Details has been Updated by<b>" + reqdata['adminname'] + "</b> from<b> Attendance App  </b>";
             const activityby:any = '1';
-            const appmodule:string= "Touch ID";
+            const appmodule:string= "Employees";
             const InsertActivity = await Database.table("ActivityHistoryMaster")
                         .insert({
                                 LastModifiedDate: currentDateTime,

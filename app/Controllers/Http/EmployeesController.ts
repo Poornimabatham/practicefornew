@@ -58,18 +58,20 @@ export default class EmployeesController {
             this.data['username']= validation.username ? validation.username.toLowerCase():'';
             this.data['department']=validation.department ? validation.department:'';
             this.data['designation']=validation.designation ? validation.designation:'';
-            this.data['shift']=validation.shift ? validation.shift:'';
-            this.data['empid'] = validation.empid;
+            this.data['shifts']= validation.shift ? validation.shift:'';
+            this.data['empid'] = validation.EmpId;
             this.data['Orgid'] = validation.Orgid;
             this.data['adminid'] = validation.adminid;
             this.data['adminname'] = validation.adminname;
             this.data['empname'] = validation.EmpName;
+       
             const result = await EmployeeService.prototype.EmpDetailUpdate(this.data);
             if (result == true) {
                 response.status(200).send({ Messsage: result, Name: "Updated SuccessFully "})
-            }
-            if (result == false) {
+            }else if (result == false) {
                 response.status(204).send({ Messsage: result, Name: "Updated UnsuccessFull "})
+            }else if (result == 2) {
+                response.status(205).send({ Messsage:"Invalid Request" , Name: "UserName Already Exist"})
             }
         }catch(error){
             response.status(400).send({ Message:"Invalid Request",Error: error });
@@ -91,7 +93,7 @@ export default class EmployeesController {
                 response.status(200).send({ Messsage: result, Name: "Updated SuccessFully "})
             }
             if (result == false) {
-                response.status(204).send({ Messsage: result, Name: "Updated UnsuccessFull "})
+                response.status(205).send({ Messsage: result, Name: "Updated UnsuccessFull "})
             }
         }catch(error){
             response.status(400).send({ Message:"Invalid Request",Error: error });
@@ -111,7 +113,7 @@ export default class EmployeesController {
                 response.status(200).send({ Messsage: result, Name: "Updated SuccessFully "})
             }
             if (result == false) {
-                response.status(204).send({ Messsage: result, Name: "Updated UnsuccessFull "})
+                response.status(205).send({ Messsage: result, Name: "Updated UnsuccessFull "})
             }
         }catch(error){
             response.status(400).send({ Message:"Invalid Request",Error: error });
@@ -133,7 +135,7 @@ export default class EmployeesController {
                 response.status(200).send({ Messsage: result, Name: "Updated SuccessFully "})
             }
             if (result == false) {
-                response.status(204).send({ Messsage: result, Name: "Updated UnsuccessFull "})
+                response.status(205).send({ Messsage: result, Name: "Updated UnsuccessFull "})
             }
         }catch(error){
             response.status(400).send({ Message:"Invalid Request",Error: error });
@@ -153,7 +155,7 @@ export default class EmployeesController {
                 response.status(200).send({ Messsage: result, Name: "Updated SuccessFully "})
             }
             if (result == false) {
-                response.status(204).send({ Messsage: result, Name: "Updated UnsuccessFull "})
+                response.status(205).send({ Messsage: result, Name: "Updated UnsuccessFull "})
             }
         }catch(error){
             response.status(400).send({ Message:"Invalid Request",Error: error });
@@ -174,7 +176,7 @@ export default class EmployeesController {
                 response.status(202).send({ Messsage: result, Name: "Updated SuccessFully "})
             }
             if (result == false) {
-                response.status(204).send({ Messsage: result, Name: "Updated UnsuccessFull "})
+                response.status(205).send({ Messsage: result, Name: "Updated UnsuccessFull "})
             }
         }catch(error){
             response.status(400).send({ Message:"Invalid Request",Error: error });

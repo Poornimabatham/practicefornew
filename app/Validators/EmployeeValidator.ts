@@ -108,7 +108,7 @@ export default class EmployeeValidator extends BaseValidator {
       department:schema.number.optional(),
       designation:schema.number.optional(),
       shift:schema.number.optional(),
-      empid: schema.number(),
+      EmpId: schema.number(),
       Orgid: schema.number(),
       adminname: schema.string(),
       EmpName: schema.string(),
