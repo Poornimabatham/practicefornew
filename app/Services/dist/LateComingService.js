@@ -38,7 +38,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 exports.__esModule = true;
 var Database_1 = require("@ioc:Adonis/Lucid/Database");
 var Helper_1 = require("App/Helper/Helper");
-var moment = require("moment-timezone");
 var DateTime = require("luxon").DateTime;
 var LateComingService = /** @class */ (function () {
     function LateComingService() {

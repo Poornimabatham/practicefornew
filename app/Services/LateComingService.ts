@@ -1,8 +1,6 @@
 import Database from "@ioc:Adonis/Lucid/Database";
 import Helper from "App/Helper/Helper";
-import { Zone } from "luxon";
-import { format } from "mysql2";
-const moment = require("moment-timezone");
+
 const { DateTime } = require("luxon");
 
 export default class LateComingService {
@@ -42,9 +40,11 @@ export default class LateComingService {
       .orderBy("E.FirstName", "asc")
       .limit(limit);
 
+      
     const zone = await Helper.getTimeZone(data.Orgid);
 
     if (data.Date == undefined) {
+      
       const currentDateTimeIn = DateTime.local().setZone(zone);
 
       var Date2 = currentDateTimeIn.toFormat("yyyy-MM-dd");

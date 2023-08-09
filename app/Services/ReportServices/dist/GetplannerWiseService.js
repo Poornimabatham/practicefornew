@@ -37,100 +37,156 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 exports.__esModule = true;
 var Database_1 = require("@ioc:Adonis/Lucid/Database");
-var DateTime = require("luxon").DateTime;
-var dayjs = require("dayjs");
-var moment = require('moment');
+var _a = require("luxon"), Duration = _a.Duration, DateTime = _a.DateTime;
+var moment = require("moment");
 var GetplannerWiseSummary = /** @class */ (function () {
     function GetplannerWiseSummary() {
     }
     GetplannerWiseSummary.Getlannerwisesummary = function (a) {
         return __awaiter(this, void 0, void 0, function () {
-            var currentDate, Date2, overtime, overtime1, overtime3, loggedHours, shiftin, shiftout, weekoff_sts, bhour, fetchdatafromTimeOFFandAttendanceMaster, result, res;
+            var currentDate, Date2, fetchdatafromTimeOFFandAttendanceMaster, result, res;
+            var _this = this;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         currentDate = a.attDen;
                         Date2 = currentDate.toFormat("yyyy-MM-dd");
-                        overtime = "";
-                        overtime1 = "";
-                        overtime3 = "";
-                        loggedHours = "00:00:00";
-                        shiftin = "";
-                        shiftout = "";
-                        weekoff_sts = "-";
-                        bhour = "00:00:00";
                         return [4 /*yield*/, Database_1["default"].from("Timeoff as Toff")
                                 .innerJoin("AttendanceMaster as AM", "Toff.TimeofDate", "AM.AttendanceDate")
-                                .select("AM.AttendanceDate", "Toff.Reason", "Toff.TimeofDate", "Toff.TimeTo", "AM.TimeIn", "AM.TimeOut", "AM.timeindate", "AM.timeoutdate", "AM.TimeOutApp", "Toff.EmployeeId as TEID", "AM.EmployeeId as AMEID", Database_1["default"].raw("(SELECT SEC_TO_TIME(sum(time_to_sec(TIMEDIFF(Timeoff_end, Timeoff_start)))) FROM Timeoff WHERE \n             Timeoff.EmployeeId = " + a.userid + " AND Timeoff.ApprovalSts = 2) AS timeoffhours"), "AM.ShiftId", "AM.TotalLoggedHours AS thours", Database_1["default"].raw("(SELECT SEC_TO_TIME(sum(time_to_sec(TIMEDIFF(TimeTo, TimeFrom)))) FROM Timeoff WHERE \n                Timeoff.EmployeeId = " + a.userid + " AND Timeoff.ApprovalSts = 2) AS bhour"), Database_1["default"].raw("SUBSTRING_INDEX(EntryImage, '.com/', -1) AS EntryImage"), Database_1["default"].raw("SUBSTRING_INDEX(ExitImage, '.com/', -1) AS ExitImage"), Database_1["default"].raw("CONCAT(LEFT(checkInLoc, 35), '...') AS checkInLoc"), Database_1["default"].raw("CONCAT(LEFT(CheckOutLoc, 35), '...') AS CheckOutLoc"), "latit_in", "longi_in", "latit_out", "longi_out", "multitime_sts").limit(2)
-                                // .andWhere('AM.EmployeeId',a.userid)
-                                // .andWhere('AM.AttendanceDate',Date2)
-                                .whereIn("AM.AttendanceStatus", [1, 3, 5, 4, 8, 10])];
+                                .select("AM.AttendanceStatus", "AM.AttendanceDate", "Toff.Reason", "Toff.TimeofDate", "Toff.TimeTo", "AM.TimeIn", "AM.TimeOut", "AM.timeindate", "AM.timeoutdate", "AM.TimeOutApp", "Toff.EmployeeId as TEID", "AM.EmployeeId as AMEID", Database_1["default"].raw("(SELECT SEC_TO_TIME(sum(time_to_sec(TIMEDIFF(Timeoff_end, Timeoff_start)))) FROM Timeoff WHERE \n                Toff.EmployeeId = " + a.userid + " AND Toff.ApprovalSts != 2) AS timeoffhours"), "AM.ShiftId", "AM.TotalLoggedHours AS thours", Database_1["default"].raw("(SELECT SEC_TO_TIME(sum(time_to_sec(TIMEDIFF(TimeTo, TimeFrom)))) FROM Timeoff WHERE \n                Toff.EmployeeId = " + a.userid + " AND Toff.ApprovalSts != 2) AS bhour"), Database_1["default"].raw("SUBSTRING_INDEX(EntryImage, '.com/', -1) AS EntryImage"), Database_1["default"].raw("SUBSTRING_INDEX(ExitImage, '.com/', -1) AS ExitImage"), Database_1["default"].raw("CONCAT(LEFT(checkInLoc, 35), '...') AS checkInLoc"), Database_1["default"].raw("CONCAT(LEFT(CheckOutLoc, 35), '...') AS CheckOutLoc"), "latit_in", "longi_in", "latit_out", "longi_out", "multitime_sts")
+                                .limit(2)
+                                .where("AM.AttendanceDate", Date2)
+                                .where("AM.AttendanceStatus", 1)];
                     case 1:
                         fetchdatafromTimeOFFandAttendanceMaster = _a.sent();
                         return [4 /*yield*/, fetchdatafromTimeOFFandAttendanceMaster];
                     case 2:
                         result = _a.sent();
-                        console.log(result);
                         res = [];
-                        result.forEach(function (val) {
-                            var data = {};
-                            data["AttendanceDate"] = val.AttendanceDate;
-                            data["loggedHours"] = val.thours;
-                            var logged = data["loggedHours"];
-                            data["timein"] = val.TimeIn;
-                            data["timeout"] = val.TimeOut;
-                            data["timeindate"] = val.timeindate;
-                            data["AttendanceDate"] = moment(val.timeindate).utcOffset("Asia/Kolkata").format('YYYY-MM-DD');
-                            data["timeoutdate"] = val.timeoutdate;
-                            // if(data['loggedHours'] == '00:00:00' || data['loggedHours'] != '' || data['loggedHours'] ==null){
-                            // const timeinn= 	data['timeindate']+data['timein'];
-                            //  const timeoutt=data['timeoutdate']+data['timeout'];
-                            //  console.log(timeinn)
-                            //  console.log(timeoutt)
-                            //  const parsedDate = DateTime.fromFormat(timeinn, "EEE MMM dd yyyy HH:mm:ss 'GMT'Z (z)ZZZZZ")
-                            // console.log(parsedDate.toJSDate()); // 
-                            //  var a ;
-                            //   var difference ;
-                            //   var differenceInHours;
-                            // // if(timeinn>timeoutt){
-                            //   // Calculate the difference between the two dates
-                            //   difference = date2.diff(date1);
-                            //   // Get the difference in hours
-                            //    differenceInHours = difference.as('hours');
-                            // }
-                            // else{
-                            //   difference = date2.diff(date1);
-                            //   // Get the difference in hours
-                            //    differenceInHours = difference.as('hours');
-                            // }
-                            // }
-                            data['timeoffhours'] = val.timeoffhours;
-                            if (data['timeoffhours'] == null || data['timeoffhours'] == '') {
-                                data['timeoffhours'] = '12:00:00';
-                                var time = data['timeoffhours'];
-                            }
-                            // if(data['timeoffhours'] != '00:00:00'){
-                            //   var  queryResult =   Database.raw(
-                            //     `SELECT SUBTIME( ${logged},${time}) AS latehours`
-                            //   );
-                            // res.push(queryResult)
-                            // const row111 =queryResult;
-                            // // if (row111.length > 0) {
-                            // //   const loggedHoursResult = row111[0].Loggedhours;
-                            // //   res.push(loggedHours)
-                            // // }
-                            var queryReslt2 = Database_1["default"].raw("SELECT SUBTIME  (\"" + logged + "\",\"" + time + "\" )   AS latehours");
-                            //return queryReslt2;
-                            //var result = await queryReslt2;
-                            console.log(queryReslt2);
-                            // data['timeoutplatform'] = val.TimeOutApp
-                            // data['ShiftId'] = val.ShiftId
-                            // const queryResult = Database.from('ShiftMaster').where('Id',8).select('TimeIn', 'TimeOut', 
-                            // 'shifttype',
-                            // 'HoursPerDay');
-                            // res.push(queryResult)
-                        });
-                        return [2 /*return*/];
+                        result.forEach(function (val) { return __awaiter(_this, void 0, void 0, function () {
+                            var data, status, logged, time, queryResult1, row111, loggedHoursResult, queryResult, data123, shiftin, shiftout, shiftType, hoursPerDay, shiftin1, shiftout1, startDateTime, endDateTime, Interval, HoursPerDay, halfInSeconds, v, hours, minutes, secs, timeString, formattedTime2, weekoff_sts, overtime_1, overtime, row111, overtime1, overtime, row111, overtime1;
+                            return __generator(this, function (_a) {
+                                switch (_a.label) {
+                                    case 0:
+                                        data = {};
+                                        data["AttendanceStatus"] = val.AttendanceStatus;
+                                        status = data["AttendanceStatus"];
+                                        data["AttendanceDate"] = val.AttendanceDate;
+                                        data["loggedHours"] = val.thours;
+                                        data["Reason"] = val.Reason;
+                                        data["TimeTo"] = val.TimeTo;
+                                        logged = data["loggedHours"];
+                                        data["TimeIn"] = val.TimeIn;
+                                        data["timeout"] = val.TimeOut;
+                                        data["timeoutdate"] = moment(val.timeoutdate).format("YYYY-MM-DD");
+                                        data["timeindate"] = moment(val.timeindate).format("YYYY-MM-DD");
+                                        data["ShiftId"] = val.ShiftId;
+                                        data["timeoffhours"] = val.timeoffhours;
+                                        data["TimeOutApp"] = val.TimeOutApp;
+                                        data["timeoffhours"] = val.timeoffhours;
+                                        data["timeoutplatform"] = val.TimeOutApp;
+                                        data["ShiftId"] = val.ShiftId;
+                                        res.push(data);
+                                        if (data["timeoffhours"] == null || data["timeoffhours"] == "") {
+                                            data["timeoffhours"] = "00:00:00";
+                                            time = data["timeoffhours"];
+                                        }
+                                        if (!(data["timeoffhours"] == "00:00:00")) return [3 /*break*/, 2];
+                                        return [4 /*yield*/, Database_1["default"].rawQuery("SELECT SUBTIME( \"" + logged + "\",\"" + time + "\") AS Loggedhours")];
+                                    case 1:
+                                        queryResult1 = _a.sent();
+                                        row111 = queryResult1[0];
+                                        if (row111.length > 0) {
+                                            loggedHoursResult = row111[0].Loggedhours;
+                                        }
+                                        _a.label = 2;
+                                    case 2:
+                                        queryResult = Database_1["default"].from("ShiftMaster")
+                                            .where("Id", 36)
+                                            .select("TimeIn", "TimeOut", "shifttype", "HoursPerDay");
+                                        return [4 /*yield*/, queryResult.first()];
+                                    case 3:
+                                        data123 = _a.sent();
+                                        if (data123) {
+                                            shiftin = data123.TimeIn;
+                                            shiftout = data123.TimeOut;
+                                            shiftType = data123.shifttype;
+                                            hoursPerDay = data123.HoursPerDay;
+                                            if (hoursPerDay === "00:00:00" ||
+                                                hoursPerDay !== "" ||
+                                                hoursPerDay === null) {
+                                                shiftin1 = shiftin;
+                                                shiftout1 = shiftout;
+                                                startDateTime = DateTime.fromFormat(shiftin1, "HH:mm:ss");
+                                                endDateTime = DateTime.fromFormat(shiftout1, "HH:mm:ss");
+                                                Interval = Duration.fromMillis(endDateTime.diff(startDateTime).as("milliseconds"));
+                                                HoursPerDay = Interval.toFormat("hh:mm:ss");
+                                            }
+                                        }
+                                        if (status == 4 || status == 1) {
+                                            halfInSeconds = Duration.fromISOTime(HoursPerDay).as("seconds");
+                                            v = halfInSeconds / 2;
+                                            hours = Math.floor(v / 3600);
+                                            minutes = Math.floor((v % 3600) / 60);
+                                            secs = v % 60;
+                                            timeString = hours.toString().padStart(2, "0") + ":" + minutes
+                                                .toString()
+                                                .padStart(2, "0") + ":" + secs.toString().padStart(2, "0");
+                                            formattedTime2 = DateTime.fromFormat(timeString, "H:m:s").toFormat("hh:mm:ss");
+                                        }
+                                        weekoff_sts = "WO";
+                                        if (!(val.TimeOut !== "00:00:00")) return [3 /*break*/, 13];
+                                        if (!(shiftType == 1)) return [3 /*break*/, 7];
+                                        data["thours"] = logged;
+                                        if (!(weekoff_sts == "WaO" || weekoff_sts == "H")) return [3 /*break*/, 4];
+                                        overtime_1 = logged;
+                                        return [3 /*break*/, 6];
+                                    case 4: return [4 /*yield*/, Database_1["default"].rawQuery("SELECT SUBTIME( \"" + logged + "\",\"" + HoursPerDay + "\") AS Overtime")];
+                                    case 5:
+                                        overtime = _a.sent();
+                                        row111 = overtime;
+                                        if (row111.length > 0) {
+                                            overtime1 = row111[0].Overtime;
+                                        }
+                                        _a.label = 6;
+                                    case 6: return [3 /*break*/, 12];
+                                    case 7:
+                                        if (!(shiftType == 1)) return [3 /*break*/, 11];
+                                        data["thours"] = logged;
+                                        if (!(weekoff_sts == "WO" || weekoff_sts == "H")) return [3 /*break*/, 8];
+                                        overtime1 = logged;
+                                        return [3 /*break*/, 10];
+                                    case 8: return [4 /*yield*/, Database_1["default"].rawQuery("SELECT SUBTIME( \"" + logged + "\",\"" + HoursPerDay + "\") AS Overtime")];
+                                    case 9:
+                                        overtime = _a.sent();
+                                        row111 = overtime;
+                                        if (row111.length > 0) {
+                                            overtime1 = row111[0].Overtime;
+                                        }
+                                        _a.label = 10;
+                                    case 10: return [3 /*break*/, 12];
+                                    case 11:
+                                        overtime1 = "00:00:00";
+                                        _a.label = 12;
+                                    case 12: return [3 /*break*/, 14];
+                                    case 13:
+                                        data["thours"] = "00:00:00";
+                                        if (weekoff_sts == "WO" || weekoff_sts == "H") {
+                                            overtime1 = logged;
+                                        }
+                                        else {
+                                            overtime1 = "00:00:00";
+                                        }
+                                        _a.label = 14;
+                                    case 14:
+                                        data["shiftin"] = shiftin1;
+                                        data["shiftout"] = shiftout1;
+                                        data["EntryImage"] = "-";
+                                        return [2 /*return*/];
+                                }
+                            });
+                        }); });
+                        return [2 /*return*/, res];
                 }
             });
         });
