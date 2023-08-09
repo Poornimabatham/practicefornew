@@ -1,7 +1,7 @@
 import Database from "@ioc:Adonis/Lucid/Database";
 import Helper from "App/Helper/Helper";
-import { DateTime } from "luxon";
-import moment from "moment-timezone";
+// import { DateTime } from "luxon";
+// import moment from "moment-timezone";
 
 export default class DailyAttendanceService {
 
@@ -9,7 +9,7 @@ export default class DailyAttendanceService {
         var begin = (data.currentPage - 1) * data.perPage;
         var limit;
         var offset;
-        var inpDate = data.date;
+        // var inpDate = data.date;
         var designationCondition;
 
         if (data.currentPage != 0 && data.csv == "") {
@@ -20,8 +20,8 @@ export default class DailyAttendanceService {
             limit = "";
             offset = "";
         }
-        var utcOffset
-        var cdate;
+        // var utcOffset
+        // var cdate;
         // if (inpDate) {
         //     // var now = inpDate.setZone('Asia/Kabul')
         //     // cdate = now.toFormat('yyyy-MM-dd HH:mm:ss')
@@ -73,8 +73,8 @@ export default class DailyAttendanceService {
 
         var condition;
 
-        if (data.Designation != 0 && data.Designation != "") {
-            designationCondition = ` Desg_id= ${data.Designation}`;    // From AttendanceMaster
+        if (data.DesignationId != 0 && data.DesignationId != "") {
+            designationCondition = ` Desg_id= ${data.DesignationId}`;    // From AttendanceMaster
         }
 
         if (data.dataFor == 'present') {
@@ -186,13 +186,18 @@ export default class DailyAttendanceService {
             // return data['present']
         }
         else if (data.dataFor == "absent") {
-
+            var departmentCondition;
+            var AttendanceDate;
             if (adminStatus == 2) {
-                var departmentId = data.departmentId;
-                condition = `Dept_id = ${departmentId}`;
+                var departmentId = data.DepartmentId;
+                departmentCondition = `Dept_id = ${departmentId}`;
             }
 
-            var AttendanceDate;
+            if (data.DesignationId != 0 && data.DesignationId != "") {
+                designationCondition = ` Desg_id= ${data.DesignationId}`;    // From AttendanceMaster
+            }
+
+
             if (data.date == undefined) {
                 AttendanceDate = new Date().toISOString().split('T')[0];
             }
@@ -207,15 +212,46 @@ export default class DailyAttendanceService {
                     absCount = absCountQuery[0].Id;
                 }
 
-                var absentCountQuery = await Database.from('AttendanceMaster as A').select(
-                    Database.raw("CONCAT(EmployeeMaster.FirstName, ' ', EmployeeMaster.LastName) as name"),
-                    // Database.raw(`TimeIn as '-' `),
-                    // Database.raw(`TimeOut as '-' `),
-                    // Database.raw('SELECT ApprovalStatus FROM AppliedLeave WHERE EmployeeId=A.EmployeeeId AND ApprovalStatus=2 ')
-                )
-                // .innerJoin('EmployeeMaster as E', 'E.Id', 'A.EmployeeId')
-                // .where('Date', AttendanceDate)
-                return absentCountQuery
+                var orgId = data.OrganizationId;
+                var absentCountQuery = Database.from('AttendanceMaster as A').select(
+                    Database.raw("(select CONCAT(FirstName,' ',LastName) FROM EmployeeMaster where Id = EmployeeId) as name"),
+                    Database.raw(` '-' as TimeOut`),
+                    Database.raw(` '-' as TimeIn`),
+                    Database.raw('(select ApprovalStatus from AppliedLeave where EmployeeId = A.EmployeeId and ApprovalStatus = 2 and Date = 2023-03-02) as LeaveStatus'))
+                    .innerJoin('EmployeeMaster as E', 'E.Id', 'A.EmployeeId')
+                    .where('AttendanceDate', '2023-02-01')
+                    .whereIn('AttendanceStatus', [2, 7])
+                    .where('A.OrganizationId', data.OrganizationId)
+                    .whereIn('EmployeeId', Database.raw(`SELECT Id FROM EmployeeMaster WHERE OrganizationId= ${orgId} AND Is_Delete = 0`))
+                    .whereRaw(designationCondition)
+                    .orderBy('name', 'asc')
+
+
+                if (departmentCondition != undefined) {
+                    absentCountQuery = absentCountQuery.whereRaw(departmentCondition);
+                }
+                var absentCountQueryResult = await absentCountQuery;
+
+                // return absentCountQueryResult
+
+                if (absentCountQueryResult.length > 0) {
+                    var name = absentCountQueryResult[0].name;
+
+                    absentCountQueryResult.forEach((row) => {
+                        if (name.split(' ').length > 1) {
+                            var words = name.split(' ', 4);
+                            var firstthree = words.slice(0, 3);
+                            const output = firstthree.join(' ') + '...';
+                           
+
+                        }
+                        
+
+
+
+                    })
+                }
+                // return absentCountQueryResult
             }
         }
     }

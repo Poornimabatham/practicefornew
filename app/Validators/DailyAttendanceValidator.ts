@@ -30,13 +30,13 @@ export default class DailyAttendanceValidator extends BaseValidator {
     schema: schema.create({
     OrganizationId:schema.number(),
     EmployeeId:schema.number(),
-    DepartmentId:schema.number(),
+    DepartmentId:schema.number.optional(),
     date:schema.date.optional(),
-    Designation:schema.string(),
+    DesignationId:schema.number.optional(),
     csv:schema.string.optional(),
     dataFor:schema.string(),
-    currentPage:schema.number(),
-    perPage:schema.number()
+    currentPage:schema.number.optional(),
+    perPage:schema.number.optional()
     }),message:BaseValidator.messages
   }
 
