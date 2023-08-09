@@ -63,7 +63,7 @@ export default class LogicsOnly {
        TIME_FORMAT(SEC_TO_TIME((ROUND(TIME_TO_SEC(AA.TotalLoggedHours) / 60)) * 60), '%H:%i:%s') AS loggedhours
        `)).limit(2)
 
-    const currentDateTime = moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss')
+     moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss')
 
 
   if(data.searchval == undefined){

@@ -80,7 +80,7 @@ export default class DepartmentService {
       var appModule = "Department";
       var activityBy = 1;
 
-      const InsertQuery = await Database.insertQuery().table('ActivityHistoryMaster')
+      await Database.insertQuery().table('ActivityHistoryMaster')
         .insert({
           LastModifiedDate: formattedDate,
           LastModifiedById: uid,
@@ -175,7 +175,7 @@ export default class DepartmentService {
         actionperformed = `${data.Name} department has been inactive by ${getEmpName} `;
       }
 
-      const insertQuery = await Database.table('ActivityHistoryMaster').insert({
+      await Database.table('ActivityHistoryMaster').insert({
         LastModifiedDate: formattedDate,
         LastModifiedById: DeptId,
         Module: module,

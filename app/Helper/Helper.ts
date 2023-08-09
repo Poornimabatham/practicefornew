@@ -107,7 +107,5 @@ export default class Helper {
     }
     return OrgId;
   }
-
-
 }
 

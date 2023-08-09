@@ -6,7 +6,6 @@ export default class LatecomingValidator extends BaseValidator {
     super();
   }
 
-  // Insert Designation schema
   static fetchlatecomingsschema = {
     schema: schema.create({
       Orgid: schema.number(),

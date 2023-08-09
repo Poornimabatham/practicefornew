@@ -1,8 +1,8 @@
 import Database from "@ioc:Adonis/Lucid/Database";
 // import moment from "moment";
 import Helper from "App/Helper/Helper";
-import { Connection } from "mysql2/typings/mysql/lib/Connection";
-const moment = require("moment-timezone");
+// import { Connection } from "mysql2/typings/mysql/lib/Connection";
+// const moment = require("moment-timezone");
 
 export default class DesignationService {
   // Insert Designation method
@@ -50,16 +50,16 @@ export default class DesignationService {
     const affectedRows2 = insertDesignation.length;
 
     if (affectedRows2 > 0) {
-      const timezone = await Helper.getTimeZone(a.orgid);
+      // const timezone = await Helper.getTimeZone(a.orgid);
 
-      const currentDateTime = moment().tz(timezone);
-      const date = new Date();
-      const module = "Attendance app";
+      // const currentDateTime = moment().tz(timezone);
+      // const date = new Date();
+      // const module = "Attendance app";
       const appModule = "Designation";
       const activityby = 1;
       const actionPerformed = await Helper.getempnameById(a.uid);
 
-      const query2 = await Database.insertQuery()
+    await Database.insertQuery()
         .table("ActivityHistoryMaster")
         .insert({
           LastModifiedDate: currentDate,
@@ -99,10 +99,10 @@ export default class DesignationService {
     if (a.status != undefined) {
       designationList = designationList.where("Archive", a.status);
     }
-    const currentDate = new Date();
+    // const currentDate = new Date();
 
     const result = await designationList;
-    const s: any[] = [];
+    // const s: any[] = [];
     var res = 0;
     result.forEach(function (val) {
       const data: any = {};
@@ -175,10 +175,10 @@ export default class DesignationService {
     let name = "";
     let sts1 = "";
 
-    const qr: any = await designationList2;
-    const count3 = designationList2.length;
+     await designationList2;
+    // const count3 = designationList2.length;
 
-    var res: any = "";
+    var res: any ;
     if (name != c.UpdateName) {
       res = 2;
     } else if (name == c.UpdateName && c.sts != sts1) {
@@ -203,16 +203,16 @@ if (count > 0) {
       const timezone = await Helper.getTimeZone(c.Updateorgid);
       const zone = timezone[0]?.name;
       console.log(zone);
-      const currentDateTime = moment().tz(zone);
+      // const currentDateTime = moment().tz(zone);
 
-      const date = new Date();
-      const module = "Attendance app";
+      // const date = new Date();
+      // const module = "Attendance app";
       const appModule = "Designation";
 
       let actionperformed = await Helper.getempnameById(c.Updateid);
 
-      const activityby = 1;
-      const insertctivityHistoryMaster: any = await Database.insertQuery()
+      // const activityby = 1;
+       await Database.insertQuery()
         .table("ActivityHistoryMaster")
         .insert({
           ActionPerformed: actionperformed,

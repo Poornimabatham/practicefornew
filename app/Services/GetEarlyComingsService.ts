@@ -4,7 +4,7 @@ import { DateTime } from "luxon";
 
 export default class GetEarlyComingsService {
   static async EarlyCommers(getData) {
-    
+
     const sendResponse: DefineTypes[] = [];
     const Begin = (getData.currentPage - 1) * getData.perPage;
     var limit;
@@ -15,7 +15,7 @@ export default class GetEarlyComingsService {
     }
 
     var currDate = DateTime.now().setZone(timeZone)
-    var getDate = getData.date? getData.date : currDate;
+    var getDate = getData.date ? getData.date : currDate;
     var zone = await Helper.getTimeZone(getData.orgid);
     var timeZone = zone[0]?.name;
     var formattedDate1 = getDate.toFormat("yyyy-MM-dd");
@@ -27,7 +27,7 @@ export default class GetEarlyComingsService {
       .innerJoin("EmployeeMaster as E", "A.EmployeeId", "E.Id")
       .innerJoin("ShiftMaster as S", "A.shiftId", "S.Id")
       .select(
-        "E.FirstName","E.LastName", "A.TimeIn as atimein","S.TimeInGrace","S.TimeIn", "A.AttendanceDate","S.shifttype",
+        "E.FirstName", "E.LastName", "A.TimeIn as atimein", "S.TimeInGrace", "S.TimeIn", "A.AttendanceDate", "S.shifttype",
         Database.raw(`SUBSTRING_INDEX(A.EntryImage, '.com/', -1) as EntryImage,
        TIMEDIFF(
         CASE WHEN(S.TimeInGrace!='00:00:00') THEN S.TimeInGrace ELSE S.TimeIn END,A.TimeIn) as Earlyby`)
@@ -41,7 +41,7 @@ export default class GetEarlyComingsService {
         Database.raw(
           `TIMEDIFF(A.TimeIn,CASE WHEN(S.TimeInGrace!='00:00:00') THEN S.TimeInGrace ELSE S.TimeIn END) < '00:00:59'`
         ))
-      .where("A.AttendanceDate", Date).where("A.OrganizationId",getData.orgid)
+      .where("A.AttendanceDate", Date).where("A.OrganizationId", getData.orgid)
       .where("E.Is_Delete", 0).whereNotIn("A.AttendanceStatus", [2, 3, 5])
       .whereNot("S.shifttype", 3).orderBy("Earlyby", "desc").limit(limit);
 
@@ -64,8 +64,8 @@ export default class GetEarlyComingsService {
         "A.OrganizationId", getData.orgid
       );
     }
-   
-    interface DefineTypes {
+
+    interface  DefineTypes {
       FirstName: number;
       LastName: string;
       atimein: string;

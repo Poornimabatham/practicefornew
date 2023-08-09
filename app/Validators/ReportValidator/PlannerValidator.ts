@@ -5,13 +5,7 @@ import BaseValidator from '../BaseValidator'
 export default class Plannervalidator  extends BaseValidator{
   constructor(protected ctx: HttpContextContract) {
     super()
-
   }
-
-  
-  
-  
-  // Insert Designation schema
     static FetchPlannerchema ={
   
    schema:schema.create({
@@ -19,14 +13,8 @@ export default class Plannervalidator  extends BaseValidator{
   refno:schema.number(),
   attDen:schema.number()
 
-   
     })
   }
-  
-      
-  
-  
-  
-  }
+ }
   
 

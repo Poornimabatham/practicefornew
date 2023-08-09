@@ -1,7 +1,7 @@
 import Database from "@ioc:Adonis/Lucid/Database";
 import Helper from "App/Helper/Helper";
-import { DateTime } from "luxon";
-import moment from "moment-timezone";
+// import { DateTime } from "luxon";
+// import moment from "moment-timezone";
 
 export default class DailyAttendanceService {
 
@@ -9,7 +9,7 @@ export default class DailyAttendanceService {
         var begin = (data.currentPage - 1) * data.perPage;
         var limit;
         var offset;
-        var inpDate = data.date;
+        // var inpDate = data.date;
         var designationCondition;
 
         if (data.currentPage != 0 && data.csv == "") {
@@ -20,8 +20,8 @@ export default class DailyAttendanceService {
             limit = "";
             offset = "";
         }
-        var utcOffset
-        var cdate;
+        // var utcOffset
+        // var cdate;
         // if (inpDate) {
         //     // var now = inpDate.setZone('Asia/Kabul')
         //     // cdate = now.toFormat('yyyy-MM-dd HH:mm:ss')
@@ -200,7 +200,7 @@ export default class DailyAttendanceService {
                     absCount = absCountQuery[0].Id;
                 }
 
-                var absentCountQuery = await Database.from('AttendanceMaster as A').select(
+                await Database.from('AttendanceMaster as A').select(
                     Database.raw("CONCAT(E.FirstName, ' ', E.LastName) as name"),
                     Database.raw('TimeIn as -'),
                     Database.raw('TimeOut as -'),
