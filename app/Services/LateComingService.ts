@@ -52,7 +52,6 @@ export default class LateComingService {
     }
 
     var adminStatus = await Helper.getAdminStatus(data.Empid);
-return adminStatus
     var condition;
     if (adminStatus == 2) {
       const deptId = data.Empid;

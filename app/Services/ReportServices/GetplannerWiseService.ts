@@ -6,10 +6,9 @@ const moment = require('moment');
 
 export default class GetplannerWiseSummary {
     public static async Getlannerwisesummary(a)
+    {     
     
-
-
-    {     const currentDate = a.attDen
+      const currentDate = a.attDen
        var Date2 = currentDate.toFormat("yyyy-MM-dd");
 
       
@@ -66,9 +65,9 @@ export default class GetplannerWiseSummary {
             // .andWhere('AM.EmployeeId',a.userid)
             // .andWhere('AM.AttendanceDate',Date2)
             .whereIn("AM.AttendanceStatus", [1,3,5,4,8,10]);
-      
-          
+      // return fetchdatafromTimeOFFandAttendanceMaster
           const result = await fetchdatafromTimeOFFandAttendanceMaster;
+          console.log(result);
           
           const res: any[] = [];
       
@@ -77,13 +76,13 @@ export default class GetplannerWiseSummary {
       
             data["AttendanceDate"] = val.AttendanceDate;
             data["loggedHours"] = val.thours;
+            var logged =  data["loggedHours"] ;
             data["timein"] = val.TimeIn;
             data["timeout"] = val.TimeOut;
             data["timeindate"] = val.timeindate;
             data["AttendanceDate"] = moment(val.timeindate).utcOffset("Asia/Kolkata").format('YYYY-MM-DD');
 
             data["timeoutdate"] = val.timeoutdate;
-            res.push(data['timein'])
             // if(data['loggedHours'] == '00:00:00' || data['loggedHours'] != '' || data['loggedHours'] ==null){
       
             // const timeinn= 	data['timeindate']+data['timein'];
@@ -124,43 +123,50 @@ export default class GetplannerWiseSummary {
             
       
       
-      data['timeoffhours']=val.timeoffhours;
-      var 
+       data['timeoffhours']=val.timeoffhours;
+      
       if(data['timeoffhours'] == null|| data['timeoffhours'] == ''){
-        data['timeoffhours'] ='00:00:00';   
+        data['timeoffhours'] ='12:00:00';  
+        var time =  data['timeoffhours']
       }
-      
     
-      if(data['timeoffhours'] != '00:00:00'){
-        const timeoffResult = await Database.raw(
-          "SELECT SUBTIME(, '00:00:00') AS latehours"
-        // );
-        // return timeoffResult
-        // if (timeoff && timeoff.rows.length > 0) {
-        //   const { Loggedhours } = timeoff.rows[0];
-        //   data['loggedHours'] = Loggedhours;
+      // if(data['timeoffhours'] != '00:00:00'){
+      //   var  queryResult =   Database.raw(
+      //     `SELECT SUBTIME( ${logged},${time}) AS latehours`
+      //   );
+
+        
+
+        
+        // res.push(queryResult)
+        // const row111 =queryResult;
+
+        // // if (row111.length > 0) {
       
+        // //   const loggedHoursResult = row111[0].Loggedhours;
+        // //   res.push(loggedHours)
           
-      //   }
+        // // }
+        var  queryReslt2 =   Database.raw
+        (
+ `SELECT SUBTIME  ("${logged }","${time}" )   AS latehours`);
+
+
       
-      // }
-      
+          //return queryReslt2;
+       //var result = await queryReslt2;
+      console.log(queryReslt2)
       // data['timeoutplatform'] = val.TimeOutApp
       // data['ShiftId'] = val.ShiftId
          
-      // const queryResult:any = await Database.from('ShiftMaster').where('Id',8).select('TimeIn', 'TimeOut', 
+      // const queryResult = Database.from('ShiftMaster').where('Id',8).select('TimeIn', 'TimeOut', 
       // 'shifttype',
       // 'HoursPerDay');
-      
-      // if (queryResult) {
-      
-          
-      
-      // }
-      
+      // res.push(queryResult)
+     
 
     });
-    return res
+    // return res
 
 
   }
