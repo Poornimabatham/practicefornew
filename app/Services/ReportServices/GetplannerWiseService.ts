@@ -83,29 +83,29 @@ export default class GetplannerWiseSummary {
       }
 
       if (data["timeoffhours"] == "00:00:00") {
-        var queryResult1 = await Database.rawQuery(
+        var subtimeLoggedhours = await Database.rawQuery(
           `SELECT SUBTIME( "${logged}","${time}") AS Loggedhours`
         );
 
-        const row111 = queryResult1[0];
+        const affectedRows = subtimeLoggedhours[0];
 
-        if (row111.length > 0) {
-          const loggedHoursResult = row111[0].Loggedhours;
+        if (affectedRows.length > 0) {
+          const loggedHoursResult = affectedRows[0].Loggedhours;
         }
       }
 
 
-      const queryResult = Database.from("ShiftMaster")
+      const selcthiftMasterId = Database.from("ShiftMaster")
         .where("Id", 36)
         .select("TimeIn", "TimeOut", "shifttype", "HoursPerDay");
 
-      const data123 = await queryResult.first();
+      const affectedRows2 = await selcthiftMasterId.first();
 
-      if (data123) {
-        const shiftin = data123.TimeIn;
-        const shiftout = data123.TimeOut;
-        var shiftType = data123.shifttype;
-        const hoursPerDay = data123.HoursPerDay;
+      if (affectedRows2) {
+        const shiftin = affectedRows2.TimeIn;
+        const shiftout = affectedRows2.TimeOut;
+        var shiftType = affectedRows2.shifttype;
+        const hoursPerDay = affectedRows2.HoursPerDay;
         if (
           hoursPerDay === "00:00:00" ||
           hoursPerDay !== "" ||
@@ -126,17 +126,13 @@ export default class GetplannerWiseSummary {
 
       }
 
-
-
-
-
       if (status == 4 || status == 1) {
         const halfInSeconds = Duration.fromISOTime(HoursPerDay).as("seconds");
-        const v = halfInSeconds / 2;
-        const hours = Math.floor(v / 3600);
-        const minutes = Math.floor((v % 3600) / 60);
+        const halfvalue = halfInSeconds / 2;
+        const hours = Math.floor(halfvalue/ 3600);
+        const minutes = Math.floor((halfvalue % 3600) / 60);
 
-        const secs = v % 60;
+        const secs = halfvalue% 60;
 
         const timeString = `${hours.toString().padStart(2, "0")}:${minutes
           .toString()
@@ -154,15 +150,14 @@ var weekoff_sts = "WO";
           data["thours"] = logged;
           if (weekoff_sts == "WaO" || weekoff_sts == "H") {
             const overtime = logged;
-            // console.log('overtime',overtime)
           } else {
-            var overtime = await Database.rawQuery(
+            var Selectovertime = await Database.rawQuery(
               `SELECT SUBTIME( "${logged}","${HoursPerDay}") AS Overtime`
             );
-            const row111 = overtime;
+            const affectedRows3 = Selectovertime;
 
-            if (row111.length > 0) {
-              var overtime1 = row111[0].Overtime;
+            if (affectedRows3.length > 0) {
+              var overtime1 = affectedRows3[0].Overtime;
             }
           }
 
@@ -173,13 +168,13 @@ var weekoff_sts = "WO";
           if (weekoff_sts == "WO" || weekoff_sts == "H") {
             overtime1 = logged;
           } else {
-            var overtime = await Database.rawQuery(
+            var selectOvertime = await Database.rawQuery(
               `SELECT SUBTIME( "${logged}","${HoursPerDay}") AS Overtime`
             );
-            const row111 = overtime;
+            const affectedRows4 = selectOvertime;
 
-            if (row111.length > 0) {
-              var overtime1 = row111[0].Overtime;
+            if (affectedRows4.length > 0) {
+              var overtime1 = affectedRows4[0].Overtime;
             }
           }
         }
