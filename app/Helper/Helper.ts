@@ -26,9 +26,9 @@ export default class Helper {
       .from("ZoneMaster")
       .select("name")
       .where(
-        "id",
+        "Id",
         Database.raw(
-          `(select TimeZone from Organization where id =${orgid}  LIMIT 1)`
+          `(select TimeZone from Organization where Id =${orgid}  LIMIT 1)`
         ));
     return query1[0].name;
   }
@@ -96,6 +96,17 @@ export default class Helper {
     }
     return 0;
 
+  }
+
+  public static async getOrgId(Id: number) {
+    let OrgId;
+    const getOrgIdQuery = await Database.from('EmployeeMaster').select('OrganizationId')
+      .where('Id', Id)
+
+    if (getOrgIdQuery.length > 0) {
+      OrgId = getOrgIdQuery[0].OrganizationId;
+    }
+    return OrgId;
   }
 
 

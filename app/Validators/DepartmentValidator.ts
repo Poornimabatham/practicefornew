@@ -48,9 +48,9 @@ export default class DepartmentValidator extends BaseValidator {
         schema: schema.create({
             OrganizationId: schema.number(),
             Id: schema.number(),
+            archive: schema.number(),
             Name: schema.string.optional(),
             LastModifiedById: schema.number.optional(),
-            archive: schema.number()
         }), message: BaseValidator.messages
     }
     /**
