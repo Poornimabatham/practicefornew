@@ -1,4 +1,4 @@
-import { schema, CustomMessages } from "@ioc:Adonis/Core/Validator";
+import { schema} from "@ioc:Adonis/Core/Validator";
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import BaseValidator from "./BaseValidator";
 export default class LatecomingValidator extends BaseValidator {

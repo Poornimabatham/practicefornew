@@ -26,10 +26,10 @@ export default class LateComingService {
     const res: any[] = [];
 
     var adminStatus = await Helper.getAdminStatus(data.Empid);
-    var condition = "";
+    //let condition ;
     if (adminStatus == 2) {
-      let DeptId = await Helper.getDepartmentIdByEmpID(data.Empid);
-      condition = `${DeptId}`;
+      //let DeptId = await Helper.getDepartmentIdByEmpID(data.Empid);
+      //condition = `${DeptId}`;
     }
 
     const lateComersList = await Database.from("AttendanceMaster as A")

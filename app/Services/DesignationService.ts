@@ -178,11 +178,11 @@ export default class DesignationService {
      await designationList2;
     // const count3 = designationList2.length;
 
-    var res: any ;
+    //let res: any ;
     if (name != c.UpdateName) {
-      res = 2;
+    //  res = 2;
     } else if (name == c.UpdateName && c.sts != sts1) {
-      res = c.sts;
+     // res = c.sts;
     }
 
     var updateDesignaion: any = await Database.query()

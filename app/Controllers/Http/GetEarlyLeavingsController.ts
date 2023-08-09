@@ -1,7 +1,7 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import GetEarlyLeavingValidator from 'App/Validators/GetEarlyLeavingValidator'
 import getEarlyLeavingsService from 'App/Services/getEarlyLeavingsService';
-import { Response } from '@adonisjs/core/build/standalone';
+
 
 export default class GetEarlyLeavingsController {
     private data: any = [];

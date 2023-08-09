@@ -195,9 +195,10 @@ export default class DailyAttendanceService {
             if (data.date != new Date().toISOString().split('T')[0]) {
                 const absCountQuery = await Database.from('AttendanceMaster').select('Id').where('AttendanceDate', data.date).where('OrganizatonId', data.OrganizationId).whereIn('AttendanceStatus', [2, 7]).whereIn('EmployeeId', Database.rawQuery(`(SELECT Id from EmployeeMaster where OrganizationId =${data.OrganizationId} AND Is_Delete = 0 )`)).count('Id as absCount')
 
-                var absCount;
+                
                 if (absCountQuery.length > 0) {
-                    absCount = absCountQuery[0].Id;
+                    
+                 //   var absCount = absCountQuery[0].Id;
                 }
 
                 await Database.from('AttendanceMaster as A').select(
