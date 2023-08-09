@@ -91,5 +91,84 @@ export default class Helper {
       status = queryResult.appSuperviserSts;
     }
     return status;
+
+
+
   }
-}
+
+
+   public static async  getWeeklyOff(date, ShiftId, emplid, orgid) {
+      const dt = date;
+    
+      const dayOfWeek = 1 + new Date(dt).getDay();
+  
+      let week;
+    
+
+
+
+    const selectShiftId:any = await Database
+    .from('AttendanceMaster')
+    .select('ShiftId')
+    .where('AttendanceDate', '<', date)
+    .where('EmployeeId', 7292)
+    .orderBy('AttendanceDate', 'desc')
+    .limit(1);
+    
+    const result = selectShiftId.length;
+      
+     
+    
+      let shiftid;
+      if (result.length > 0) {
+        shiftid = result[0].ShiftId;
+      } else {
+        // return "N/A";
+      }
+      
+    
+      const selectWeekOfff = await Database
+      .from('ShiftMasterChild')
+      .select('WeekOff')
+      .where('OrganizationId', 10)
+      .where('Day', dayOfWeek)
+      .where('ShiftId', 48);
+    return selectWeekOfff
+      let flage = false;
+      if (v > 0) {
+        const row = shiftQuery2.rows[0];
+        week = row.WeekOff.split(",");
+        flage = true;
+      }
+    
+      const currentDate = new Date(date);
+      const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
+      const weekOfMonth = Math.ceil(currentDate.getDate() / 7);
+    
+      if (flage && week[weekOfMonth - 1] === '1') {
+        return "WO";
+      } else {
+        const holidayQuery:any = await Database.raw("SELECT `DateFrom`, `DateTo` FROM `HolidayMaster` WHERE `OrganizationId` = ? AND ? BETWEEN `DateFrom` AND `DateTo`", [orgid, dt]);
+    
+        if (holidayQuery.rows.length > 0) {
+          return "H";
+        } else {
+          return "N/A";
+        }
+      }
+    }
+
+
+
+
+
+
+
+  
+
+
+
+
+    
+  }
+

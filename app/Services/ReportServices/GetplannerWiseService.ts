@@ -1,13 +1,18 @@
 import Database from "@ioc:Adonis/Lucid/Database";
+import Helper from "App/Helper/Helper";
 const { Duration, DateTime } = require("luxon");
 const moment = require("moment");
 
 export default class GetplannerWiseSummary {
   public static async Getlannerwisesummary(a) {
+
+
+
     const currentDate = a.attDen;
 
     var Date2 = currentDate.toFormat("yyyy-MM-dd");
-
+    const b  = await Helper.getWeeklyOff(Date2,1,a.userid,a.refno)
+return b
     const fetchdatafromTimeOFFandAttendanceMaster = await Database.from(
       "Timeoff as Toff"
     )

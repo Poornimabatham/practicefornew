@@ -37,6 +37,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 exports.__esModule = true;
 var Database_1 = require("@ioc:Adonis/Lucid/Database");
+var Helper_1 = require("App/Helper/Helper");
 var _a = require("luxon"), Duration = _a.Duration, DateTime = _a.DateTime;
 var moment = require("moment");
 var GetplannerWiseSummary = /** @class */ (function () {
@@ -44,23 +45,21 @@ var GetplannerWiseSummary = /** @class */ (function () {
     }
     GetplannerWiseSummary.Getlannerwisesummary = function (a) {
         return __awaiter(this, void 0, void 0, function () {
-            var currentDate, Date2, fetchdatafromTimeOFFandAttendanceMaster, result, res;
+            var currentDate, Date2, b, fetchdatafromTimeOFFandAttendanceMaster, result, res;
             var _this = this;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         currentDate = a.attDen;
                         Date2 = currentDate.toFormat("yyyy-MM-dd");
-                        return [4 /*yield*/, Database_1["default"].from("Timeoff as Toff")
-                                .innerJoin("AttendanceMaster as AM", "Toff.TimeofDate", "AM.AttendanceDate")
-                                .select("AM.AttendanceStatus", "AM.AttendanceDate", "Toff.Reason", "Toff.TimeofDate", "Toff.TimeTo", "AM.TimeIn", "AM.TimeOut", "AM.timeindate", "AM.timeoutdate", "AM.TimeOutApp", "Toff.EmployeeId as TEID", "AM.EmployeeId as AMEID", Database_1["default"].raw("(SELECT SEC_TO_TIME(sum(time_to_sec(TIMEDIFF(Timeoff_end, Timeoff_start)))) FROM Timeoff WHERE \n                Toff.EmployeeId = " + a.userid + " AND Toff.ApprovalSts != 2) AS timeoffhours"), "AM.ShiftId", "AM.TotalLoggedHours AS thours", Database_1["default"].raw("(SELECT SEC_TO_TIME(sum(time_to_sec(TIMEDIFF(TimeTo, TimeFrom)))) FROM Timeoff WHERE \n                Toff.EmployeeId = " + a.userid + " AND Toff.ApprovalSts != 2) AS bhour"), Database_1["default"].raw("SUBSTRING_INDEX(EntryImage, '.com/', -1) AS EntryImage"), Database_1["default"].raw("SUBSTRING_INDEX(ExitImage, '.com/', -1) AS ExitImage"), Database_1["default"].raw("CONCAT(LEFT(checkInLoc, 35), '...') AS checkInLoc"), Database_1["default"].raw("CONCAT(LEFT(CheckOutLoc, 35), '...') AS CheckOutLoc"), "latit_in", "longi_in", "latit_out", "longi_out", "multitime_sts")
-                                .limit(2)
-                                .where("AM.AttendanceDate", Date2)
-                                .where("AM.AttendanceStatus", 1)];
+                        return [4 /*yield*/, Helper_1["default"].getWeeklyOff(Date2, 1, a.userid, a.refno)];
                     case 1:
+                        b = _a.sent();
+                        return [2 /*return*/, b];
+                    case 2:
                         fetchdatafromTimeOFFandAttendanceMaster = _a.sent();
                         return [4 /*yield*/, fetchdatafromTimeOFFandAttendanceMaster];
-                    case 2:
+                    case 3:
                         result = _a.sent();
                         res = [];
                         result.forEach(function (val) { return __awaiter(_this, void 0, void 0, function () {
