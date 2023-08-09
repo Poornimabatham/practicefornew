@@ -26,63 +26,22 @@ export default class Helper {
       .from("ZoneMaster")
       .select("name")
       .where(
-        "id",
+        "Id",
         Database.raw(
-          `(select TimeZone from Organization where id =${orgid}  LIMIT 1)`
-        )); 
-    return  query1[0].name;
-  }
-
-  public static async getempnameById(empid: number) {
-    const query2 = await Database.query()
-      .from("EmployeeMaster")
-      .select("FirstName")
-      .where("Id", empid);
-    return query2[0].FirstName;
-  }
-
-  public static async generateToken(secretKey: string, data: any = {}) {
-    try {
-      const payload = {
-        audience: data.username,
-        Id: data.empid,
-
-      const options = {
-        expiresIn: "1m",
-        issuer: "Ubiattendace App",
-      };
-      const token = jwt.sign(payload, secretKey, options, {
-        alg: "RS512",
-        typ: "JWT",
-      });
-      return token;
-    } catch (err) {
-      console.log(err);
-      return 0;
-    }
-  }
- 
-  public static async getTimeZone(orgid: any) {
-    const query1 = await Database.query()
-      .from("ZoneMaster")
-      .select("name")
-      .where(
-        "id",
-        Database.raw(
-          `(select TimeZone from Organization where id =${orgid}  LIMIT 1)`
-        )
-      );
+          `(select TimeZone from Organization where Id =${orgid}  LIMIT 1)`
+        ));
     return query1[0].name;
   }
-  public static async getempnameById(empid: number) {
-    console.log(empid);
 
+  public static async getempnameById(empid: number) {
     const query2 = await Database.query()
       .from("EmployeeMaster")
       .select("FirstName")
       .where("Id", empid);
     return query2[0].FirstName;
   }
+
+
   public static generateToken(secretKey: string, data: any = {}) {
     try {
       const payload = {
@@ -119,7 +78,7 @@ export default class Helper {
     return status;
   }
   public static async getDepartmentIdByEmpID(empid: number) {
-   
+
     const EmpQuery = await Database.from("EmployeeMaster")
       .select("Department")
       .where("id", empid);
@@ -139,14 +98,17 @@ export default class Helper {
 
   }
 
-  public static async getAdminStatus(id:number) {
-    let status = 0;
-    const queryResult = await Database.query()
-      .from("UserMaster").select("appSuperviserSts").where("EmployeeId", id).first();
-    if (queryResult) {
-      status = queryResult.appSuperviserSts;
+  public static async getOrgId(Id: number) {
+    let OrgId;
+    const getOrgIdQuery = await Database.from('EmployeeMaster').select('OrganizationId')
+      .where('Id', Id)
+
+    if (getOrgIdQuery.length > 0) {
+      OrgId = getOrgIdQuery[0].OrganizationId;
     }
-    return status;
+    return OrgId;
   }
+
+
 }
 

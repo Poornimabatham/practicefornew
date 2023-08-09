@@ -3,7 +3,6 @@ import Helper from "App/Helper/Helper";
 import { DateTime } from 'luxon';
 import moment from 'moment-timezone';
 
-
 export default class DepartmentService {
 
   public static async getdepartment(data) {
@@ -104,7 +103,7 @@ export default class DepartmentService {
   public static async updateDepartment(data) {
 
     var result = [];
-    result['status'] = '0';         // Bydefault result
+    result['status'] = '0';
     const date = DateTime.now();
     const formattedDate = date.toFormat('yy-MM-dd');
     var orgId = await Helper.getOrgId(data.Id);
@@ -152,8 +151,9 @@ export default class DepartmentService {
       });
 
     if (updateQuery) {
+
       var zone = await Helper.getTimeZone(orgId);
-      var timeZone = zone[0]?.name;
+      var timeZone = zone;
       var defaulttimeZone = moment().tz(timeZone).toDate();
       const dateTime = DateTime.fromJSDate(defaulttimeZone);
       const formattedDate = dateTime.toFormat('yy-MM-dd HH:mm:ss');
