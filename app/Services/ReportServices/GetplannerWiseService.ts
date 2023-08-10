@@ -12,7 +12,6 @@ export default class GetplannerWiseSummary {
 
     var Date2 = currentDate.toFormat("yyyy-MM-dd");
     const b  = await Helper.getWeeklyOff(Date2,1,a.userid,a.refno)
-return b
     const fetchdatafromTimeOFFandAttendanceMaster = await Database.from(
       "Timeoff as Toff"
     )

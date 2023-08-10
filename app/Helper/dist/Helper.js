@@ -157,54 +157,6 @@ var Helper = /** @class */ (function () {
             });
         });
     };
-    Helper.getWeeklyOff = function (date, ShiftId, emplid, orgid) {
-        return __awaiter(this, void 0, void 0, function () {
-            var dt, dayOfWeek, week, selectShiftId, result, shiftid, selectWeekOfff, flage, row, currentDate, daysInMonth, weekOfMonth, holidayQuery;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        dt = date;
-                        dayOfWeek = 1 + new Date(dt).getDay();
-                        return [4 /*yield*/, Database_1["default"]
-                                .from('AttendanceMaster')
-                                .select('ShiftId')
-                                .where('AttendanceDate', '<', date)
-                                .where('EmployeeId', 7292)
-                                .orderBy('AttendanceDate', 'desc')
-                                .limit(1)];
-                    case 1:
-                        selectShiftId = _a.sent();
-                        result = selectShiftId.length;
-                        if (result.length > 0) {
-                            shiftid = result[0].ShiftId;
-                        }
-                        else {
-                            // return "N/A";
-                        }
-                        return [4 /*yield*/, Database_1["default"]
-                                .from('ShiftMasterChild')
-                                .select('WeekOff')
-                                .where('OrganizationId', 10)
-                                .where('Day', dayOfWeek)
-                                .where('ShiftId', 48)];
-                    case 2:
-                        selectWeekOfff = _a.sent();
-                        return [2 /*return*/, selectWeekOfff];
-                    case 3: return [4 /*yield*/, Database_1["default"].raw("SELECT `DateFrom`, `DateTo` FROM `HolidayMaster` WHERE `OrganizationId` = ? AND ? BETWEEN `DateFrom` AND `DateTo`", [orgid, dt])];
-                    case 4:
-                        holidayQuery = _a.sent();
-                        if (holidayQuery.rows.length > 0) {
-                            return [2 /*return*/, "H"];
-                        }
-                        else {
-                            return [2 /*return*/, "N/A"];
-                        }
-                        _a.label = 5;
-                    case 5: return [2 /*return*/];
-                }
-            });
-        });
-    };
     return Helper;
 }());
 exports["default"] = Helper;

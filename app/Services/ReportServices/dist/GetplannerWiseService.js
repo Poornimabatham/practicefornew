@@ -55,7 +55,12 @@ var GetplannerWiseSummary = /** @class */ (function () {
                         return [4 /*yield*/, Helper_1["default"].getWeeklyOff(Date2, 1, a.userid, a.refno)];
                     case 1:
                         b = _a.sent();
-                        return [2 /*return*/, b];
+                        return [4 /*yield*/, Database_1["default"].from("Timeoff as Toff")
+                                .innerJoin("AttendanceMaster as AM", "Toff.TimeofDate", "AM.AttendanceDate")
+                                .select("AM.AttendanceStatus", "AM.AttendanceDate", "Toff.Reason", "Toff.TimeofDate", "Toff.TimeTo", "AM.TimeIn", "AM.TimeOut", "AM.timeindate", "AM.timeoutdate", "AM.TimeOutApp", "Toff.EmployeeId as TEID", "AM.EmployeeId as AMEID", Database_1["default"].raw("(SELECT SEC_TO_TIME(sum(time_to_sec(TIMEDIFF(Timeoff_end, Timeoff_start)))) FROM Timeoff WHERE \n                Toff.EmployeeId = " + a.userid + " AND Toff.ApprovalSts != 2) AS timeoffhours"), "AM.ShiftId", "AM.TotalLoggedHours AS thours", Database_1["default"].raw("(SELECT SEC_TO_TIME(sum(time_to_sec(TIMEDIFF(TimeTo, TimeFrom)))) FROM Timeoff WHERE \n                Toff.EmployeeId = " + a.userid + " AND Toff.ApprovalSts != 2) AS bhour"), Database_1["default"].raw("SUBSTRING_INDEX(EntryImage, '.com/', -1) AS EntryImage"), Database_1["default"].raw("SUBSTRING_INDEX(ExitImage, '.com/', -1) AS ExitImage"), Database_1["default"].raw("CONCAT(LEFT(checkInLoc, 35), '...') AS checkInLoc"), Database_1["default"].raw("CONCAT(LEFT(CheckOutLoc, 35), '...') AS CheckOutLoc"), "latit_in", "longi_in", "latit_out", "longi_out", "multitime_sts")
+                                .limit(2)
+                                .where("AM.AttendanceDate", Date2)
+                                .where("AM.AttendanceStatus", 1)];
                     case 2:
                         fetchdatafromTimeOFFandAttendanceMaster = _a.sent();
                         return [4 /*yield*/, fetchdatafromTimeOFFandAttendanceMaster];
