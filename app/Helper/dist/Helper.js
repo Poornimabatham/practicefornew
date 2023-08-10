@@ -157,6 +157,63 @@ var Helper = /** @class */ (function () {
             });
         });
     };
+    Helper.getWeeklyOff = function (date, shiftId, emplid, orgid) {
+        return __awaiter(this, void 0, void 0, function () {
+            var dt, dayOfWeek, weekOfMonth, week, selectShiftId, shiftid, shiftRow, flage, holidayRow;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        dt = date;
+                        dayOfWeek = 1 + new Date(dt).getDay();
+                        weekOfMonth = Math.ceil(new Date(dt).getDate() / 7);
+                        week = [];
+                        return [4 /*yield*/, Database_1["default"].from("AttendanceMaster")
+                                .select("ShiftId")
+                                .where("AttendanceDate", "<", dt)
+                                .where("EmployeeId", emplid)
+                                .orderBy("AttendanceDate", "desc")
+                                .limit(1)];
+                    case 1:
+                        selectShiftId = _a.sent();
+                        if (selectShiftId.length > 0) {
+                            shiftid = selectShiftId[0].ShiftId;
+                        }
+                        else {
+                            return [2 /*return*/, "N/A"];
+                        }
+                        return [4 /*yield*/, Database_1["default"].from("ShiftMasterChild")
+                                .where("OrganizationId", orgid)
+                                .where("Day", dayOfWeek)
+                                .where("ShiftId", shiftId)
+                                .first()];
+                    case 2:
+                        shiftRow = _a.sent();
+                        flage = false;
+                        if (shiftRow) {
+                            week = shiftRow.WeekOff.split(",");
+                            flage = true;
+                        }
+                        if (!(flage && week[weekOfMonth - 1] != "1")) return [3 /*break*/, 3];
+                        return [2 /*return*/, "WO"];
+                    case 3: return [4 /*yield*/, Database_1["default"].from("HolidayMaster")
+                            .where("OrganizationId", orgid)
+                            .where("DateFrom", "<=", dt)
+                            .where("DateTo", ">=", dt)
+                            .first()];
+                    case 4:
+                        holidayRow = _a.sent();
+                        if (holidayRow) {
+                            return [2 /*return*/, "H"];
+                        }
+                        else {
+                            return [2 /*return*/, "N/A"];
+                        }
+                        _a.label = 5;
+                    case 5: return [2 /*return*/];
+                }
+            });
+        });
+    };
     return Helper;
 }());
 exports["default"] = Helper;

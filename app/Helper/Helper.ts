@@ -91,24 +91,52 @@ export default class Helper {
       status = queryResult.appSuperviserSts;
     }
     return status;
-
-
-
   }
 
-
-   
-
-
-
-
-
-
-  
-
-
-
-
+  public static async getWeeklyOff(date:string, shiftId:number, emplid: number, orgid:number) {
+    const dt = date;
+    const dayOfWeek = 1 + new Date(dt).getDay();
+    const weekOfMonth = Math.ceil(new Date(dt).getDate() / 7);
+    let week=[];
+    const selectShiftId: any = await Database.from("AttendanceMaster")
+      .select("ShiftId")
+      .where("AttendanceDate", "<", dt)
+      .where("EmployeeId", emplid)
+      .orderBy("AttendanceDate", "desc")
+      .limit(1);
     
-  }
+    let shiftid
+    if (selectShiftId.length > 0) {
+      shiftid = selectShiftId[0].ShiftId;
 
+    } else {
+      return "N/A";
+    }
+
+    const shiftRow = await Database.from("ShiftMasterChild")
+      .where("OrganizationId", orgid)
+      .where("Day", dayOfWeek)
+      .where("ShiftId", shiftId)
+      .first();
+    let flage = false;
+    if (shiftRow) {
+      week = shiftRow.WeekOff.split(",");
+      flage = true;
+    }
+    if (flage && week[weekOfMonth - 1] != "1") {
+      return "WO";
+    } else {
+      const holidayRow = await Database.from("HolidayMaster")
+        .where("OrganizationId", orgid)
+        .where("DateFrom", "<=", dt)
+        .where("DateTo", ">=", dt)
+        .first();
+
+      if (holidayRow) {
+        return "H";
+      } else {
+        return "N/A";
+      }
+    }
+  }
+}

@@ -45,30 +45,34 @@ var GetplannerWiseSummary = /** @class */ (function () {
     }
     GetplannerWiseSummary.Getlannerwisesummary = function (a) {
         return __awaiter(this, void 0, void 0, function () {
-            var currentDate, Date2, b, fetchdatafromTimeOFFandAttendanceMaster, result, res;
+            var currentDate, overtime, overtime1, loggedHours, hoursPerDay, shiftin, shiftout, shiftType, weekoff_sts, Date2, fetchdatafromTimeOFFandAttendanceMaster, result, res;
             var _this = this;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         currentDate = a.attDen;
+                        overtime = "00:00:00";
+                        overtime1 = '00:00:00';
+                        loggedHours = "00:00:00";
+                        hoursPerDay = "00:00:00";
+                        shiftin = "00:00:00";
+                        shiftout = "00:00:00";
+                        weekoff_sts = "-";
                         Date2 = currentDate.toFormat("yyyy-MM-dd");
-                        return [4 /*yield*/, Helper_1["default"].getWeeklyOff(Date2, 1, a.userid, a.refno)];
-                    case 1:
-                        b = _a.sent();
                         return [4 /*yield*/, Database_1["default"].from("Timeoff as Toff")
                                 .innerJoin("AttendanceMaster as AM", "Toff.TimeofDate", "AM.AttendanceDate")
                                 .select("AM.AttendanceStatus", "AM.AttendanceDate", "Toff.Reason", "Toff.TimeofDate", "Toff.TimeTo", "AM.TimeIn", "AM.TimeOut", "AM.timeindate", "AM.timeoutdate", "AM.TimeOutApp", "Toff.EmployeeId as TEID", "AM.EmployeeId as AMEID", Database_1["default"].raw("(SELECT SEC_TO_TIME(sum(time_to_sec(TIMEDIFF(Timeoff_end, Timeoff_start)))) FROM Timeoff WHERE \n                Toff.EmployeeId = " + a.userid + " AND Toff.ApprovalSts != 2) AS timeoffhours"), "AM.ShiftId", "AM.TotalLoggedHours AS thours", Database_1["default"].raw("(SELECT SEC_TO_TIME(sum(time_to_sec(TIMEDIFF(TimeTo, TimeFrom)))) FROM Timeoff WHERE \n                Toff.EmployeeId = " + a.userid + " AND Toff.ApprovalSts != 2) AS bhour"), Database_1["default"].raw("SUBSTRING_INDEX(EntryImage, '.com/', -1) AS EntryImage"), Database_1["default"].raw("SUBSTRING_INDEX(ExitImage, '.com/', -1) AS ExitImage"), Database_1["default"].raw("CONCAT(LEFT(checkInLoc, 35), '...') AS checkInLoc"), Database_1["default"].raw("CONCAT(LEFT(CheckOutLoc, 35), '...') AS CheckOutLoc"), "latit_in", "longi_in", "latit_out", "longi_out", "multitime_sts")
                                 .limit(2)
                                 .where("AM.AttendanceDate", Date2)
-                                .where("AM.AttendanceStatus", 1)];
-                    case 2:
+                                .whereIn("AM.AttendanceStatus", [1, 2, 3])];
+                    case 1:
                         fetchdatafromTimeOFFandAttendanceMaster = _a.sent();
                         return [4 /*yield*/, fetchdatafromTimeOFFandAttendanceMaster];
-                    case 3:
+                    case 2:
                         result = _a.sent();
                         res = [];
                         result.forEach(function (val) { return __awaiter(_this, void 0, void 0, function () {
-                            var data, status, logged, time, subtimeLoggedhours, affectedRows, loggedHoursResult, selcthiftMasterId, affectedRows2, shiftin, shiftout, shiftType, hoursPerDay, shiftin1, shiftout1, startDateTime, endDateTime, Interval, HoursPerDay, halfInSeconds, halfvalue, hours, minutes, secs, timeString, formattedTime2, weekoff_sts, overtime, Selectovertime, affectedRows3, overtime1, selectOvertime, affectedRows4, overtime1;
+                            var data, status, logged, ShiftId, datetimeString, datetimeString2, dateTime1, Time1, dateTime, Time2, Interval, startDateTime, endDateTime, time, subtimeLoggedhours, selcthiftMasterId, affectedRows2, shiftin1, shiftout1, startDateTime, endDateTime, Interval1, halfInSeconds, halfvalue, hours, minutes, secs, timeString, formattedTime2, userid, orgidid, bhour;
                             return __generator(this, function (_a) {
                                 switch (_a.label) {
                                     case 0:
@@ -81,32 +85,54 @@ var GetplannerWiseSummary = /** @class */ (function () {
                                         data["TimeTo"] = val.TimeTo;
                                         logged = data["loggedHours"];
                                         data["TimeIn"] = val.TimeIn;
-                                        data["timeout"] = val.TimeOut;
+                                        data["TimeOut"] = val.TimeOut;
                                         data["timeoutdate"] = moment(val.timeoutdate).format("YYYY-MM-DD");
                                         data["timeindate"] = moment(val.timeindate).format("YYYY-MM-DD");
                                         data["ShiftId"] = val.ShiftId;
+                                        ShiftId = data["ShiftId"];
                                         data["timeoffhours"] = val.timeoffhours;
                                         data["TimeOutApp"] = val.TimeOutApp;
                                         data["timeoffhours"] = val.timeoffhours;
                                         data["timeoutplatform"] = val.TimeOutApp;
                                         data["ShiftId"] = val.ShiftId;
-                                        res.push(data);
+                                        // res.push(data)
+                                        if (logged == "00:00:00" || logged != "" || logged == null) {
+                                            datetimeString = data["timeindate"] + " " + data["TimeIn"];
+                                            datetimeString2 = data["timeoutdate"] + " " + data["TimeOut"];
+                                            dateTime1 = DateTime.fromFormat(datetimeString, "yyyy-MM-dd HH:mm:ss");
+                                            Time1 = dateTime1.toFormat("HH:mm:ss");
+                                            dateTime = DateTime.fromFormat(datetimeString2, "yyyy-MM-dd HH:mm:ss");
+                                            Time2 = dateTime.toFormat("HH:mm:ss");
+                                            startDateTime = void 0;
+                                            endDateTime = void 0;
+                                            if (Time1 > Time2) {
+                                                startDateTime = DateTime.fromFormat(Time1, "HH:mm:ss");
+                                                endDateTime = DateTime.fromFormat(Time2, "HH:mm:ss");
+                                                Interval = Duration.fromMillis(endDateTime.diff(startDateTime).as("milliseconds"));
+                                            }
+                                            else {
+                                                startDateTime = DateTime.fromFormat(Time1, "HH:mm:ss");
+                                                endDateTime = DateTime.fromFormat(Time2, "HH:mm:ss");
+                                                Interval = Duration.fromMillis(endDateTime.diff(startDateTime).as("milliseconds"));
+                                            }
+                                            loggedHours = Interval.toFormat("hh:mm:ss");
+                                        }
+                                        ///logged hours End//////
                                         if (data["timeoffhours"] == null || data["timeoffhours"] == "") {
                                             data["timeoffhours"] = "00:00:00";
                                             time = data["timeoffhours"];
                                         }
-                                        if (!(data["timeoffhours"] == "00:00:00")) return [3 /*break*/, 2];
-                                        return [4 /*yield*/, Database_1["default"].rawQuery("SELECT SUBTIME( \"" + logged + "\",\"" + time + "\") AS Loggedhours")];
+                                        if (!(data["timeoffhours"] != "00:00:00")) return [3 /*break*/, 2];
+                                        return [4 /*yield*/, Database_1["default"].rawQuery("SELECT SUBTIME( \"" + loggedHours + "\",\"" + time + "\") AS Loggedhours")];
                                     case 1:
                                         subtimeLoggedhours = _a.sent();
-                                        affectedRows = subtimeLoggedhours[0];
-                                        if (affectedRows.length > 0) {
-                                            loggedHoursResult = affectedRows[0].Loggedhours;
+                                        if (subtimeLoggedhours.length > 0) {
+                                            loggedHours = subtimeLoggedhours[0][0];
                                         }
                                         _a.label = 2;
                                     case 2:
                                         selcthiftMasterId = Database_1["default"].from("ShiftMaster")
-                                            .where("Id", 36)
+                                            .where("Id", ShiftId)
                                             .select("TimeIn", "TimeOut", "shifttype", "HoursPerDay");
                                         return [4 /*yield*/, selcthiftMasterId.first()];
                                     case 3:
@@ -117,18 +143,19 @@ var GetplannerWiseSummary = /** @class */ (function () {
                                             shiftType = affectedRows2.shifttype;
                                             hoursPerDay = affectedRows2.HoursPerDay;
                                             if (hoursPerDay === "00:00:00" ||
-                                                hoursPerDay !== "" ||
+                                                hoursPerDay == "" ||
                                                 hoursPerDay === null) {
                                                 shiftin1 = shiftin;
                                                 shiftout1 = shiftout;
                                                 startDateTime = DateTime.fromFormat(shiftin1, "HH:mm:ss");
                                                 endDateTime = DateTime.fromFormat(shiftout1, "HH:mm:ss");
-                                                Interval = Duration.fromMillis(endDateTime.diff(startDateTime).as("milliseconds"));
-                                                HoursPerDay = Interval.toFormat("hh:mm:ss");
+                                                Interval1 = Duration.fromMillis(endDateTime.diff(startDateTime).as("milliseconds"));
+                                                hoursPerDay = Interval1.toFormat("hh:mm:ss");
                                             }
                                         }
-                                        if (status == 4 || status == 1) {
-                                            halfInSeconds = Duration.fromISOTime(HoursPerDay).as("seconds");
+                                        //       			/// for manageHalfday///////
+                                        if (status == 4 || status == 10) {
+                                            halfInSeconds = Duration.fromISOTime(hoursPerDay).as("seconds");
                                             halfvalue = halfInSeconds / 2;
                                             hours = Math.floor(halfvalue / 3600);
                                             minutes = Math.floor((halfvalue % 3600) / 60);
@@ -138,54 +165,125 @@ var GetplannerWiseSummary = /** @class */ (function () {
                                                 .padStart(2, "0") + ":" + secs.toString().padStart(2, "0");
                                             formattedTime2 = DateTime.fromFormat(timeString, "H:m:s").toFormat("hh:mm:ss");
                                         }
-                                        weekoff_sts = "WO";
-                                        if (!(val.TimeOut !== "00:00:00")) return [3 /*break*/, 13];
-                                        if (!(shiftType == 1)) return [3 /*break*/, 7];
-                                        data["thours"] = logged;
-                                        if (!(weekoff_sts == "WaO" || weekoff_sts == "H")) return [3 /*break*/, 4];
-                                        overtime = logged;
-                                        return [3 /*break*/, 6];
-                                    case 4: return [4 /*yield*/, Database_1["default"].rawQuery("SELECT SUBTIME( \"" + logged + "\",\"" + HoursPerDay + "\") AS Overtime")];
-                                    case 5:
-                                        Selectovertime = _a.sent();
-                                        affectedRows3 = Selectovertime;
-                                        if (affectedRows3.length > 0) {
-                                            overtime1 = affectedRows3[0].Overtime;
+                                        userid = a.userid;
+                                        orgidid = a.refno;
+                                        return [4 /*yield*/, Helper_1["default"].getWeeklyOff(Date2, ShiftId, userid, orgidid)];
+                                    case 4:
+                                        /////////////ShiftHours End ///////////
+                                        weekoff_sts = _a.sent();
+                                        if (!(val.TimeOut != "00:00:00")) return [3 /*break*/, 18];
+                                        if (!(shiftType == 3)) return [3 /*break*/, 8];
+                                        "SELECT SUBTIME( \"" + loggedHours + "\",\"" + hoursPerDay + "\") AS Overtime";
+                                        data["thours"] = loggedHours;
+                                        if (!(weekoff_sts == "WO" || weekoff_sts == "H")) return [3 /*break*/, 5];
+                                        overtime = loggedHours;
+                                        return [3 /*break*/, 7];
+                                    case 5: return [4 /*yield*/, Database_1["default"].rawQuery("SELECT SUBTIME( \"" + loggedHours + "\",\"" + hoursPerDay + "\") AS Overtime")];
+                                    case 6:
+                                        overtime = _a.sent();
+                                        if (overtime.length > 0) {
+                                            overtime1 = overtime[0][0];
                                         }
-                                        _a.label = 6;
-                                    case 6: return [3 /*break*/, 12];
-                                    case 7:
-                                        if (!(shiftType == 1)) return [3 /*break*/, 11];
-                                        data["thours"] = logged;
-                                        if (!(weekoff_sts == "WO" || weekoff_sts == "H")) return [3 /*break*/, 8];
-                                        overtime1 = logged;
-                                        return [3 /*break*/, 10];
-                                    case 8: return [4 /*yield*/, Database_1["default"].rawQuery("SELECT SUBTIME( \"" + logged + "\",\"" + HoursPerDay + "\") AS Overtime")];
-                                    case 9:
-                                        selectOvertime = _a.sent();
-                                        affectedRows4 = selectOvertime;
-                                        if (affectedRows4.length > 0) {
-                                            overtime1 = affectedRows4[0].Overtime;
+                                        _a.label = 7;
+                                    case 7: return [3 /*break*/, 17];
+                                    case 8:
+                                        if (!(shiftType == 1)) return [3 /*break*/, 12];
+                                        data["thours"] = loggedHours;
+                                        if (!(weekoff_sts == "WO" || weekoff_sts == "H")) return [3 /*break*/, 9];
+                                        overtime1 = loggedHours;
+                                        return [3 /*break*/, 11];
+                                    case 9: return [4 /*yield*/, Database_1["default"].rawQuery("SELECT SUBTIME( \"" + loggedHours + "\",\"" + hoursPerDay + "\") AS Overtime")];
+                                    case 10:
+                                        overtime = _a.sent();
+                                        // console.log(overtime)
+                                        if (overtime.length > 0) {
+                                            console.log("a");
+                                            overtime1 = overtime[0][0];
+                                            console.log(overtime1);
                                         }
-                                        _a.label = 10;
-                                    case 10: return [3 /*break*/, 12];
-                                    case 11:
+                                        _a.label = 11;
+                                    case 11: return [3 /*break*/, 17];
+                                    case 12:
+                                        if (!(shiftType == 2)) return [3 /*break*/, 16];
+                                        data["thours"] = loggedHours;
+                                        if (!(weekoff_sts == "WO" || weekoff_sts == "H")) return [3 /*break*/, 13];
+                                        overtime1 = loggedHours;
+                                        return [3 /*break*/, 15];
+                                    case 13: return [4 /*yield*/, Database_1["default"].rawQuery("SELECT SUBTIME( \"" + loggedHours + "\",\"" + hoursPerDay + "\") AS Overtime")];
+                                    case 14:
+                                        overtime = _a.sent();
+                                        if (overtime.length > 0) {
+                                            overtime1 = overtime[0][0];
+                                            console.log(overtime1);
+                                        }
+                                        _a.label = 15;
+                                    case 15: return [3 /*break*/, 17];
+                                    case 16:
                                         overtime1 = "00:00:00";
-                                        _a.label = 12;
-                                    case 12: return [3 /*break*/, 14];
-                                    case 13:
+                                        _a.label = 17;
+                                    case 17: return [3 /*break*/, 19];
+                                    case 18:
                                         data["thours"] = "00:00:00";
                                         if (weekoff_sts == "WO" || weekoff_sts == "H") {
-                                            overtime1 = logged;
+                                            overtime1 = loggedHours;
                                         }
                                         else {
                                             overtime1 = "00:00:00";
                                         }
-                                        _a.label = 14;
-                                    case 14:
-                                        data["shiftin"] = shiftin1;
-                                        data["shiftout"] = shiftout1;
+                                        _a.label = 19;
+                                    case 19:
+                                        data["shiftin"] = shiftin;
+                                        data["shiftout"] = shiftout;
                                         data["EntryImage"] = "-";
+                                        if (val.EntryImage != "") {
+                                            data["EntryImage"] = val.EntryImage;
+                                        }
+                                        data["ExitImage"] = "-";
+                                        if (val.ExitImage != "") {
+                                            data["ExitImage"] = val.ExitImage;
+                                        }
+                                        if (val.bhour != null || val.bhour != "") {
+                                            bhour = val.bhour;
+                                        }
+                                        data["checkInLoc"] = "-";
+                                        if (val.checkInLoc != "") {
+                                            data["checkInLoc"] = val.checkInLoc;
+                                        }
+                                        data["CheckOutLoc"] = "-";
+                                        if (val.CheckOutLoc != "") {
+                                            data["CheckOutLoc"] = val.CheckOutLoc;
+                                        }
+                                        data["latit_in"] = 0;
+                                        if (val.latit_in != "") {
+                                            data["latit_in"] = val.latit_in;
+                                        }
+                                        data["latit_out"] = 0;
+                                        if (val.atit_out != "") {
+                                            data["latit_out"] = val.latit_out;
+                                        }
+                                        data["longi_in"] = 0;
+                                        if (val.latit_out != "") {
+                                            data["longi_in"] = val.longi_in;
+                                        }
+                                        data["longi_out"] = "-";
+                                        if (val.longi_out != "") {
+                                            data["longi_out"] = val.longi_out;
+                                        }
+                                        data["overtime"] = overtime1;
+                                        data["bhour"] = bhour;
+                                        data["plateform"] = "-";
+                                        if (data["timeoutplatform"] != "") {
+                                            data["plateform"] = data["timeoutplatform"];
+                                        }
+                                        data["HoursPerDay"] = hoursPerDay;
+                                        data["AttendanceDate"] = val.AttendanceDate;
+                                        data["AttendanceMasterId"] = val.Id;
+                                        data["AttendanceStatus"] = val.AttendanceStatus;
+                                        data["MultipletimeStatus"] = val.multitime_sts;
+                                        if (val.multitime_sts == 1 && shiftType != 3) {
+                                            data["shifttype"] = 1;
+                                        }
+                                        res.push(data);
                                         return [2 /*return*/];
                                 }
                             });
