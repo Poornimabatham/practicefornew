@@ -72,7 +72,7 @@ var GetplannerWiseSummary = /** @class */ (function () {
                         result = _a.sent();
                         res = [];
                         result.forEach(function (val) { return __awaiter(_this, void 0, void 0, function () {
-                            var data, status, logged, ShiftId, datetimeString, datetimeString2, dateTime1, Time1, dateTime, Time2, Interval, startDateTime, endDateTime, time, subtimeLoggedhours, selcthiftMasterId, affectedRows2, shiftin1, shiftout1, startDateTime, endDateTime, Interval1, halfInSeconds, halfvalue, hours, minutes, secs, timeString, formattedTime2, userid, orgidid, bhour;
+                            var data, status, logged, ShiftId, datetimeString, datetimeString2, dateTime1, Time1, dateTime, Time2, Interval, startDateTime, endDateTime, time, subtimeLoggedhours, selcthiftMasterId, affectedRows2, shiftin1, shiftout1, startDateTime, endDateTime, Interval1, halfInSeconds, halfvalue, hours, minutes, secs, timeString, userid, orgidid, bhour;
                             return __generator(this, function (_a) {
                                 switch (_a.label) {
                                     case 0:
@@ -163,7 +163,7 @@ var GetplannerWiseSummary = /** @class */ (function () {
                                             timeString = hours.toString().padStart(2, "0") + ":" + minutes
                                                 .toString()
                                                 .padStart(2, "0") + ":" + secs.toString().padStart(2, "0");
-                                            formattedTime2 = DateTime.fromFormat(timeString, "H:m:s").toFormat("hh:mm:ss");
+                                            hoursPerDay = DateTime.fromFormat(timeString, "H:m:s").toFormat("hh:mm:ss");
                                         }
                                         userid = a.userid;
                                         orgidid = a.refno;

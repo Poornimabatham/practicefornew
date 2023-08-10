@@ -188,7 +188,7 @@ export default class GetplannerWiseSummary {
         const timeString = `${hours.toString().padStart(2, "0")}:${minutes
           .toString()
           .padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
-        const formattedTime2 = DateTime.fromFormat(
+          hoursPerDay  = DateTime.fromFormat(
           timeString,
           "H:m:s"
         ).toFormat("hh:mm:ss");
