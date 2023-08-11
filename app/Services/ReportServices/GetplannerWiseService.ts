@@ -1,24 +1,22 @@
 import Database from "@ioc:Adonis/Lucid/Database";
 import Helper from "App/Helper/Helper";
+import { relativeTimeRounding } from "moment";
 const { Duration, DateTime } = require("luxon");
-
 
 const moment = require("moment");
 
 export default class GetplannerWiseSummary {
   public static async Getlannerwisesummary(a) {
     const currentDate = a.attDen;
-   
-  
-    var overtime="00:00:00";
-    var overtime1 = '00:00:00';
-    
-    var loggedHours = "00:00:00"; 
+    let overtime;
+    let overtime1;
+    var loggedHours = "00:00:00";
     var hoursPerDay = "00:00:00";
-    var shiftin="00:00:00";
-    var shiftout="00:00:00";
-    var shiftType; 
-    var weekoff_sts="-"; 
+    var shiftin = "00:00:00";
+    var shiftout = "00:00:00";
+    var shiftType;
+    var weekoff_sts;
+    var ShiftId;
     var Date2 = currentDate.toFormat("yyyy-MM-dd");
     const fetchdatafromTimeOFFandAttendanceMaster = await Database.from(
       "Timeoff as Toff"
@@ -44,13 +42,13 @@ export default class GetplannerWiseSummary {
         "AM.EmployeeId as AMEID",
         Database.raw(
           `(SELECT SEC_TO_TIME(sum(time_to_sec(TIMEDIFF(Timeoff_end, Timeoff_start)))) FROM Timeoff WHERE 
-                Toff.EmployeeId = ${a.userid} AND Toff.ApprovalSts != 2) AS timeoffhours`
+                Toff.EmployeeId = ${a.userid} AND Toff.ApprovalSts = 2) AS timeoffhours`
         ),
         "AM.ShiftId",
         "AM.TotalLoggedHours AS thours",
         Database.raw(
           `(SELECT SEC_TO_TIME(sum(time_to_sec(TIMEDIFF(TimeTo, TimeFrom)))) FROM Timeoff WHERE 
-                Toff.EmployeeId = ${a.userid} AND Toff.ApprovalSts != 2) AS bhour`
+                Toff.EmployeeId = ${a.userid} AND Toff.ApprovalSts = 2) AS bhour`
         ),
         Database.raw("SUBSTRING_INDEX(EntryImage, '.com/', -1) AS EntryImage"),
         Database.raw("SUBSTRING_INDEX(ExitImage, '.com/', -1) AS ExitImage"),
@@ -63,34 +61,31 @@ export default class GetplannerWiseSummary {
         "multitime_sts"
       )
       .limit(2)
-      .where("AM.AttendanceDate", Date2)
-      . whereIn("AM.AttendanceStatus", [1,2,3]);
+      // .where("AM.AttendanceDate", Date2)
+      .whereIn("AM.AttendanceStatus", [1, 2, 3]);
 
     const result = await fetchdatafromTimeOFFandAttendanceMaster;
     const res: any[] = [];
 
     result.forEach(async (val) => {
-      const data: any = {};
+      let data: any = {};
+
       data["AttendanceStatus"] = val.AttendanceStatus;
-      const status = data["AttendanceStatus"];
-      data["AttendanceDate"] = val.AttendanceDate;
-      data["loggedHours"] = val.thours;
-      data["Reason"] = val.Reason;
-      data["TimeTo"] = val.TimeTo;
-      let logged = data["loggedHours"];
+
       data["TimeIn"] = val.TimeIn;
       data["TimeOut"] = val.TimeOut;
       data["timeoutdate"] = moment(val.timeoutdate).format("YYYY-MM-DD");
       data["timeindate"] = moment(val.timeindate).format("YYYY-MM-DD");
+      data["AttendanceDate"] = val.AttendanceDate;
+      data["loggedHours"] = val.thours;
       data["ShiftId"] = val.ShiftId;
-      let ShiftId = data["ShiftId"];
-      data["timeoffhours"] = val.timeoffhours;
-      data["TimeOutApp"] = val.TimeOutApp;
-      data["timeoffhours"] = val.timeoffhours;
-      data["timeoutplatform"] = val.TimeOutApp;
-      data["ShiftId"] = val.ShiftId;
+      ShiftId = data["ShiftId"];
       // res.push(data)
-      if (logged == "00:00:00" || logged != "" || logged == null) {
+      if (
+        loggedHours == "00:00:00" ||
+        loggedHours != "" ||
+        loggedHours == null
+      ) {
         const datetimeString = `${data["timeindate"]} ${data["TimeIn"]}`;
         const datetimeString2 = `${data["timeoutdate"]} ${data["TimeOut"]}`;
         const dateTime1 = DateTime.fromFormat(
@@ -103,7 +98,6 @@ export default class GetplannerWiseSummary {
           "yyyy-MM-dd HH:mm:ss"
         );
         const Time2 = dateTime.toFormat("HH:mm:ss");
-
         var Interval;
         let startDateTime;
         let endDateTime;
@@ -123,61 +117,57 @@ export default class GetplannerWiseSummary {
           );
         }
         loggedHours = Interval.toFormat("hh:mm:ss");
+        data["loggedHours"] = loggedHours;
       }
-
-
-
-      			///logged hours End//////
-
+      ///logged hours End//////
+      data["timeoffhours"] = val.timeoffhours;
       if (data["timeoffhours"] == null || data["timeoffhours"] == "") {
         data["timeoffhours"] = "00:00:00";
         var time = data["timeoffhours"];
-      
       }
-
       if (data["timeoffhours"] != "00:00:00") {
         var subtimeLoggedhours = await Database.rawQuery(
           `SELECT SUBTIME( "${loggedHours}","${time}") AS Loggedhours`
         );
-
-        if (subtimeLoggedhours.length> 0) {
-          loggedHours = subtimeLoggedhours[0][0]
+        if (subtimeLoggedhours.length > 0) {
+          loggedHours = subtimeLoggedhours[0][0].Loggedhours;
+          data["loggedHours"] = loggedHours;
         }
       }
-// ///ShiftHoursEND
-      const selcthiftMasterId = Database.from("ShiftMaster")
-        .where("Id", ShiftId )
-        .select("TimeIn", "TimeOut", "shifttype", "HoursPerDay");
+      
+      data["timeoutplatform"] = val.TimeOutApp;
 
-      const affectedRows2 = await selcthiftMasterId.first();
-      if (affectedRows2) {
-         shiftin = affectedRows2.TimeIn;
-         shiftout = affectedRows2.TimeOut;
-         shiftType = affectedRows2.shifttype;
-         hoursPerDay = affectedRows2.HoursPerDay;
-        if (
-          hoursPerDay === "00:00:00" ||
-          hoursPerDay == "" ||
-          hoursPerDay === null
-        ) {
-          let shiftin1 = shiftin;
-          let shiftout1 = shiftout;
+      // const selcthiftMasterId = await Database.from("ShiftMaster")
+      //   .where("Id", ShiftId)
+      //   .select("TimeIn", "TimeOut", "shifttype", "HoursPerDay");
+      // if (selcthiftMasterId.length > 0) {
+      //   shiftin = selcthiftMasterId[0].TimeIn;
+      //   shiftout = selcthiftMasterId[0].TimeOut;
+      //   shiftType = selcthiftMasterId[0].shifttype;
+      //   hoursPerDay = selcthiftMasterId[0].HoursPerDay;
 
-          const startDateTime = DateTime.fromFormat(shiftin1, "HH:mm:ss");
-          const endDateTime = DateTime.fromFormat(shiftout1, "HH:mm:ss");
+      //   if (
+      //     hoursPerDay == "00:00:00" ||
+      //     hoursPerDay != undefined ||
+      //     hoursPerDay == null
+      //   ) {
+      //     var shiftin1 = shiftin;
+      //     var shiftout1 = shiftout;
+      //     const startDateTime = DateTime.fromFormat(shiftin1, "HH:mm:ss");
+      //     const endDateTime = DateTime.fromFormat(shiftout1, "HH:mm:ss");
 
-          const Interval1 = Duration.fromMillis(
-            endDateTime.diff(startDateTime).as("milliseconds")
-          );
+      //     const Interval1 = Duration.fromMillis(
+      //       endDateTime.diff(startDateTime).as("milliseconds")
+      //     );
 
-          hoursPerDay = Interval1.toFormat("hh:mm:ss");
-          
-        }
-      }
+      //     hoursPerDay = Interval1.toFormat("HH:mm:ss");
+      //   }
+      //   data['hours'] = hoursPerDay
 
-//       			/// for manageHalfday///////
+      // }
 
-      if (status == 4 || status == 10) {
+
+      if (data["AttendanceStatus"] == 4 || data["AttendanceStatus"] == 10 || data["AttendanceStatus"]==1) {
         const halfInSeconds = Duration.fromISOTime(hoursPerDay).as("seconds");
         const halfvalue = halfInSeconds / 2;
         const hours = Math.floor(halfvalue / 3600);
@@ -188,144 +178,116 @@ export default class GetplannerWiseSummary {
         const timeString = `${hours.toString().padStart(2, "0")}:${minutes
           .toString()
           .padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
-          hoursPerDay  = DateTime.fromFormat(
-          timeString,
-          "H:m:s"
-        ).toFormat("hh:mm:ss");
+        hoursPerDay = DateTime.fromFormat(timeString, "H:m:s").toFormat(
+          "hh:mm:ss"
+        );
       }
+      data['hours'] = hoursPerDay
       const userid = a.userid;
       const orgidid = a.refno;
-     
+
+
+      // weekoff_sts = await Helper.getWeeklyOff(Date2, ShiftId, userid, orgidid);
       
-     
-      
-      			/////////////ShiftHours End ///////////
+      // if (val.TimeOut != "00:00:00") {
+      //   if (shiftType == 3) {
+      //     data["thours"] = loggedHours;
 
-       weekoff_sts = await Helper.getWeeklyOff(
-        Date2,
-        ShiftId,
-        userid,
-        orgidid
-      );
-    
-    
-      if (val.TimeOut != "00:00:00") {
-        if (shiftType == 3) {
-              `SELECT SUBTIME( "${loggedHours}","${ hoursPerDay }") AS Overtime`
-          data["thours"] = loggedHours;
-          if (weekoff_sts == "WO" || weekoff_sts == "H") {
-            overtime = loggedHours;
-          } else {
-            overtime = await Database.rawQuery(
-              `SELECT SUBTIME( "${loggedHours}","${ hoursPerDay }") AS Overtime`
-            );
-           
-            if (overtime.length > 0) {
-              overtime1 = overtime[0][0]
-            }
-          }
-        } else if (shiftType == 1) {
-          data["thours"] = loggedHours;
-          if (weekoff_sts == "WO" || weekoff_sts == "H") {
-            overtime1 = loggedHours;
-          } else {
-            overtime = await Database.rawQuery(
-              `SELECT SUBTIME( "${loggedHours}","${hoursPerDay}") AS Overtime`
-            );
-            // console.log(overtime)
+      //     if (weekoff_sts == "WO" || weekoff_sts == "H") {
+      //       overtime1 = loggedHours;
+      //     } else {
+      //       overtime = await Database.rawQuery(
+      //         `SELECT SUBTIME( "${loggedHours}","${hoursPerDay}") AS Overtime`
+      //       );
 
+      //       if (overtime.length > 0) {
+      //         overtime1 = overtime[0][0];
+      //       }
+      //     }
+      //   } else if (shiftType == 1) {
+      //     data["thours"] = loggedHours;
+      //     if (weekoff_sts == "WO" || weekoff_sts == "H") {
+      //       overtime1 = loggedHours;
+      //     } else {
+      //       overtime = await Database.rawQuery(
+      //         `SELECT SUBTIME( "${loggedHours}","${hoursPerDay}") AS Overtime`
+      //       );
 
-            if ( overtime.length> 0) {
-              console.log("a")
-              overtime1 = overtime[0][0];
-              console.log(overtime1)
-            }
-          }
-        } else if (shiftType == 2) {
-          data["thours"] = loggedHours;
-          if (weekoff_sts == "WO" || weekoff_sts == "H") {
-            overtime1 = loggedHours;
-          } else {
-            overtime = await Database.rawQuery(
-              `SELECT SUBTIME( "${loggedHours}","${ hoursPerDay}") AS Overtime`
-            );
-            
-            if (overtime.length > 0) {
-              overtime1 = overtime[0][0]
-              console.log(overtime1)
-            }
-          }
-        } 
-        
-        else {
-          overtime1 = "00:00:00";
-        }
-      }
+      //       if (overtime.length > 0) {
+      //         overtime1 = overtime[0][0];
+      //       }
+      //     }
+      //   } else if (shiftType == 1) {
+      //     data["thours"] = loggedHours;
+      //     if (weekoff_sts == "WO" || weekoff_sts == "H") {
+      //       overtime1 = loggedHours;
+      //     } else {
+      //       overtime = await Database.rawQuery(
+      //         `SELECT SUBTIME( "${loggedHours}","${hoursPerDay}") AS Overtime`
+      //       );
 
-       else {
-        data["thours"] = "00:00:00";
-        if (weekoff_sts == "WO" || weekoff_sts == "H") {
-          overtime1 = loggedHours;
-        } else {
-          overtime1 = "00:00:00";
-        }
-      }
+      //       if (overtime.length > 0) {
+      //         overtime1 = overtime[0][0];
+      //       }
+      //     }
+      //   } else if (shiftType == 2) {
+      //     data["thours"] = loggedHours;
 
-      data["shiftin"] =  shiftin ;
+      //     if (weekoff_sts == "WO" || weekoff_sts == "H") {
+      //       overtime1 = loggedHours;
+      //     } else {
+      //       overtime = await Database.rawQuery(
+      //         `SELECT SUBTIME( "${loggedHours}","${hoursPerDay}") AS Overtime`
+      //       );
+
+      //       if (overtime.length > 0) {
+      //         overtime1 = overtime[0][0];
+      //       }
+      //     }
+      //   } else {
+      //     overtime1 = "00:00:00";
+      //   }
+      // } else {
+      //   data["thours"] = "00:00:00";
+      //   if (weekoff_sts == "WO" || weekoff_sts == "H") {
+      //     overtime1 = loggedHours;
+      //   } else {
+      //     overtime1 = "00:00:00";
+      //   }
+      // }
+
+      data["shiftin"] = shiftin;
       data["shiftout"] = shiftout;
       data["EntryImage"] = "-";
 
-      if (val.EntryImage != "") {
-        data["EntryImage"] = val.EntryImage;
-      }
-      data["ExitImage"] = "-";
-      if (val.ExitImage != "") {
-        data["ExitImage"] = val.ExitImage;
-      }
-      if (val.bhour != null || val.bhour != "") {
-        var bhour = val.bhour;
-      }
-      data["checkInLoc"] = "-";
-      if (val.checkInLoc != "") {
-        data["checkInLoc"] = val.checkInLoc;
-      }
-      data["CheckOutLoc"] = "-";
-      if (val.CheckOutLoc != "") {
-        data["CheckOutLoc"] = val.CheckOutLoc;
-      }
-      data["latit_in"] = 0;
-      if (val.latit_in != "") {
-        data["latit_in"] = val.latit_in;
-      }
-      data["latit_out"] = 0;
-      if (val.atit_out != "") {
-        data["latit_out"] = val.latit_out;
-      }
-      data["longi_in"] = 0;
-      if (val.latit_out != "") {
-        data["longi_in"] = val.longi_in;
-      }
-      data["longi_out"] = "-";
-      if (val.longi_out != "") {
-        data["longi_out"] = val.longi_out;
-      }
-
-      data["overtime"] = overtime1;
-      data["bhour"] = bhour;
-      data["plateform"] = "-";
-      if (data["timeoutplatform"] != "") {
-        data["plateform"] = data["timeoutplatform"];
-      }
-      data["HoursPerDay"] =  hoursPerDay;
       data["AttendanceDate"] = val.AttendanceDate;
-      data["AttendanceMasterId"] = val.Id;
-      data["AttendanceStatus"] = val.AttendanceStatus;
-      data["MultipletimeStatus"] = val.multitime_sts;
-      if (val.multitime_sts == 1 && shiftType != 3) {
-        data["shifttype"] = 1;
-      }
-res.push(data)
     
+      data["MultipletimeStatus"] = val.multitime_sts;
+   
+      res.push(data);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     });
     return res;
   }
