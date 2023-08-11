@@ -44,7 +44,7 @@ var GetplannerWiseSummary = /** @class */ (function () {
     }
     GetplannerWiseSummary.Getlannerwisesummary = function (a) {
         return __awaiter(this, void 0, void 0, function () {
-            var currentDate, overtime, overtime1, loggedHours, hoursPerDay, shiftin, shiftout, shiftType, weekoff_sts, ShiftId, Date2, fetchdatafromTimeOFFandAttendanceMaster, result, res;
+            var currentDate, loggedHours, hoursPerDay, shiftin, shiftout, Date2, fetchdatafromTimeOFFandAttendanceMaster, result, res;
             var _this = this;
             return __generator(this, function (_a) {
                 switch (_a.label) {
@@ -81,7 +81,6 @@ var GetplannerWiseSummary = /** @class */ (function () {
                                         data["AttendanceDate"] = val.AttendanceDate;
                                         data["loggedHours"] = val.thours;
                                         data["ShiftId"] = val.ShiftId;
-                                        ShiftId = data["ShiftId"];
                                         if (loggedHours == "00:00:00" ||
                                             loggedHours != "" ||
                                             loggedHours == null) {

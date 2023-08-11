@@ -1,6 +1,4 @@
 import Database from "@ioc:Adonis/Lucid/Database";
-import Helper from "App/Helper/Helper";
-import { relativeTimeRounding } from "moment";
 const { Duration, DateTime } = require("luxon");
 
 const moment = require("moment");
@@ -8,15 +6,12 @@ const moment = require("moment");
 export default class GetplannerWiseSummary {
   public static async Getlannerwisesummary(a) {
     const currentDate = a.attDen;
-    let overtime;
-    let overtime1;
+
     var loggedHours = "00:00:00";
     var hoursPerDay = "00:00:00";
     var shiftin = "00:00:00";
     var shiftout = "00:00:00";
-    var shiftType;
-    var weekoff_sts;
-    var ShiftId;
+
     var Date2 = currentDate.toFormat("yyyy-MM-dd");
     const fetchdatafromTimeOFFandAttendanceMaster = await Database.from(
       "Timeoff as Toff"
@@ -79,7 +74,6 @@ export default class GetplannerWiseSummary {
       data["AttendanceDate"] = val.AttendanceDate;
       data["loggedHours"] = val.thours;
       data["ShiftId"] = val.ShiftId;
-      ShiftId = data["ShiftId"];
       if (
         loggedHours == "00:00:00" ||
         loggedHours != "" ||
