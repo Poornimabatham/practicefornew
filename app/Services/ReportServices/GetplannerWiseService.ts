@@ -42,13 +42,13 @@ export default class GetplannerWiseSummary {
         "AM.EmployeeId as AMEID",
         Database.raw(
           `(SELECT SEC_TO_TIME(sum(time_to_sec(TIMEDIFF(Timeoff_end, Timeoff_start)))) FROM Timeoff WHERE 
-                Toff.EmployeeId = ${a.userid} AND Toff.ApprovalSts = 2) AS timeoffhours`
+                Toff.EmployeeId = ${a.userid} AND Toff.ApprovalSts != 2) AS timeoffhours`
         ),
         "AM.ShiftId",
         "AM.TotalLoggedHours AS thours",
         Database.raw(
           `(SELECT SEC_TO_TIME(sum(time_to_sec(TIMEDIFF(TimeTo, TimeFrom)))) FROM Timeoff WHERE 
-                Toff.EmployeeId = ${a.userid} AND Toff.ApprovalSts = 2) AS bhour`
+                Toff.EmployeeId = ${a.userid} AND Toff.ApprovalSts != 2) AS bhour`
         ),
         Database.raw("SUBSTRING_INDEX(EntryImage, '.com/', -1) AS EntryImage"),
         Database.raw("SUBSTRING_INDEX(ExitImage, '.com/', -1) AS ExitImage"),
@@ -61,7 +61,7 @@ export default class GetplannerWiseSummary {
         "multitime_sts"
       )
       .limit(2)
-      // .where("AM.AttendanceDate", Date2)
+      .andWhere("AM.AttendanceDate", Date2)
       .whereIn("AM.AttendanceStatus", [1, 2, 3]);
 
     const result = await fetchdatafromTimeOFFandAttendanceMaster;
@@ -80,7 +80,6 @@ export default class GetplannerWiseSummary {
       data["loggedHours"] = val.thours;
       data["ShiftId"] = val.ShiftId;
       ShiftId = data["ShiftId"];
-      // res.push(data)
       if (
         loggedHours == "00:00:00" ||
         loggedHours != "" ||
@@ -119,7 +118,6 @@ export default class GetplannerWiseSummary {
         loggedHours = Interval.toFormat("hh:mm:ss");
         data["loggedHours"] = loggedHours;
       }
-      ///logged hours End//////
       data["timeoffhours"] = val.timeoffhours;
       if (data["timeoffhours"] == null || data["timeoffhours"] == "") {
         data["timeoffhours"] = "00:00:00";
@@ -134,40 +132,14 @@ export default class GetplannerWiseSummary {
           data["loggedHours"] = loggedHours;
         }
       }
-      
+
       data["timeoutplatform"] = val.TimeOutApp;
 
-      // const selcthiftMasterId = await Database.from("ShiftMaster")
-      //   .where("Id", ShiftId)
-      //   .select("TimeIn", "TimeOut", "shifttype", "HoursPerDay");
-      // if (selcthiftMasterId.length > 0) {
-      //   shiftin = selcthiftMasterId[0].TimeIn;
-      //   shiftout = selcthiftMasterId[0].TimeOut;
-      //   shiftType = selcthiftMasterId[0].shifttype;
-      //   hoursPerDay = selcthiftMasterId[0].HoursPerDay;
-
-      //   if (
-      //     hoursPerDay == "00:00:00" ||
-      //     hoursPerDay != undefined ||
-      //     hoursPerDay == null
-      //   ) {
-      //     var shiftin1 = shiftin;
-      //     var shiftout1 = shiftout;
-      //     const startDateTime = DateTime.fromFormat(shiftin1, "HH:mm:ss");
-      //     const endDateTime = DateTime.fromFormat(shiftout1, "HH:mm:ss");
-
-      //     const Interval1 = Duration.fromMillis(
-      //       endDateTime.diff(startDateTime).as("milliseconds")
-      //     );
-
-      //     hoursPerDay = Interval1.toFormat("HH:mm:ss");
-      //   }
-      //   data['hours'] = hoursPerDay
-
-      // }
-
-
-      if (data["AttendanceStatus"] == 4 || data["AttendanceStatus"] == 10 || data["AttendanceStatus"]==1) {
+      if (
+        data["AttendanceStatus"] == 4 ||
+        data["AttendanceStatus"] == 10 ||
+        data["AttendanceStatus"] == 1
+      ) {
         const halfInSeconds = Duration.fromISOTime(hoursPerDay).as("seconds");
         const halfvalue = halfInSeconds / 2;
         const hours = Math.floor(halfvalue / 3600);
@@ -182,112 +154,15 @@ export default class GetplannerWiseSummary {
           "hh:mm:ss"
         );
       }
-      data['hours'] = hoursPerDay
-      const userid = a.userid;
-      const orgidid = a.refno;
-
-
-      // weekoff_sts = await Helper.getWeeklyOff(Date2, ShiftId, userid, orgidid);
-      
-      // if (val.TimeOut != "00:00:00") {
-      //   if (shiftType == 3) {
-      //     data["thours"] = loggedHours;
-
-      //     if (weekoff_sts == "WO" || weekoff_sts == "H") {
-      //       overtime1 = loggedHours;
-      //     } else {
-      //       overtime = await Database.rawQuery(
-      //         `SELECT SUBTIME( "${loggedHours}","${hoursPerDay}") AS Overtime`
-      //       );
-
-      //       if (overtime.length > 0) {
-      //         overtime1 = overtime[0][0];
-      //       }
-      //     }
-      //   } else if (shiftType == 1) {
-      //     data["thours"] = loggedHours;
-      //     if (weekoff_sts == "WO" || weekoff_sts == "H") {
-      //       overtime1 = loggedHours;
-      //     } else {
-      //       overtime = await Database.rawQuery(
-      //         `SELECT SUBTIME( "${loggedHours}","${hoursPerDay}") AS Overtime`
-      //       );
-
-      //       if (overtime.length > 0) {
-      //         overtime1 = overtime[0][0];
-      //       }
-      //     }
-      //   } else if (shiftType == 1) {
-      //     data["thours"] = loggedHours;
-      //     if (weekoff_sts == "WO" || weekoff_sts == "H") {
-      //       overtime1 = loggedHours;
-      //     } else {
-      //       overtime = await Database.rawQuery(
-      //         `SELECT SUBTIME( "${loggedHours}","${hoursPerDay}") AS Overtime`
-      //       );
-
-      //       if (overtime.length > 0) {
-      //         overtime1 = overtime[0][0];
-      //       }
-      //     }
-      //   } else if (shiftType == 2) {
-      //     data["thours"] = loggedHours;
-
-      //     if (weekoff_sts == "WO" || weekoff_sts == "H") {
-      //       overtime1 = loggedHours;
-      //     } else {
-      //       overtime = await Database.rawQuery(
-      //         `SELECT SUBTIME( "${loggedHours}","${hoursPerDay}") AS Overtime`
-      //       );
-
-      //       if (overtime.length > 0) {
-      //         overtime1 = overtime[0][0];
-      //       }
-      //     }
-      //   } else {
-      //     overtime1 = "00:00:00";
-      //   }
-      // } else {
-      //   data["thours"] = "00:00:00";
-      //   if (weekoff_sts == "WO" || weekoff_sts == "H") {
-      //     overtime1 = loggedHours;
-      //   } else {
-      //     overtime1 = "00:00:00";
-      //   }
-      // }
+      data["hoursPerDay"] = hoursPerDay;
 
       data["shiftin"] = shiftin;
       data["shiftout"] = shiftout;
       data["EntryImage"] = "-";
 
-      data["AttendanceDate"] = val.AttendanceDate;
-    
       data["MultipletimeStatus"] = val.multitime_sts;
-   
+
       res.push(data);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     });
     return res;
   }
