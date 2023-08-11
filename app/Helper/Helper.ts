@@ -25,7 +25,7 @@ export default class Helper {
   }
   public static async getempnameById(empid: number) {
     const query2 = await Database.query().from('EmployeeMaster').select('FirstName').where('Id', empid);
-     return query2[0].FirstName;
+    return query2[0].FirstName;
 
   }
   public static generateToken(secretKey: string, data: any = {}) {
@@ -68,6 +68,12 @@ export default class Helper {
     }
 
     return status;
+  }
+
+  public static async getDepartmentIdByEmpId(empId: number) {
+
+    const getDeptIdQuery = await Database.from('DepartmentMaster').select('Id').whereIn('Id', Database.rawQuery('SELECT Department FROM `EmployeeMaster` where Id= 15213'))
+    return getDeptIdQuery[0].Id;
   }
 
 }
