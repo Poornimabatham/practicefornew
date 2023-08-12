@@ -2,8 +2,8 @@ import { schema, CustomMessages } from '@ioc:Adonis/Core/Validator'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import BaseValidator from './BaseValidator'
 export default class ShiftValidator {
-   constructor(protected ctx: HttpContextContract) {
-   // super()
+  constructor(protected ctx: HttpContextContract) {
+    // super()
   }
   static shifts = {
     schema: schema.create({
@@ -12,25 +12,53 @@ export default class ShiftValidator {
       shifttype: schema.number.optional(),
       currentpage: schema.number(),
       perpage: schema.number(),
-    }), message: BaseValidator.messages
-  }
+    }),
+    message: BaseValidator.messages,
+  };
   static addshift = {
     schema: schema.create({
-      name :schema.string(),
+      name: schema.string(),
       org_id: schema.number(),
       ti: schema.string(),
-       to: schema.string(),
-       tib: schema.string.optional(),
-       tob: schema.string.optional(),
-       sts: schema.number(),
-       shifttype: schema.number(),
-       minimumworkinghours: schema.number.optional(),
-       multiplepunches: schema.number(),
-       empid: schema.number(),
-       shiftcalendardata: schema.string(),
-      
-    })
-  }
+      to: schema.string(),
+      tib: schema.string.optional(),
+      tob: schema.string.optional(),
+      sts: schema.number(),
+      shifttype: schema.number(),
+      minimumworkinghours: schema.number.optional(),
+      multiplepunches: schema.number(),
+      empid: schema.number(),
+      shiftcalendardata: schema.string(),
+    }),
+  };
+  static updateshift = {
+    schema: schema.create({
+      uid: schema.number(),
+      shift: schema.string(),
+      sts: schema.number(),
+      multiple_timests: schema.number(),
+      id: schema.number(),
+    }),
+  };
+  static assign = {
+    schema: schema.create({
+      Orgid: schema.number(),
+      shiftid: schema.number(),
+      shiftname: schema.string(),
+      empid: schema.number(),
+      empname: schema.string(),
+      adminid: schema.number(),
+      adminname: schema.string(),
+    }),
+  };
+  static Inactiveshift={ 
+    schema: schema.create({
+      orgId: schema.number(),
+      id: schema.number(),
+      empId: schema.number(),
+    }),
+  };
+
   /*
    * Define schema to validate the "shape", "type", "formatting" and "integrity" of data.
    *
@@ -50,7 +78,7 @@ export default class ShiftValidator {
    *     ])
    *    ```
    */
-  public schema = schema.create({})
+  public schema = schema.create({});
 
   /**
    * Custom messages for validation failures. You can make use of dot notation `(.)`
@@ -63,5 +91,5 @@ export default class ShiftValidator {
    * }
    *
    */
-  public messages: CustomMessages = {}
+  public messages: CustomMessages = {};
 }
