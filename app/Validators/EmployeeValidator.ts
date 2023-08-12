@@ -1,4 +1,4 @@
-import { schema, CustomMessages } from '@ioc:Adonis/Core/Validator'
+import { schema, CustomMessages,rules } from '@ioc:Adonis/Core/Validator'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import BaseValidator from './BaseValidator'
 
@@ -112,6 +112,20 @@ export default class EmployeeValidator extends BaseValidator {
       Orgid: schema.number(),
       adminname: schema.string(),
       EmpName: schema.string(),
+      adminid: schema.number()
+    }), message: BaseValidator.messages
+  }
+  public static RegisterEmpDetail = {
+    schema: schema.create({
+      EmpName:schema.string(),
+      contact:schema.number(),
+      password:schema.string([rules.minLength(8),rules.maxLength(15)]),
+      username:schema.string.optional(),
+      department:schema.number(),
+      designation:schema.number(),
+      shifts:schema.number(),
+      Orgid: schema.number(),
+      adminname: schema.string(),
       adminid: schema.number()
     }), message: BaseValidator.messages
   }

@@ -3,6 +3,7 @@ import Database from "@ioc:Adonis/Lucid/Database";
 import LogicsOnly from "App/Services/getAttendances_service";
 
 export default class Helper {
+  
 
   public static encode5t(str: any) {
     for (let i = 0; i < 5; i++) {
@@ -78,14 +79,11 @@ export default class Helper {
     return status;
   }
   public static async getDepartmentIdByEmpID(empid: number) {
-   
     const EmpQuery = await Database.from("EmployeeMaster")
       .select("Department")
       .where("id", empid);
-
     if (EmpQuery.length > 0) {
       const departmentId: number = EmpQuery[0].Department;
-
       const DepQuery = await Database.from("DepartmentMaster")
         .select("Id")
         .where("Id", departmentId);
@@ -95,7 +93,6 @@ export default class Helper {
       }
     }
     return 0;
-
   }
   public static FirstLettercapital(sentence:string) {
     var words = sentence.split(" ");
@@ -103,6 +100,15 @@ export default class Helper {
       return word.charAt(0).toUpperCase() + word.slice(1);
     });
     return capitalizedWords.join(" ");
+  }
+
+  public static async getCountryIdByOrg(orgid: number) {
+    const getCountryId = await Database.from("Organization").select("Country").where("Id", orgid);
+    if (getCountryId.length > 0) {
+      const CountryId: number = getCountryId[0].Country;
+      return CountryId; 
+    }
+    return 0;
   }
 
 }

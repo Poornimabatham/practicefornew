@@ -43,9 +43,9 @@ export default class loginService {
           OrganizationId: arr.orgid,
           Token: arr.token,
         })
-        .returning("id");
+        .returning("id");// last inserted Id;
         
-      return arr.id;// last inserted Id;
+      return arr.id;
     }
   }
   

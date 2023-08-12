@@ -14,7 +14,7 @@ export default class LoginController {
         let key:any = process.env.secretKey;
         let username1=Helper.encode5t(result[0]);
         let empid= Helper.encode5t(result[3].toString());
-        let token:any = Helper.generateToken(key,{username:username1,empid:empid});s
+        let token:any = Helper.generateToken(key,{username:username1,empid:empid});
         if(token == 0)
         { 
           return response.status(400).send({Message:"Key is not Generated",Key:token});
