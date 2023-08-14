@@ -18,16 +18,16 @@ export default class Helper {
     return str;
   }
 
-
   public static async getTimeZone(orgid: any) {
     const query1 = await Database.query()
       .from("ZoneMaster")
       .select("name")
       .where(
-        "Id",
+        "id",
         Database.raw(
-          `(select TimeZone from Organization where Id =${orgid}  LIMIT 1)`
-        ));
+          `(select TimeZone from Organization where id =${orgid}  LIMIT 1)`
+        )
+      );
     return query1[0].name;
   }
 
@@ -38,7 +38,6 @@ export default class Helper {
       .where("Id", empid);
     return query2[0].FirstName;
   }
-
 
   public static generateToken(secretKey: string, data: any = {}) {
     try {
@@ -80,33 +79,40 @@ export default class Helper {
     return 0;
   }
 
-  public static async getOrgId(Id: number) {
-    let OrgId;
-    const getOrgIdQuery = await Database.from('EmployeeMaster').select('OrganizationId')
-      .where('Id', Id)
-
-    if (getOrgIdQuery.length > 0) {
-      OrgId = getOrgIdQuery[0].OrganizationId;
+  public static async getAdminStatus(id: number) {
+    let status = 0;
+    const queryResult = await Database.query()
+      .from("UserMaster")
+      .select("appSuperviserSts")
+      .where("EmployeeId", id)
+      .first();
+    if (queryResult) {
+      status = queryResult.appSuperviserSts;
     }
-    return OrgId;
+    return status;
   }
 
-  public static async getWeeklyOff(date:string, shiftId:number, emplid: number, orgid:number) {
+  public static async getWeeklyOff(
+    date: string,
+    shiftId: number,
+    emplid: number,
+    orgid: number
+  ) {
     const dt = date;
     const dayOfWeek = 1 + new Date(dt).getDay();
     const weekOfMonth = Math.ceil(new Date(dt).getDate() / 7);
-    let week=[];
+    let week = [];
     const selectShiftId: any = await Database.from("AttendanceMaster")
       .select("ShiftId")
       .where("AttendanceDate", "<", dt)
       .where("EmployeeId", emplid)
       .orderBy("AttendanceDate", "desc")
       .limit(1);
-    
-    let shiftid
-    if (selectShiftId.length > 0) {
-      shiftid = selectShiftId[0].ShiftId;
 
+    if (selectShiftId.length > 0) {
+      let shiftid;
+
+      shiftid = selectShiftId[0].ShiftId;
     } else {
       return "N/A";
     }
@@ -137,5 +143,16 @@ export default class Helper {
       }
     }
   }
-}
 
+  public static async getInterimAttAvailableSt(value: number) {
+    const GetIntermAttendanceId = await Database.from("InterimAttendances")
+      .where("AttendanceMasterId", value)
+      .select("id")
+
+
+      if(GetIntermAttendanceId.length>0){
+        return GetIntermAttendanceId[0].id
+      }
+      return 0
+  }
+}
