@@ -155,4 +155,37 @@ export default class Helper {
       }
       return 0
   }
+
+  public static async getCurrentDate() {
+    const date = new Date();
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+
+    const formattedDate = `${year}-${month}-${day}`;
+    return formattedDate;
+  }
+
+  //get shiftname by shift Id
+  public static async getShiftName(Id: number, orgid: number) {
+    let ShiftName: any;
+    console.log(Id);
+    console.log(orgid);
+    const getshiftname: any = await Database.from("ShiftMaster")
+      .select("Name")
+      .where("Id", Id)
+      .andWhere("OrganizationId", orgid);
+    //console.log(rowh.toSQL().toNative());
+    if (getshiftname.length > 0) {
+      ShiftName = getshiftname[0].Name;
+    }
+
+    return ShiftName;
+  }
 }
+
+
+
+
+
