@@ -1,4 +1,3 @@
-
 export default class BaseValidator {
    
     public static messages = {

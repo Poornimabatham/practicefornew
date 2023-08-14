@@ -1,17 +1,12 @@
-import { schema, CustomMessages } from '@ioc:Adonis/Core/Validator'
+import { schema } from '@ioc:Adonis/Core/Validator'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import BaseValidator from './BaseValidator'
 
 export default class DesignationValidator  extends BaseValidator{
   constructor(protected ctx: HttpContextContract) {
     super()
-
   }
 
-  
-  
-  
-  // Insert Designation schema
     static AddDesignationschema ={
    schema:schema.create({
       uid: schema.number(),
@@ -34,8 +29,6 @@ export default class DesignationValidator  extends BaseValidator{
       })
      }
   
-  
-    //  Update designation schema
     static updateDesignationschema={
       schema:schema.create({
         Updateid:schema.number(),
@@ -45,10 +38,7 @@ export default class DesignationValidator  extends BaseValidator{
         
       })
      }
-  
-  
-  
-  
+
   }
   
 

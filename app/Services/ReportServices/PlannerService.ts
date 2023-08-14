@@ -1,22 +1,21 @@
-import { Request } from "@adonisjs/core/build/standalone";
-import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
-import GetplannerWiseSummary from "App/Services/ReportServices/GetplannerWiseService";
-import Plannervalidator from "App/Validators/ReportValidator/PlannerValidator";
+import Database from "@ioc:Adonis/Lucid/Database";
+// import moment from "moment";
+// import Helper from "App/Helper/Helper";
+// const moment = require("moment");
+require("moment-timezone");
 
-export default class GetplannerController {
-  public async data({ request }: HttpContextContract) {
-    const userid = 7295;
-    const refno = request.input("refno");
-    const attDaten = request.input("attDate");
-    //  const zone = getEmpTimeZone(userid,refno)
+export default class    PlannerService {
+    public static async  getplannerwisesummary(a) {
+    
+   
 
-    const datastart = new Date();
-    const overtime = "";
-    const overtime1 = "";
-    const overtime3 = "";
-    const loggedHours = "00:00:00";
-    const shiftin = "";
-    const shiftout = "";
+    // const datastart = new Date();
+    // const overtime = "";
+    // const overtime1 = "";
+    // const overtime3 = "";
+    // const loggedHours = "00:00:00";
+    // const shiftin = "";
+    // const shiftout = "";
 
 
 
@@ -44,12 +43,12 @@ export default class GetplannerController {
         "Toff.TimeTo",
         Database.raw(
           `(SELECT SEC_TO_TIME(sum(time_to_sec(TIMEDIFF(Timeoff_end, Timeoff_start)))) FROM Timeoff WHERE 
-       Timeoff.EmployeeId = ${userid} AND Timeoff.ApprovalSts = 2) AS timeoffhours`
+       Timeoff.EmployeeId = ${a.userid} AND Timeoff.ApprovalSts = 2) AS timeoffhours`
         ),
         "AM.ShiftId",
         "AM.TotalLoggedHours AS thours",
         Database.raw(
-          `(SELECT SEC_TO_TIME(sum(time_to_sec(TIMEDIFF(TimeTo, TimeFrom)))) FROM Timeoff WHERE Timeoff.EmployeeId = 6 AND Timeoff.ApprovalSts = 2) AS bhour`
+          `(SELECT SEC_TO_TIME(sum(time_to_sec(TIMEDIFF(TimeTo, TimeFrom)))) FROM Timeoff WHERE Timeoff.EmployeeId =  ${a.userid} AND Timeoff.ApprovalSts = 2) AS bhour`
         ),
         Database.raw("SUBSTRING_INDEX(EntryImage, '.com/', -1) AS EntryImage"),
         Database.raw("SUBSTRING_INDEX(ExitImage, '.com/', -1) AS ExitImage"),
@@ -63,6 +62,7 @@ export default class GetplannerController {
       )
       .limit(6)
       .whereIn("AttendanceStatus", [1, 2, 3, 4]);
+
 
     // return fetchdatafromTimeOFFandAttendanceMaster
     // const fetchdatafromTimeOFF  = TimeOff_data.length
@@ -86,5 +86,11 @@ export default class GetplannerController {
       res.push(data)
     });
     return res;
-  }
+
+
+
+  // Insert Designation method
+
+
+}
 }

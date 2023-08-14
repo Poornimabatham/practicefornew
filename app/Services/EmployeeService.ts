@@ -93,7 +93,7 @@ export default class EmployeeService{
             const actionperformed:string = "<b>" + reqdata['empname'] + "</b> has been made inactive by <b>" + reqdata['adminname']  + "</b> from<b> Attendance App  </b>";
             const activityby:any = '1';
             const appmodule:string="Inactive";
-            const InsertActivity = await Database.table("ActivityHistoryMaster")
+            await Database.table("ActivityHistoryMaster")
                         .insert({
                                 LastModifiedDate: currentDateTime,
                                 LastModifiedById:reqdata['adminid'],

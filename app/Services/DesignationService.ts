@@ -1,7 +1,8 @@
 import Database from "@ioc:Adonis/Lucid/Database";
 import Helper from "App/Helper/Helper";
+import { Connection } from "mysql2/typings/mysql/lib/Connection";
 const moment = require("moment-timezone");
-import { DateTime } from "luxon";
+
 export default class DesignationService {
   public static async AddDesignation(a) {
     const currentDate = new Date();
@@ -44,12 +45,10 @@ export default class DesignationService {
     const affectedRows2 = insertDesignation.length;
 
     if (affectedRows2 > 0) {
-      const timezone = await Helper.getTimeZone(a.orgid);
+      // const timezone = await Helper.getTimeZone(a.orgid);
 
-      var defaulttimeZone = moment().tz(timezone).toDate();
-      const dateTime = DateTime.fromJSDate(defaulttimeZone);
-      const formattedDate = dateTime.toFormat("yy-MM-dd HH:mm:ss");
-
+      const currentDateTime = moment().tz(timezone);
+      const date = new Date();
       const module = "Attendance app";
       const appModule = "Designation";
       const activityby = 1;
@@ -57,7 +56,7 @@ export default class DesignationService {
 
       const actionperformed2 = `${a.name} Designation  has been Added by  ${actionPerformed}from Attendance App`;
 
-      const query2 = await Database.insertQuery()
+    await Database.insertQuery()
         .table("ActivityHistoryMaster")
         .insert({
           LastModifiedDate: currentDate,
@@ -97,10 +96,10 @@ export default class DesignationService {
     if (a.status != undefined) {
       designationList = designationList.where("Archive", a.status);
     }
-    const currentDate = new Date();
+    // const currentDate = new Date();
 
     const result = await designationList;
-    const s: any[] = [];
+    // const s: any[] = [];
     var res = 0;
     result.forEach(function (val) {
       const data: any = {};
@@ -160,14 +159,14 @@ export default class DesignationService {
     let name = "";
     let sts1 = "";
 
-    const qr: any = await designationList2;
-    const count3 = designationList2.length;
+     await designationList2;
+    // const count3 = designationList2.length;
 
-    var res: any = "";
+    //let res: any ;
     if (name != c.UpdateName) {
-      res = 2;
+    //  res = 2;
     } else if (name == c.UpdateName && c.sts != sts1) {
-      res = c.sts;
+     // res = c.sts;
     }
 
     var updateDesignaion: any = await Database.query()
@@ -184,11 +183,11 @@ export default class DesignationService {
     const count = await updateDesignaion;
     if (count > 0) {
       const timezone = await Helper.getTimeZone(c.Updateorgid);
+      const zone = timezone[0]?.name;
+      console.log(zone);
+      const currentDateTime = moment().tz(zone);
 
-      var defaulttimeZone = moment().tz(timezone).toDate();
-      const dateTime = DateTime.fromJSDate(defaulttimeZone);
-      const formattedDate = dateTime.toFormat("yy-MM-dd HH:mm:ss");
-
+      const date = new Date();
       const module = "Attendance app";
       const appModule = "Designation";
 
@@ -204,8 +203,8 @@ export default class DesignationService {
         actionperformed = `${c.UpdateName} designation has been inactive by ${getempname} `;
       }
 
-      const activityby = 1;
-      const insertctivityHistoryMaster: any = await Database.insertQuery()
+      // const activityby = 1;
+       await Database.insertQuery()
         .table("ActivityHistoryMaster")
         .insert({
           ActionPerformed: actionperformed,

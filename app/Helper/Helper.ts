@@ -1,6 +1,5 @@
 const jwt = require("jsonwebtoken");
 import Database from "@ioc:Adonis/Lucid/Database";
-import LogicsOnly from "App/Services/getAttendances_service";
 
 export default class Helper {
   public static encode5t(str: any) {
@@ -19,16 +18,16 @@ export default class Helper {
     return str;
   }
 
+
   public static async getTimeZone(orgid: any) {
     const query1 = await Database.query()
       .from("ZoneMaster")
       .select("name")
       .where(
-        "id",
+        "Id",
         Database.raw(
-          `(select TimeZone from Organization where id =${orgid}  LIMIT 1)`
-        )
-      );
+          `(select TimeZone from Organization where Id =${orgid}  LIMIT 1)`
+        ));
     return query1[0].name;
   }
 
@@ -39,6 +38,7 @@ export default class Helper {
       .where("Id", empid);
     return query2[0].FirstName;
   }
+
 
   public static generateToken(secretKey: string, data: any = {}) {
     try {
@@ -80,17 +80,15 @@ export default class Helper {
     return 0;
   }
 
-  public static async getAdminStatus(id: number) {
-    let status = 0;
-    const queryResult = await Database.query()
-      .from("UserMaster")
-      .select("appSuperviserSts")
-      .where("EmployeeId", id)
-      .first();
-    if (queryResult) {
-      status = queryResult.appSuperviserSts;
+  public static async getOrgId(Id: number) {
+    let OrgId;
+    const getOrgIdQuery = await Database.from('EmployeeMaster').select('OrganizationId')
+      .where('Id', Id)
+
+    if (getOrgIdQuery.length > 0) {
+      OrgId = getOrgIdQuery[0].OrganizationId;
     }
-    return status;
+    return OrgId;
   }
 
   public static async getWeeklyOff(date:string, shiftId:number, emplid: number, orgid:number) {
@@ -140,3 +138,4 @@ export default class Helper {
     }
   }
 }
+
