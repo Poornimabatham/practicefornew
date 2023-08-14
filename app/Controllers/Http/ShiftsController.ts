@@ -11,7 +11,6 @@ export default class ShiftsController {
   public async create({request,response}: HttpContextContract) {
     const validatedparams = await request.validate(ShiftValidator.addshift);
     const result = await ShiftsService.createdata(validatedparams);
-    console.log(result);
     response.json(result);
   }
 
@@ -27,7 +26,6 @@ export default class ShiftsController {
   public async edit({request , response }: HttpContextContract) {
     const validatedparams = await request.validate(ShiftValidator.assign);
     const result = await ShiftsService.assignShift(validatedparams);
-    console.log(result);
     return response.json(result);
    
   }
@@ -35,15 +33,12 @@ export default class ShiftsController {
   public async update({ request, response }: HttpContextContract) {
      const validatedparams = await request.validate(ShiftValidator.updateshift);
     const result = await ShiftsService.updateShift(validatedparams);
-    
-    console.log(result);
     response.json(result);
   }
 
   public async destroy({ request, response }: HttpContextContract) {
     const validatedparams = await request.validate(ShiftValidator.Inactiveshift);
     const result = await ShiftsService.deleteInActivateShift(validatedparams);
-    console.log(result);
     response.json(result);
   }
 }
