@@ -1,10 +1,10 @@
 import Database from "@ioc:Adonis/Lucid/Database";
 import Helper from "App/Helper/Helper";
-// import { DateTime } from "luxon";
+import { DateTime } from "luxon";
 // import moment from "moment-timezone";
 
 export default class DailyAttendanceService {
-
+     
     public static async getpresentList(data) {
         var begin = (data.currentPage - 1) * data.perPage;
         var limit;
@@ -214,27 +214,80 @@ export default class DailyAttendanceService {
     }
 
     public static async saveTimeInOut(allDataOfTimeInOut) {
-        console.log('allDataOfTimeInOut');
+
         let jsonData= JSON.parse(allDataOfTimeInOut.data);
-        console.log(jsonData[0]['2023-05-19']['interim'][0].StaffId);
-        console.log(jsonData.length);
-        // (allDataOfTimeInOut.data).forEach(item => {
-        //     for (const dateKey in item) {
-        //       if (item.hasOwnProperty(dateKey)) {
-        //         const dateData = item[dateKey];
-        //         if (Array.isArray(dateData.interim)) {
-        //           dateData.interim.forEach(interimItem => {
+        //console.log(jsonData[0]['2023-05-19']['interim'][0].StaffId);
+        //console.log(jsonData.length);
+        for(let i=0; i < jsonData.length; i++){
+            const date = Object.keys(jsonData[i]);
+                if (Array.isArray(jsonData[i][date[0]].interim)) {
+                    console.log('working case');
+                    for (let j = 0; j < jsonData[i][date[0]].interim.length; j++) {
+                        const {
+                            Id = 0,
+                            UserId = 0,
+                            ShiftId = '',
+                            AttendanceMasterId = 0,
+                            Action = '',
+                            AttendanceDate = '',
+                            OrganizationId = 0,
+                            LatitudeIn = 0,
+                            LongitudeIn = 0,
+                            LatitudeOut = 0,
+                            LongitudeOut = 0,
+                            TimeInTime = '',
+                            TimeOutTime = '',
+                            IsTimeInSynced = 0,
+                            IsTimeOutSynced = 0,
+                            FakeTimeInStatus = 0,
+                            FakeTimeOutStatus = 0,
+                            FakeLocationInStatus = 0,
+                            FakeLocationOutStatus = 0,
+                            GeofenceIn = '',
+                            GeofenceOut = '',
+                            TimeInDevice = '',
+                            TimeOutDevice = '',
+                            TimeInCity = '',
+                            TimeOutCity = '',   
+                            TimeInAppVersion = '',
+                            TimeOutAppVersion = '',
+                            TimeOutPictureBase64 = '',
+                            TimeInPictureBase64 = '',
+                            TimeInApp = '',
+                            TimeOutApp = '',
+                            TimeInAddress = '',
+                            TimeOutAddress = '',
+                            TimeInDeviceName = '',
+                            TimeOutDeviceName = '',
+                            Platform = '',
+                            SyncTimeIn = '',
+                            SyncTimeOut = '',
+                            TimeInDeviceId = '',
+                            TimeOutDeviceId = '',
+                            TimeInDate = '',
+                            TimeOutDate = '',
+                            TimeInStampApp = '',
+                            TimeOutStampApp = '',
+                            TimeInRemark = '',
+                            TimeOutRemark = '',
+                            orgTopic = '',
+                            ThumnailTimeOutPictureBase64='',
+                            ThumnailTimeInPictureBase64='',
+                            GeofenceInAreaId='',
+                            GeofenceOutAreaId=''
+                          } = jsonData[i][date[0]].interim[j];
 
-        //             console.log(interimItem);
-        //             // Process the interim item as needed
-        //             // For example, push the "Id" property to the results array
-        //            // results.push(interimItem.Id);
-        //           });
-        //         }
-        //       }
-        //     }
-        //   });
+                const zone = await Helper.getEmpTimeZone(UserId,OrganizationId);
+                const defaultZone = DateTime.now().setZone(zone);
+                
+                // console.log(defaultZone.minus({ days: 1 }).toFormat('yyyy-MM-dd, HH:mm:ss'));
+                // console.log(defaultZone.toFormat('yyyy-MM-dd, HH:mm:ss'));
 
+                    } 
+                }else{
+                    console.log('array not working');
+                }
+                
+        }
     }
-
 }
