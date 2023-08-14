@@ -213,4 +213,28 @@ export default class DailyAttendanceService {
         }
     }
 
+    public static async saveTimeInOut(allDataOfTimeInOut) {
+        console.log('allDataOfTimeInOut');
+        let jsonData= JSON.parse(allDataOfTimeInOut.data);
+        console.log(jsonData[0]['2023-05-19']['interim'][0].StaffId);
+        console.log(jsonData.length);
+        // (allDataOfTimeInOut.data).forEach(item => {
+        //     for (const dateKey in item) {
+        //       if (item.hasOwnProperty(dateKey)) {
+        //         const dateData = item[dateKey];
+        //         if (Array.isArray(dateData.interim)) {
+        //           dateData.interim.forEach(interimItem => {
+
+        //             console.log(interimItem);
+        //             // Process the interim item as needed
+        //             // For example, push the "Id" property to the results array
+        //            // results.push(interimItem.Id);
+        //           });
+        //         }
+        //       }
+        //     }
+        //   });
+
+    }
+
 }
