@@ -9,17 +9,8 @@ export default class ShiftsService {
     //  const currentpage:number = a.currentpage;
     // const perpage:number = a.perpage;
     //const rowperpage:number = (currentpage - 1) * perpage;
-    function getCurrentDate(): string {
-      const date = new Date();
 
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, "0");
-      const day = String(date.getDate()).padStart(2, "0");
-
-      const formattedDate = `${year}-${month}-${day}`;
-      return formattedDate;
-    }
-    const currentDate = getCurrentDate();
+    const currentDate = await helper.getCurrentDate();
     //console.log(currentDate);
     const orgid: number = a.OrganizationId;
     type KeyValuePair = { [key: string]: any };
@@ -256,7 +247,102 @@ export default class ShiftsService {
           }
         }
       }
-      console.log(result);
+      return result;
     }
+  }
+
+  //update shift function
+  static async updateShift(data) {
+    const uid = data.uid;
+    const shift = data.shift;
+    const sts = data.sts;
+    const id = data.id;
+    const multiple_timests = data.multiple_timests;
+    const currentDate: Date = new Date();
+    const year: number = currentDate.getFullYear();
+    const month: number = currentDate.getMonth() + 1;
+    const day: number = currentDate.getDate();
+
+    const date: string = `${year}-${month.toString().padStart(2, "0")}-${day
+      .toString()
+      .padStart(2, "0")}`;
+    let result: any = [];
+    const orgid: any = await helper.getOrgId(uid);
+    const row = await Database.query()
+      .from("ShiftMaster")
+      .select("*")
+      .where("Name", shift)
+      .andWhere("OrganizationId", orgid)
+      .andWhere("id", "!=", id)
+      .orderBy("Name");
+    const count = row.length;
+    //console.log(count);
+    if (count > 0) {
+      result["Status"] = "-1";
+      return result;
+    } else {
+      const row2: any = await Database.query()
+        .from("ShiftMaster")
+        .where("Id", id)
+        .andWhere("OrganizationId", orgid)
+        .update({
+          Name: shift,
+          MultipletimeStatus: multiple_timests,
+          LastModifiedDate: date,
+          archive: sts,
+        });
+      if (row2 > 0) {
+        result["Status"] = 1;
+        return result;
+      } else {
+        result["Status"] = 0;
+        return result;
+      }
+    }
+  }
+
+  // assignShift
+  static async assignShift(data) {
+    const Orgid = data.Orgid;
+    const shiftid = data.shiftid;
+    const shiftname = data.shiftname;
+    const empid = data.empid;
+    const empname = data.empname;
+    const adminid = data.adminid;
+    const adminname = data.adminname;
+    const result: any[] = [];
+    const row: any = await Database.query()
+      .from("EmployeeMaster")
+      .where("Id", empid)
+      .andWhere("OrganizationId", Orgid)
+      .update("Shift", shiftid);
+    const count = row;
+    console.log(count > 0);
+    if (count > 0) {
+      result["status"] = "true";
+    } else {
+      result["status"] = "false";
+    }
+    return result;
+  }
+
+  //deleteInActivateShift
+  static async deleteInActivateShift(data) { 
+    console.log(data);
+
+    const orgid = data.orgId;
+    const Id = data.id;
+    const empId = data.empId;
+    const result: any[] = [];
+    let ShiftName :any = await helper.getShiftName(Id, orgid);
+    console.log(ShiftName);
+    const getshiftdata:any = await Database.from('ShiftMaster').select('*').where('OrganizationId', orgid).andWhere('Id', Id).andWhere('archive', '1').delete();   
+    if (getshiftdata > 0) {
+      result["status"] = "true";
+    } else { 
+      result["status"] ='false';
+    }
+    return result;
+    
   }
 }
