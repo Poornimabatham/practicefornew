@@ -1,9 +1,9 @@
 import Route from '@ioc:Adonis/Core/Route'
 
-Route.get('/emplist','EmployeesController.emplist').middleware("auth");
-Route.post('/deleteEmployee','EmployeesController.deleteEmployee').middleware("auth");
-Route.post('/getSelfieUpdate','EmployeesController.updateSelfistatus').middleware(['auth']);
-Route.post('/getAllowAttToUser','EmployeesController.getAllowAttToUser').middleware(['auth']);
+Route.get('/emplist','EmployeesController.emplist')
+Route.post('/deleteEmployee','EmployeesController.deleteEmployee')
+Route.post('/getSelfieUpdate','EmployeesController.updateSelfistatus');
+Route.post('/getAllowAttToUser','EmployeesController.getAllowAttToUser');
 Route.post('/getFaceIdUpdate','EmployeesController.FacePermissionUpdate');
 Route.post('/DeviceUpdate','EmployeesController.DevicePermissionUpdate');
 Route.post('/FingerPrintUpdate','EmployeesController.FingerPrintPermissionUpdate');
