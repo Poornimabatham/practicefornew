@@ -34,5 +34,8 @@ import  '../app/Routes/GetEarlyComingsRoute'
 import  '../app/Routes/getEarlyLeavingsRoutes'
 import "../app/Routes/LateComingRoute"
 import "../app/Routes/Report/GetplannerRoute"
+import "../app/Routes/getEmpdataDepartmentWiseNewRoute"
+import "../app/Routes/getCDateAttnDeptWiseRoutes"
+
 
 

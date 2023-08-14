@@ -54,7 +54,7 @@ const datefrom = new Date(get.DateFrom);
 const dateString = datefrom.toLocaleDateString('en-US'); // Change 'en-US' to your preferred locale
 const DateFrom = moment(dateString, 'MM/DD/YYYY').format('YYYY/MM/DD');
 
-const dateto = new Date(get.DateFrom); 
+const dateto = new Date(get.DateTo); 
 const dateString2 = dateto.toLocaleDateString('en-US'); 
 const DateTo = moment(dateString2, 'MM/DD/YYYY').format('YYYY/MM/DD');
 
@@ -82,9 +82,9 @@ const InsertHolidays = await Database
 if(InsertHolidays.length > 0){
                
 const zone = await Helper.getTimeZone(get.OrganizationId);
-  
-const timezone = zone[0]?.name;
+const timezone = zone;
 const date = moment().tz(timezone).toDate();
+
 const uid = get.empid;
 const EmpName = await Helper.getempnameById(get.EmpId);
 const module = 'Attendance app';

@@ -16,7 +16,6 @@ export default class DesignationService {
       .select("Id");
 
     const result: any = [];
-    // const res: any = await designationList;
 
     const affectedRows = designationList.length;
 
@@ -45,8 +44,6 @@ export default class DesignationService {
         add_sts: "YourAddStsValue",
       });
 
-    // const res2: any = await insertDesignation;
-
     const affectedRows2 = insertDesignation.length;
 
     if (affectedRows2 > 0) {
@@ -65,7 +62,7 @@ export default class DesignationService {
           LastModifiedDate: currentDate,
           LastModifiedById: a.uid,
           ActionPerformed: actionPerformed,
-          Module: "poornima",
+          Module: module,
           OrganizationId: a.orgid,
           ActivityBy: activityby,
           adminid: a.uid,
@@ -201,7 +198,7 @@ export default class DesignationService {
     
 if (count > 0) {
       const timezone = await Helper.getTimeZone(c.Updateorgid);
-      const zone = timezone[0]?.name;
+      const zone = timezone;
       console.log(zone);
       const currentDateTime = moment().tz(zone);
 
