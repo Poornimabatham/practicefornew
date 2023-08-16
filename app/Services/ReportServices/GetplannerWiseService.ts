@@ -19,7 +19,7 @@ export default class GetplannerWiseSummary {
     var weekoff_sts;
     var ShiftId;
 
-    var Date2 = currentDate.toFormat("yyyy-MM-dd");
+    var AttendanceDate = currentDate.toFormat("yyyy-MM-dd");
     const fetchdatafromTimeOFFandAttendanceMaster = await Database.from(
       "Timeoff as Toff"
     )
@@ -29,6 +29,7 @@ export default class GetplannerWiseSummary {
         "AM.AttendanceDate"
       )
       .select(
+        "Toff.Id",
         "AM.AttendanceStatus",
         "AM.AttendanceDate",
         "Toff.Reason",
@@ -61,9 +62,8 @@ export default class GetplannerWiseSummary {
         "longi_out",
         "multitime_sts"
       )
-      .limit(2)
-      .andWhere("AM.AttendanceDate", Date2)
-      .whereIn("AM.AttendanceStatus", [1, 2, 3]);
+      .andWhere("AM.AttendanceDate", AttendanceDate)
+      .andWhereIn("AM.AttendanceStatus", [1, 2, 3]).limit(2)
 
     const result = fetchdatafromTimeOFFandAttendanceMaster;
     let res: any[] = [];
@@ -72,7 +72,7 @@ export default class GetplannerWiseSummary {
       result.map(async (val) => {
         let data: any = {};
 
-        data["AttendanceStatus"] = val.AttendanceStatus;
+        data["AttendanceStatus"]= val.AttendanceStatus;
 
         data["TimeIn"] = val.TimeIn;
         data["TimeOut"] = val.TimeOut;
@@ -168,7 +168,8 @@ export default class GetplannerWiseSummary {
 
         if (
           data["AttendanceStatus"] == 4 ||
-          data["AttendanceStatus"] == 10 
+          data["AttendanceStatus"] == 10 ||
+          data["AttendanceStatus"] == 1
         ) {
           const halfInSeconds = Duration.fromISOTime(hoursPerDay).as("seconds");
           const halfvalue = halfInSeconds / 2;
@@ -188,7 +189,7 @@ export default class GetplannerWiseSummary {
         const orgidid = a.refno;
 
         weekoff_sts = await Helper.getWeeklyOff(
-          Date2,
+          AttendanceDate,
           ShiftId,
           userid,
           orgidid
@@ -290,7 +291,7 @@ export default class GetplannerWiseSummary {
         data["overtime"] = overtime1;
         data["bhour"] = bhour;
         data["plateform"] = "-";
-        if (data["timeoutplatform"] != "") {
+        if (data["timeoutplatform"] == "") {
           data["plateform"] = data["timeoutplatform"];
         }
         data["AttendanceDate"] = val.AttendanceDate;
@@ -300,12 +301,7 @@ export default class GetplannerWiseSummary {
         if (val.multitime_sts == 1 && shiftType != 3) {
           data["shifttype"] = 1;
         }
-        // data['getInterimAttAvailableSts'] = 
-        console.log(val.Id)
-        const U  = await Helper.getInterimAttAvailableSt(val.Id)
-        console.log(U)
-        console.log( data['getInterimAttAvailableSts'] )
-
+        data['getInterimAttAvailableSts']  = await Helper.getInterimAttAvailableSt(val.Id)
         res.push(data);
       })
     );
