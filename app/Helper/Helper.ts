@@ -1,5 +1,8 @@
 const jwt = require("jsonwebtoken");
 import Database from "@ioc:Adonis/Lucid/Database";
+import EmployeeMaster from "App/Models/EmployeeMaster";
+import Organization from "App/Models/Organization";
+import ZoneMaster from "App/Models/ZoneMaster";
 
 export default class Helper {
   public static encode5t(str: any) {
@@ -31,7 +34,7 @@ export default class Helper {
     return query1[0].name;
   }
 
-  public static async getempnameById(empid: number) {
+  public static async getmpnameById(empid: number) {
     const query2 = await Database.query()
       .from("EmployeeMaster")
       .select("FirstName")
@@ -143,6 +146,31 @@ export default class Helper {
       }
     }
   }
+
+
+  public static async getEmpTimeZone(userid, orgid) {
+    const defaultZone = 'Asia/Kolkata';
+    const { CurrentCountry: country, timezone: id } = await EmployeeMaster.findByOrFail('Id', userid);
+    
+    if (id) {
+      const zoneData = await ZoneMaster.find(id);
+      return zoneData ? zoneData.Name : defaultZone;
+    }
+    if (!country) {
+      const organization = await Organization.findByOrFail('Id',orgid);
+      if (organization) {
+        const zoneData = await ZoneMaster.find(organization.TimeZone);
+        return zoneData ? zoneData.Name : defaultZone;
+      }
+    } else {
+      const zoneData = await ZoneMaster.query().where('CountryId', country).first();
+      return zoneData ? zoneData.Name : defaultZone;
+    }
+  
+    return defaultZone;
+  }
+
+}
 
   public static async getInterimAttAvailableSt(value: number) {
     const GetIntermAttendanceId = await Database.from("InterimAttendances")
