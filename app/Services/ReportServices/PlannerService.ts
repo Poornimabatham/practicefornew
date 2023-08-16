@@ -1,7 +1,7 @@
 import Database from "@ioc:Adonis/Lucid/Database";
 // import moment from "moment";
-import Helper from "App/Helper/Helper";
-const moment = require("moment");
+// import Helper from "App/Helper/Helper";
+// const moment = require("moment");
 require("moment-timezone");
 
 export default class    PlannerService {
@@ -9,13 +9,13 @@ export default class    PlannerService {
     
    
 
-    const datastart = new Date();
-    const overtime = "";
-    const overtime1 = "";
-    const overtime3 = "";
-    const loggedHours = "00:00:00";
-    const shiftin = "";
-    const shiftout = "";
+    // const datastart = new Date();
+    // const overtime = "";
+    // const overtime1 = "";
+    // const overtime3 = "";
+    // const loggedHours = "00:00:00";
+    // const shiftin = "";
+    // const shiftout = "";
 
 
 

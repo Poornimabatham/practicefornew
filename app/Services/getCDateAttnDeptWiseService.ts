@@ -15,42 +15,47 @@ export default class getCDateAttnDeptWiseService{
       limit;
     }
 
-    // var currDate = DateTime.now().setZone(timeZone)
-    var getDate = getData.date;
+    var currDate = DateTime.now().setZone(timeZone)
+    var getDate = getData.date?getData.date:currDate;
     var zone = await Helper.getTimeZone(getData.orgid);
     var timeZone = zone;
     var formattedDate1 = getDate.toFormat("yyyy-MM-dd");
     var dateTimeUTC = DateTime.fromISO(formattedDate1, { zone: "Pacific/Pago_Pago" });
     var dateTimeInTimeZone = dateTimeUTC.setZone(timeZone);
-    var Date = dateTimeInTimeZone.toFormat("yyyy-MM-dd");
+    var date = dateTimeInTimeZone.toFormat("yyyy-MM-dd");
 
-    var time = moment().format('HH:mm:ss')
+    // var time = moment().format('HH:mm:ss')
 
     if (getData.datafor == "present"){
+      // console.log("helo");
+    
       var getdataforPresentees = Database.from("AttendanceMaster as A")
        .innerJoin("EmployeeMaster as E","A.EmployeeId","E.Id")
        .innerJoin("InterimAttendances as I","A.Id"," I.AttendanceMasterId")
        .innerJoin("ShiftMaster as S","A.ShiftId","S.Id")
        .innerJoin("DepartmentMaster as D","A.Dept_id","D.Id")
-
-       .select( "A.latit_in","A.longi_in","A.latit_out","A.longi_out","A.Id","A.TotalLoggedHours","A.AttendanceStatus","A.ShiftId","A.multitime_sts","A.OrganizationId","A.AttendanceDate",
-         Database.raw(`(select CONCAT(FirstName,' ',LastName)  from EmployeeMaster where E.Id= ${2169795}) as name,
+       .select( "A.latit_in","A.longi_in","A.latit_out","A.longi_out","A.Id","A.TotalLoggedHours","A.AttendanceStatus","A.ShiftId","A.multitime_sts","A.OrganizationId","A.Dept_id",Database.raw("DATE_FORMAT(A.AttendanceDate,'%Y-%m-%d') as AttendanceDate"),
+         Database.raw(`(select CONCAT(FirstName,' ',LastName)  from EmployeeMaster where E.Id= ${38054345}) as name,
          IF((SELECT Count(id) FROM InterimAttendances WHERE I.AttendanceMasterId=A.Id)>0,'true','false') as  getInterimAttAvailableSts 
          `),
          Database.raw(`
          (Select S.shifttype from ShiftMaster where Id=ShiftId) as shiftType, SUBSTR(S.TimeIn, 1, 5) as TimeIn,
          SUBSTR(S.TimeOut, 1, 5) as TimeOut ,'Present' as status,
          SUBSTRING_INDEX(EntryImage, '.com/', -1) as EntryImage,
-         SUBSTRING_INDEX(ExitImage, '.com/', -1) as ExitImage,SUBSTR(checkInLoc, 1, 40) as checkInLoc, 
+         SUBSTRING_INDEX(ExitImage, '.com/', -1) as ExitImage,
+         SUBSTR(checkInLoc, 1, 40) as checkInLoc, 
          SUBSTR(CheckOutLoc, 1, 40) as CheckOutLoc
          `)
-        )
-        .where("A.AttendanceDate",Date).where("A.OrganizationId",getData.orgid).whereIn("A.AttendanceStatus",[1,3,4,5,8]).orderBy("name").limit(limit)
-
-        if(getData.dept!==0){
-          getdataforPresentees = getdataforPresentees.where("A.Dept_id",getData.dept)
-          // getdataforPresentees = getdataforPresentees.where("E.Department",getData.dept)
-        }
+        )                   
+        .where("A.AttendanceDate",date)
+        .where("A.OrganizationId",getData.orgid)
+        .whereIn("A.AttendanceStatus",[1,3,4,5,8]).orderBy("name")
+        .limit(limit)
+return getdataforPresentees
+        // if(getData.dept!==0){
+        //   getdataforPresentees = getdataforPresentees.where("A.Dept_id",getData.dept)
+        //   // getdataforPresentees = getdataforPresentees.where("E.Department",getData.dept)
+        // }
       
         if((await getdataforPresentees).length >0){
        
@@ -87,10 +92,10 @@ export default class getCDateAttnDeptWiseService{
       }
       return sendResponse;
   }else if(getData.datafor == "absent"){
-    
-    if(Date != moment().format("yyyy-MM-dd")) { // for other day's absentees
+   
+    if(date != moment().format("yyyy-MM-DD")) { // for other day's absentees
 
-       var query = Database
+       var fetchothersdaysabsentees = Database
        .from('AttendanceMaster as A')
        .innerJoin('EmployeeMaster as E', 'A.EmployeeId', 'E.Id')
        .innerJoin('AppliedLeave as AL', 'A.EmployeeId', 'AL.EmployeeId')
@@ -100,19 +105,19 @@ export default class getCDateAttnDeptWiseService{
         
          Database.raw('AL.ApprovalStatus as LeaveStatus')
         )
-        .where('AttendanceDate',Date)
+        .where('AttendanceDate',date)
        .where('A.OrganizationId', getData.orgid)
        .whereIn('A.AttendanceStatus', [2, 7])
        .whereIn('A.EmployeeId',Database.rawQuery(`(SELECT Id from EmployeeMaster where OrganizationId =${getData.orgid} AND Is_Delete = 0 )`))
        .where('AL.ApprovalStatus',2)
-       .where('AL.Date',Date)
-       .orderBy('name')
+      //  .where('AL.Date',date)
+      //  .orderBy('name')
        .limit(limit);
 
-       if(getData.dept!==0){
-        query = query.where("A.Dept_id",getData.dept);
-        // getdataforPresentees = getdataforPresentees.where("E.Department",getData.dept)
-      }
+      //  if(getData.dept!==0){
+      //   fetchothersdaysabsentees = fetchothersdaysabsentees.where("A.Dept_id",getData.dept);
+      //   // getdataforPresentees = getdataforPresentees.where("E.Department",getData.dept)
+      // }
     //   if(Date != moment().format("yyyy-MM-dd")){
 
     // // return Date
@@ -120,7 +125,7 @@ export default class getCDateAttnDeptWiseService{
     //     // query= query.andWhere('AL.Date',Date)
     //   }
         
-       return query
+       return fetchothersdaysabsentees
 
 
 

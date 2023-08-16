@@ -1,5 +1,4 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import Database from '@ioc:Adonis/Lucid/Database'
 import LateComingService from 'App/Services/LateComingService'
 import LatecomingValidator from 'App/Validators/LatecomingValidator'
 export default class LatecomingsController {
