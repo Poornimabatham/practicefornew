@@ -76,6 +76,21 @@ export default class Helper {
     return getDeptIdQuery[0].Id;
   }
 
+  public static async getInterimAttAvailableSt(value: number) {
+    const GetIntermAttendanceId = await Database.from("InterimAttendances")
+      .where("AttendanceMasterId", value)
+      .select("id");
+
+    if (GetIntermAttendanceId.length > 0) {
+      return GetIntermAttendanceId[0].id;
+    }
+    return 0;
+  }
+
+  public static async getShiftType(ShiftId: number) {
+    const getShiftTypeQuery = await Database.from('ShiftMaster').select('shifttype').where('Id', ShiftId);
+    return getShiftTypeQuery[0].shiftType;
+  }
 }
 
 

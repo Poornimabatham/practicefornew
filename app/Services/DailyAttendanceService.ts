@@ -10,7 +10,6 @@ export default class DailyAttendanceService {
         var begin = (data.currentPage - 1) * data.perPage;
         var limit;
         var offset;
-        // var inpDate = data.date;
         var designationCondition;
 
         if (data.currentPage != 0 && data.csv == "") {
@@ -189,7 +188,7 @@ export default class DailyAttendanceService {
             }
 
             data['present'] = result;
-            return data['present']
+            // return data['present']
         }
         else if (data.dataFor == "absent") {
             var departmentCondition;
@@ -199,21 +198,25 @@ export default class DailyAttendanceService {
                 departmentCondition = `Dept_id = ${departmentId}`;
             }
 
-            if (data.date == undefined) {
-                AttendanceDate = new Date().toISOString().split('T')[0];
-            }
-            else {
-                AttendanceDate = data.date.toFormat('yyyy-MM-dd')
-            }
-            if (data.date != new Date().toISOString().split('T')[0]) {
-                const absCountQuery = await Database.from('AttendanceMaster').where('AttendanceDate', '2023-03-02').where('OrganizationId', data.OrganizationId).whereIn('AttendanceStatus', [2, 7]).whereIn('EmployeeId', Database.rawQuery(`(SELECT Id from EmployeeMaster where OrganizationId =${data.OrganizationId} AND Is_Delete = 0 )`)).count('Id as abscount')
+            // if (data.date == undefined) {
+            //     AttendanceDate = new Date().toISOString().split('T')[0];
+            // }
+            // else {
+            //     AttendanceDate = data.date.toFormat('yyyy-MM-dd')
+            // }
 
+            if (data.date != undefined) {                  //for other day's absentees
+                AttendanceDate = data.date;
+                var formattedAttendanceDate = moment(AttendanceDate).format('YYYY-MM-DD')
+
+                const absCountQuery = await Database.from('AttendanceMaster').where('AttendanceDate', formattedAttendanceDate).where('OrganizationId', data.OrganizationId).whereIn('AttendanceStatus', [2, 7]).whereIn('EmployeeId', Database.rawQuery(`(SELECT Id from EmployeeMaster where OrganizationId =${data.OrganizationId} AND Is_Delete = 0 )`)).count('Id as abscount')
 
                 var absCount;
                 if (absCountQuery.length > 0) {
                     absCount = absCountQuery[0].abscount;
                 }
 
+                // return absCount
                 var orgId = data.OrganizationId;
                 var absentCountQuery = Database.from('AttendanceMaster as A').select(
                     Database.raw("(select CONCAT(FirstName,' ',LastName) FROM EmployeeMaster where Id = EmployeeId) as name"),
@@ -238,8 +241,6 @@ export default class DailyAttendanceService {
                 }
                 var absentCountQueryResult = await absentCountQuery;
 
-
-
                 interface absentList {
                     name: string,
                     TimeIn: string,
@@ -251,8 +252,10 @@ export default class DailyAttendanceService {
                 var absentListResult: absentList[] = [];
 
                 if (absentCountQueryResult.length > 0) {
+
                     var Name;
                     var name = absentCountQueryResult[0].name;
+
                     if (name.split(' ').length > 3) {
                         var words = name.split(' ', 4);
                         var firstthree = words.slice(0, 3);
@@ -277,135 +280,216 @@ export default class DailyAttendanceService {
                 else {
                     absentListResult.push()
                 }
+
                 data['absent'] = absentListResult;
                 return data['absent']
 
             }
+            else            //For Today's Absentees
+            {
+
+                if (adminStatus == 2) {
+                    var departmentId = await Helper.getDepartmentIdByEmpId(data.EmployeeId);
+                    departmentCondition = `Dept_id = ${departmentId}`;
+                }
+
+                var AbsCountQuery;
+
+                AbsCountQuery = Database.from('AttendanceMaster as A').select(
+                    Database.raw(`CONCAT (E.FirstName, ' ' ,E.LastName)  as name`),
+                    Database.raw(` '-' as Timeout `),
+                    Database.raw(` '-' as TimeOut `),
+                )
+                    .innerJoin('EmployeeMaster as E', 'A.EmployeeId', 'E.Id')
+                    .where('AttendanceDate', '2023-03-02')
+                    .where('A.OrganizationId', data.OrganizationId)
+                    .whereIn('AttendanceStatus', [2, 7])
+                    .orderBy('name', 'asc')
+
+
+                // return AbsCountQuery
+
+                if (data.DesignationId != 0 && data.DesignationId != undefined) {
+                    designationCondition = ` Desg_id= ${data.DesignationId}`;              // From AttendanceMaster
+                    AbsCountQuery = AbsCountQuery.whereRaw(designationCondition);
+                }
+
+                if (departmentCondition != undefined) {
+                    AbsCountQuery = AbsCountQuery.whereRaw(departmentCondition);
+                }
+
+                var AbsCountQueryResult = await AbsCountQuery
+                // return AbsCountQueryResult
+
+
+                var AttendanceDatep = moment(data.date);
+                var attDate = AttendanceDatep.format('yyyy-MM-DD')
+                var AbsentCountQuery
+                AbsentCountQuery = Database.from('EmployeeMaster as E').select(
+                    Database.raw(`CONCAT(E.FirstName, ' ', E.LastName) as name`),
+                    Database.raw(` '-' as TimeIn `),
+                    Database.raw(` '-' as TimeOut `),
+                    Database.raw(`(select ApprovalStatus FROM AppliedLeave WHERE EmployeeId=E.Id AND ApprovalStatus=2 AND Date='2023-02-05') as LeaveStatus`),
+                    'A.AttendanceStatus')
+                    .innerJoin('AttendanceMaster as A', 'A.EmployeeId', 'E.Id')
+                    .innerJoin('ShiftMaster as S', 'A.ShiftId', 'S.Id')
+                    .whereNotIn('E.Id', Database.from('AttendanceMaster as A').select('A.EmployeeId').where('A.OrganizationId', data.OrganizationId).whereIn('A.AttendanceStatus', [1, 8, 4, 7]).whereNotIn('A.Wo_H_Hd', [11, 12])).andWhere('E.OrganizationId', data.OrganizationId)
+                    .andWhere(builder => {
+                        builder.where('E.Id', Database.raw(`(select empid from ShiftPlanner WHERE ShiftPlanner.orgid=${data.OrganizationId} and ShiftPlanner.empid=E.Id)`))
+                            .orWhere('E.Id', Database.raw(`E.Shift`));
+                    })
+                    // .groupBy('E.Id')
+                    // .orderBy('name', 'asc')
+                    .limit(25);
+
+
+                // return AbsentCountQuery
+
+
+                // if (data.DesignationId != 0 && data.DesignationId != undefined) {
+                //     designationCondition = `Designation= ${data.DesignationId}`;          // From AttendanceMaster
+                //     AbsentCountQuery = AbsentCountQuery.whereRaw(designationCondition);
+                // }
+
+                if (departmentCondition != undefined) {
+                    AbsentCountQuery = AbsentCountQuery.whereRaw(departmentCondition);
+                }
+
+                var AbsentCountQueryResult = await AbsentCountQuery
+                // return AbsentCountQueryResult
+
+                interface OtherDayAbsentList {
+                    name: string,
+                    TimeIn: string,
+                    TimeOut: string,
+                    LeaveStatus: string
+                }
+
+                var otherDayAbsentData: OtherDayAbsentList[] = []
+                if (AbsentCountQuery.length > 0) {
+
+                    var Name;
+                    var name = AbsentCountQueryResult[0].name;
+                    if (name.split(' ').length > 3) {
+                        var words = name.split(' ', 4);
+                        var firstthree = words.slice(0, 3);
+                        Name = firstthree.join(' ') + '...';
+                    }
+                    else {
+                        Name = name;
+                    }
+                    AbsentCountQueryResult.forEach((row) => {
+                        const otherDayAbsentList: OtherDayAbsentList = {
+                            name: Name,
+                            TimeIn: row.TimeIn,
+                            TimeOut: row.TimeOut,
+                            LeaveStatus: row.LeaveStatus
+                        }
+                        otherDayAbsentData.push(otherDayAbsentList)
+                    })
+
+
+                }
+                else {
+                    otherDayAbsentData.push()
+                }
+
+                data['absent'] = AbsCountQueryResult.concat(AbsentCountQueryResult)
+                return data['absent']
+            }
         }
 
-        else            //For Today's Absentees
-        {
 
+        else if (data.dataFor == 'latecomings') {
+
+            // var AttendanceDateLC = data.date;
+            // var FormattedAttendanceDate = moment(AttendanceDateLC).format('YYYY-MM-DD')
+            var DepartmentCondition
             if (adminStatus == 2) {
-                var departmentId = await Helper.getDepartmentIdByEmpId(data.EmployeeId);
-                departmentCondition = `Dept_id = ${departmentId}`;
+                var DepartmentId = await Helper.getDepartmentIdByEmpId(data.EmployeeId);
+                DepartmentCondition = `Dept_id=${DepartmentId}`;
             }
 
-            var AbsCountQuery;
-
-            AbsCountQuery = Database.from('AttendanceMaster as A').select(
-                Database.raw(`CONCAT (E.FirstName, ' ' ,E.LastName)  as name`),
-                Database.raw(` '-' as Timeout `),
-                Database.raw(` '-' as TimeOut `),
+            //Today's Late Comers
+            var LateComingsQuery = Database.from('EmployeeMaster as E').select(
+                Database.raw(`CONCAT(FirstName,' ',LastName) as name`),
+                Database.raw(`SUBSTR(TimeIn,1,5) as 'TimeIn'`),
+                Database.raw(`SUBSTR(TimeOut, 1, 5) as 'TimeOut'`),
+                Database.raw(`'Present' as status`),
+                Database.raw(`SUBSTRING_INDEX(EntryImage, '.com/', -1) as EntryImage`),
+                Database.raw(`SUBSTRING_INDEX(ExitImage, '.com/', -1) as ExitImage`),
+                Database.raw(`SUBSTR(checkInLoc, 1, 40) as checkInLoc`),
+                Database.raw(`SUBSTR(CheckOutLoc, 1, 40) as CheckOutLoc`),
+                'latit_in', 'longi_in', 'latit_out', 'longi_out', 'A.Id', 'multitime_sts', 'ShiftId', 'TotalLoggedHours'
             )
-                .innerJoin('EmployeeMaster as E', 'A.EmployeeId', 'E.Id')
-                .where('AttendanceDate', '2023-03-02')
-                .where('A.OrganizationId', data.OrganizationId)
-                .whereIn('AttendanceStatus', [2, 7])
-                .orderBy('name', 'asc')
-
-
-            // return AbsCountQuery
-            if (data.DesignationId != 0 && data.DesignationId != undefined) {
-                designationCondition = ` Desg_id= ${data.DesignationId}`;          // From AttendanceMaster
-                AbsCountQuery = AbsCountQuery.whereRaw(designationCondition);
-            }
-
-            if (departmentCondition != undefined) {
-                AbsCountQuery = AbsCountQuery.whereRaw(departmentCondition);
-            }
-
-            var AbsCountQueryResult = await AbsCountQuery
-            // return AbsCountQueryResult
-
-
-            var AttendanceDatep = moment(data.date);
-            var attDate = AttendanceDatep.format('yyyy-MM-DD')
-            var AbsentCountQuery
-            AbsentCountQuery = await Database.from('EmployeeMaster as E').select(
-                Database.raw(`CONCAT(E.FirstName, ' ', E.LastName) as name`),
-                Database.raw(` '-' as TimeIn `),
-                Database.raw(` '-' as TimeOut `),
-                Database.raw(`(select ApprovalStatus FROM AppliedLeave WHERE EmployeeId=E.Id AND ApprovalStatus=2 AND Date='2023-02-05') as LeaveStatus`),
-                'A.AttendanceStatus')
+                .where('E.Id', data.EmployeeId)
                 .innerJoin('AttendanceMaster as A', 'A.EmployeeId', 'E.Id')
-                .innerJoin('ShiftMaster as S', 'A.ShiftId', 'S.Id')
-                .whereNotIn('E.Id', Database.from('AttendanceMaster as A').select('A.EmployeeId').where('A.OrganizationId', data.OrganizationId).whereIn('A.AttendanceStatus', [1, 8, 4, 7]).whereNotIn('A.Wo_H_Hd', [11, 12])).andWhere('E.OrganizationId', data.OrganizationId)
-                // (Database.raw(`CASE WHEN E.Id (select empid from ShiftPlanner WHERE  ShiftPlanner.orgid=${data.OrganizationId} and ShiftPlanner.empid=E.Id))THEN(select ShiftId FROM ShiftPlanner WHERE ShiftPlanner.orgid=${data.OrganizationId} And ShiftPlanner.empid=E.Id) ELSE E.Shift END) `))
+                .whereRaw(`SUBSTRING(time(TimeIn), 1, 5) > SUBSTRING((SELECT (CASE WHEN time(TimeInGrace) != '00:00:00' THEN time(TimeInGrace) ELSE time(TimeIn) END) FROM ShiftMaster WHERE ShiftMaster.Id = "A.ShiftId"), 1, 5)AND AttendanceDate='2023-02-01' AND A.OrganizationId=${data.OrganizationId} AND AttendanceStatus IN (1,4,8) `)
 
-                // .andWhere('E.Id',Database.from('ShiftPlanner').select('empid').where('ShiftPlanner.orgid',data.OrganizationId).where('ShiftPlanner.empid','E.Id'))
-                // .orWhere('E.Shift',Database.from('ShiftPlanner').select('ShiftId').where('ShiftPlanner.orgid',data.OrganizationId).andWhere('ShiftPlanner.empid','E.Id'))
 
-                .limit(1)
-            return AbsentCountQuery
-
-            // AbsentCountQuery = Database.from('EmployeeMaster as E').select('E.Id',
-            //     Database.raw(`CONCAT(E.FirstName,' ',E.LastName) as name `),
-            //     Database.raw(`'-' as TimeIn `),
-            //     Database.raw(`'-' as TimeOut `),
-            //     Database.raw(`(select ApprovalStatus FROM AppliedLeave WHERE EmployeeId=E.Id AND ApprovalStatus=2 AND Date='2023-02-05') as LeaveStatus`),
-            //     'A.AttendanceStatus')
-
-            //     .innerJoin('AttendanceMaster as A', 'A.EmployeeId', 'E.Id')
-            //     .innerJoin('ShiftMaster as S', 'A.ShiftId', 'S.Id')
-            //     .whereNotIn('E.Id', Database.raw(`(select A.EmployeeId From AttendanceMaster where A.OrganizationId=${data.OrganizationId} and AttendanceStatus IN (1,8,4,7) and A.Wo_H_Hd NOT IN (11,12)) AND E.OrganizationId=${data.OrganizationId}
-            //      AND (CASE WHEN (E.Id IN(select empid from ShiftPlanner WHERE  ShiftPlanner.orgid=${data.OrganizationId} and ShiftPlanner.empid=E.Id))THEN(select ShiftId FROM ShiftPlanner WHERE ShiftPlanner.orgid=${data.OrganizationId} And ShiftPlanner.empid=E.Id) ELSE E.Shift END)=S.Id AND S.TimeIn<'10:00:00' AND E.archive=1 AND E.Is_Delete=0`))
-            //     //  .groupBy('E.Id')
-            //     // .orderBy('name', 'asc')
-            //     .limit(10)
-
-            // if (data.DesignationId != 0 && data.DesignationId != undefined) {
-            //     designationCondition = ` Designation= ${data.DesignationId}`;          // From AttendanceMaster
-            //     AbsentCountQuery = AbsentCountQuery.whereRaw(designationCondition);
-            // }
-
-            if (departmentCondition != undefined) {
-                AbsentCountQuery = AbsentCountQuery.whereRaw(departmentCondition);
+            if (data.DesignationId != 0 && data.DesignationId != undefined) {
+                designationCondition = ` Desg_id= ${data.DesignationId}`;              // From AttendanceMaster
+                LateComingsQuery = LateComingsQuery.whereRaw(designationCondition);
             }
+            if (DepartmentCondition != undefined) {
+                LateComingsQuery = LateComingsQuery.whereRaw(DepartmentCondition );
+            }
+            // return LateComingsQuery
 
-            var AbsentCountQueryResult = await AbsentCountQuery
-            // return AbsentCountQueryResult
-
-            interface OtherDayAbsentList {
+            var  LateComingsQueryResult = await  LateComingsQuery;
+            interface LateComingsList {
                 name: string,
                 TimeIn: string,
                 TimeOut: string,
-                LeaveStatus: string
+                status: string,
+                EntryImage: string,
+                ExitImage: string,
+                checkInLoc: string,
+                checkOutLoc: string,
+                latit_in: string,
+                latit_out: string,
+                Id: number,
+                multitime_sts: string,
+                shiftType: number,
+                getInterimAttAvailableSts: number,
+                TotalLoggedHours: string
             }
 
-            var otherDayAbsentData: OtherDayAbsentList[] = []
-            if (AbsentCountQuery.length > 0) {
+            var LateComingsData: LateComingsList[] = [];
 
-                var Name;
-                var name = AbsentCountQueryResult[0].name;
-                if (name.split(' ').length > 3) {
-                    var words = name.split(' ', 4);
-                    var firstthree = words.slice(0, 3);
-                    Name = firstthree.join(' ') + '...';
-                }
-                else {
-                    Name = name;
-                }
-                AbsentCountQueryResult.forEach((row) => {
-                    const otherDayAbsentList: OtherDayAbsentList = {
-                        name: Name,
+            if ((LateComingsQueryResult).length > 0) {
+
+                LateComingsQueryResult.forEach(async (row) => {
+                    var lateComingsList: LateComingsList = {
+                        name: row.name,
                         TimeIn: row.TimeIn,
                         TimeOut: row.TimeOut,
-                        LeaveStatus: row.LeaveStatus
+                        status: row.status,
+                        EntryImage: row.EntryImage,
+                        ExitImage: row.ExitImage,
+                        checkInLoc: row.checkInLoc,
+                        checkOutLoc: row.CheckOutLoc,
+                        latit_in: row.latit_in,
+                        latit_out: row.latit_out,
+                        Id: row.Id,
+                        multitime_sts: row.multitime_sts,
+                        shiftType: await Helper.getShiftType(row.ShiftId),
+                        getInterimAttAvailableSts: await Helper.getInterimAttAvailableSt(row.Id),
+                        TotalLoggedHours: row.TotalLoggedHours
                     }
-                    otherDayAbsentData.push(otherDayAbsentList)
+                    LateComingsData.push(lateComingsList)
                 })
-
-
             }
+            // return LateComingsData;
+
             else {
-                otherDayAbsentData.push()
+                LateComingsData.push()
             }
-
-            data['absent'] = AbsCountQueryResult.concat(AbsentCountQueryResult)
-            return data['absent']
+            data['latecomings'] = LateComingsData;
+            return data['latecomings'];
         }
 
     }
 }
+
 
