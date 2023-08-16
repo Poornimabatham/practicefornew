@@ -147,13 +147,12 @@ export default class Helper {
   public static async getInterimAttAvailableSt(value: number) {
     const GetIntermAttendanceId = await Database.from("InterimAttendances")
       .where("AttendanceMasterId", value)
-      .select("id")
+      .select("id");
 
-
-      if(GetIntermAttendanceId.length>0){
-        return GetIntermAttendanceId[0].id
-      }
-      return 0
+    if (GetIntermAttendanceId.length > 0) {
+      return GetIntermAttendanceId[0].id;
+    }
+    return 0;
   }
 
   public static async getCurrentDate() {
@@ -167,7 +166,6 @@ export default class Helper {
     return formattedDate;
   }
 
-  //get shiftname by shift Id
   public static async getShiftName(Id: number, orgid: number) {
     let ShiftName: any;
     console.log(Id);
@@ -176,16 +174,18 @@ export default class Helper {
       .select("Name")
       .where("Id", Id)
       .andWhere("OrganizationId", orgid);
-    //console.log(rowh.toSQL().toNative());
     if (getshiftname.length > 0) {
       ShiftName = getshiftname[0].Name;
     }
-
     return ShiftName;
   }
+
+  public static async getEmpName(Id: number) {
+    const query = await Database.from("EmployeeMaster")
+      .select("FirstName","LastName")
+      .where("Id", Id)
+      .where("Is_Delete",0)
+    
+    return query[0].FirstName;
+  }
 }
-
-
-
-
-
