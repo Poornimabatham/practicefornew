@@ -9,12 +9,11 @@ export default class LatecomingValidator extends BaseValidator {
   static fetchlatecomingsschema = {
     schema: schema.create({
       Orgid: schema.number(),
-      Date: schema.date({ format: "yyyy-MM-dd" }),
+      Date: schema.date.optional({ format: "yyyy-MM-dd" }),
       Empid: schema.number(),
-      Csv: schema.number(),
+      Csv: schema.number.optional(),
       Currentpage: schema.number(),
       Perpage: schema.number(),
-     
     }),
   };
 }

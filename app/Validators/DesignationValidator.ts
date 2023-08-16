@@ -17,7 +17,6 @@ export default class DesignationValidator  extends BaseValidator{
     })
   }
   
-  // Fetch Designation schema
      static Designationschema ={
       schema:schema.create({
         orgid:schema.number(),
@@ -34,7 +33,7 @@ export default class DesignationValidator  extends BaseValidator{
         Updateid:schema.number(),
         UpdateName:schema.string(),
         sts:schema.number.optional(),
-        Updateorgid:schema.number()
+        Updateorgid:schema.number.optional()
         
       })
      }

@@ -35,6 +35,7 @@ import  '../app/Routes/getEarlyLeavingsRoutes'
 import "../app/Routes/LateComingRoute"
 import "../app/Routes/Report/GetplannerRoute"
 import "../app/Routes/getOutsidegeoRoute"
+import "../app/Routes/AttendanceRoute"
 
 
 

@@ -11,7 +11,7 @@ export default class Plannervalidator  extends BaseValidator{
    schema:schema.create({
   userid:schema.number(),
   refno:schema.number(),
-  attDen:schema.number()
+  attDen:schema.date({ format: "yyyy-MM-dd" })
 
     })
   }

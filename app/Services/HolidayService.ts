@@ -10,7 +10,7 @@ export default class HolidayService {
   const begin = (currentPage - 1) * perPage;
   
   const FetchHolidays = Database.query()
-  .from("holidaymaster")
+  .from("HolidayMaster")
   .select("Id","Name","Description","DateTo","OrganizationId",
     Database.raw("DATE(DateFrom) AS fromDate"),
     Database.raw("DATEDIFF(DATE(DateTo),DATE(DateFrom))   AS DiffDate"),"DateFrom")
@@ -62,7 +62,7 @@ const CurrDate = moment().format("YYYY/MM/DD")
 
 const result = {status:" "};
 const existingHoliday = await Database.query()
-  .from('holidaymaster')
+  .from('HolidayMaster')
   .whereBetween('DateFrom', [DateFrom,DateTo])
   .orWhereBetween('DateTo',[DateFrom,DateTo])
   .andWhere('OrganizationId', get.OrganizationId)
@@ -75,7 +75,7 @@ if (existingHoliday){
 
 const InsertHolidays = await Database
 .insertQuery() // 👈 gives an instance of insert query builder.
-.table('holidaymaster')
+.table('HolidayMaster')
 .insert({Name:get.Name, Description:get.Description, OrganizationId:get.OrganizationId,CreatedById:get.EmpId,
   CreatedDate:CurrDate, DivisionId:0, LastModifiedDate:CurrDate, LastModifiedById:get.EmpId,DateFrom:DateFrom, DateTo:DateTo,FiscalId:1})
 
@@ -83,7 +83,7 @@ if(InsertHolidays.length > 0){
                
 const zone = await Helper.getTimeZone(get.OrganizationId);
   
-const timezone = zone[0]?.name;
+const timezone = zone;
 const date = moment().tz(timezone).toDate();
 const uid = get.empid;
 const EmpName = await Helper.getempnameById(get.EmpId);
