@@ -8,12 +8,12 @@ export default class  GetApprovalRegularizationValidator extends BaseValidator {
 
   static GetApprovalRegularizationschema = {
     schema: schema.create({
-      Attendanceid:schema.number(),
-      Orgid:schema.number(),
-      Uid:schema.number(),
-      Approvalresult:schema.number(),
-      Comment:schema.number(),
-      Platform:schema.number(),
+      attendance_id:schema.number(),
+      orgid:schema.number(),
+      uid:schema.number(),
+      approverresult:schema.number(),
+      comment :schema.number(),
+      platform :schema.number(),
       RegularizationAppliedFrom:schema.number()
     }),
   };
