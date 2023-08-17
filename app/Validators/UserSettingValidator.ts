@@ -64,10 +64,11 @@ export default class UserSettingValidator  {
       })
    }
 
-   static Profileimage = {
+   static QrValidation = {
       schema:schema.create({
         empId:schema.number(),
-        orgId:schema.number()
+        orgId:schema.number(),
+        qRKioskPin:schema.number()
 
       })
    }

@@ -341,19 +341,22 @@ export default class Usersettingservice{
     
     }
 
-    // static async getProfileImage(data){
-    //   const orgId      = data.orgId;
-    //   const empId      = data.empId;
-    //   const result:any = {};
+    static async setQrKioskPin(data){
+      const orgId      = data.orgId;
+      const empId      = data.empId;
+      const Qr         = data.qRKioskPin;
+      const result:any = {};
 
-    //   const query = await Database.query().from('EmployeeMaster').select('ImageName','OrganizationId').where('id',empId).andWhere('OrganizationId',orgId);
-     
-    //   query.forEach((row) => {
-          
-    //       const imagename = row.ImageName;
+      const query = await Database.query().from('UserMaster').select('*').where('EmployeeId',empId).andWhere('OrganizationId',orgId);
 
-    //   })
-
-    // }
+      if(query.length > 0){
+         
+          const query2 = await Database.query().from('UserMaster').where('EmployeeId',empId).andWhere('OrganizationId',orgId).update({ kioskPin:Qr});
+          result['response'] = 1;
+      }else{
+          result['response'] = 0;
+      }
+        return result;
+    }
 
 }

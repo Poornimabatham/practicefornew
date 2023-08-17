@@ -8,7 +8,7 @@ Route.get("/Employeelist","UsersettingsController.getEmployeesList");
 Route.get("/getNotification","UsersettingsController.OrgCheck");
 Route.put("/notificationchange","UsersettingsController.Notification")
 Route.put("/updatenotification","UsersettingsController.UpdateNotification");
-Route.get("/getImageprofile","UsersettingsController.getProfileImage")
+Route.get("/SetQr","UsersettingsController.setQrKioskPin")
 
 
   

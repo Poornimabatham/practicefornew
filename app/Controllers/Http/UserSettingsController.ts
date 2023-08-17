@@ -56,10 +56,11 @@ export default class UsersettingsController {
        response.json(res);
     }
 
-    // public async getProfileImage({request,response}:HttpContextContract){
-    //    const Validdata = await request.validate(UserSettingValidator.Profileimage)
-    //    const res = await UserSettingService.getProfileImage(Validdata)
-    // }
+    public async setQrKioskPin({request,response}:HttpContextContract){
+       const Validdata = await request.validate(UserSettingValidator.QrValidation)
+       const res = await UserSettingService.setQrKioskPin(Validdata);
+       response.json(res)
+    }
 
 
 }
