@@ -21,9 +21,11 @@
     "youch-terminal": "^2.2.2"
   },
   "dependencies": {
+    "@adonisjs/auth": "^8.2.3",
     "@adonisjs/core": "^5.9.0",
     "@adonisjs/limiter": "^1.0.2",
     "@adonisjs/lucid": "^18.4.0",
+    "@adonisjs/redis": "^7.3.3",
     "@adonisjs/repl": "^3.1.11",
     "@rocketseat/adonis-timezone": "^0.7.0",
     "dayjs": "^1.11.9",

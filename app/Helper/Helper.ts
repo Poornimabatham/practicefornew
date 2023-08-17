@@ -2,6 +2,7 @@ const jwt = require("jsonwebtoken");
 import Database from "@ioc:Adonis/Lucid/Database";
 import EmployeeMaster from "App/Models/EmployeeMaster";
 import Organization from "App/Models/Organization";
+import ShiftMaster from "App/Models/ShiftMaster";
 import ZoneMaster from "App/Models/ZoneMaster";
 
 export default class Helper {
@@ -147,30 +148,30 @@ export default class Helper {
     }
   }
 
-
   public static async getEmpTimeZone(userid, orgid) {
-    const defaultZone = 'Asia/Kolkata';
-    const { CurrentCountry: country, timezone: id } = await EmployeeMaster.findByOrFail('Id', userid);
-    
+    const defaultZone = "Asia/Kolkata";
+    const { CurrentCountry: country, timezone: id } =
+      await EmployeeMaster.findByOrFail("Id", userid);
+
     if (id) {
       const zoneData = await ZoneMaster.find(id);
       return zoneData ? zoneData.Name : defaultZone;
     }
     if (!country) {
-      const organization = await Organization.findByOrFail('Id',orgid);
+      const organization = await Organization.findByOrFail("Id", orgid);
       if (organization) {
         const zoneData = await ZoneMaster.find(organization.TimeZone);
         return zoneData ? zoneData.Name : defaultZone;
       }
     } else {
-      const zoneData = await ZoneMaster.query().where('CountryId', country).first();
+      const zoneData = await ZoneMaster.query()
+        .where("CountryId", country)
+        .first();
       return zoneData ? zoneData.Name : defaultZone;
     }
-  
+
     return defaultZone;
   }
-
-}
 
   public static async getInterimAttAvailableSt(value: number) {
     const GetIntermAttendanceId = await Database.from("InterimAttendances")
@@ -209,11 +210,83 @@ export default class Helper {
   }
 
   public static async getEmpName(Id: number) {
-    const query = await Database.from("EmployeeMaster")
-      .select("FirstName","LastName")
+    const query  =  await Database.from("EmployeeMaster")
+      .select("FirstName", "LastName")
       .where("Id", Id)
-      .where("Is_Delete",0)
-    
+      .where("Is_Delete", 0);
+ 
     return query[0].FirstName;
+  }
+
+  public static async getShiftType(shiftId) {
+    const defaultshifttype = 0;
+    const allDataOfShiftMaster: any = await ShiftMaster.find(shiftId);
+    // console.log(allDataOfShiftMaster?.toSQL().toNative());
+
+    if (allDataOfShiftMaster) {
+      return allDataOfShiftMaster
+        ? allDataOfShiftMaster.shifttype
+        : defaultshifttype;
+    } else {
+      return defaultshifttype;
+    }
+  }
+
+  public static async getassignedShiftTimes(empid, ShiftDate) {
+    let getshiftid = await Database.from("ShiftPlanner")
+      .select("shiftid")
+      .where("empid", empid)
+      .andWhere("ShiftDate", ShiftDate);
+    if (getshiftid.length > 0) {
+      return getshiftid[0].shiftid;
+    } else {
+      let getshiftid = await Database.from("ShiftMaster")
+        .select("Id")
+        .where(
+          "id",
+          Database.rawQuery(
+            `(SELECT Shift FROM EmployeeMaster where id=${empid})`
+          )
+        );
+      if (getshiftid.length > 0) {
+        return getshiftid[0].Id;
+      }
+    }
+  }
+
+  public static async getAddonPermission(orgid: number, addon: string) {
+    let getaddonpermission = await Database.from("licence_ubiattendance")
+      .select(Database.raw(`${addon} as addon`))
+      .where("OrganizationId", orgid);
+    if (getaddonpermission.length > 0) {
+      return getaddonpermission[0].addon;
+    } else {
+      return 0;
+    }
+  }
+
+  public static async getNotificationPermission(
+    orgid: number,
+    notification: string
+  ) {
+    let getNotificationPermission = await Database.from("NotificationStatus")
+      .select(Database.raw(`${notification} as notification`))
+      .where("OrganizationId", orgid);
+    if (getNotificationPermission.length > 0) {
+      return getNotificationPermission[0].notification;
+    } else {
+      return 0;
+    }
+  }
+
+  public static async getShiftmultists(id: number) {
+    let getshiftMultiplests = await Database.from("ShiftMaster")
+      .select("MultipletimeStatus")
+      .where("Id", id);
+    if (getshiftMultiplests.length > 0) {
+      return getshiftMultiplests[0].MultipletimeStatus;
+    } else {
+      return 0;
+    }
   }
 }

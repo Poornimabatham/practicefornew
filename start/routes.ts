@@ -17,6 +17,7 @@
 | import './routes/customer'
 |
 */
+import Route from '@ioc:Adonis/Core/Route'
 
 
 import "../app/Routes/EmployeeRoute"
@@ -35,6 +36,19 @@ import  '../app/Routes/getEarlyLeavingsRoutes'
 import "../app/Routes/LateComingRoute"
 import "../app/Routes/Report/GetplannerRoute"
 import "../app/Routes/AttendanceRoute"
+import Redis from '@ioc:Adonis/Addons/Redis'
+
+// Route.get('/', async () => {
+//     return "Working fine!"
+// })
+
+
+
+Route.get('/', async () => {
+await Redis.set('hello', 'world')
+const value = await Redis.get('hello')
+    return value
+})
 
 
 
