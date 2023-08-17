@@ -27,6 +27,7 @@ export default class Helper {
     return query2[0].FirstName;
 
   }
+
   public static generateToken(secretKey: string, data: any = {}) {
     try {
 
@@ -35,6 +36,7 @@ export default class Helper {
         Id: data.empid,
       }
       const options = {
+        
         expiresIn: "1h",
         issuer: "Ubiattendace App",
       }
@@ -48,6 +50,19 @@ export default class Helper {
       return 0;
     }
   }
+
+    public static async getAdminStatus(empid){
+      
+      const query3 = await Database.query().from('UserMaster').select('appSuperviserSts').where('EmployeeId',empid);
+      return query3[0].appSuperviserSts;
+
+    }
+
+    public static async getDepartmentIdByEmpID(empid){
+       const query4 = await Database.query().from('DepartmentMaster').select('Id').where('id',Database.raw(`(select   Department from EmployeeMaster where id = ${empid})`));
+       return query4[0].Id;
+    }
+
 
 
 
