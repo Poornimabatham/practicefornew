@@ -289,4 +289,12 @@ export default class Helper {
       return 0;
     }
   }
+
+    static async getCountryIdByOrg(orgid:number)
+    {
+      const query:any =  await Database.query().from('Organization').select('Country').where('Id',orgid)
+      return query
+    }
+
+    
 }
