@@ -36,6 +36,8 @@ import  '../app/Routes/getEarlyLeavingsRoutes'
 import "../app/Routes/LateComingRoute"
 import "../app/Routes/Report/GetplannerRoute"
 import "../app/Routes/AttendanceRoute"
+import  "../app/Routes/ClientsRoute"
+import "../app/Routes/getInfoRoute"
 import Redis from '@ioc:Adonis/Addons/Redis'
 
 // Route.get('/', async () => {
@@ -49,6 +51,7 @@ await Redis.set('hello', 'world')
 const value = await Redis.get('hello')
     return value
 })
+
 
 
 
