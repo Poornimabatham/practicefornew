@@ -23,8 +23,8 @@
     "@adonisjs/core",
     "@adonisjs/lucid",
     "@adonisjs/limiter",
-    "@adonisjs/auth",
-    "@adonisjs/drive-s3"
+    "@adonisjs/redis",
+    "@adonisjs/auth"
   ],
   "aceProviders": [
     "@adonisjs/repl"
