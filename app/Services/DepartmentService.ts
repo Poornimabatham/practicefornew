@@ -55,9 +55,9 @@ export default class DepartmentService {
     return query1;
   }
 
-  public static async updatedept(data) {
+  public static async updatedept(data)
+   {
     var currentdate = new Date();
-
     const query = await Database.from("DepartmentMaster")
       .select("Id", "OrganizationId", "Name")
       .where("Id", data.Id)

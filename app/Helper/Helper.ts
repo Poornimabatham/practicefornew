@@ -4,7 +4,7 @@ import Database from "@ioc:Adonis/Lucid/Database";
 
 export default class Helper{
 
-    public static async encode5t(str:any)
+    public static  encode5t(str:any)
     {
         for (let i = 0; i < 5; i++) {
             str = Buffer.from(str).toString('base64');
@@ -51,5 +51,21 @@ export default class Helper{
           return 0;
       }
   }
+
+
+  static async getAdminStatus(empid:number)
+    {
+      const query:any =  await Database.query().from('UserMaster').select('appSuperviserSts').where('EmployeeId',empid)
+      //console.log(query.toSQL().toNative());
+      
+      return query
+    }
+    static async getCountryIdByOrg(orgid:number)
+    {
+      const query:any =  await Database.query().from('Organization').select('Country').where('Id',orgid)
+      return query
+    }
+
+    
 }
 
