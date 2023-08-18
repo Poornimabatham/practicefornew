@@ -267,7 +267,6 @@ export default class getCDateAttnDeptWiseService {
         return MegedArrayResult;
       }
     } else if (getData.datafor == "latecomings") {
-      console.log("late");
 
       var getdataforLatecomings = Database.from("EmployeeMaster AS E")
         .innerJoin("AttendanceMaster AS AM", "E.Id", "AM.EmployeeId")
