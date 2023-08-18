@@ -129,13 +129,6 @@ export default class DesignationService {
     return designationList;
   }
 
-
-
-
-
-
-
-
   // Update designation Method
   public static async updateDesignation(c) {
 
