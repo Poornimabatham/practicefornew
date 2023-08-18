@@ -73,6 +73,15 @@ export default class UserSettingValidator  {
       })
    }
 
+   static ChangeQR = {
+     schema:schema.create({
+      userId:schema.number(),
+      orgId:schema.number(),
+      oldPin:schema.number(),
+      newPin:schema.number()
+     })
+   }
+
   /**
    * Custom messages for validation failures. You can make use of dot notation `(.)`
    * for targeting nested fields and array expressions `(*)` for targeting all

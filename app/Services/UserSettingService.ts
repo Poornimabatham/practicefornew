@@ -1,7 +1,7 @@
 import Database from "@ioc:Adonis/Lucid/Database";
 import helper from '../Helper/Helper'
 import Helper from "../Helper/Helper";
-import { DateTime } from "luxon";
+
 
 
 export default class Usersettingservice{
@@ -331,8 +331,7 @@ export default class Usersettingservice{
          }else{
            res['status'] = true
          }
-
-          return res;
+           return res;
 
       }else{
           res['status'] = 'No Update';
@@ -349,14 +348,47 @@ export default class Usersettingservice{
 
       const query = await Database.query().from('UserMaster').select('*').where('EmployeeId',empId).andWhere('OrganizationId',orgId);
 
-      if(query.length > 0){
+      if(query.length > 0)
+      {
          
           const query2 = await Database.query().from('UserMaster').where('EmployeeId',empId).andWhere('OrganizationId',orgId).update({ kioskPin:Qr});
-          result['response'] = 1;
+         
+          if(query2.length > 0)
+          {
+            result['response'] = 1;
+          }
+            result['response'] = 0;
+              
       }else{
-          result['response'] = 0;
+           result['response'] = 0;
       }
-        return result;
+           return result;
+    }
+
+    static async ChangeQrKioskPin(data){
+
+      const empId  = data.userId;
+      const orgId  = data.orgId;
+      const oldPin = data.oldPin;
+      const newPin = data.newPin;
+      const result = {};
+
+      const query = await Database.query().from('UserMaster').select('kioskPin').where('EmployeeId',empId).andWhere('OrganizationId',orgId).andWhere('kioskPin',oldPin);
+    
+      if(query.length > 0){
+        
+        const query12 = await Database.query().from('UserMaster').where('EmployeeId',empId).andWhere('OrganizationId',orgId).update({kioskPin:newPin})
+
+        if(query12.length > 0){
+           result['status'] = 1;
+        }else{
+           result['status'] = 0;
+        }
+
+      }else{
+          result['status'] = 2;
+      }
+          return result;
     }
 
 }

@@ -9,6 +9,7 @@ Route.get("/getNotification","UsersettingsController.OrgCheck");
 Route.put("/notificationchange","UsersettingsController.Notification")
 Route.put("/updatenotification","UsersettingsController.UpdateNotification");
 Route.get("/SetQr","UsersettingsController.setQrKioskPin")
+Route.put("/ChangeQR","UsersettingsController.ChangeQrKioskPin")
 
 
   
