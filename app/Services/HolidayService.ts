@@ -8,15 +8,26 @@ export default class HolidayService {
   const currentPage = 2;
   const perPage = 10;
   const begin = (currentPage - 1) * perPage;
+  const CurrYear = moment().format("yyyy")
+  const currentYear = new Date().getFullYear();
+  const nextYear = currentYear + 1;   // Calculate the next year
+  const startfiscaldate = "04-01"
+  const endfiscaldate = "03-31"
+  
+  const startfiscalyear =  CurrYear +"-"+ startfiscaldate ; // concat CurrYear with startfiscaldate
+  const endfiscalyear = nextYear +"-"+ endfiscaldate;  // concat nextYear with endfiscaldate
   
   const FetchHolidays = Database.query()
   .from("HolidayMaster")
   .select("Id","Name","Description","DateTo","OrganizationId",
     Database.raw("DATE(DateFrom) AS fromDate"),
     Database.raw("DATEDIFF(DATE(DateTo),DATE(DateFrom))   AS DiffDate"),"DateFrom")
-  .where("OrganizationId",OrgId.OrgId).orderBy("fromDate", "asc")
-  .limit(perPage).offset(begin)
-
+  .where("OrganizationId",OrgId.OrgId)
+  .whereBetween("DateFrom",[startfiscalyear,endfiscalyear])
+  .whereBetween("DateTo",[startfiscalyear,endfiscalyear])
+  .orderBy("fromDate", "asc")
+  .limit(begin)
+  
   interface DefineTypes{
    Id:number,
    Name:string,
