@@ -251,7 +251,7 @@ export default class ShiftsService {
       .toString()
       .padStart(2, "0")}`;
     let result: any = {};
-    const orgid: any = await helper.getOrgId(uid);
+    const orgid = uid;  // get from req. parameters
     const row = await Database.query()
       .from("ShiftMaster")
       .select("*")
@@ -288,11 +288,11 @@ export default class ShiftsService {
   static async assignShift(data) {
     const Orgid = data.Orgid;
     const shiftid = data.shiftid;
-    const shiftname = data.shiftname;
+    // const shiftname = data.shiftname;
     const empid = data.empid;
-    const empname = data.empname;
-    const adminid = data.adminid;
-    const adminname = data.adminname;
+    // const empname = data.empname;
+    // const adminid = data.adminid;
+    // const adminname = data.adminname;
     const result= {};
     const row: any = await Database.query()
       .from("EmployeeMaster")
@@ -313,7 +313,7 @@ export default class ShiftsService {
   static async deleteInActivateShift(data) { 
     const orgid = data.orgId;
     const Id = data.id;
-    const empId = data.empId;
+    // const empId = data.empId;
     const result= {};
     let ShiftName :any = await helper.getShiftName(Id, orgid);
     console.log(ShiftName);
