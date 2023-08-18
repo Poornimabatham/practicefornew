@@ -396,9 +396,7 @@ export default class DailyAttendanceService {
             }
         }
 
-
         else if (data.dataFor == 'latecomings') {
-
 
             var DepartmentCondition
             if (adminStatus == 2) {
@@ -415,7 +413,7 @@ export default class DailyAttendanceService {
                 AttendanceDate = currDate;
             }
 
-            //Today's Late Comers
+
             var LateComingsQuery = Database.from('EmployeeMaster as E').select(
                 Database.raw(`CONCAT(FirstName,' ',LastName) as name`),
                 Database.raw(`SUBSTR(TimeIn,1,5) as 'TimeIn'`),
@@ -494,6 +492,123 @@ export default class DailyAttendanceService {
             return data['latecomings'];
         }
 
+        else if (data.dataFor == "earlyleavings")
+
+
+            if (adminStatus == 2) {
+                var DepartmentId = await Helper.getDepartmentIdByEmpId(data.EmployeeId);
+                departmentCondition = `Dept_id=${DepartmentId}`;
+            }
+
+        if (data.date != undefined && data.date != " ") {
+            var AttDate = data.date;
+            AttendanceDate = AttDate.toFormat('yyyy-MM-dd');
+        }
+        else {
+            var currDate = moment().format('YYYY-MM-DD');
+            AttendanceDate = currDate;
+        }
+
+        var earlyLeavingsQuery = Database.from('AttendanceMaster as A').select(
+            Database.raw(`CONCAT(E.FirstName,' ',E.LastName) as name`),
+            Database.raw(`SUBSTRING_INDEX(A.EntryImage, '.com/', -1) as EntryImage`),
+            Database.raw(`SUBSTRING_INDEX(A.ExitImage, '.com/', -1) as ExitImage`),
+            Database.raw(`SUBSTR(A.checkInLoc, 1, 40) as checkInLoc`),
+            Database.raw(` SUBSTR(A.CheckOutLoc, 1, 40) as CheckOutLoc`),
+            'A.TimeIn as TimeIn', 'A.TimeOut as TimeOut', 'A.Desg_id',
+            'A.ShiftId', 'A.latit_in', 'A.longi_in', 'A.latit_out', 'A.longi_out', 'A.Id', 'A.multitime_sts', 'A.TotalLoggedHours', 'S.TimeIn as ShiftTimeIn', 'S.TimeOut as ShiftTimeOut')
+            .innerJoin('EmployeeMaster as E', 'A.EmployeeId', 'E.Id')
+            .innerJoin('ShiftMaster as S ', 'A.ShiftId', 'S.Id')
+            .where('A.OrganizationId', data.OrganizationId)
+            .where('A.Is_Delete', 0)
+            .whereRaw(`CASE WHEN (S.shifttype=2 AND A.timeindate= A.timeoutdate) 
+            THEN CONCAT(DATE_ADD(A.AttendanceDate, INTERVAL 1 DAY),' ',S.TimeOut) 
+            WHEN(S.shifttype=2 AND A.timeindate!=A.timeoutdate) 
+            THEN CONCAT(DATE_ADD(A.AttendanceDate, INTERVAL 1 DAY),' ',S.TimeOut)
+            ELSE CONCAT(A.AttendanceDate,' ',S.TimeOut)END >  CASE 
+            WHEN (A.timeoutdate!='0000-00-00') 
+            THEN CONCAT(A.timeoutdate,' ',A.TimeOut)  
+            WHEN(S.shifttype=2 AND A.timeindate!=A.timeoutdate)
+            THEN  CONCAT(A.timeoutdate,' ',A.TimeOut) 
+            ELSE CONCAT(A.AttendanceDate,' ',A.TimeOut) END  And A.TimeIn!='00:00:00' And A.TimeOut!='00:00:00' and A.AttendanceStatus NOT IN(2,3,5) And 
+            (CASE WHEN (A.timeoutdate!='0000-00-00')  
+            THEN (
+            CASE WHEN (S.shifttype=2 AND A.timeindate=A.timeoutdate) 
+            THEN TIMEDIFF(CONCAT(DATE_ADD(A.AttendanceDate, INTERVAL 1 DAY),' ',S.TimeOut),CONCAT(A.AttendanceDate,' ',A.TimeOut))       
+            ELSE TIMEDIFF((  
+            CASE WHEN (S.shifttype=2 AND A.timeindate!=A.timeoutdate) 
+            THEN CONCAT(DATE_ADD(A.AttendanceDate, INTERVAL 1 DAY),' ',S.TimeOut) 
+            ELSE  CONCAT(A.AttendanceDate,' ',S.TimeOut) END ) ,CONCAT(A.timeoutdate,' ',A.TimeOut)) END)
+            ELSE SUBTIME(S.TimeOut, A.TimeIn) END) > '00:00:59'
+            And A.TimeIn!='00:00:00' 
+            And A.TimeOut!='00:00:00' 
+            OR A.AttendanceDate=${AttendanceDate} 
+            And S.shifttype!=3 ORDER BY E.FirstName ASC`)
+            .limit(limit)
+            .offset(offset)
+
+        // if (data.DesignationId != 0 && data.DesignationId != undefined) {
+        //     designationCondition = `Desg_id= ${data.DesignationId}`;              // From AttendanceMaster
+        //     earlyLeavingsQuery.whereRaw(designationCondition);
+        // }
+
+        if (departmentCondition != undefined) {
+            earlyLeavingsQuery.whereRaw(departmentCondition);
+        }
+        var earlyLeavingsQueryResult = await earlyLeavingsQuery;
+
+        // return earlyLeavingsQueryResult
+
+
+        interface earlyLeavingsInterface {
+            shift: string,
+            name: string,
+            TimeIn: string,
+            TimeOut: string,
+            EntryImage: string,
+            ExitImage: string,
+            CheckOutLoc: string,
+            checkInLoc: string,
+            latit_in: string,
+            longi_in: string,
+            latit_out: string,
+            longi_out: string,
+            status: string,
+            Id: number,
+            multitime_sts: string,
+            shiftType: number,
+            getInterimAttAvailableSts: string,
+            TotalLoggedHours: string
+        }
+        var earlyleavings: earlyLeavingsInterface[] = [];
+
+        if (earlyLeavingsQueryResult.length > 0) {
+
+            earlyLeavingsQueryResult.forEach(row => {
+                const earlyleavingsList: earlyLeavingsInterface = {
+                    shift:,
+                    name: row.name,
+                    TimeIn: row.TimeIn,
+                    TimeOut: row.TimeOut,
+                    EntryImage: row.EntryImage,
+                    ExitImage: row.ExitImage,
+                    CheckOutLoc: row.CheckOutLoc,
+                    checkInLoc: row.checkInLoc,
+                    latit_in: row.latit_in,
+                    longi_in: row.longi_in,
+                    latit_out: row.latit_out,
+                    longi_out: row.longi_out,
+                    status: row.status,
+                    Id: row.status,
+                    multitime_sts: row.multitime_sts,
+                    shiftType:
+                        getInterimAttAvailableSts:,
+                    TotalLoggedHours: row.TotalLoggedHours
+                }
+                earlyleavings.push(earlyleavingsList)
+            })
+            data['earlyleavings'] = earlyleavings;
+        }
     }
 }
 
