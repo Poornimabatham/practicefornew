@@ -6,8 +6,6 @@ import ShiftMaster from "App/Models/ShiftMaster";
 import ZoneMaster from "App/Models/ZoneMaster";
 
 export default class Helper {
-  
-
   public static encode5t(str: any) {
     for (let i = 0; i < 5; i++) {
       str = Buffer.from(str).toString("base64");
@@ -32,8 +30,22 @@ export default class Helper {
         "id",
         Database.raw(
           `(select TimeZone from Organization where id =${orgid}  LIMIT 1)`
-        )); 
-    return  query1[0].name;
+        )
+      );
+    return query1[0].name;
+  }
+
+  public static async getAdminStatus(id: any) {
+    let status = 0;
+    const queryResult = await Database.query()
+      .from("UserMaster")
+      .select("appSuperviserSts")
+      .where("EmployeeId", id)
+      .first();
+    if (queryResult) {
+      status = queryResult.appSuperviserSts;
+    }
+    return status;
   }
 
   public static async getempnameById(empid: number) {
@@ -81,19 +93,21 @@ export default class Helper {
     }
     return 0;
   }
-  public static FirstLettercapital(sentence:string) {
+  public static FirstLettercapital(sentence: string) {
     var words = sentence.split(" ");
-    var capitalizedWords = words.map(function(word) {
+    var capitalizedWords = words.map(function (word) {
       return word.charAt(0).toUpperCase() + word.slice(1);
     });
     return capitalizedWords.join(" ");
   }
 
   public static async getCountryIdByOrg1(orgid: number) {
-    const getCountryId = await Database.from("Organization").select("Country").where("Id", orgid);
+    const getCountryId = await Database.from("Organization")
+      .select("Country")
+      .where("Id", orgid);
     if (getCountryId.length > 0) {
       const CountryId: number = getCountryId[0].Country;
-      return CountryId; 
+      return CountryId;
     }
     return 0;
   }
@@ -212,11 +226,11 @@ export default class Helper {
   }
 
   public static async getEmpName(Id: number) {
-    const query  =  await Database.from("EmployeeMaster")
+    const query = await Database.from("EmployeeMaster")
       .select("FirstName", "LastName")
       .where("Id", Id)
       .where("Is_Delete", 0);
- 
+
     return query[0].FirstName;
   }
 
@@ -292,17 +306,11 @@ export default class Helper {
     }
   }
 
-    static async getCountryIdByOrg(orgid:number)
-    {
-      const query:any =  await Database.query().from('Organization').select('Country').where('Id',orgid)
-      return query
-    }
-
-    public static async getempnameById(empid: number) {
-      const query2 = await Database.query().from('EmployeeMaster').select('FirstName').where('Id', empid);
-      return query2[0].FirstName;
-  
-    }
-
-    
+  static async getCountryIdByOrg(orgid: number) {
+    const query: any = await Database.query()
+      .from("Organization")
+      .select("Country")
+      .where("Id", orgid);
+    return query;
+  }
 }
