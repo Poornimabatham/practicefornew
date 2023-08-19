@@ -7,6 +7,7 @@
 
 // import User from 'App/Models/userModel'
 
+
 // declare module '@ioc:Adonis/Addons/Auth' {
 //   /*
 //   |--------------------------------------------------------------------------
@@ -38,6 +39,7 @@
 //       config: LucidProviderConfig<typeof User>
 //     }
 //   }
+
 
 //   /*
 //   |--------------------------------------------------------------------------

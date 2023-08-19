@@ -2,6 +2,8 @@ const jwt = require("jsonwebtoken");
 import Database from "@ioc:Adonis/Lucid/Database";
 
 export default class Helper {
+  
+
   public static encode5t(str: any) {
     for (let i = 0; i < 5; i++) {
       str = Buffer.from(str).toString("base64");
@@ -25,10 +27,10 @@ export default class Helper {
       .where(
         "Id",
         Database.raw(
-          `(select TimeZone from Organization where Id =${orgid}  LIMIT 1)`
-        )
-      );
-    return query1[0].name;
+
+          `(select TimeZone from Organization where id =${orgid}  LIMIT 1)`
+        )); 
+    return  query1[0].name;
   }
 
   public static async getempnameById(empid: number) {
@@ -77,10 +79,8 @@ export default class Helper {
     const EmpQuery = await Database.from("EmployeeMaster")
       .select("Department")
       .where("id", empid);
-
     if (EmpQuery.length > 0) {
       const departmentId: number = EmpQuery[0].Department;
-
       const DepQuery = await Database.from("DepartmentMaster")
         .select("Id")
         .where("Id", departmentId);
@@ -88,6 +88,23 @@ export default class Helper {
       if (DepQuery.length > 0) {
         return DepQuery[0].Id;
       }
+    }
+    return 0;
+  }
+  public static FirstLettercapital(sentence:string) {
+    var words = sentence.split(" ");
+    var capitalizedWords = words.map(function(word) {
+      return word.charAt(0).toUpperCase() + word.slice(1);
+    });
+    return capitalizedWords.join(" ");
+  }
+
+
+  public static async getCountryIdByOrg1(orgid: number) {
+    const getCountryId = await Database.from("Organization").select("Country").where("Id", orgid);
+    if (getCountryId.length > 0) {
+      const CountryId: number = getCountryId[0].Country;
+      return CountryId; 
     }
     return 0;
   }
@@ -298,11 +315,24 @@ export default class Helper {
     }
   }
 
-  static async getCountryIdByOrg(orgid: number) {
-    const query: any = await Database.query()
-      .from("Organization")
-      .select("Country")
-      .where("Id", orgid);
-    return query;
-  }
+    static async getCountryIdByOrg(orgid:number)
+    {
+      const query:any =  await Database.query().from('Organization').select('Country').where('Id',orgid)
+      return query
+    }
+
+    public static async getAdminStatus(id: any) {
+      let status = 0;
+      const queryResult = await Database.query().from('UserMaster')
+        .select('appSuperviserSts')
+        .where('EmployeeId', id)
+        .first();
+  
+      if (queryResult) {
+        status = queryResult.appSuperviserSts;
+      }
+  
+      return status;
+    }
+    
 }

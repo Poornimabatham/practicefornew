@@ -35,6 +35,7 @@
 //     api: {
 //       driver: 'oat',
 
+
 //       /*
 //       |--------------------------------------------------------------------------
 //       | Redis provider for managing tokens
@@ -57,6 +58,7 @@
 //         redisConnection: 'local',
 //         foreignKey: 'user_id',
 //       },
+
 
 //       provider: {
 //         /*

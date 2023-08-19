@@ -119,7 +119,7 @@ export default class DepartmentService {
     if (selectQuery.length > 0) {
       result['status'] = '-1';
       return false
-    }
+    }  
 
     const query1 = await Database.from('DepartmentMaster').select('Name', 'archive').where('OrganizationId', orgId).andWhere('Id', DeptId);
 
