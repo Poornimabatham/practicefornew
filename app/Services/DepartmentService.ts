@@ -3,7 +3,6 @@ import Helper from "App/Helper/Helper";
 import { DateTime } from 'luxon';
 import moment from 'moment-timezone';
 
-
 export default class DepartmentService {
 
   public static async getdepartment(data) {
@@ -27,7 +26,7 @@ export default class DepartmentService {
     const departmentList = await Database.from('DepartmentMaster').select('Id', Database.raw(`if(LENGTH("Name") > 30, concat(SUBSTR("Name", 1, 30), '....'), Name) as Name ,'archive'`)).where('OrganizationId', data.OrganizationId).orderBy('Name').limit(limit).offset(offset);
 
 
-    var result: department[] = [];         //declared result as an empty array with type department
+    var result: department[] = []; //declared result as an empty array with type department
 
     departmentList.forEach((row) => {
       const data: department = {
@@ -71,7 +70,7 @@ export default class DepartmentService {
     if (insertQuery.length > 0) {
 
       var zone = await Helper.getTimeZone(data.OrganizationId);
-      var timeZone = zone[0]?.name;
+      var timeZone = zone;
       var defaulttimeZone = moment().tz(timeZone).toDate();
       const dateTime = DateTime.fromJSDate(defaulttimeZone);    //converts the JavaScript Date object to a Luxon DateTime
       const formattedDate = dateTime.toFormat('yy-MM-dd HH:mm:ss');
@@ -81,7 +80,7 @@ export default class DepartmentService {
       var appModule = "Department";
       var activityBy = 1;
 
-      const InsertQuery = await Database.insertQuery().table('ActivityHistoryMaster')
+      await Database.insertQuery().table('ActivityHistoryMaster')
         .insert({
           LastModifiedDate: formattedDate,
           LastModifiedById: uid,
@@ -95,20 +94,17 @@ export default class DepartmentService {
 
       result['status'] = '1';
     }
-
     return result['status'];
-
   }
-
 
   public static async updateDepartment(data) {
 
     var result = [];
-    result['status'] = '0';         // Bydefault result
+    result['status'] = '0';
     const date = DateTime.now();
     const formattedDate = date.toFormat('yy-MM-dd');
-    var orgId = await Helper.getOrgId(data.Id);
-    var DeptId = data.Id;
+    var DeptId = data.DId;
+    var orgId = data.OrganizationId;
 
     var selectQuery = await Database.from("DepartmentMaster")
       .select("Id")
@@ -118,7 +114,7 @@ export default class DepartmentService {
       .andWhere("archive", data.archive);
 
     if (selectQuery.length > 0) {
-      result['status'] = '-1';
+      result['status'] = '-1'; /// department already exist
       return false
     }  
 
@@ -140,7 +136,6 @@ export default class DepartmentService {
     else if (name == data.Name && status != data.archive) {
       archiveStatus = data.archive;
     }
-
     const updateQuery = await Database.query()
       .from("DepartmentMaster")
       .where("Id", DeptId)
@@ -152,8 +147,9 @@ export default class DepartmentService {
       });
 
     if (updateQuery) {
+
       var zone = await Helper.getTimeZone(orgId);
-      var timeZone = zone[0]?.name;
+      var timeZone = zone;
       var defaulttimeZone = moment().tz(timeZone).toDate();
       const dateTime = DateTime.fromJSDate(defaulttimeZone);
       const formattedDate = dateTime.toFormat('yy-MM-dd HH:mm:ss');
@@ -161,7 +157,7 @@ export default class DepartmentService {
       var appModule = "Department";
       var actionperformed;
       var activityBy = 1;
-      var getEmpName = await Helper.getempnameById(DeptId)
+      var getEmpName = await Helper.getEmpName(data.EmpID)       //getemployeeName
 
       if (archiveStatus == 2) {
         actionperformed = ` ${data.Name} department has been edited by ${getEmpName} `;
@@ -175,7 +171,7 @@ export default class DepartmentService {
         actionperformed = `${data.Name} department has been inactive by ${getEmpName} `;
       }
 
-      const insertQuery = await Database.table('ActivityHistoryMaster').insert({
+      await Database.table('ActivityHistoryMaster').insert({
         LastModifiedDate: formattedDate,
         LastModifiedById: DeptId,
         Module: module,
