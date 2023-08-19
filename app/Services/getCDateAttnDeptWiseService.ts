@@ -153,10 +153,13 @@ export default class getCDateAttnDeptWiseService {
         if ((await GetOthersdaysAbsentees).length > 0) {
           var storeReponse: getdataforAbsenteesInterface[] = [];
           var queryResult = await GetOthersdaysAbsentees;
-
+          //console.log(//queryResult);
+          //var i=0;
           queryResult.forEach(function (val) {
             var Name;
-            var Getname = queryResult[0].name;
+            var Getname = val.name.trim(" ",true);
+            //console.log(Getname.split(" "));
+            
             if (Getname.split(" ").length > 3) {
               var words = Getname.split(" ", 4);
               var firstthree = words.slice(0, 3);
@@ -165,11 +168,12 @@ export default class getCDateAttnDeptWiseService {
               Name = Getname;
             }
             var getdata: getdataforAbsenteesInterface = {
-              name: val.name,
+              name: Name,
               LeaveStatus: val.LeaveStatus,
               TimeIn: val.TimeIn,
               TimeOut: val.TimeOut,
             };
+            //i++;
             storeReponse.push(getdata);
           });
         } else {
@@ -253,7 +257,7 @@ export default class getCDateAttnDeptWiseService {
               Name = Getname;
             }
             var getdata: getdataforAbsenteesInterface = {
-              name: val.name,
+              name: val.Name,
               LeaveStatus: val.LeaveStatus,
               TimeIn: val.TimeIn,
               TimeOut: val.TimeOut,

@@ -1,26 +1,24 @@
 import Database from "@ioc:Adonis/Lucid/Database";
 import Helper from "App/Helper/Helper";
-// import { Connection } from "mysql2/typings/mysql/lib/Connection";
-// const moment = require("moment-timezone");
+const moment = require("moment-timezone");
+import { DateTime } from "luxon";
 
 export default class DesignationService {
   public static async AddDesignation(a) {
     const currentDate = new Date();
-     console.log(currentDate);
-     
-  
+    console.log(currentDate);
+
     var designationList = await Database.query()
       .from("DesignationMaster")
       .where("Name", a.name)
       .andWhere("OrganizationId", a.orgid)
       .select("Id");
-      console.log(designationList);
-   
+    console.log(designationList);
 
     const result: any = [];
 
-     const affectedRows = designationList.length;
-    console.log(affectedRows)
+    const affectedRows = designationList.length;
+    console.log(affectedRows);
 
     if (affectedRows > 0) {
       result["status"] = -1;
@@ -40,7 +38,7 @@ export default class DesignationService {
         Code: 8,
         RoleId: 9,
         Description: a.desc,
-        archive: '1',
+        archive: "1",
         daysofnotice: "YourDaysOfNoticeValue",
         add_sts: "YourAddStsValue",
       });
@@ -48,21 +46,25 @@ export default class DesignationService {
     const affectedRows2 = insertDesignation.length;
 
     if (affectedRows2 > 0) {
-      // const timezone = await Helper.getTimeZone(a.orgid);
+      const timezone = await Helper.getTimeZone(a.orgid);
 
-      // const currentDateTime = moment().tz(timezone);
-      // const date = new Date();
-      // const module = "Attendance app";
+      var defaulttimeZone = moment().tz(timezone).toDate();
+      const dateTime = DateTime.fromJSDate(defaulttimeZone);
+      const formattedDate = dateTime.toFormat("yy-MM-dd HH:mm:ss");
+
+      const module = "Attendance app";
       const appModule = "Designation";
       const activityby = 1;
       const actionPerformed = await Helper.getempnameById(a.uid);
 
-    await Database.insertQuery()
+      const actionperformed2 = `${a.name} Designation  has been Added by  ${actionPerformed}from Attendance App`;
+
+      const insertActivityHistoryMaster = await Database.insertQuery()
         .table("ActivityHistoryMaster")
         .insert({
           LastModifiedDate: formattedDate,
           LastModifiedById: a.uid,
-          ActionPerformed: actionPerformed,
+          ActionPerformed: actionperformed2,
           Module: module,
           OrganizationId: a.orgid,
           ActivityBy: activityby,
@@ -97,10 +99,8 @@ export default class DesignationService {
     if (a.status != undefined) {
       getDesignationList = getDesignationList.where("Archive", a.status);
     }
-    // const currentDate = new Date();
 
-    const result = await designationList;
-    // const s: any[] = [];
+    const result = await getDesignationList;
     var res = 0;
     result.forEach(function (val) {
       const data: any = {};
@@ -130,7 +130,6 @@ export default class DesignationService {
     return getDesignationList;
   }
 
-  // Update designation Method
   public static async updateDesignation(c) {
     const result: any[] = [];
 
@@ -158,14 +157,11 @@ export default class DesignationService {
     let name = "";
     let sts1 = "";
 
-     await designationList2;
-    // const count3 = designationList2.length;
-
-    //let res: any ;
+    var res: any = "";
     if (name != c.UpdateName) {
-    //  res = 2;
+      res = 2;
     } else if (name == c.UpdateName && c.sts != sts1) {
-     // res = c.sts;
+      res = c.sts;
     }
 
     var updateDesignaion: any = await Database.query()
@@ -182,20 +178,27 @@ export default class DesignationService {
     const count = await updateDesignaion;
     if (count > 0) {
       const timezone = await Helper.getTimeZone(c.Updateorgid);
-      const zone = timezone;
-      console.log(zone);
-      // const currentDateTime = moment().tz(zone);
 
-      // const date = new Date();
-      // const module = "Attendance app";
+      var defaulttimeZone = moment().tz(timezone).toDate();
+      const dateTime = DateTime.fromJSDate(defaulttimeZone);
+      const formattedDate = dateTime.toFormat("yy-MM-dd HH:mm:ss");
+
+      const module = "Attendance app";
       const appModule = "Designation";
 
       let actionperformed;
       var activityBy = 1;
       var getempname = await Helper.getempnameById(c.Updateid);
 
-      // const activityby = 1;
-       await Database.insertQuery()
+      if (res == 2) {
+        actionperformed = `${c.UpdateName} designation has been edited by ${getempname} `;
+      } else if (res == 1) {
+        actionperformed = `${c.UpdateName} designation has been active by ${getempname} `;
+      } else {
+        actionperformed = `${c.UpdateName} designation has been inactive by ${getempname} `;
+      }
+
+      const insertActivityHistoryMaster: any = await Database.insertQuery()
         .table("ActivityHistoryMaster")
         .insert({
           ActionPerformed: actionperformed,
