@@ -28,8 +28,8 @@ export default class GetapprovalRegularService {
     }
 
     if (data.attendance_id != "" && data.attendance_id != 0) {
-      try {
-        var selectAttendanceMasterList: any = await Database.from(
+      
+        const selectAttendanceMasterList: any = await Database.from(
           "AttendanceMaster"
         )
           .select(
@@ -75,7 +75,7 @@ export default class GetapprovalRegularService {
                 .limit(4);
 
               if (data.approverresult == 2) {
-                selectAttendanceMasterList = await Database.from(
+                const selectAttendanceMasterList = await Database.from(
                   "AttendanceMaster"
                 )
                   .select("*")
@@ -373,9 +373,7 @@ export default class GetapprovalRegularService {
             })
           );
         }
-      } catch (err) {
-        console.log(err);
-      }
+      
     }
 
     if (count >= 1) {

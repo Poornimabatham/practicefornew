@@ -35,7 +35,7 @@ export default class Helper {
     return query1[0].name;
   }
 
-  public static async getmpnameById(empid: number) {
+  public static async getempnameById(empid: number) {
     const query2 = await Database.query()
       .from("EmployeeMaster")
       .select("FirstName")

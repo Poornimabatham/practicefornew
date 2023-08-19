@@ -44,7 +44,7 @@ var GetapprovalRegularService = /** @class */ (function () {
     }
     GetapprovalRegularService.GetregularizationApproverRejectedAPI = function (data) {
         return __awaiter(this, void 0, void 0, function () {
-            var ActivityBy, module, count, count1, successMsg, Msg1, Msg, status, count11, con, regularizetimein, totalovertime, newtimeout, selectAttendanceMasterList, err_1, response;
+            var ActivityBy, module, count, count1, successMsg, Msg1, Msg, status, count11, con, regularizetimein, totalovertime, newtimeout, selectAttendanceMasterList_1, response;
             var _this = this;
             return __generator(this, function (_a) {
                 switch (_a.label) {
@@ -69,20 +69,17 @@ var GetapprovalRegularService = /** @class */ (function () {
                             ActivityBy = 1;
                             module = "ubiattendance APP";
                         }
-                        if (!(data.attendance_id != "" && data.attendance_id != 0)) return [3 /*break*/, 6];
-                        _a.label = 1;
-                    case 1:
-                        _a.trys.push([1, 5, , 6]);
+                        if (!(data.attendance_id != "" && data.attendance_id != 0)) return [3 /*break*/, 3];
                         return [4 /*yield*/, Database_1["default"].from("AttendanceMaster")
                                 .select("Id", "RegularizeTimeOut", "RegularizeTimeIn", "TimeIn", "TimeOut", "AttendanceDate", "EmployeeId")
                                 .where("Id", data.attendance_id)];
-                    case 2:
-                        selectAttendanceMasterList = _a.sent();
-                        count1 = selectAttendanceMasterList.length;
-                        if (!(count1 == 1)) return [3 /*break*/, 4];
+                    case 1:
+                        selectAttendanceMasterList_1 = _a.sent();
+                        count1 = selectAttendanceMasterList_1.length;
+                        if (!(count1 == 1)) return [3 /*break*/, 3];
                         // console.log('count1',count1)
-                        return [4 /*yield*/, Promise.all(selectAttendanceMasterList.map(function (val) { return __awaiter(_this, void 0, void 0, function () {
-                                var timein, timeout, attendancedate, orginaltimein, empid, selectEmployeeMasterList, hrid, shiftId, mdate, updateAttendanceMaster, affected_rows, selectAttendaneMasterList2, attsts, msg, title, emailmsg, updateRegularizationApproval, sql12, approverId, timeincondition, sql;
+                        return [4 /*yield*/, Promise.all(selectAttendanceMasterList_1.map(function (val) { return __awaiter(_this, void 0, void 0, function () {
+                                var timein, timeout, attendancedate, orginaltimein, empid, selectEmployeeMasterList, selectAttendanceMasterList_2, hrid, shiftId, mdate, updateAttendanceMaster, affected_rows, selectAttendaneMasterList2, attsts, msg, title, emailmsg, updateRegularizationApproval, sql12, approverId, timeincondition, sql;
                                 return __generator(this, function (_a) {
                                     switch (_a.label) {
                                         case 0:
@@ -106,10 +103,10 @@ var GetapprovalRegularService = /** @class */ (function () {
                                                     .where("ApproverId", "!=", 0)
                                                     .andWhere("Id", data.attendance_id)];
                                         case 2:
-                                            selectAttendanceMasterList = _a.sent();
+                                            selectAttendanceMasterList_2 = _a.sent();
                                             hrid = data.uid;
-                                            if (!(selectAttendanceMasterList.length > 0)) return [3 /*break*/, 12];
-                                            shiftId = selectAttendanceMasterList[0].ShiftId;
+                                            if (!(selectAttendanceMasterList_2.length > 0)) return [3 /*break*/, 12];
+                                            shiftId = selectAttendanceMasterList_2[0].ShiftId;
                                             if (!(regularizetimein == timein)) return [3 /*break*/, 5];
                                             console.log("=");
                                             return [4 /*yield*/, Helper_1["default"].getOvertimeForRegularization(timein, newtimeout, shiftId)];
@@ -304,11 +301,11 @@ var GetapprovalRegularService = /** @class */ (function () {
                                             _a.label = 23;
                                         case 23:
                                             if (!(data.approverresult == 1)) return [3 /*break*/, 31];
-                                            selectAttendanceMasterList = Database_1["default"].from("AttendanceMaster")
+                                            selectAttendanceMasterList_1 = Database_1["default"].from("AttendanceMaster")
                                                 .where("ApproverId", "!=", 0)
                                                 .andWhere("Id", data.attendance_id)
                                                 .select("Id");
-                                            if (!(selectAttendanceMasterList.length > 0)) return [3 /*break*/, 27];
+                                            if (!(selectAttendanceMasterList_1.length > 0)) return [3 /*break*/, 27];
                                             return [4 /*yield*/, Database_1["default"].from("AttendanceMaster")
                                                     .where("Id", data.attendanceId)
                                                     .where("RegularizeSts", 3)
@@ -383,16 +380,11 @@ var GetapprovalRegularService = /** @class */ (function () {
                                     }
                                 });
                             }); }))];
-                    case 3:
+                    case 2:
                         // console.log('count1',count1)
                         _a.sent();
-                        _a.label = 4;
-                    case 4: return [3 /*break*/, 6];
-                    case 5:
-                        err_1 = _a.sent();
-                        console.log(err_1);
-                        return [3 /*break*/, 6];
-                    case 6:
+                        _a.label = 3;
+                    case 3:
                         if (count >= 1) {
                             status = true;
                             if (data.approverresult == 2) {

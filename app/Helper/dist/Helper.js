@@ -76,7 +76,7 @@ var Helper = /** @class */ (function () {
             });
         });
     };
-    Helper.getmpnameById = function (empid) {
+    Helper.getempnameById = function (empid) {
         return __awaiter(this, void 0, void 0, function () {
             var query2;
             return __generator(this, function (_a) {
