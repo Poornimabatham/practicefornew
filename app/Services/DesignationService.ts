@@ -2,19 +2,25 @@ import Database from "@ioc:Adonis/Lucid/Database";
 import Helper from "App/Helper/Helper";
 const moment = require("moment-timezone");
 import { DateTime } from "luxon";
+
 export default class DesignationService {
   public static async AddDesignation(a) {
     const currentDate = new Date();
-
+     console.log(currentDate);
+     
+  
     var designationList = await Database.query()
       .from("DesignationMaster")
       .where("Name", a.name)
       .andWhere("OrganizationId", a.orgid)
       .select("Id");
+      console.log(designationList);
+   
 
     const result: any = [];
 
-    const affectedRows = designationList.length;
+     const affectedRows = designationList.length;
+    console.log(affectedRows)
 
     if (affectedRows > 0) {
       result["status"] = -1;
@@ -27,17 +33,15 @@ export default class DesignationService {
         Name: a.name,
         OrganizationId: a.orgid,
         CreatedDate: currentDate,
-        CreatedById: 1,
+        CreatedById: a.uid,
         LastModifiedDate: currentDate,
-        LastModifiedById: 2,
-        OwnerId: 3,
+        LastModifiedById: a.uid,
+        OwnerId: a.uid,
         Code: 8,
         RoleId: 9,
-        HRSts: a.sts,
-        Description: "YourDescriptionValue",
-        archive: "YourArchiveValue",
+        Description: a.desc,
+        archive: '1',
         daysofnotice: "YourDaysOfNoticeValue",
-        sts: a.sts,
         add_sts: "YourAddStsValue",
       });
 
@@ -55,7 +59,7 @@ export default class DesignationService {
       const activityby = 1;
       const actionPerformed = await Helper.getempnameById(a.uid);
 
-      const actionperformed2 = `${a.name} Designation  has been Added by  ${actionPerformed}from Attendance App`;
+      const actionperformed2 = `${a.name} Designation  has been Added by  ${actionPerformed}from Attendance App`;
 
       const insertActivityHistoryMaster = await Database.insertQuery()
         .table("ActivityHistoryMaster")
@@ -91,14 +95,14 @@ export default class DesignationService {
       .limit(5);
 
     if (a.currentpage != 0 && a.pagename == 0) {
-      getDesignationList =  getDesignationList.offset(begin).limit(a.perpage);
+      getDesignationList = getDesignationList.offset(begin).limit(a.perpage);
     }
 
     if (a.status != undefined) {
       getDesignationList = getDesignationList.where("Archive", a.status);
     }
 
-    const result = await  getDesignationList;
+    const result = await getDesignationList;
     var res = 0;
     result.forEach(function (val) {
       const data: any = {};
@@ -125,7 +129,7 @@ export default class DesignationService {
         .orderBy("name", "asc");
     }
 
-    return  getDesignationList;
+    return getDesignationList;
   }
 
   public static async updateDesignation(c) {
@@ -154,7 +158,6 @@ export default class DesignationService {
       .where("Id", c.Updateid);
     let name = "";
     let sts1 = "";
-
 
     var res: any = "";
     if (name != c.UpdateName) {
@@ -197,16 +200,16 @@ export default class DesignationService {
         actionperformed = `${c.UpdateName} designation has been inactive by ${getempname} `;
       }
 
-      const  insertActivityHistoryMaster: any = await Database.insertQuery()
+      const insertActivityHistoryMaster: any = await Database.insertQuery()
         .table("ActivityHistoryMaster")
         .insert({
           ActionPerformed: actionperformed,
           AppModule: appModule,
           LastModifiedById: c.uid,
-          LastModifiedDate :formattedDate ,
+          LastModifiedDate: formattedDate,
           Module: module,
           OrganizationId: c.orgid,
-          ActivityBy:  activityBy,
+          ActivityBy: activityBy,
           adminid: c.uid,
         });
       result["status"] = "inserted in activity master";
