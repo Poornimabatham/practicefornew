@@ -1,8 +1,6 @@
 import Database from "@ioc:Adonis/Lucid/Database";
 import Helper from "App/Helper/Helper";
 import moment from "moment";
-import { DateTime } from "luxon";
-// import moment from "moment-timezone";
 
 export default class DailyAttendanceService {
 
@@ -25,7 +23,7 @@ export default class DailyAttendanceService {
 
         var adminStatus = await Helper.getAdminStatus(data.EmployeeId);
 
-        var departmentId = await Helper.getDepartmentIdByEmpId(data.EmployeeId);
+        var departmentId = await Helper.getDepartmentIdByEmpID(data.EmployeeId);
 
         if (data.dataFor == 'present') {
 
@@ -78,7 +76,7 @@ export default class DailyAttendanceService {
                 .offset(offset);
 
             if (adminStatus == 2) {
-                var departmentId = await Helper.getDepartmentIdByEmpId(data.EmployeeId);
+                var departmentId = await Helper.getDepartmentIdByEmpID(data.EmployeeId);
                 departmentCondition = `E.Department = ${departmentId}`;
                 DailyAttPresentReportDataQuery.whereRaw(departmentCondition);
             }
@@ -147,7 +145,7 @@ export default class DailyAttendanceService {
         else if (data.dataFor == "absent") {
 
             if (adminStatus == 2) {
-                var departmentId = await Helper.getDepartmentIdByEmpId(data.EmployeeId);
+                var departmentId = await Helper.getDepartmentIdByEmpID(data.EmployeeId);
                 departmentCondition = `Dept_id = ${departmentId}`;
             }
 
@@ -201,21 +199,20 @@ export default class DailyAttendanceService {
 
                 if (absentCountQueryResult.length > 0) {
 
-
-                    // if (name.split(' ').length > 3) {
-                    //     var words = name.split(' ', 4);
-                    //     var firstthree = words.slice(0, 3);
-                    //     Name = firstthree.join(' ') + '...';
-                    // }
-                    // else {
-                    //     Name = name;
-                    // }
                     absentCountQueryResult.forEach((row) => {
                         var Name;
                         var name = row.name;
+                        if (name.split(' ').length > 3) {
+                            var words = name.split(' ', 4);
+                            var firstthree = words.slice(0, 3);
+                            Name = firstthree.join(' ') + '...';
+                        }
+                        else {
+                            Name = name;
+                        }
 
                         var absentData: absentList = {
-                            name: row.name,
+                            name: Name,
                             TimeIn: row.TimeIn,
                             TimeOut: row.TimeOut,
                             LeaveStatus: row.LeaveStatus,
@@ -239,7 +236,7 @@ export default class DailyAttendanceService {
                 AttendanceDate = moment().format('yyyy-MM-DD');
 
                 if (adminStatus == 2) {
-                    var departmentId = await Helper.getDepartmentIdByEmpId(data.EmployeeId);
+                    var departmentId = await Helper.getDepartmentIdByEmpID(data.EmployeeId);
                     departmentCondition = `Dept_id = ${departmentId}`;
                 }
 
@@ -254,8 +251,6 @@ export default class DailyAttendanceService {
                     .whereIn('AttendanceStatus', [2, 7])
                     .orderBy('name', 'asc')
 
-                // return AbsCountQuery
-
                 if (data.DesignationId != 0 && data.DesignationId != undefined) {
                     designationCondition = ` Desg_id= ${data.DesignationId}`;              // From AttendanceMaster
                     AbsCountQuery = AbsCountQuery.whereRaw(designationCondition);
@@ -266,7 +261,7 @@ export default class DailyAttendanceService {
                 }
 
                 var AbsCountQueryResult = await AbsCountQuery
-                
+
 
                 var AbsentCountQuery = Database.from('EmployeeMaster as E').select(
 
@@ -286,16 +281,15 @@ export default class DailyAttendanceService {
                         builder.where('E.Id', Database.raw(`(select empid from ShiftPlanner WHERE ShiftPlanner.orgid=${data.OrganizationId} and ShiftPlanner.empid=E.Id)`))
                             .orWhere('E.Id', Database.raw(`E.Shift`));
                     })
-                    // .groupBy('E.Id')
-                    // .orderBy('name', 'asc')
+                    .groupBy('E.Id')
+                    .orderBy('name', 'asc')
                     .limit(25);
 
-               
 
-                // if (data.DesignationId != 0 && data.DesignationId != undefined) {
-                //     designationCondition = `Designation= ${data.DesignationId}`;          // From AttendanceMaster
-                //     AbsentCountQuery = AbsentCountQuery.whereRaw(designationCondition);
-                // }
+                if (data.DesignationId != 0 && data.DesignationId != undefined) {
+                    designationCondition = `Designation= ${data.DesignationId}`;          // From AttendanceMaster
+                    AbsentCountQuery = AbsentCountQuery.whereRaw(designationCondition);
+                }
 
                 if (departmentCondition != undefined) {
                     AbsentCountQuery = AbsentCountQuery.whereRaw(departmentCondition);
@@ -312,17 +306,17 @@ export default class DailyAttendanceService {
                 var otherDayAbsentData: OtherDayAbsentList[] = []
                 if (AbsentCountQueryResult.length > 0) {
 
-                    var Name;
-                    var name = AbsentCountQueryResult[0].name;
-                    if (name.split(' ').length > 3) {
-                        var words = name.split(' ', 4);
-                        var firstthree = words.slice(0, 3);
-                        Name = firstthree.join(' ') + '...';
-                    }
-                    else {
-                        Name = name;
-                    }
                     AbsentCountQueryResult.forEach((row) => {
+                        var Name;
+                        var name = AbsentCountQueryResult[0].name;
+                        if (name.split(' ').length > 3) {
+                            var words = name.split(' ', 4);
+                            var firstthree = words.slice(0, 3);
+                            Name = firstthree.join(' ') + '...';
+                        }
+                        else {
+                            Name = name;
+                        }
                         const otherDayAbsentList: OtherDayAbsentList = {
                             name: Name,
                             TimeIn: row.TimeIn,
@@ -346,7 +340,7 @@ export default class DailyAttendanceService {
 
             var DepartmentCondition
             if (adminStatus == 2) {
-                var DepartmentId = await Helper.getDepartmentIdByEmpId(data.EmployeeId);
+                var DepartmentId = await Helper.getDepartmentIdByEmpID(data.EmployeeId);
                 DepartmentCondition = `Dept_id=${DepartmentId}`;
             }
 
@@ -426,7 +420,7 @@ export default class DailyAttendanceService {
                     LateComingsData.push(lateComingsList)
                 })
             }
-           
+
             else {
                 LateComingsData.push()
             }
@@ -438,7 +432,7 @@ export default class DailyAttendanceService {
 
 
             if (adminStatus == 2) {
-                var DepartmentId = await Helper.getDepartmentIdByEmpId(data.EmployeeId);
+                var DepartmentId = await Helper.getDepartmentIdByEmpID(data.EmployeeId);
                 departmentCondition = `Dept_id=${DepartmentId}`;
             }
 
@@ -489,17 +483,15 @@ export default class DailyAttendanceService {
             .limit(limit)
             .offset(offset)
 
-        // if (data.DesignationId != 0 && data.DesignationId != undefined) {
-        //     designationCondition = `Desg_id= ${data.DesignationId}`;              // From AttendanceMaster
-        //     earlyLeavingsQuery.whereRaw(designationCondition);
-        // }
+        if (data.DesignationId != 0 && data.DesignationId != undefined) {
+            designationCondition = `Desg_id= ${data.DesignationId}`;              // From AttendanceMaster
+            earlyLeavingsQuery.whereRaw(designationCondition);
+        }
 
         if (departmentCondition != undefined) {
             earlyLeavingsQuery.whereRaw(departmentCondition);
         }
         var earlyLeavingsQueryResult = await earlyLeavingsQuery;
-
-        // return earlyLeavingsQueryResult
 
         interface earlyLeavingsInterface {
             shift: string,
@@ -564,5 +556,7 @@ export default class DailyAttendanceService {
         return data['earlyleavings']
     }
 }
+
+
 
 

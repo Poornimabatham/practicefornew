@@ -1,28 +1,9 @@
-import { schema, CustomMessages } from '@ioc:Adonis/Core/Validator'
+import { schema } from '@ioc:Adonis/Core/Validator'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
-export default class UserSettingValidator {
+export default class UserSettingValidator  {
   constructor(protected ctx: HttpContextContract) {}
 
-  /*
-   * Define schema to validate the "shape", "type", "formatting" and "integrity" of data.
-   *
-   * For example:
-   * 1. The username must be of data type string. But then also, it should
-   *    not contain special characters or numbers.
-   *    ```
-   *     schema.string({}, [ rules.alpha() ])
-   *    ```
-   *
-   * 2. The email must be of data type string, formatted as a valid
-   *    email. But also, not used by any other user.
-   *    ```
-   *     schema.string({}, [
-   *       rules.email(),
-   *       rules.unique({ table: 'users', column: 'email' }),
-   *     ])
-   *    ```
-   */
   public schema = schema.create({})
   static usersetting = {
     schema:schema.create({
@@ -33,6 +14,73 @@ export default class UserSettingValidator {
        rtpassword:schema.string()
     })
   }
+
+  static updateprofile = {
+    schema:schema.create({
+       orgid : schema.string(),
+       empid: schema.string(),
+    }),
+  }
+
+   static PunchVisit = {
+      schema:schema.create({
+        Orgid:schema.number(),
+        Empid:schema.number(),
+        Date:schema.date.optional({format:'yyyy-MM-dd'}),
+        loginEmp:schema.string(),
+        currentPage:schema.number(),
+        perpage:schema.number()
+
+      })
+   }
+
+   static EmployeeList = {
+    schema:schema.create({
+      Orgid:schema.number(),
+      Empid:schema.number(),
+    })
+   }
+
+   static Notification = {
+      schema:schema.create({
+        Orgid:schema.number(),
+      })
+   }
+
+   static Notification2 = {
+      schema:schema.create({
+        ColumnName:schema.string(),
+        Value:schema.number(),
+        OrgId:schema.number()
+
+      })
+   }
+
+   static updateNotification = {
+      schema:schema.create({
+        empid:schema.number(),
+        status:schema.string(),
+        orgid:schema.number()
+      })
+   }
+
+   static QrValidation = {
+      schema:schema.create({
+        empId:schema.number(),
+        orgId:schema.number(),
+        qRKioskPin:schema.number()
+
+      })
+   }
+
+   static ChangeQR = {
+     schema:schema.create({
+      userId:schema.number(),
+      orgId:schema.number(),
+      oldPin:schema.number(),
+      newPin:schema.number()
+     })
+   }
 
   /**
    * Custom messages for validation failures. You can make use of dot notation `(.)`
@@ -45,5 +93,5 @@ export default class UserSettingValidator {
    * }
    *
    */
-  public messages: CustomMessages = {}
+  // messages: CustomMessages = {}
 }
