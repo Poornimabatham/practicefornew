@@ -12,8 +12,8 @@ export default class  GetApprovalRegularizationValidator extends BaseValidator {
       orgid:schema.number(),
       uid:schema.number(),
       approverresult:schema.number(),
-      comment :schema.number(),
-      platform :schema.number(),
+      comment :schema.string(),
+      platform :schema.string.optional(),
       RegularizationAppliedFrom:schema.number()
     }),
   };

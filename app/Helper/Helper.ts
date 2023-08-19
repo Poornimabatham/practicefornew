@@ -4,7 +4,7 @@ import EmployeeMaster from "App/Models/EmployeeMaster";
 import Organization from "App/Models/Organization";
 import ShiftMaster from "App/Models/ShiftMaster";
 import ZoneMaster from "App/Models/ZoneMaster";
-
+import moment from "moment";
 export default class Helper {
   public static encode5t(str: any) {
     for (let i = 0; i < 5; i++) {
@@ -210,11 +210,11 @@ export default class Helper {
   }
 
   public static async getEmpName(Id: number) {
-    const query  =  await Database.from("EmployeeMaster")
+    const query = await Database.from("EmployeeMaster")
       .select("FirstName", "LastName")
       .where("Id", Id)
       .where("Is_Delete", 0);
- 
+
     return query[0].FirstName;
   }
 
@@ -290,11 +290,57 @@ export default class Helper {
     }
   }
 
-    static async getCountryIdByOrg(orgid:number)
-    {
-      const query:any =  await Database.query().from('Organization').select('Country').where('Id',orgid)
-      return query
-    }
+  static async getCountryIdByOrg(orgid: number) {
+    const query: any = await Database.query()
+      .from("Organization")
+      .select("Country")
+      .where("Id", orgid);
+    return query;
+  }
 
+  public static async getOvertimeForRegularization(timein, timeout, id) {
+    var name:string = " ";
+    var selectShiftMasterData: any = await Database.from("ShiftMaster")
+      .select("TimeIn", "TimeOut")
+      .where("Id", id);
+try{
+
+      
+    for (const row of selectShiftMasterData) {
+      const stime1 = moment(`1980-01-01 ${row.TimeIn}`).unix();
     
+      const stime2 = moment(`1980-01-01 ${row.TimeOut}`).unix();
+      const time1 = moment(`1980-01-01 ${timein}`).unix();
+      const time2 = moment(`1980-01-01 ${timeout}`).unix();
+
+      const totaltime = time2 - time1;
+
+      const stotaltime = stime2 - stime1;
+      const overtime = Math.abs(totaltime - stotaltime);
+      const overtimeInMinutes = overtime / 60;
+
+      if (overtime > 0) {
+         name = moment()
+          .startOf("day")
+          .minutes(overtimeInMinutes)
+          .format("HH:mm:00");
+
+      }
+      if (totaltime - stotaltime < 0) {
+        name = "-" + `${name}`;
+
+        }
+      if (timein == "00:00:00") {
+        name = "00:00:00";
+      }
+    }
+  }
+
+  catch(error) {
+    console.error(error.message);
+  }
+return name
+
+}
+
 }
