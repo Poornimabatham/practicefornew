@@ -4,23 +4,22 @@ import ShiftsService from 'App/Services/ShiftService';
 import ShiftValidator from 'App/Validators/ShiftValidator';
 
 export default class ShiftsController {
-  public async index({ }: HttpContextContract) {
-   // return "mayank";
+   public async index({}: HttpContextContract) {
   }
 
-  public async create({request,response}: HttpContextContract) {
-    const validatedparams = await request.validate(ShiftValidator.addshift);
-    const result = await ShiftsService.createdata(validatedparams);
-    response.json(result);
+  public async create({request}: HttpContextContract) {
+    const validparameters = await request.validate(ShiftValidator.addshift);
+    await ShiftsService.createdata(validparameters);
+  
   }
 
   public async store({}: HttpContextContract) {}
 
   public async show({request,response }: HttpContextContract)
   {
-    const validatedparams = await request.validate(ShiftValidator.shifts);
-    const result = await ShiftsService.getShiftData(validatedparams);
-    response.json(result);
+    const a = await request.validate(ShiftValidator.shifts);
+    const b = await ShiftsService.getShiftData(a)
+    response.json(b);
   }
 
   public async edit({request , response }: HttpContextContract) {

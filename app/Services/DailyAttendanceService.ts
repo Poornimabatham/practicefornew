@@ -2,6 +2,7 @@ import Database from "@ioc:Adonis/Lucid/Database";
 import Helper from "App/Helper/Helper";
 import moment from "moment";
 
+
 export default class DailyAttendanceService {
 
     public static async getpresentList(data) {
@@ -555,6 +556,7 @@ export default class DailyAttendanceService {
         }
         return data['earlyleavings']
     }
+
 }
 
 

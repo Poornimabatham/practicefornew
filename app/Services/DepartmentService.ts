@@ -26,7 +26,7 @@ export default class DepartmentService {
     const departmentList = await Database.from('DepartmentMaster').select('Id', Database.raw(`if(LENGTH("Name") > 30, concat(SUBSTR("Name", 1, 30), '....'), Name) as Name ,'archive'`)).where('OrganizationId', data.OrganizationId).orderBy('Name').limit(limit).offset(offset);
 
 
-    var result: department[] = []; //declared result as an empty array with type department
+    var result: department[] = [];         //declared result as an empty array with type department
 
     departmentList.forEach((row) => {
       const data: department = {
@@ -94,8 +94,11 @@ export default class DepartmentService {
 
       result['status'] = '1';
     }
+
     return result['status'];
+
   }
+
 
   public static async updateDepartment(data) {
 
@@ -103,8 +106,8 @@ export default class DepartmentService {
     result['status'] = '0';
     const date = DateTime.now();
     const formattedDate = date.toFormat('yy-MM-dd');
-    var DeptId = data.DId;
-    var orgId = data.OrganizationId;
+    var orgId = await Helper.getOrgId(data.Id);
+    var DeptId = data.Id;
 
     var selectQuery = await Database.from("DepartmentMaster")
       .select("Id")
@@ -114,7 +117,7 @@ export default class DepartmentService {
       .andWhere("archive", data.archive);
 
     if (selectQuery.length > 0) {
-      result['status'] = '-1'; /// department already exist
+      result['status'] = '-1';
       return false
     }  
 
@@ -136,6 +139,7 @@ export default class DepartmentService {
     else if (name == data.Name && status != data.archive) {
       archiveStatus = data.archive;
     }
+
     const updateQuery = await Database.query()
       .from("DepartmentMaster")
       .where("Id", DeptId)
@@ -157,7 +161,7 @@ export default class DepartmentService {
       var appModule = "Department";
       var actionperformed;
       var activityBy = 1;
-      var getEmpName = await Helper.getEmpName(data.EmpID)       //getemployeeName
+      var getEmpName = await Helper.getempnameById(DeptId)       //getemployeeName
 
       if (archiveStatus == 2) {
         actionperformed = ` ${data.Name} department has been edited by ${getEmpName} `;

@@ -9,6 +9,12 @@ export default class ShiftsService {
     //  const currentpage:number = a.currentpage;
     // const perpage:number = a.perpage;
     //const rowperpage:number = (currentpage - 1) * perpage;
+    function getCurrentDate(): string {
+      const date = new Date();
+
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
 
     const currentDate = await helper.getCurrentDate();
     const orgid: number = a.OrganizationId;
@@ -16,6 +22,8 @@ export default class ShiftsService {
     const keyValueArray: KeyValuePair[] = [];
     keyValueArray.push({ OrganizationId: orgid });
     let conditionarr = keyValueArray[0];
+    console.log(keyValueArray);
+
     const data = await Database.query()
       .from("ShiftMaster")
       .select("*")
@@ -36,6 +44,7 @@ export default class ShiftsService {
       let archive: number = a.archive;
       keyValueArray[0].archive = archive;
       conditionarr = keyValueArray[0];
+      console.log(conditionarr);
       data1 = await Database.query()
         .from("ShiftMaster")
         .select("*")
@@ -80,6 +89,7 @@ export default class ShiftsService {
         let archive: number = a.archive;
         keyValueArray[0].archive = archive;
         conditionarr = keyValueArray[0];
+        console.log(conditionarr);
         data1 = await Database.query()
           .from("ShiftMaster")
           .select("*")
@@ -102,6 +112,7 @@ export default class ShiftsService {
     const tog = data.tog ? data.tog : "00:00";
     const big = data.big ? data.big : "00:00";
     const bog = data.bog ? data.bog : "00:00";
+    // console.log(bog);
     const sts = data.sts;
     const shifttype1 = data.shifttype;
     const multiplepunches = data.multiplepunches;
@@ -115,6 +126,7 @@ export default class ShiftsService {
 
     // Parse the JSON string into an object
     const result1 = JSON.parse(string);
+    console.log(result1);
     if (shifttype1 != "3") {
       ti = ti == "00:00:00" ? "00:01:00" : ti;
       to = to == "00:00:00" ? "23:59:00" : to;
@@ -122,6 +134,8 @@ export default class ShiftsService {
 
     if (shifttype1 == "2") {
     } else {
+      console.log(to);
+      console.log(ti);
       if (HoursPerDay1 == "00:00:00") {
         function parseTime(timeStr: string): Date {
           const [hours, minutes] = timeStr.split(":").map(Number);
@@ -153,7 +167,7 @@ export default class ShiftsService {
       const date: string = `${year}-${month.toString().padStart(2, "0")}-${day
         .toString()
         .padStart(2, "0")}`;
-      const result = {};
+      const result: any[] = [];
       const query = await Database.query()
         .from("ShiftMaster")
         .select("*")
@@ -186,6 +200,8 @@ export default class ShiftsService {
           MultipletimeStatus: multiplepunches,
         });
         var Id: any = row;
+        console.log(row);
+        console.log("A");
         if (Id > 0) {
           let i = 0;
           let j = 0;
@@ -203,6 +219,7 @@ export default class ShiftsService {
             j++;
           });
           if (i == 7) {
+            console.log("item");
             const zone: any = await helper.getTimeZone(orgid);
             const Zonename = zone[0].name;
             moment.tz.setDefault(Zonename);
@@ -231,99 +248,7 @@ export default class ShiftsService {
           }
         }
       }
-      return result;
+      console.log(result);
     }
-  }
-
-  //update shift function
-  static async updateShift(data) {
-    const uid = data.uid;
-    const shift = data.shift;
-    const sts = data.sts;
-    const id = data.id;
-    const multiple_timests = data.multiple_timests;
-    const currentDate: Date = new Date();
-    const year: number = currentDate.getFullYear();
-    const month: number = currentDate.getMonth() + 1;
-    const day: number = currentDate.getDate();
-
-    const date: string = `${year}-${month.toString().padStart(2, "0")}-${day
-      .toString()
-      .padStart(2, "0")}`;
-    let result: any = {};
-    const orgid: any = await helper.getOrgId(uid);
-    const row = await Database.query()
-      .from("ShiftMaster")
-      .select("*")
-      .where("Name", shift)
-      .andWhere("OrganizationId", orgid)
-      .andWhere("id", "!=", id)
-      .orderBy("Name");
-    const count = row.length;
-    if (count > 0) {
-      result["Status"] = "-1";
-      return result;
-    } else {
-      const row2: any = await Database.query()
-        .from("ShiftMaster")
-        .where("Id", id)
-        .andWhere("OrganizationId", orgid)
-        .update({
-          Name: shift,
-          MultipletimeStatus: multiple_timests,
-          LastModifiedDate: date,
-          archive: sts,
-        });
-      if (row2 > 0) {
-        result["Status"] = 1;
-        return result;
-      } else {
-        result["Status"] = 0;
-        return result;
-      }
-    }
-  }
-
-  // assignShift
-  static async assignShift(data) {
-    const Orgid = data.Orgid;
-    const shiftid = data.shiftid;
-    const shiftname = data.shiftname;
-    const empid = data.empid;
-    const empname = data.empname;
-    const adminid = data.adminid;
-    const adminname = data.adminname;
-    const result= {};
-    const row: any = await Database.query()
-      .from("EmployeeMaster")
-      .where("Id", empid)
-      .andWhere("OrganizationId", Orgid)
-      .update("Shift", shiftid);
-    const count = row;
-    console.log(count > 0);
-    if (count > 0) {
-      result["status"] = "true";
-    } else {
-      result["status"] = "false";
-    }
-    return result;
-  }
-
-  //deleteInActivateShift
-  static async deleteInActivateShift(data) { 
-    const orgid = data.orgId;
-    const Id = data.id;
-    const empId = data.empId;
-    const result= {};
-    let ShiftName :any = await helper.getShiftName(Id, orgid);
-    console.log(ShiftName);
-    const getshiftdata:any = await Database.from('ShiftMaster').select('*').where('OrganizationId', orgid).andWhere('Id', Id).andWhere('archive', '1').delete();   
-    if (getshiftdata > 0) {
-      result["status"] = "true";
-    } else { 
-      result["status"] ='false';
-    }
-    return result;
-    
   }
 }
