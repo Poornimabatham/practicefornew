@@ -8,7 +8,7 @@ export default class ClientsService {
     const OrgId: number = a.orgid;
     const EmpId: number = a.empid;
     const adminSts: number = await Helper.getAdminStatus(EmpId);
-    return adminSts
+    // return adminSts
 
     let allClientList: any;
     //return adminSts
@@ -42,11 +42,11 @@ export default class ClientsService {
   }
 
   static async addClient(inclient) {
-    const empid = inclient.empid;
-    const orgid = inclient.orgid;
-    const comp_name = inclient.comp_name;
+    const empid = inclient.empId;
+    const orgid = inclient.orgId;
+    const comp_name = inclient.compName;
     const name = inclient.name;
-    const address = inclient.address;
+    const address = inclient.compAddress;
     const country = inclient.country;
     const city = inclient.city;
     const countrycode = inclient.countrycode;
@@ -57,7 +57,7 @@ export default class ClientsService {
     const platform = inclient.platform;
     const radius = inclient.radius;
     const Lat_Long = inclient.Lat_Long;
-    const empSts = inclient.empSts;//which permission user have
+    const empSts = inclient.empSts;      //which permission user have
     let todayDate = new Date().toISOString().slice(0, 10);
     let ClientList: any;
     let sts: any;
@@ -119,9 +119,9 @@ export default class ClientsService {
   ///////////////////add client function end //////////////////
   static async editClient(editclient) {
     const clientid: number = editclient.clientid;
-    const empid: number = editclient.empid;
-    const orgid: number = editclient.orgid;
-    const comp_name: string = editclient.comp_name;
+    const empid: number = editclient.empId;
+    const orgid: number = editclient.orgId;
+    const comp_name: string = editclient.compName;
     const name: string = editclient.name;
     const address: string = editclient.address;
     const country: number = editclient.country;
@@ -135,7 +135,7 @@ export default class ClientsService {
     const radius: string = editclient.radius;
     const Lat: string = editclient.newLat;
     const Long: string = editclient.newLong;
-    const newLatLng: string = Lat.Long;
+    const newLatLng: string = editclient.Long;
     const empSts: number = editclient.empSts;//which permission user have 
     let todayDate = new Date().toISOString().slice(0, 10);
     let ClientList: any;

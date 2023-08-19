@@ -211,6 +211,7 @@ export default class DailyAttendanceService {
                             Name = name;
                         }
 
+                         
                         var absentData: absentList = {
                             name: Name,
                             TimeIn: row.TimeIn,
