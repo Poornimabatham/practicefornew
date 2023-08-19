@@ -21,8 +21,8 @@ export default class Helper {
     const query1: any = await Database.query().from('ZoneMaster').select('name').where('id', Database.raw(`(select TimeZone from Organization where id =${orgid}  LIMIT 1)`));
 
     return query1;
-
   }
+
   public static async getempnameById(empid: number) {
     const query2 = await Database.query().from('EmployeeMaster').select('FirstName').where('Id', empid);
     return query2[0].FirstName;
@@ -91,6 +91,8 @@ export default class Helper {
     const getShiftTypeQuery = await Database.from('ShiftMaster').select('shifttype').where('Id', ShiftId);
     return getShiftTypeQuery[0].shiftType;
   }
+
+
 }
 
 

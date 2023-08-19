@@ -1,7 +1,7 @@
 import Database from "@ioc:Adonis/Lucid/Database";
 import Helper from "App/Helper/Helper";
 import moment from "moment";
-// import { DateTime } from "luxon";
+import { DateTime } from "luxon";
 // import moment from "moment-timezone";
 
 export default class DailyAttendanceService {
@@ -22,55 +22,6 @@ export default class DailyAttendanceService {
             limit = "";
             offset = "";
         }
-        // return limit
-        // var utcOffset
-        // var cdate;
-        // if (inpDate) {
-        //     // var now = inpDate.setZone('Asia/Kabul')
-        //     // cdate = now.toFormat('yyyy-MM-dd HH:mm:ss')
-        //     cdate = moment().tz('Europe/Tirane').toDate()
-        //     // cdate = moment.tz.zonesForCountry('Asia/Kolkata', true);
-
-        //     return cdate
-        //     // cdate = DateTime.fromJSDate(inpDate).setZone({ offset: 'utcOffset', name: 'Asia/Kolkata' });
-
-        // }
-        // return utcOffset
-        // else {
-        //     cdate = new Date()
-        // }
-        // // var formattedDate = cdate.toISOString()
-        // // return formattedDate;
-        // return cdate
-
-        // let date;
-        // var formattedDateTime
-
-        // if (inpDate) {
-        //     var cdate=inpDate.setZone('Asia/Kolkata')
-        //     // date = DateTime.fromJSDate(inpDate, { zone: 'Asia/Kabul' })
-        //     formattedDateTime = cdate.toFormat('yyyy-MM-dd ')
-        // } else {
-        //     date = DateTime.now().setZone('Asia/Kabul');
-        //     formattedDateTime = date.toFormat('yyyy-MM-dd ')
-        // }
-
-        // return formattedDateTime;
-
-
-        // const formattedDateTime= formatDateTime(inpDate,'Asia/Kabul')
-
-        //         var zone = await Helper.getTimeZone(data.OrganizationId)
-        //         var timeZone = zone[0]?.name;
-        //         const now = inpDate ? inpDate.setZone('Asia/Kabul') : DateTime.local().setZone('Asia/Kabul')
-        //         const FormattedDate = now.toFormat('yyyy-MM-dd HH:mm:ss');
-        //         return FormattedDate
-
-        // var formattedDate = inpDate
-        //     ? DateTime.fromISO(inpDate, { zone: 'utc' }).setZone('Asia/Kabul')
-        //     : DateTime.now().setZone('Asia/Kabul');
-        // var FormattedDate = formattedDate.toFormat('yyyy-MM-dd HH:mm:ss')
-
 
         var adminStatus = await Helper.getAdminStatus(data.EmployeeId);
 
@@ -199,7 +150,6 @@ export default class DailyAttendanceService {
                 var departmentId = await Helper.getDepartmentIdByEmpId(data.EmployeeId);
                 departmentCondition = `Dept_id = ${departmentId}`;
             }
-            // return departmentCondition
 
             if (data.date != undefined) {
                 var AttDate = data.date;
@@ -212,7 +162,6 @@ export default class DailyAttendanceService {
                     absCount = absCountQuery[0].abscount;
                 }
 
-                // return absCount
                 var orgId = data.OrganizationId;
                 var absentCountQuery = Database.from('AttendanceMaster as A').select(Database.raw(
                     "DATE_FORMAT(A.AttendanceDate,'%Y-%m-%d') as AttendanceDate"
@@ -240,8 +189,6 @@ export default class DailyAttendanceService {
                     absentCountQuery = absentCountQuery.whereRaw(designationCondition);
                 }
                 var absentCountQueryResult = await absentCountQuery;
-                // return absentCountQuery
-
                 interface absentList {
                     name: string,
                     TimeIn: string,
@@ -254,8 +201,6 @@ export default class DailyAttendanceService {
 
                 if (absentCountQueryResult.length > 0) {
 
-                    var Name;
-                    var name = absentCountQueryResult[0].name;
 
                     // if (name.split(' ').length > 3) {
                     //     var words = name.split(' ', 4);
@@ -266,6 +211,9 @@ export default class DailyAttendanceService {
                     //     Name = name;
                     // }
                     absentCountQueryResult.forEach((row) => {
+                        var Name;
+                        var name = row.name;
+
                         var absentData: absentList = {
                             name: row.name,
                             TimeIn: row.TimeIn,
@@ -283,7 +231,7 @@ export default class DailyAttendanceService {
                 }
 
                 data['absent'] = absentListResult;
-                // return data['absent']
+                return data['absent']
 
             }
             else            //For Today's Absentees
@@ -318,7 +266,7 @@ export default class DailyAttendanceService {
                 }
 
                 var AbsCountQueryResult = await AbsCountQuery
-                // return AbsCountQueryResult
+                
 
                 var AbsentCountQuery = Database.from('EmployeeMaster as E').select(
 
@@ -342,7 +290,7 @@ export default class DailyAttendanceService {
                     // .orderBy('name', 'asc')
                     .limit(25);
 
-                // return AbsentCountQuery
+               
 
                 // if (data.DesignationId != 0 && data.DesignationId != undefined) {
                 //     designationCondition = `Designation= ${data.DesignationId}`;          // From AttendanceMaster
@@ -354,8 +302,6 @@ export default class DailyAttendanceService {
                 }
 
                 var AbsentCountQueryResult = await AbsentCountQuery
-                // return AbsentCountQueryResult
-
                 interface OtherDayAbsentList {
                     name: string,
                     TimeIn: string,
@@ -413,7 +359,6 @@ export default class DailyAttendanceService {
                 AttendanceDate = currDate;
             }
 
-
             var LateComingsQuery = Database.from('EmployeeMaster as E').select(
                 Database.raw(`CONCAT(FirstName,' ',LastName) as name`),
                 Database.raw(`SUBSTR(TimeIn,1,5) as 'TimeIn'`),
@@ -429,7 +374,6 @@ export default class DailyAttendanceService {
                 .innerJoin('AttendanceMaster as A', 'A.EmployeeId', 'E.Id')
                 .whereRaw(`SUBSTRING(time(TimeIn), 1, 5) > SUBSTRING((SELECT (CASE WHEN time(TimeInGrace) != '00:00:00' THEN time(TimeInGrace) ELSE time(TimeIn) END) FROM ShiftMaster WHERE ShiftMaster.Id = "A.ShiftId"), 1, 5)AND AttendanceDate=${AttendanceDate} AND A.OrganizationId=${data.OrganizationId} AND AttendanceStatus IN (1,4,8) `)
 
-
             if (data.DesignationId != 0 && data.DesignationId != undefined) {
                 designationCondition = ` Desg_id= ${data.DesignationId}`;              // From AttendanceMaster
                 LateComingsQuery = LateComingsQuery.whereRaw(designationCondition);
@@ -437,7 +381,6 @@ export default class DailyAttendanceService {
             if (DepartmentCondition != undefined) {
                 LateComingsQuery = LateComingsQuery.whereRaw(DepartmentCondition);
             }
-            // return LateComingsQuery
 
             var LateComingsQueryResult = await LateComingsQuery;
             interface LateComingsList {
@@ -483,8 +426,7 @@ export default class DailyAttendanceService {
                     LateComingsData.push(lateComingsList)
                 })
             }
-            // return LateComingsData;
-
+           
             else {
                 LateComingsData.push()
             }
@@ -559,7 +501,6 @@ export default class DailyAttendanceService {
 
         // return earlyLeavingsQueryResult
 
-
         interface earlyLeavingsInterface {
             shift: string,
             name: string,
@@ -584,31 +525,43 @@ export default class DailyAttendanceService {
 
         if (earlyLeavingsQueryResult.length > 0) {
 
-            earlyLeavingsQueryResult.forEach(row => {
-                const earlyleavingsList: earlyLeavingsInterface = {
-                    shift:,
-                    name: row.name,
-                    TimeIn: row.TimeIn,
-                    TimeOut: row.TimeOut,
-                    EntryImage: row.EntryImage,
-                    ExitImage: row.ExitImage,
-                    CheckOutLoc: row.CheckOutLoc,
-                    checkInLoc: row.checkInLoc,
-                    latit_in: row.latit_in,
-                    longi_in: row.longi_in,
-                    latit_out: row.latit_out,
-                    longi_out: row.longi_out,
-                    status: row.status,
-                    Id: row.status,
-                    multitime_sts: row.multitime_sts,
-                    shiftType:
-                        getInterimAttAvailableSts:,
-                    TotalLoggedHours: row.TotalLoggedHours
-                }
-                earlyleavings.push(earlyleavingsList)
-            })
+            await Promise.all(
+                earlyLeavingsQueryResult.map(async (row) => {
+
+                    var shiftTimeIn = row.ShiftTimeIn.slice(0, 5);
+                    var shiftTimeOut = row.ShiftTimeOut.slice(0, 5);
+                    var shift = shiftTimeIn + '-' + shiftTimeOut;
+                    var TimeIn = row.TimeIn.slice(0, 5);
+                    var TimeOut = row.TimeOut.slice(0, 5);
+                    var shiftType = await Helper.getShiftType(row.ShiftId);
+                    var getInterimAttAvailableSts = await Helper.getInterimAttAvailableSt(row.Id);
+                    const earlyleavingsList: earlyLeavingsInterface = {
+                        shift: shift,
+                        name: row.name,
+                        TimeIn: TimeIn,
+                        TimeOut: TimeOut,
+                        EntryImage: row.EntryImage,
+                        ExitImage: row.ExitImage,
+                        CheckOutLoc: row.CheckOutLoc,
+                        checkInLoc: row.checkInLoc,
+                        latit_in: row.latit_in,
+                        longi_in: row.longi_in,
+                        latit_out: row.latit_out,
+                        longi_out: row.longi_out,
+                        status: row.status,
+                        Id: row.status,
+                        multitime_sts: row.multitime_sts,
+                        shiftType: shiftType,
+                        getInterimAttAvailableSts: getInterimAttAvailableSts,
+                        TotalLoggedHours: row.TotalLoggedHours
+                    }
+                    earlyleavings.push(earlyleavingsList)
+                })
+            )
             data['earlyleavings'] = earlyleavings;
+
         }
+        return data['earlyleavings']
     }
 }
 
