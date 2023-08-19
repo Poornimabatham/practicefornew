@@ -34,8 +34,8 @@ declare module '@ioc:Adonis/Addons/Auth' {
     |
     */
     user: {
-      implementation: LucidProviderContract<typeof User>
-      config: LucidProviderConfig<typeof User>
+      implementation: LucidProviderContract<typeof Auth>
+      config: LucidProviderConfig<typeof Auth>
     }
   }
 

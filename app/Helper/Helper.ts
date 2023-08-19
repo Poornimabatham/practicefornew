@@ -298,5 +298,11 @@ export default class Helper {
       return query
     }
 
+    public static async getempnameById(empid: number) {
+      const query2 = await Database.query().from('EmployeeMaster').select('FirstName').where('Id', empid);
+      return query2[0].FirstName;
+  
+    }
+
     
 }
