@@ -18,7 +18,6 @@ export default class Helper {
     return str;
   }
 
-
   public static async getTimeZone(orgid: any) {
     const query1 = await Database.query()
       .from("ZoneMaster")
@@ -27,7 +26,8 @@ export default class Helper {
         "Id",
         Database.raw(
           `(select TimeZone from Organization where Id =${orgid}  LIMIT 1)`
-        ));
+        )
+      );
     return query1[0].name;
   }
 
@@ -39,6 +39,18 @@ export default class Helper {
     return query2[0].FirstName;
   }
 
+  public static async getAdminStatus(id: any) {
+    let status = 0;
+    const queryResult = await Database.query()
+      .from("UserMaster")
+      .select("appSuperviserSts")
+      .where("EmployeeId", id)
+      .first();
+    if (queryResult) {
+      status = queryResult.appSuperviserSts;
+    }
+    return status;
+  }
 
   public static generateToken(secretKey: string, data: any = {}) {
     try {
@@ -82,8 +94,9 @@ export default class Helper {
 
   public static async getOrgId(Id: number) {
     let OrgId;
-    const getOrgIdQuery = await Database.from('EmployeeMaster').select('OrganizationId')
-      .where('Id', Id)
+    const getOrgIdQuery = await Database.from("EmployeeMaster")
+      .select("OrganizationId")
+      .where("Id", Id);
 
     if (getOrgIdQuery.length > 0) {
       OrgId = getOrgIdQuery[0].OrganizationId;
@@ -205,11 +218,11 @@ export default class Helper {
   }
 
   public static async getEmpName(Id: number) {
-    const query  =  await Database.from("EmployeeMaster")
+    const query = await Database.from("EmployeeMaster")
       .select("FirstName", "LastName")
       .where("Id", Id)
       .where("Is_Delete", 0);
- 
+
     return query[0].FirstName;
   }
 
@@ -285,12 +298,11 @@ export default class Helper {
     }
   }
 
-    static async getCountryIdByOrg(orgid:number)
-    {
-      const query:any =  await Database.query().from('Organization').select('Country').where('Id',orgid)
-      return query
-    }
-
-    
+  static async getCountryIdByOrg(orgid: number) {
+    const query: any = await Database.query()
+      .from("Organization")
+      .select("Country")
+      .where("Id", orgid);
+    return query;
+  }
 }
-
