@@ -47,11 +47,11 @@ import Redis from '@ioc:Adonis/Addons/Redis'
 
 
 
-Route.get('/', async () => {
-await Redis.set('hello', 'world')
-const value = await Redis.get('hello')
-    return value
-})
+// Route.get('/', async () => {
+// await Redis.set('hello', 'world')
+// const value = await Redis.get('hello')
+//     return value
+// })
 
 
 
