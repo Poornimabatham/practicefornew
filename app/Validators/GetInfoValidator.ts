@@ -1,8 +1,12 @@
 import { schema, CustomMessages } from '@ioc:Adonis/Core/Validator'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import BaseValidator from './BaseValidator'
 
-export default class UservalidationValidator {
-  constructor(protected ctx: HttpContextContract) {}
+export default class GetInfoValidator extends BaseValidator {
+
+  constructor(protected ctx: HttpContextContract) {
+    super()
+  }
 
   /*
    * Define schema to validate the "shape", "type", "formatting" and "integrity" of data.
@@ -24,7 +28,16 @@ export default class UservalidationValidator {
    *    ```
    */
   public schema = schema.create({})
-
+  static GetInfoSchema = 
+  {
+    schema:schema.create({
+        uid : schema.number(),
+        refno : schema.number(),
+       // platform : schema.string(),
+       // refid : schema.number(),
+        
+    }),message:BaseValidator.messages
+  }
   /**
    * Custom messages for validation failures. You can make use of dot notation `(.)`
    * for targeting nested fields and array expressions `(*)` for targeting all

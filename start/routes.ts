@@ -36,6 +36,24 @@ import "../app/Routes/LateComingRoute"
 import "../app/Routes/Report/GetplannerRoute"
 import "../app/Routes/getOutsidegeoRoute"
 import "../app/Routes/AttendanceRoute"
+import  "../app/Routes/ClientsRoute"
+import "../app/Routes/getInfoRoute"
+import Redis from '@ioc:Adonis/Addons/Redis'
+import "../app/Routes/getEmpdataDepartmentWiseNewRoute"
+import "../app/Routes/getCDateAttnDeptWiseRoutes"
+
+// Route.get('/', async () => {
+//     return "Working fine!"
+// })
+
+
+
+// Route.get('/', async () => {
+// await Redis.set('hello', 'world')
+// const value = await Redis.get('hello')
+//     return value
+// })
+
 
 
 
