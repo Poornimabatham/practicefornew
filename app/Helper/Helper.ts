@@ -170,7 +170,7 @@ export default class Helper {
     return defaultZone;
   }
 
-}
+
 
   public static async getInterimAttAvailableSt(value: number) {
     const GetIntermAttendanceId = await Database.from("InterimAttendances")
@@ -216,4 +216,17 @@ export default class Helper {
     
     return query[0].FirstName;
   }
+
+  public static async getName(tablename :any, getcol :any, wherecol:any, id:any) {
+    let name :string = "";
+    const query = await Database.query().from(tablename).select(getcol).where(wherecol, id);
+    const count = query.length;
+    if (count > 0) {
+      query.forEach((row) => { 
+      name = row[getcol];
+      
+      })
+    }
+    return name;
+}
 }

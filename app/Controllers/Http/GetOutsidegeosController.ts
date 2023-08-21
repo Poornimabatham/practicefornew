@@ -17,6 +17,8 @@ export default class GetOutsidegeosController {
     const result = await GetoutsidegeoService.getOutsidegeoService(
       validatedparams
     );
+    console.log(result)
+    response.json(result)
   }
 
   public async edit({}: HttpContextContract) {}
