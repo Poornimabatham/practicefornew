@@ -50,7 +50,6 @@ var DesignationService = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         currentDate = new Date();
-                        console.log(currentDate);
                         return [4 /*yield*/, Database_1["default"].query()
                                 .from("DesignationMaster")
                                 .where("Name", a.name)
@@ -58,10 +57,8 @@ var DesignationService = /** @class */ (function () {
                                 .select("Id")];
                     case 1:
                         designationList = _a.sent();
-                        console.log(designationList);
                         result = [];
                         affectedRows = designationList.length;
-                        console.log(affectedRows);
                         if (affectedRows > 0) {
                             result["status"] = -1;
                             return [2 /*return*/, "user already exist in this list"];
@@ -79,7 +76,7 @@ var DesignationService = /** @class */ (function () {
                                 Code: 8,
                                 RoleId: 9,
                                 Description: a.desc,
-                                archive: '1',
+                                archive: "1",
                                 daysofnotice: "YourDaysOfNoticeValue",
                                 add_sts: "YourAddStsValue"
                             })];

@@ -303,6 +303,7 @@ export default class Helper {
     var selectShiftMasterData: any = await Database.from("ShiftMaster")
       .select("TimeIn", "TimeOut")
       .where("Id", id);
+     
 try{
 
       
@@ -312,7 +313,6 @@ try{
       const stime2 = moment(`1980-01-01 ${row.TimeOut}`).unix();
       const time1 = moment(`1980-01-01 ${timein}`).unix();
       const time2 = moment(`1980-01-01 ${timeout}`).unix();
-
       const totaltime = time2 - time1;
 
       const stotaltime = stime2 - stime1;

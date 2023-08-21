@@ -44,7 +44,7 @@ var GetapprovalRegularService = /** @class */ (function () {
     }
     GetapprovalRegularService.GetregularizationApproverRejectedAPI = function (data) {
         return __awaiter(this, void 0, void 0, function () {
-            var ActivityBy, module, count, count1, successMsg, Msg1, Msg, status, count11, con, regularizetimein, totalovertime, newtimeout, selectAttendanceMasterList_1, response;
+            var ActivityBy, module, count, count1, successMsg, Msg1, Msg, status, count11, con, regularizetimein, totalovertime, newtimeout, selectAttendanceMasterList, err_1, response;
             var _this = this;
             return __generator(this, function (_a) {
                 switch (_a.label) {
@@ -69,17 +69,19 @@ var GetapprovalRegularService = /** @class */ (function () {
                             ActivityBy = 1;
                             module = "ubiattendance APP";
                         }
-                        if (!(data.attendance_id != "" && data.attendance_id != 0)) return [3 /*break*/, 3];
+                        if (!(data.attendance_id != undefined && data.attendance_id != 0)) return [3 /*break*/, 6];
+                        _a.label = 1;
+                    case 1:
+                        _a.trys.push([1, 5, , 6]);
                         return [4 /*yield*/, Database_1["default"].from("AttendanceMaster")
                                 .select("Id", "RegularizeTimeOut", "RegularizeTimeIn", "TimeIn", "TimeOut", "AttendanceDate", "EmployeeId")
                                 .where("Id", data.attendance_id)];
-                    case 1:
-                        selectAttendanceMasterList_1 = _a.sent();
-                        count1 = selectAttendanceMasterList_1.length;
-                        if (!(count1 == 1)) return [3 /*break*/, 3];
-                        // console.log('count1',count1)
-                        return [4 /*yield*/, Promise.all(selectAttendanceMasterList_1.map(function (val) { return __awaiter(_this, void 0, void 0, function () {
-                                var timein, timeout, attendancedate, orginaltimein, empid, selectEmployeeMasterList, selectAttendanceMasterList_2, hrid, shiftId, mdate, updateAttendanceMaster, affected_rows, selectAttendaneMasterList2, attsts, msg, title, emailmsg, updateRegularizationApproval, sql12, approverId, timeincondition, sql;
+                    case 2:
+                        selectAttendanceMasterList = _a.sent();
+                        count1 = selectAttendanceMasterList.length;
+                        if (!(count1 == 1)) return [3 /*break*/, 4];
+                        return [4 /*yield*/, Promise.all(selectAttendanceMasterList.map(function (val) { return __awaiter(_this, void 0, void 0, function () {
+                                var timein, timeout, attendancedate, orginaltimein, empid, selectEmployeeMasterList, empname, selectAttendanceMasterList_1, hrid, shiftId, mdate, updateAttendanceMaster, affected_rows, selectAttendaneMasterList2_1, attsts, updateAttendanceMaster, msg, insertActivityHistoryMaster, title, emailmsg, updateRegularizationApproval, insertActivityHistoryMaster, selectRegulariationList, approverId, timeincondition, updateAttendanceMaster, selectAttendaneMasterList2, updateAttendanceMaster, insertActivityHistoryMaster_1, selectAttendanceMasterList_2, updateAttendanceMaster, insertActivityHistoryMaster, updateRegularizationApproval, updateAttendanceMaster, insertActivityHistoryMaster;
                                 return __generator(this, function (_a) {
                                     switch (_a.label) {
                                         case 0:
@@ -94,24 +96,25 @@ var GetapprovalRegularService = /** @class */ (function () {
                                                     .select(Database_1["default"].raw("\n    IF(LastName != '', CONCAT(FirstName, ' ', LastName), FirstName) as name\n  "), "Shift", "Department", "Designation", "area_assigned", "CompanyEmail")
                                                     .where("Id", empid)
                                                     .orWhere("organizationId", data.orgid)
-                                                    .limit(4)];
+                                                    .limit(2)];
                                         case 1:
                                             selectEmployeeMasterList = _a.sent();
+                                            if (selectEmployeeMasterList.length > 0) {
+                                                empname = selectEmployeeMasterList[0].name;
+                                            }
                                             if (!(data.approverresult == 2)) return [3 /*break*/, 23];
                                             return [4 /*yield*/, Database_1["default"].from("AttendanceMaster")
                                                     .select("*")
                                                     .where("ApproverId", "!=", 0)
                                                     .andWhere("Id", data.attendance_id)];
                                         case 2:
-                                            selectAttendanceMasterList_2 = _a.sent();
+                                            selectAttendanceMasterList_1 = _a.sent();
                                             hrid = data.uid;
-                                            if (!(selectAttendanceMasterList_2.length > 0)) return [3 /*break*/, 12];
-                                            shiftId = selectAttendanceMasterList_2[0].ShiftId;
+                                            if (!(selectAttendanceMasterList_1.length > 0)) return [3 /*break*/, 12];
+                                            shiftId = selectAttendanceMasterList_1[0].ShiftId;
                                             if (!(regularizetimein == timein)) return [3 /*break*/, 5];
-                                            console.log("=");
                                             return [4 /*yield*/, Helper_1["default"].getOvertimeForRegularization(timein, newtimeout, shiftId)];
                                         case 3:
-                                            // console.log('regularizetimein',regularizetimein,'timein',timein)
                                             totalovertime = _a.sent();
                                             mdate = DateTime.local().toFormat("yyyy-MM-dd HH:mm:ss");
                                             return [4 /*yield*/, Database_1["default"].query()
@@ -140,14 +143,13 @@ var GetapprovalRegularService = /** @class */ (function () {
                                                     .where("Id", data.attendance_id)
                                                     .andWhere("RegularizeSts", 3)];
                                         case 7:
-                                            selectAttendaneMasterList2 = _a.sent();
-                                            affected_rows = selectAttendaneMasterList2.length;
+                                            selectAttendaneMasterList2_1 = _a.sent();
+                                            affected_rows = selectAttendaneMasterList2_1.length;
                                             if (!(affected_rows == 1)) return [3 /*break*/, 9];
-                                            attsts = selectAttendaneMasterList2[0].AttendanceStatus; // Assuming the result is an array of objects
+                                            attsts = selectAttendaneMasterList2_1[0].AttendanceStatus;
                                             if (attsts == 2) {
                                                 attsts = 1;
                                             }
-                                            console.log("attsts", attsts);
                                             return [4 /*yield*/, Database_1["default"].query()
                                                     .from("AttendanceMaster")
                                                     .where("Id", data.attendance_id)
@@ -169,7 +171,7 @@ var GetapprovalRegularService = /** @class */ (function () {
                                             _a.label = 9;
                                         case 9:
                                             if (!(count >= 1)) return [3 /*break*/, 11];
-                                            msg = "Regularization request of <b>$empname}</b> has been approved </br> Attendance Date: <b>" + attendancedate + "</b>";
+                                            msg = "Regularization request of <b>" + empname + "</b> has been approved </br> Attendance Date: <b>" + attendancedate + "</b>";
                                             return [4 /*yield*/, Database_1["default"].insertQuery()
                                                     .table("ActivityHistoryMaster")
                                                     .insert({
@@ -180,9 +182,9 @@ var GetapprovalRegularService = /** @class */ (function () {
                                                     ActivityBy: ActivityBy
                                                 })];
                                         case 10:
-                                            updateAttendanceMaster = _a.sent();
+                                            insertActivityHistoryMaster = _a.sent();
                                             title = "Alert:Your Regularization Request is approved";
-                                            emailmsg = "Dear $empname,<br><br> This is to inform you that your regularization\n                   request has been approved.<br>Remarks :  ." + data.comment;
+                                            emailmsg = "Dear " + empname + "<br><br> This is to inform you that your regularization\n                   request has been approved.<br>Remarks :  ." + data.comment;
                                             _a.label = 11;
                                         case 11: return [3 /*break*/, 23];
                                         case 12: return [4 /*yield*/, Database_1["default"].from("RegularizationApproval")
@@ -201,7 +203,7 @@ var GetapprovalRegularService = /** @class */ (function () {
                                             count = updateRegularizationApproval;
                                             hrid = data.uid;
                                             if (!(count >= 1)) return [3 /*break*/, 23];
-                                            msg = "Regularization request of <b>$empname</b> has been approved </br> Attendance Date: <b>" + attendancedate + "</b>";
+                                            msg = "Regularization request of <b>" + empname + "</b> has been approved </br> Attendance Date: <b>" + attendancedate + "</b>";
                                             return [4 /*yield*/, Database_1["default"].insertQuery()
                                                     .table("ActivityHistoryMaster")
                                                     .insert({
@@ -212,7 +214,7 @@ var GetapprovalRegularService = /** @class */ (function () {
                                                     ActivityBy: ActivityBy
                                                 })];
                                         case 14:
-                                            selectAttendaneMasterList2 = _a.sent();
+                                            insertActivityHistoryMaster = _a.sent();
                                             return [4 /*yield*/, Database_1["default"].from("RegularizationApproval")
                                                     .select("ApproverId")
                                                     .where(" attendanceId", data.attendance_id)
@@ -221,8 +223,8 @@ var GetapprovalRegularService = /** @class */ (function () {
                                                     .andWhere("ApproverSts", 3)
                                                     .andWhere("approverregularsts", 0)];
                                         case 15:
-                                            sql12 = _a.sent();
-                                            con = sql12.length;
+                                            selectRegulariationList = _a.sent();
+                                            con = selectRegulariationList.length;
                                             if (!(con > 0)) return [3 /*break*/, 16];
                                             approverId = con[0].ApproverId;
                                             hrid = con[0].ApproverId;
@@ -232,7 +234,7 @@ var GetapprovalRegularService = /** @class */ (function () {
                                             else {
                                                 timeincondition = "The requested timein is: " + regularizetimein + "<br><br><br>";
                                             }
-                                            msg = "Dear $Hrname,<br><br>\n\t\t\t\t\t\t\t\t\t\tThis is to inform you that, $empname has requested regularization for \n                    the " + attendancedate + ". Kindly approve the request.<br>\n\t\t\t\t\t\t\t\t\t\t" + timeincondition + "\n\t\t\t\t\t\t\t\t\t\tThe requested timeout is: " + newtimeout + "<br><br><br>";
+                                            msg = "Dear $Hrname,<br><br>\n\t\t\t\t\t\t\t\t\t\tThis is to inform you that, " + empname + " has requested regularization for \n                    the " + attendancedate + ". Kindly approve the request.<br>\n\t\t\t\t\t\t\t\t\t\t" + timeincondition + "\n\t\t\t\t\t\t\t\t\t\tThe requested timeout is: " + newtimeout + "<br><br><br>";
                                             return [3 /*break*/, 21];
                                         case 16:
                                             if (!(regularizetimein == timein)) return [3 /*break*/, 18];
@@ -249,7 +251,6 @@ var GetapprovalRegularService = /** @class */ (function () {
                                                     LastModifiedById: hrid
                                                 })];
                                         case 17:
-                                            // $totalovertime=$this->getOvertimeForRegularization($timein,$newtimeout,$shiftid);
                                             updateAttendanceMaster = _a.sent();
                                             count = updateAttendanceMaster.length;
                                             return [3 /*break*/, 21];
@@ -260,7 +261,7 @@ var GetapprovalRegularService = /** @class */ (function () {
                                                     .where("Id", data.attendance_id)
                                                     .andWhere("RegularizeSts", 3)];
                                         case 19:
-                                            sql = _a.sent();
+                                            selectAttendaneMasterList2 = _a.sent();
                                             if (affected_rows == 1) {
                                                 attsts =
                                                     selectAttendaneMasterList2[0].AttendanceStatus;
@@ -284,7 +285,7 @@ var GetapprovalRegularService = /** @class */ (function () {
                                             _a.label = 21;
                                         case 21:
                                             if (!(count >= 1)) return [3 /*break*/, 23];
-                                            msg = "Regularization request of <b>$empname</b> has been approved </br> Attendance Date: <b>" + attendancedate + "</b>";
+                                            msg = "Regularization request of <b>" + empname + "</b> has been approved </br> Attendance Date: <b>" + attendancedate + "</b>";
                                             return [4 /*yield*/, Database_1["default"].insertQuery()
                                                     .table("ActivityHistoryMaster")
                                                     .insert({
@@ -295,20 +296,20 @@ var GetapprovalRegularService = /** @class */ (function () {
                                                     ActivityBy: ActivityBy
                                                 })];
                                         case 22:
-                                            updateAttendanceMaster = _a.sent();
+                                            insertActivityHistoryMaster_1 = _a.sent();
                                             title = "Alert:Your Regularization Request is approved";
-                                            emailmsg = "Dear $empname,<br><br> This is to inform you that your regularization request has been approved.<br>Remarks : \n                       \"." + data.comment;
+                                            emailmsg = "Dear " + empname + ",<br><br> This is to inform you that your regularization request has been approved.<br>Remarks : \n                       \"." + data.comment;
                                             _a.label = 23;
                                         case 23:
                                             if (!(data.approverresult == 1)) return [3 /*break*/, 31];
-                                            selectAttendanceMasterList_1 = Database_1["default"].from("AttendanceMaster")
+                                            selectAttendanceMasterList_2 = Database_1["default"].from("AttendanceMaster")
                                                 .where("ApproverId", "!=", 0)
                                                 .andWhere("Id", data.attendance_id)
                                                 .select("Id");
-                                            if (!(selectAttendanceMasterList_1.length > 0)) return [3 /*break*/, 27];
+                                            if (!(selectAttendanceMasterList_2.length > 0)) return [3 /*break*/, 27];
                                             return [4 /*yield*/, Database_1["default"].from("AttendanceMaster")
                                                     .where("Id", data.attendanceId)
-                                                    .where("RegularizeSts", 3)
+                                                    .where("RegularizeSts", 2)
                                                     .update({
                                                     RegularizeSts: data.approverResult,
                                                     RegularizeApprovalDate: mdate,
@@ -317,7 +318,7 @@ var GetapprovalRegularService = /** @class */ (function () {
                                         case 24:
                                             updateAttendanceMaster = _a.sent();
                                             if (!(count >= 1)) return [3 /*break*/, 26];
-                                            msg = "Regularization request of <b>$empname</b> has been rejected</br> Attendance Date: <b>" + attendancedate + "</b>";
+                                            msg = "Regularization request of <b>" + empname + "</b> has been rejected</br> Attendance Date: <b>" + attendancedate + "</b>";
                                             return [4 /*yield*/, Database_1["default"].insertQuery()
                                                     .table("ActivityHistoryMaster")
                                                     .insert({
@@ -328,9 +329,9 @@ var GetapprovalRegularService = /** @class */ (function () {
                                                     ActivityBy: ActivityBy
                                                 })];
                                         case 25:
-                                            selectAttendaneMasterList2 = _a.sent();
+                                            insertActivityHistoryMaster = _a.sent();
                                             title = "Alert:Your Regularization Request is  rejected";
-                                            emailmsg = "Dear $empname,<br><br> This is to inform you that your regularization request has been rejected.<br>Remarks : \n         \"." + data.comment;
+                                            emailmsg = "Dear " + empname + ",<br><br> This is to inform you that your regularization request has been rejected.<br>Remarks : \n         \"." + data.comment;
                                             _a.label = 26;
                                         case 26: return [3 /*break*/, 31];
                                         case 27: return [4 /*yield*/, Database_1["default"].from("RegularizationApproval")
@@ -358,10 +359,10 @@ var GetapprovalRegularService = /** @class */ (function () {
                                                     RegularizeApproverRemarks: data.comment
                                                 })];
                                         case 29:
-                                            _a.sent();
+                                            updateAttendanceMaster = _a.sent();
                                             count = updateAttendanceMaster.length;
                                             if (!(count >= 1)) return [3 /*break*/, 31];
-                                            msg = "Regularization request of <b>$empname</b> has been rejected | \n    AttendanceDate: <b>" + attendancedate + "</b>";
+                                            msg = "Regularization request of <b>" + empname + "</b> has been rejected | \n    AttendanceDate: <b>" + attendancedate + "</b>";
                                             return [4 /*yield*/, Database_1["default"].insertQuery()
                                                     .table("ActivityHistoryMaster")
                                                     .insert({
@@ -372,19 +373,23 @@ var GetapprovalRegularService = /** @class */ (function () {
                                                     ActivityBy: ActivityBy
                                                 })];
                                         case 30:
-                                            selectAttendaneMasterList2 = _a.sent();
+                                            insertActivityHistoryMaster = _a.sent();
                                             title = "Alert:Your Regularization Request is rejected";
-                                            emailmsg = "Dear $empname,<br><br> This\n                     is to inform you that your regularization request has \n                      rejected.<br>HR Remarks :  \"." + data.comment;
+                                            emailmsg = "Dear " + empname + ",<br><br> This\n                     is to inform you that your regularization request has \n                      rejected.<br>HR Remarks :  \"." + data.comment;
                                             _a.label = 31;
                                         case 31: return [2 /*return*/];
                                     }
                                 });
                             }); }))];
-                    case 2:
-                        // console.log('count1',count1)
-                        _a.sent();
-                        _a.label = 3;
                     case 3:
+                        _a.sent();
+                        _a.label = 4;
+                    case 4: return [3 /*break*/, 6];
+                    case 5:
+                        err_1 = _a.sent();
+                        console.log(err_1);
+                        return [3 /*break*/, 6];
+                    case 6:
                         if (count >= 1) {
                             status = true;
                             if (data.approverresult == 2) {
