@@ -8,15 +8,26 @@ export default class HolidayService {
   const currentPage = 2;
   const perPage = 10;
   const begin = (currentPage - 1) * perPage;
+  const CurrYear = moment().format("yyyy")
+  const currentYear = new Date().getFullYear();
+  const nextYear = currentYear + 1;   // Calculate the next year
+  const startfiscaldate = "04-01"
+  const endfiscaldate = "03-31"
+  
+  const startfiscalyear =  CurrYear +"-"+ startfiscaldate ; // concat CurrYear with startfiscaldate
+  const endfiscalyear = nextYear +"-"+ endfiscaldate;  // concat nextYear with endfiscaldate
   
   const FetchHolidays = Database.query()
   .from("HolidayMaster")
   .select("Id","Name","Description","DateTo","OrganizationId",
     Database.raw("DATE(DateFrom) AS fromDate"),
     Database.raw("DATEDIFF(DATE(DateTo),DATE(DateFrom))   AS DiffDate"),"DateFrom")
-  .where("OrganizationId",OrgId.OrgId).orderBy("fromDate", "asc")
-  .limit(perPage).offset(begin)
-
+  .where("OrganizationId",OrgId.OrgId)
+  .whereBetween("DateFrom",[startfiscalyear,endfiscalyear])
+  .whereBetween("DateTo",[startfiscalyear,endfiscalyear])
+  .orderBy("fromDate", "asc")
+  .limit(begin)
+  
   interface DefineTypes{
    Id:number,
    Name:string,
@@ -54,7 +65,7 @@ const datefrom = new Date(get.DateFrom);
 const dateString = datefrom.toLocaleDateString('en-US'); // Change 'en-US' to your preferred locale
 const DateFrom = moment(dateString, 'MM/DD/YYYY').format('YYYY/MM/DD');
 
-const dateto = new Date(get.DateFrom); 
+const dateto = new Date(get.DateTo); 
 const dateString2 = dateto.toLocaleDateString('en-US'); 
 const DateTo = moment(dateString2, 'MM/DD/YYYY').format('YYYY/MM/DD');
 
@@ -82,9 +93,9 @@ const InsertHolidays = await Database
 if(InsertHolidays.length > 0){
                
 const zone = await Helper.getTimeZone(get.OrganizationId);
-  
 const timezone = zone;
 const date = moment().tz(timezone).toDate();
+
 const uid = get.empid;
 const EmpName = await Helper.getempnameById(get.EmpId);
 const module = 'Attendance app';

@@ -8,7 +8,7 @@ export default class extends BaseSchema {
       table.string('key', 255).notNullable().primary()
       table.integer('points', 9).notNullable()
       table.bigint('expire').unsigned()
-  
+     
     })
   }
 

@@ -2,9 +2,8 @@ import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import GetEarlyLeavingValidator from 'App/Validators/GetEarlyLeavingValidator'
 import getEarlyLeavingsService from 'App/Services/getEarlyLeavingsService';
 
-
 export default class GetEarlyLeavingsController {
-    private data: any = [];
+    private data = [];
     public async getEarlyLeavings({request,response}:HttpContextContract){
 
       var getvalidData = await request.validate(GetEarlyLeavingValidator.EarlyLeavingScehma);
