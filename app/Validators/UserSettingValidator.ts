@@ -81,7 +81,16 @@ export default class UserSettingValidator  {
       newPin:schema.number()
      })
    }
-
+   
+   static RegDetail = {
+     schema:schema.create({
+      datafor:schema.string(),
+      uid:schema.number(),
+      orgid:schema.number(),
+      hrsts:schema.number(),
+      divhrsts:schema.number()
+     })
+   }
   /**
    * Custom messages for validation failures. You can make use of dot notation `(.)`
    * for targeting nested fields and array expressions `(*)` for targeting all

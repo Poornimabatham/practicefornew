@@ -1,6 +1,8 @@
 import Database from "@ioc:Adonis/Lucid/Database";
 import helper from '../Helper/Helper'
 import Helper from "../Helper/Helper";
+import { DateTime } from "luxon";
+import moment from "moment-timezone";
 
 
 
@@ -68,13 +70,14 @@ export default class Usersettingservice{
     static async getPunchInfoCsv(data)
     {
        const Empid       = data.Empid;
-       const Orgid       = data.Orgid;                                       /////write function getEmpTimeZone
+       const Orgid       = data.Orgid;                                       
        const csv         = data.Csv;
        const today       = data.Date;
        const loginEmp    = data.loginEmp;
        const currentPage = data.currentPage;
        const perpage     = data.perpage;
        const begin       = (currentPage-1)*perpage;
+       const zone         = await Helper.getEmpTimeZone(Empid,Orgid)
        const adminstatus = await Helper.getAdminStatus(loginEmp);
        const res:any[]   = [];
 
@@ -143,9 +146,10 @@ export default class Usersettingservice{
       const csv          = data.Csv;
       const today        = data.Date;
       const loginEmp     = data.loginEmp;
-      const currentPage  = data.currentPage;                              /////write function getEmpTimeZone
+      const currentPage  = data.currentPage;                              
       const perpage      = data.perpage;
       const begin        = (currentPage-1)*perpage;  
+      const zone         = await Helper.getEmpTimeZone(Empid,Orgid)
       const adminstatus  = await Helper.getAdminStatus(Empid);
       const res:any[]    = [];
 
@@ -389,6 +393,139 @@ export default class Usersettingservice{
           result['status'] = 2;
       }
           return result;
+    }
+
+    static async getRegDetailForApproval(data){
+         
+        const deta          = data.datafor;
+        const userid        = data.uid;
+        const orgid         = data.orgid;
+        const hrsts         = data.hrsts; 
+        const devhrsts      = data.divhrsts;
+        let result:any[] = [];
+        let   count         = 0;
+        let   startdate     = '';
+        let   status        = false;
+        const zone          = await Helper.getTimeZone(orgid);
+        let   enddate       = moment().tz(zone).format('YYYY-MM-DD');;
+   
+        
+        const leavestaus    = 'LeaveStatus';
+            
+        const query = await Database.query().from('Organization').select('CreatedDate').where('Id',orgid);
+        count = query.length;
+
+        if(count == 1)
+        {
+          startdate = (moment(query[0].CreatedDate).format("yyyy-MM-DD"));
+        }
+        
+        const query2 = await Database.query().from('OtherMaster').select('ActualValue').where('DisplayName',deta).andWhere('OtherType',leavestaus);
+        let value    = query2[0].ActualValue;
+        
+
+        let sql = Database.query().from('AttendanceMaster').select('*',Database.raw(`(SELECT IF(LastName!='',CONCAT(FirstName,' ',LastName),FirstName) FROM EmployeeMaster WHERE Id=EmployeeId) as Name`)).where(Database.raw(` DATE(AttendanceDate) between "${startdate}" and "${enddate}" `)).orderBy('RegularizeRequestDate','desc')        
+
+        if(hrsts == 1 || devhrsts == 1){
+          sql = sql.where(Database.raw(`OrganizationId=${orgid} and RegularizeSts=${value} and EmployeeId in (select Id from EmployeeMaster where Is_Delete=0 and (DOL='0000-00-00' or DOL>curdate()))`));
+        }else{
+          sql = sql.where(Database.raw(`OrganizationId=${orgid} and RegularizeSts=${value} AND Id IN (SELECT attendanceId FROM RegularizationApproval Where ApproverId=${userid}) and EmployeeId in (select Id from EmployeeMaster where Is_Delete=0 and (DOL='0000-00-00' or DOL>curdate()))`));
+        }
+
+        const sql11 = await sql;
+        const total = sql11.length;
+
+        if(total >= 1)
+        {
+          await Promise.all(         
+          sql11.map(async (row) =>{
+             
+              
+               const res = {};
+               res['total']        = total;
+               let attid           = row.Id;
+               res['Id']           = row.Id;
+               res['employeeId']   = row.EmployeeId;
+               res['employeeName'] = row.Name;
+               let regsts          = row.RegularizeSts;
+               res['device']       = row.device;
+
+               if(res['device'] == "Auto Time Out"){
+                   res['deviceid'] = 1;
+               }else{
+                   res['deviceid'] = 0;
+               }
+               res['empRemarks']       = row.RegularizationRemarks;
+               res['approverRemarks']  = row.RegularizeApproverRemarks;
+               res['attendanceDate']   = moment(row.AttendanceDate).format("yyyy-MM-DD");
+               res['regApplyDate']     = moment(row.RegularizeRequestDate).format("yyyy-MM-DD");
+               
+               res['requestedtimeout'] = moment(row.requestedtimeout).format("HH:mm:ss");
+               
+               
+              
+      
+               if(regsts == 3)
+               {
+                  res['regularizeSts'] = 'pending';
+                  let pstatus          = 0;
+                  let approverid       = row.ApproverId;
+                  
+                  if(approverid != 0)
+                  {
+                    pstatus            = approverid;
+                  }
+                  if(pstatus == 0 || pstatus == null)
+                  {
+                    pstatus = 0;
+                  }
+                
+                  
+                  if(pstatus == 0)
+                  {
+                     
+                     const qur =  await Database.query().from('RegularizationApproval').select('ApproverId').where('attendanceId',attid).andWhere('ApproverSts',regsts).andWhere('approverregularsts',0).orderBy
+                     ('Id','asc').limit(1);
+                     pstatus = qur[0].ApproverId;
+                   
+
+                  }
+                  const Name = await Helper.getEmpName(pstatus);
+
+
+                  if(pstatus != 0)
+                  {
+                     if(pstatus != userid){
+                      res['pstatus'] = 'Pending at' + Name;
+                      res['ApprovalIcon'] = false;
+                     }else{
+                      res['pstatus'] = 'Pending at' + Name;
+                      res['ApprovalIcon'] = true;
+                     }
+                  }else{
+                      res['pstatus'] = "Pending";
+                      res['ApprovalIcon'] = false;
+                  }
+               }
+               if(regsts == 2)
+               {
+                  res['regularizeSts']='Approved';
+                  res['Pstatus']="";
+                  res['ApprovalIcon']=false;
+               }
+               if(regsts == 3){
+                  res['regularizeSts']='Rejected';
+                  res['Pstatus']="";
+                  res['ApprovalIcon']=false;
+               }
+                result.push(res); 
+                
+            })
+            );
+              return result; 
+                      
+        }
+         
     }
 
 }
