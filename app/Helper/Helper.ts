@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 import Database from "@ioc:Adonis/Lucid/Database";
+import ShiftMaster from "App/Models/ShiftMaster";
 
 export default class Helper {
   public static encode5t(str: any) {
@@ -257,6 +258,18 @@ export default class Helper {
     return query[0].FirstName;
   }
 
+  public static async getName(tablename :any, getcol :any, wherecol:any, id:any) {
+    let name :string = "";
+    const query = await Database.query().from(tablename).select(getcol).where(wherecol, id);
+    const count = query.length;
+    if (count > 0) {
+      query.forEach((row) => { 
+      name = row[getcol];
+      
+      })
+    }
+    return name;
+}
   public static async getShiftType(shiftId) {
     const defaultshifttype = 0;
     const allDataOfShiftMaster: any = await ShiftMaster.find(shiftId);
