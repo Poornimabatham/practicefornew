@@ -1,11 +1,9 @@
-// import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import ShiftsService from 'App/Services/ShiftService';
 import ShiftValidator from 'App/Validators/ShiftValidator';
 
 export default class ShiftsController {
-  public async index({ }: HttpContextContract) {
-   // return "mayank";
+  public async index({}: HttpContextContract) {
   }
 
   public async create({request,response}: HttpContextContract) {

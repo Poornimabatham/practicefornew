@@ -37,12 +37,15 @@ const authConfig: AuthConfig = {
 
       /*
       |--------------------------------------------------------------------------
-      | Tokens provider
+      | Redis provider for managing tokens
       |--------------------------------------------------------------------------
       |
-      | Uses SQL database for managing tokens. Use the "database" driver, when
-      | tokens are the secondary mode of authentication.
-      | For example: The Github personal tokens
+      | Uses Redis for managing tokens. We recommend using the "redis" driver
+      | over the "database" driver when the tokens based auth is the
+      | primary authentication mode.
+      |
+      | Redis ensure that all the expired tokens gets cleaned up automatically.
+      | Whereas with SQL, you have to cleanup expired tokens manually.
       |
       | The foreignKey column is used to make the relationship between the user
       | and the token. You are free to use any column name here.
@@ -50,8 +53,8 @@ const authConfig: AuthConfig = {
       */
       tokenProvider: {
         type: 'api',
-        driver: 'database',
-        table: 'api_tokens',
+        driver: 'redis',
+        redisConnection: 'local',
         foreignKey: 'user_id',
       },
 
@@ -64,15 +67,15 @@ const authConfig: AuthConfig = {
         | Name of the driver
         |
         */
-        driver: 'lucid',
+        driver: 'database',
 
         /*
         |--------------------------------------------------------------------------
         | Identifier key
         |--------------------------------------------------------------------------
         |
-        | The identifier key is the unique key on the model. In most cases specifying
-        | the primary key is the right choice.
+        | The identifier key is the unique key inside the defined database table.
+        | In most cases specifying the primary key is the right choice.
         |
         */
         identifierKey: 'id',
@@ -91,16 +94,14 @@ const authConfig: AuthConfig = {
 
         /*
         |--------------------------------------------------------------------------
-        | Model
+        | Database table
         |--------------------------------------------------------------------------
         |
-        | The model to use for fetching or finding users. The model is imported
-        | lazily since the config files are read way earlier in the lifecycle
-        | of booting the app and the models may not be in a usable state at
-        | that time.
+        | The database table to query. Make sure the database table has a `password`
+        | field and `remember_me_token` column.
         |
         */
-        model: () => import('App/Models/User'),
+        usersTable: 'Auth',
       },
     },
   },

@@ -1,9 +1,22 @@
-import { schema, CustomMessages } from '@ioc:Adonis/Core/Validator'
-import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import { schema, CustomMessages } from "@ioc:Adonis/Core/Validator";
+import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
+import BaseValidator from "../Validators/BaseValidator";
+import { format } from "mysql2";
 
-export default class UservalidationValidator {
-  constructor(protected ctx: HttpContextContract) {}
-
+export default class GetOutsidegeoValidator extends BaseValidator {
+  constructor(protected ctx: HttpContextContract) {
+    super();
+  }
+  static getoutsidegeo: any = {
+    schema: schema.create({
+      seid: schema.number(),
+      uid: schema.number(),
+      orgid: schema.number(),
+      date: schema.date.optional({ format: "yyyy-MM-dd" }),
+      currentPage: schema.number.optional(),
+      perPage: schema.number.optional(),
+    }),
+  };
   /*
    * Define schema to validate the "shape", "type", "formatting" and "integrity" of data.
    *
@@ -23,7 +36,7 @@ export default class UservalidationValidator {
    *     ])
    *    ```
    */
-  public schema = schema.create({})
+  public schema = schema.create({});
 
   /**
    * Custom messages for validation failures. You can make use of dot notation `(.)`
@@ -36,5 +49,5 @@ export default class UservalidationValidator {
    * }
    *
    */
-  public messages: CustomMessages = {}
+  public messages: CustomMessages = {};
 }
