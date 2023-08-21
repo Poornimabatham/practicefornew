@@ -15,7 +15,4 @@ export default class ShiftMaster extends BaseModel {
 
   @column({columnName:'shifttype'})  
   public shifttype: number
-
-  @column({columnName:'MultipletimeStatus'})  
-  public MultipletimeStatus: number
 }

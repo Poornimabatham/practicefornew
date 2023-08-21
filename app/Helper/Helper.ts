@@ -1,11 +1,5 @@
 const jwt = require("jsonwebtoken");
 import Database from "@ioc:Adonis/Lucid/Database";
-import AttendanceMaster from "App/Models/AttendanceMaster";
-import EmployeeMaster from "App/Models/EmployeeMaster";
-import Organization from "App/Models/Organization";
-import ShiftMaster from "App/Models/ShiftMaster";
-import ZoneMaster from "App/Models/ZoneMaster";
-import { proxyAddr } from 'proxy-addr';
 
 export default class Helper {
   public static encode5t(str: any) {
@@ -277,34 +271,6 @@ export default class Helper {
     }
   }
 
-
-  public static async getShiftMultipleTimeStatus(userId, today, shiftId) {
-    const attendanceRecord = await AttendanceMaster.query()
-      .where('EmployeeId', userId)
-      .where('AttendanceDate', today)
-      .whereNot('TimeIn', '00:00:00')
-      .select('multitime_sts')
-      .first();
-
-    if (attendanceRecord && attendanceRecord.multitime_sts) {
-      return attendanceRecord.multitime_sts;
-    } else {
-      const shiftRecord = await ShiftMaster.query()
-        .where('Id', shiftId)
-        .select('MultipletimeStatus')
-        .first();
-      if (shiftRecord && shiftRecord.MultipletimeStatus) {
-        return shiftRecord.MultipletimeStatus;
-      }
-    }
-    return 0;
-  }
-
-
-
-
-
-
   public static async getassignedShiftTimes(empid, ShiftDate) {
     let getshiftid = await Database.from("ShiftPlanner")
       .select("shiftid")
@@ -363,25 +329,6 @@ export default class Helper {
     }
   }
 
-
-  public static calculateOvertime = (startTime, endTime) => {
-    const [startHours, startMinutes,startSeconds] = startTime.split(':').map(Number);
-    const [endHours, endMinutes,endSeconds] = endTime.split(':').map(Number);
-    const totalStartSeconds = startHours * 3600 + startMinutes * 60 + startSeconds;
-    const totalEndSeconds = endHours * 3600 + endMinutes * 60 + endSeconds;
-    let timeDiffInSeconds = totalEndSeconds - totalStartSeconds;
-
-  // if (timeDiffInSeconds < 0) {
-  //   timeDiffInSeconds += 24 * 3600; // Assuming time is within 24 hours range
-  // }
-   const hours = Math.floor(Math.abs(timeDiffInSeconds) / 3600) * (timeDiffInSeconds < 0 ? 1 : 1);
-   const remainingSeconds = Math.abs(timeDiffInSeconds) % 3600;
-   const minutes = Math.floor(remainingSeconds / 60) * (timeDiffInSeconds < 0 ? 1 : 1);
-   const seconds = Math.floor(remainingSeconds % 60) * (timeDiffInSeconds < 0 ? 1 : 1);
-   
-   return { hours, minutes, seconds };
-  };
-
   static async getCountryIdByOrg(orgid: number) {
     const query: any = await Database.query()
       .from("Organization")
@@ -389,6 +336,5 @@ export default class Helper {
       .where("Id", orgid);
     return query;
   }
-
 
 }
