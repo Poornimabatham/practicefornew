@@ -52,7 +52,6 @@ export default class DepartmentService {
     if (query.length > 0) {
       result['status'] = '-1';
       return result['status'];
-
     }
     const insertQuery = await Database.insertQuery()
       .table("DepartmentMaster")
@@ -116,7 +115,7 @@ export default class DepartmentService {
     if (selectQuery.length > 0) {
       result['status'] = '-1'; /// department already exist
       return false
-    }  
+    }
 
     const query1 = await Database.from('DepartmentMaster').select('Name', 'archive').where('OrganizationId', orgId).andWhere('Id', DeptId);
 
@@ -157,7 +156,7 @@ export default class DepartmentService {
       var appModule = "Department";
       var actionperformed;
       var activityBy = 1;
-      var getEmpName = await Helper.getEmpName(data.EmpID)       //getemployeeName
+      var getEmpName = await Helper.getEmpName(data.adminId)       //getemployeeName
 
       if (archiveStatus == 2) {
         actionperformed = ` ${data.Name} department has been edited by ${getEmpName} `;

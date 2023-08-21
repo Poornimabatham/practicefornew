@@ -24,7 +24,7 @@ export default class ClientsController {
 
 
   public async getClientList({ request, response }: HttpContextContract) {
-    const clientdata = await request.all();
+    const clientdata = await request.validate(ClientValidator.getClientListSchema);
     const res = await ClientService.getClientList(clientdata);
     response.json(res);
 
