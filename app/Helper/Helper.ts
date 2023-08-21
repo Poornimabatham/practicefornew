@@ -1,6 +1,10 @@
 const jwt = require("jsonwebtoken");
 import Database from "@ioc:Adonis/Lucid/Database";
+import AttendanceMaster from "App/Models/AttendanceMaster";
+import EmployeeMaster from "App/Models/EmployeeMaster";
+import Organization from "App/Models/Organization";
 import ShiftMaster from "App/Models/ShiftMaster";
+import ZoneMaster from "App/Models/ZoneMaster";
 
 export default class Helper {
   public static encode5t(str: any) {
