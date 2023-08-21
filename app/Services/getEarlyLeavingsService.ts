@@ -3,6 +3,7 @@ import Helper from "App/Helper/Helper";
 import { DateTime } from "luxon";
 
 export default class getEarlyLeavingsService {
+  
   static async EarlyLeavers(getData) {
     var Begin = (getData.currentPage - 1) * getData.perPage;
     var limit;
@@ -21,7 +22,7 @@ export default class getEarlyLeavingsService {
     var dateTimeInTimeZone = dateTimeUTC.setZone(timeZone);
     var Date = dateTimeInTimeZone.toFormat("yyyy-MM-dd");
 
-    let getEarlyComingsdata = Database.from("AttendanceMaster as A")
+    let getEarlyLeaversdata = Database.from("AttendanceMaster as A")
       .innerJoin("EmployeeMaster as E", "A.EmployeeId", "E.Id")
       .innerJoin("ShiftMaster as S", "A.shiftId", "S.Id")
       .select(
@@ -88,32 +89,19 @@ export default class getEarlyLeavingsService {
     if (adminStatus === 2) {
       const deptId = getData.deptId;
       ConditionForadminStatus = `A.Dept_id = ${deptId}`;
-      getEarlyComingsdata = getEarlyComingsdata.where(
+      getEarlyLeaversdata = getEarlyLeaversdata.where(
         "A.Dept_id",
         ConditionForadminStatus
       );
     }
     if (getData.empid !== 0) {
-      getEarlyComingsdata = getEarlyComingsdata.where("E.Id", getData.empid);
-    }
-    
-    interface DefineTypes {
-      FirstName: string;
-      LastName: string;
-      shifttype: number;
-      EmployeeId: number;
-      ShiftId: number;
-      atimein: string;
-      TimeOut: string;
-      earlyleaver: number;
-      EntryImage: string;
+      getEarlyLeaversdata = getEarlyLeaversdata.where("E.Id", getData.empid);
     }
 
-    var sendResponse: DefineTypes[] = [];
-
-    var queryResult = await getEarlyComingsdata;
+    var sendResponse: EarlyLeaversInterface[] = [];
+    var queryResult = await getEarlyLeaversdata;
     queryResult.forEach(function (val) {
-      var data: DefineTypes = {
+      var data: EarlyLeaversInterface = {
         FirstName: val.FirstName,
         LastName: val.LastName,
         EmployeeId: val.EmployeeId,

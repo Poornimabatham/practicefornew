@@ -1,11 +1,10 @@
 import Database from "@ioc:Adonis/Lucid/Database";
 import Helper from "App/Helper/Helper";
 import { DateTime } from "luxon";
-
 export default class GetEarlyComingsService {
   static async EarlyCommers(getData) {
 
-    const sendResponse: DefineTypes[] = [];
+    const sendResponse: EarlyCommersInterface[] = [];
     const Begin = (getData.currentPage - 1) * getData.perPage;
     var limit;
     if (getData.csv == " ") {
@@ -65,18 +64,9 @@ export default class GetEarlyComingsService {
       );
     }
 
-    interface  DefineTypes {
-      FirstName: number;
-      LastName: string;
-      atimein: string;
-      TimeIn: string;
-      Earlyby: number;
-      EntryImage: string;
-    }
-
     const queryResult = await getEarlyComingsdata;
     queryResult.forEach(function (val) {
-      const data: DefineTypes = {
+      const data: EarlyCommersInterface = {
         FirstName: val.FirstName,
         LastName: val.LastName,
         atimein: val.atimein,
