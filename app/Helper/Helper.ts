@@ -350,4 +350,44 @@ export default class Helper {
     return query;
   }
 
+  public static async getShiftMultipleTimeStatus(userId, today, shiftId) {
+    const attendanceRecord = await AttendanceMaster.query()
+      .where('EmployeeId', userId)
+      .where('AttendanceDate', today)
+      .whereNot('TimeIn', '00:00:00')
+      .select('multitime_sts')
+      .first();
+
+    if (attendanceRecord && attendanceRecord.multitime_sts) {
+      return attendanceRecord.multitime_sts;
+    } else {
+      const shiftRecord = await ShiftMaster.query()
+        .where('Id', shiftId)
+        .select('MultipletimeStatus')
+        .first();
+      if (shiftRecord && shiftRecord.MultipletimeStatus) {
+        return shiftRecord.MultipletimeStatus;
+      }
+    }
+    return 0;
+  }
+
+  public static calculateOvertime = (startTime, endTime) => {
+    const [startHours, startMinutes,startSeconds] = startTime.split(':').map(Number);
+    const [endHours, endMinutes,endSeconds] = endTime.split(':').map(Number);
+    const totalStartSeconds = startHours * 3600 + startMinutes * 60 + startSeconds;
+    const totalEndSeconds = endHours * 3600 + endMinutes * 60 + endSeconds;
+    let timeDiffInSeconds = totalEndSeconds - totalStartSeconds;
+
+  // if (timeDiffInSeconds < 0) { 
+  //   timeDiffInSeconds += 24 * 3600; // Assuming time is within 24 hours range
+  // }
+   const hours = Math.floor(Math.abs(timeDiffInSeconds) / 3600) * (timeDiffInSeconds < 0 ? 1 : 1);
+   const remainingSeconds = Math.abs(timeDiffInSeconds) % 3600;
+   const minutes = Math.floor(remainingSeconds / 60) * (timeDiffInSeconds < 0 ? 1 : 1);
+   const seconds = Math.floor(remainingSeconds % 60) * (timeDiffInSeconds < 0 ? 1 : 1);
+   
+   return { hours, minutes, seconds };
+  };
+
 }

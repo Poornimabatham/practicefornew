@@ -18,4 +18,19 @@ export default class EmployeeMaster extends BaseModel {
 
   @column({columnName:'CurrentCountry'})
   public CurrentCountry: number
+
+  @column({columnName:'Department'})
+  public Department: number
+
+  @column({columnName:'Designation'})
+  public Designation: number
+
+  @column({columnName:'area_assigned'})
+  public area_assigned: number
+
+  @column({columnName:'hourly_rate'})
+  public hourly_rate: number
+
+  @column({columnName:'OwnerId'})
+  public OwnerId: number
 }
