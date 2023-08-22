@@ -30,20 +30,10 @@ export default class Helper {
       .where(
         "Id",
         Database.raw(
-
           `(select TimeZone from Organization where id =${orgid}  LIMIT 1)`
         )
       );
     return query1[0].name;
-  }
-
- 
-  public static async getempnameById(empid: number) {
-    const query2 = await Database.query()
-      .from("EmployeeMaster")
-      .select("FirstName")
-      .where("Id", empid);
-    return query2[0].FirstName;
   }
 
   public static async getAdminStatus(id: any) {
@@ -57,6 +47,14 @@ export default class Helper {
       status = queryResult.appSuperviserSts;
     }
     return status;
+  }
+
+  public static async getempnameById(empid: number) {
+    const query2 = await Database.query()
+      .from("EmployeeMaster")
+      .select("FirstName")
+      .where("Id", empid);
+    return query2[0].FirstName;
   }
 
   public static generateToken(secretKey: string, data: any = {}) {
@@ -103,7 +101,6 @@ export default class Helper {
     });
     return capitalizedWords.join(" ");
   }
-
 
   public static async getCountryIdByOrg1(orgid: number) {
     const getCountryId = await Database.from("Organization")
@@ -250,18 +247,25 @@ export default class Helper {
     return query[0].FirstName;
   }
 
-  public static async getName(tablename :any, getcol :any, wherecol:any, id:any) {
-    let name :string = "";
-    const query = await Database.query().from(tablename).select(getcol).where(wherecol, id);
+  public static async getName(
+    tablename: any,
+    getcol: any,
+    wherecol: any,
+    id: any
+  ) {
+    let name: string = "";
+    const query = await Database.query()
+      .from(tablename)
+      .select(getcol)
+      .where(wherecol, id);
     const count = query.length;
     if (count > 0) {
-      query.forEach((row) => { 
-      name = row[getcol];
-      
-      })
+      query.forEach((row) => {
+        name = row[getcol];
+      });
     }
     return name;
-}
+  }
   public static async getShiftType(shiftId) {
     const defaultshifttype = 0;
     const allDataOfShiftMaster: any = await ShiftMaster.find(shiftId);
@@ -344,18 +348,18 @@ export default class Helper {
 
   public static async getShiftMultipleTimeStatus(userId, today, shiftId) {
     const attendanceRecord = await AttendanceMaster.query()
-      .where('EmployeeId', userId)
-      .where('AttendanceDate', today)
-      .whereNot('TimeIn', '00:00:00')
-      .select('multitime_sts')
+      .where("EmployeeId", userId)
+      .where("AttendanceDate", today)
+      .whereNot("TimeIn", "00:00:00")
+      .select("multitime_sts")
       .first();
 
     if (attendanceRecord && attendanceRecord.multitime_sts) {
       return attendanceRecord.multitime_sts;
     } else {
       const shiftRecord = await ShiftMaster.query()
-        .where('Id', shiftId)
-        .select('MultipletimeStatus')
+        .where("Id", shiftId)
+        .select("MultipletimeStatus")
         .first();
       if (shiftRecord && shiftRecord.MultipletimeStatus) {
         return shiftRecord.MultipletimeStatus;
@@ -365,22 +369,27 @@ export default class Helper {
   }
 
   public static calculateOvertime = (startTime, endTime) => {
-    const [startHours, startMinutes,startSeconds] = startTime.split(':').map(Number);
-    const [endHours, endMinutes,endSeconds] = endTime.split(':').map(Number);
-    const totalStartSeconds = startHours * 3600 + startMinutes * 60 + startSeconds;
+    const [startHours, startMinutes, startSeconds] = startTime
+      .split(":")
+      .map(Number);
+    const [endHours, endMinutes, endSeconds] = endTime.split(":").map(Number);
+    const totalStartSeconds =
+      startHours * 3600 + startMinutes * 60 + startSeconds;
     const totalEndSeconds = endHours * 3600 + endMinutes * 60 + endSeconds;
     let timeDiffInSeconds = totalEndSeconds - totalStartSeconds;
 
-  // if (timeDiffInSeconds < 0) { 
-  //   timeDiffInSeconds += 24 * 3600; // Assuming time is within 24 hours range
-  // }
-   const hours = Math.floor(Math.abs(timeDiffInSeconds) / 3600) * (timeDiffInSeconds < 0 ? 1 : 1);
-   const remainingSeconds = Math.abs(timeDiffInSeconds) % 3600;
-   const minutes = Math.floor(remainingSeconds / 60) * (timeDiffInSeconds < 0 ? 1 : 1);
-   const seconds = Math.floor(remainingSeconds % 60) * (timeDiffInSeconds < 0 ? 1 : 1);
-   
-   return { hours, minutes, seconds };
+    // if (timeDiffInSeconds < 0) {
+    //   timeDiffInSeconds += 24 * 3600; // Assuming time is within 24 hours range
+    // }
+    const hours =
+      Math.floor(Math.abs(timeDiffInSeconds) / 3600) *
+      (timeDiffInSeconds < 0 ? 1 : 1);
+    const remainingSeconds = Math.abs(timeDiffInSeconds) % 3600;
+    const minutes =
+      Math.floor(remainingSeconds / 60) * (timeDiffInSeconds < 0 ? 1 : 1);
+    const seconds =
+      Math.floor(remainingSeconds % 60) * (timeDiffInSeconds < 0 ? 1 : 1);
+
+    return { hours, minutes, seconds };
   };
-
 }
-

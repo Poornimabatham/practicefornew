@@ -1,6 +1,7 @@
 import Database from "@ioc:Adonis/Lucid/Database";
 import Helper from "App/Helper/Helper";
 const { DateTime } = require("luxon");
+import moment from "moment";
 
 export default class LateComingService {
   public static async getLateComing(data) {
@@ -75,4 +76,51 @@ export default class LateComingService {
 
     return response;
   }
+
+
+
+  public static async getOvertimeForRegularization(timein, timeout, id) {
+    var name:string = " ";
+    var selectShiftMasterData: any = await Database.from("ShiftMaster")
+      .select("TimeIn", "TimeOut")
+      .where("Id", id);
+     
+try{
+
+      
+    for (const row of selectShiftMasterData) {
+      const stime1 = moment(`1980-01-01 ${row.TimeIn}`).unix();
+    
+      const stime2 = moment(`1980-01-01 ${row.TimeOut}`).unix();
+      const time1 = moment(`1980-01-01 ${timein}`).unix();
+      const time2 = moment(`1980-01-01 ${timeout}`).unix();
+      const totaltime = time2 - time1;
+
+      const stotaltime = stime2 - stime1;
+      const overtime = Math.abs(totaltime - stotaltime);
+      const overtimeInMinutes = overtime / 60;
+
+      if (overtime > 0) {
+         name = moment()
+          .startOf("day")
+          .minutes(overtimeInMinutes)
+          .format("HH:mm:00");
+
+      }
+      if (totaltime - stotaltime < 0) {
+        name = "-" + `${name}`;
+
+        }
+      if (timein == "00:00:00") {
+        name = "00:00:00";
+      }
+    }
+  }
+
+  catch(error) {
+    console.error(error.message);
+  }
+return name
+
+}
 }

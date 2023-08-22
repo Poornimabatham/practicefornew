@@ -6,7 +6,6 @@ export default class GetDataToRegService {
   public static async FetchingdatatoReg(data) {
     var count = 0;
     var status = false;
-    //$data = array();
 
     const currentMonth = moment().endOf("month").format("YYYY-MM-DD");
 

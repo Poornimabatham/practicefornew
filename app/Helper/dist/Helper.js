@@ -76,22 +76,6 @@ var Helper = /** @class */ (function () {
             });
         });
     };
-    Helper.getempnameById = function (empid) {
-        return __awaiter(this, void 0, void 0, function () {
-            var query2;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, Database_1["default"].query()
-                            .from("EmployeeMaster")
-                            .select("FirstName")
-                            .where("Id", empid)];
-                    case 1:
-                        query2 = _a.sent();
-                        return [2 /*return*/, query2[0].FirstName];
-                }
-            });
-        });
-    };
     Helper.getAdminStatus = function (id) {
         return __awaiter(this, void 0, void 0, function () {
             var status, queryResult;
@@ -110,6 +94,22 @@ var Helper = /** @class */ (function () {
                             status = queryResult.appSuperviserSts;
                         }
                         return [2 /*return*/, status];
+                }
+            });
+        });
+    };
+    Helper.getempnameById = function (empid) {
+        return __awaiter(this, void 0, void 0, function () {
+            var query2;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, Database_1["default"].query()
+                            .from("EmployeeMaster")
+                            .select("FirstName")
+                            .where("Id", empid)];
+                    case 1:
+                        query2 = _a.sent();
+                        return [2 /*return*/, query2[0].FirstName];
                 }
             });
         });
@@ -377,7 +377,10 @@ var Helper = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         name = "";
-                        return [4 /*yield*/, Database_1["default"].query().from(tablename).select(getcol).where(wherecol, id)];
+                        return [4 /*yield*/, Database_1["default"].query()
+                                .from(tablename)
+                                .select(getcol)
+                                .where(wherecol, id)];
                     case 1:
                         query = _a.sent();
                         count = query.length;
@@ -527,18 +530,18 @@ var Helper = /** @class */ (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: return [4 /*yield*/, AttendanceMaster_1["default"].query()
-                            .where('EmployeeId', userId)
-                            .where('AttendanceDate', today)
-                            .whereNot('TimeIn', '00:00:00')
-                            .select('multitime_sts')
+                            .where("EmployeeId", userId)
+                            .where("AttendanceDate", today)
+                            .whereNot("TimeIn", "00:00:00")
+                            .select("multitime_sts")
                             .first()];
                     case 1:
                         attendanceRecord = _a.sent();
                         if (!(attendanceRecord && attendanceRecord.multitime_sts)) return [3 /*break*/, 2];
                         return [2 /*return*/, attendanceRecord.multitime_sts];
                     case 2: return [4 /*yield*/, ShiftMaster_1["default"].query()
-                            .where('Id', shiftId)
-                            .select('MultipletimeStatus')
+                            .where("Id", shiftId)
+                            .select("MultipletimeStatus")
                             .first()];
                     case 3:
                         shiftRecord = _a.sent();
@@ -552,15 +555,18 @@ var Helper = /** @class */ (function () {
         });
     };
     Helper.calculateOvertime = function (startTime, endTime) {
-        var _a = startTime.split(':').map(Number), startHours = _a[0], startMinutes = _a[1], startSeconds = _a[2];
-        var _b = endTime.split(':').map(Number), endHours = _b[0], endMinutes = _b[1], endSeconds = _b[2];
+        var _a = startTime
+            .split(":")
+            .map(Number), startHours = _a[0], startMinutes = _a[1], startSeconds = _a[2];
+        var _b = endTime.split(":").map(Number), endHours = _b[0], endMinutes = _b[1], endSeconds = _b[2];
         var totalStartSeconds = startHours * 3600 + startMinutes * 60 + startSeconds;
         var totalEndSeconds = endHours * 3600 + endMinutes * 60 + endSeconds;
         var timeDiffInSeconds = totalEndSeconds - totalStartSeconds;
-        // if (timeDiffInSeconds < 0) { 
+        // if (timeDiffInSeconds < 0) {
         //   timeDiffInSeconds += 24 * 3600; // Assuming time is within 24 hours range
         // }
-        var hours = Math.floor(Math.abs(timeDiffInSeconds) / 3600) * (timeDiffInSeconds < 0 ? 1 : 1);
+        var hours = Math.floor(Math.abs(timeDiffInSeconds) / 3600) *
+            (timeDiffInSeconds < 0 ? 1 : 1);
         var remainingSeconds = Math.abs(timeDiffInSeconds) % 3600;
         var minutes = Math.floor(remainingSeconds / 60) * (timeDiffInSeconds < 0 ? 1 : 1);
         var seconds = Math.floor(remainingSeconds % 60) * (timeDiffInSeconds < 0 ? 1 : 1);

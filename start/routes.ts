@@ -43,6 +43,7 @@ import "../app/Routes/getEmpdataDepartmentWiseNewRoute"
 import "../app/Routes/getCDateAttnDeptWiseRoutes"
 
 import "../app/Routes/getDataToApplyRegRoute"
+import "../app/Routes/MyAddonUserInfoRoute"
 // Route.get('/', async () => {
 //     return "Working fine!"
 // })
