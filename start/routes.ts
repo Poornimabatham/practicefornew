@@ -17,7 +17,6 @@
 | import './routes/customer'
 |
 */
-import Route from '@ioc:Adonis/Core/Route'
 
 
 import "../app/Routes/EmployeeRoute"
@@ -35,10 +34,13 @@ import  '../app/Routes/GetEarlyComingsRoute'
 import  '../app/Routes/getEarlyLeavingsRoutes'
 import "../app/Routes/LateComingRoute"
 import "../app/Routes/Report/GetplannerRoute"
+import "../app/Routes/getOutsidegeoRoute"
 import "../app/Routes/AttendanceRoute"
 import  "../app/Routes/ClientsRoute"
 import "../app/Routes/getInfoRoute"
 import Redis from '@ioc:Adonis/Addons/Redis'
+import "../app/Routes/getEmpdataDepartmentWiseNewRoute"
+import "../app/Routes/getCDateAttnDeptWiseRoutes"
 
 import "../app/Routes/getDataToApplyRegRoute"
 // Route.get('/', async () => {
@@ -47,11 +49,11 @@ import "../app/Routes/getDataToApplyRegRoute"
 
 
 
-Route.get('/', async () => {
-await Redis.set('hello', 'world')
-const value = await Redis.get('hello')
-    return value
-})
+// Route.get('/', async () => {
+// await Redis.set('hello', 'world')
+// const value = await Redis.get('hello')
+//     return value
+// })
 
 
 import "../app/Routes/ApprovalRegularizationRoute"

@@ -14,29 +14,29 @@ export default class LateComingService {
     }
 
     var lateComersList = Database.from("AttendanceMaster as A")
-      .innerJoin("EmployeeMaster as E", "E.Id", "A.EmployeeId")
-      .innerJoin("ShiftMaster as S", "S.Id", "A.ShiftId")
-      .select(
-        "E.FirstName",
-        "E.LastName",
-        "A.TimeIn as atimein",
-        "A.ShiftId",
-        "A.EmployeeId",
-        "A.AttendanceDate",
-        Database.raw(
-          `(SELECT TIMEDIFF(A.TimeIn, CASE WHEN S.TimeInGrace != '00:00:00' THEN S.TimeInGrace ELSE S.TimeIn END)) as latehours`
-        ),
-        Database.raw(
-          `A.TimeIn > (CASE WHEN S.TimeInGrace != '00:00:00' THEN S.TimeInGrace ELSE S.TimeIn END)
-    AND TIMEDIFF(A.TimeIn, CASE WHEN S.TimeInGrace != '00:00:00' THEN S.TimeInGrace ELSE S.TimeIn END) > '00:00:59' as l`
-        ),
-        Database.raw("SUBSTRING_INDEX(EntryImage, '.com/', -1) AS EntryImage")
-      )
-      .where("A.OrganizationId", data.Orgid)
-      .whereNotIn("A.AttendanceStatus", [2, 3, 5])
-      .whereNot("S.shifttype", 3)
-      .orderBy("E.FirstName", "asc")
-      .limit(limit);
+    .innerJoin("EmployeeMaster as E", "E.Id", "A.EmployeeId")
+    .innerJoin("ShiftMaster as S", "S.Id", "A.ShiftId")
+    .select(
+      "E.FirstName",
+      "E.LastName",
+      "A.TimeIn as atimein",
+      "A.ShiftId",
+      "A.EmployeeId",
+      "A.AttendanceDate",
+      Database.raw(
+        `(SELECT TIMEDIFF(A.TimeIn, CASE WHEN S.TimeInGrace != '00:00:00' THEN S.TimeInGrace ELSE S.TimeIn END)) as latehours`
+      ),
+      Database.raw(
+        `A.TimeIn > (CASE WHEN S.TimeInGrace != '00:00:00' THEN S.TimeInGrace ELSE S.TimeIn END)
+  AND TIMEDIFF(A.TimeIn, CASE WHEN S.TimeInGrace != '00:00:00' THEN S.TimeInGrace ELSE S.TimeIn END) > '00:00:59' as l`
+      ),
+      Database.raw("SUBSTRING_INDEX(EntryImage, '.com/', -1) AS EntryImage")
+    )
+    .where("A.OrganizationId", data.Orgid)
+    .whereNotIn("A.AttendanceStatus", [2, 3, 5])
+    .whereNot("S.shifttype", 3)
+    .orderBy("E.FirstName", "asc")
+    .limit(limit);
 
     const zone = await Helper.getTimeZone(data.Orgid);
 

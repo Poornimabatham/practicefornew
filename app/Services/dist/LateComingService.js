@@ -59,7 +59,7 @@ var LateComingService = /** @class */ (function () {
                         lateComersList = Database_1["default"].from("AttendanceMaster as A")
                             .innerJoin("EmployeeMaster as E", "E.Id", "A.EmployeeId")
                             .innerJoin("ShiftMaster as S", "S.Id", "A.ShiftId")
-                            .select("E.FirstName", "E.LastName", "A.TimeIn as atimein", "A.ShiftId", "A.EmployeeId", "A.AttendanceDate", Database_1["default"].raw("(SELECT TIMEDIFF(A.TimeIn, CASE WHEN S.TimeInGrace != '00:00:00' THEN S.TimeInGrace ELSE S.TimeIn END)) as latehours"), Database_1["default"].raw("A.TimeIn > (CASE WHEN S.TimeInGrace != '00:00:00' THEN S.TimeInGrace ELSE S.TimeIn END)\n    AND TIMEDIFF(A.TimeIn, CASE WHEN S.TimeInGrace != '00:00:00' THEN S.TimeInGrace ELSE S.TimeIn END) > '00:00:59' as l"), Database_1["default"].raw("SUBSTRING_INDEX(EntryImage, '.com/', -1) AS EntryImage"))
+                            .select("E.FirstName", "E.LastName", "A.TimeIn as atimein", "A.ShiftId", "A.EmployeeId", "A.AttendanceDate", Database_1["default"].raw("(SELECT TIMEDIFF(A.TimeIn, CASE WHEN S.TimeInGrace != '00:00:00' THEN S.TimeInGrace ELSE S.TimeIn END)) as latehours"), Database_1["default"].raw("A.TimeIn > (CASE WHEN S.TimeInGrace != '00:00:00' THEN S.TimeInGrace ELSE S.TimeIn END)\n  AND TIMEDIFF(A.TimeIn, CASE WHEN S.TimeInGrace != '00:00:00' THEN S.TimeInGrace ELSE S.TimeIn END) > '00:00:59' as l"), Database_1["default"].raw("SUBSTRING_INDEX(EntryImage, '.com/', -1) AS EntryImage"))
                             .where("A.OrganizationId", data.Orgid)
                             .whereNotIn("A.AttendanceStatus", [2, 3, 5])
                             .whereNot("S.shifttype", 3)

@@ -6,16 +6,19 @@ import { DateTime } from "luxon";
 export default class DesignationService {
   public static async AddDesignation(a) {
     const currentDate = new Date();
+    console.log(currentDate);
 
     var designationList = await Database.query()
       .from("DesignationMaster")
       .where("Name", a.name)
       .andWhere("OrganizationId", a.orgid)
       .select("Id");
+    console.log(designationList);
 
     const result: any = [];
 
     const affectedRows = designationList.length;
+    console.log(affectedRows);
 
     if (affectedRows > 0) {
       result["status"] = -1;
