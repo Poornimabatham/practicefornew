@@ -268,6 +268,7 @@ export default class Helper {
     }
     return name;
   }
+  
   public static async getShiftType(shiftId) {
     const defaultshifttype = 0;
     const allDataOfShiftMaster: any = await ShiftMaster.find(shiftId);
