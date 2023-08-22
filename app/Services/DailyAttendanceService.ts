@@ -393,6 +393,7 @@ export default class DailyAttendanceService {
         AttendanceDate = currDate;
       }
 
+
       var LateComingsQuery = Database.from("EmployeeMaster as E")
         .select(
           Database.raw(`CONCAT(FirstName,' ',LastName) as name`),
@@ -417,8 +418,8 @@ export default class DailyAttendanceService {
         .where("E.Id", data.EmployeeId)
         .innerJoin("AttendanceMaster as A", "A.EmployeeId", "E.Id")
         .whereRaw(
-          `SUBSTRING(time(TimeIn), 1, 5) > SUBSTRING((SELECT (CASE WHEN time(TimeInGrace) != '00:00:00' THEN time(TimeInGrace) ELSE time(TimeIn) END) FROM ShiftMaster WHERE ShiftMaster.Id = "A.ShiftId"), 1, 5)AND AttendanceDate=${AttendanceDate} AND A.OrganizationId=${data.OrganizationId} AND AttendanceStatus IN (1,4,8) `
-        );
+          `SUBSTRING((TimeIn), 1, 5) > SUBSTRING((SELECT (CASE WHEN (TimeInGrace) != '00:00:00' THEN (TimeInGrace) ELSE (TimeIn) END) FROM ShiftMaster WHERE ShiftMaster.Id = A.ShiftId), 1, 5) AND AttendanceDate="${AttendanceDate}" AND A.OrganizationId=${data.OrganizationId} AND AttendanceStatus IN (1,4,8) AND '3' NOT IN (Select shifttype from ShiftMaster where Id=ShiftId) order by name `
+        )
 
       if (data.DesignationId != 0 && data.DesignationId != undefined) {
         designationCondition = ` Desg_id= ${data.DesignationId}`; // From AttendanceMaster
@@ -478,6 +479,7 @@ export default class DailyAttendanceService {
       data["latecomings"] = LateComingsData;
       return data["latecomings"];
     } else if (data.dataFor == "earlyleavings") {
+
 
       if (adminStatus == 2) {
         var DepartmentId = await Helper.getDepartmentIdByEmpID(data.EmployeeId);
