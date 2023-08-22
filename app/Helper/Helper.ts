@@ -37,18 +37,7 @@ export default class Helper {
     return query1[0].name;
   }
 
-  public static async getAdminStatus(id: any) {
-    let status = 0;
-    const queryResult = await Database.query()
-      .from("UserMaster")
-      .select("appSuperviserSts")
-      .where("EmployeeId", id)
-      .first();
-    if (queryResult) {
-      status = queryResult.appSuperviserSts;
-    }
-    return status;
-  }
+
 
   public static async getempnameById(empid: number) {
     const query2 = await Database.query()
