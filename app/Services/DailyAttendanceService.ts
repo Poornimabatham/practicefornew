@@ -4,7 +4,6 @@ import AttendanceMaster from "App/Models/AttendanceMaster";
 import EmployeeMaster from "App/Models/EmployeeMaster";
 import { DateTime } from "luxon";
 import moment from "moment";
-import { an } from './../../commands/index';
 
 export default class DailyAttendanceService {
   public static async getpresentList(data) {
@@ -498,9 +497,7 @@ export default class DailyAttendanceService {
           Database.raw(
             `SUBSTRING_INDEX(A.EntryImage, '.com/', -1) as EntryImage`
           ),
-          Database.raw(
-            `SUBSTRING_INDEX(A.ExitImage, '.com/', -1) as ExitImage`
-          ),
+          Database.raw(`SUBSTRING_INDEX(A.ExitImage, '.com/', -1) as ExitImage`),
           Database.raw(`SUBSTR(A.checkInLoc, 1, 40) as checkInLoc`),
           Database.raw(` SUBSTR(A.CheckOutLoc, 1, 40) as CheckOutLoc`),
           "A.TimeIn as TimeIn",
@@ -590,8 +587,7 @@ export default class DailyAttendanceService {
             var TimeIn = row.TimeIn.slice(0, 5);
             var TimeOut = row.TimeOut.slice(0, 5);
             var shiftType = await Helper.getShiftType(row.ShiftId);
-            var getInterimAttAvailableSts =
-              await Helper.getInterimAttAvailableSt(row.Id);
+            var getInterimAttAvailableSts = await Helper.getInterimAttAvailableSt(row.Id);
             const earlyleavingsList: earlyLeavingsInterface = {
               shift: shift,
               name: row.name,
@@ -614,10 +610,10 @@ export default class DailyAttendanceService {
             };
             earlyleavings.push(earlyleavingsList);
           })
-        );
-        data["earlyleavings"] = earlyleavings;
-        return data["earlyleavings"];
+        )
       }
+      data["earlyleavings"] = earlyleavings;
+      return data["earlyleavings"];
     }
   }
 

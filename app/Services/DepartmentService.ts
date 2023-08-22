@@ -52,7 +52,6 @@ export default class DepartmentService {
     if (query.length > 0) {
       result['status'] = '-1';
       return result['status'];
-
     }
     const insertQuery = await Database.insertQuery()
       .table("DepartmentMaster")
@@ -106,8 +105,8 @@ export default class DepartmentService {
     result['status'] = '0';
     const date = DateTime.now();
     const formattedDate = date.toFormat('yy-MM-dd');
-    var orgId = await Helper.getOrgId(data.Id);
-    var DeptId = data.Id;
+    var orgId = data.OrganizationId;
+    var DeptId = data.DId;
 
     var selectQuery = await Database.from("DepartmentMaster")
       .select("Id")
@@ -119,7 +118,7 @@ export default class DepartmentService {
     if (selectQuery.length > 0) {
       result['status'] = '-1';
       return false
-    }  
+    }
 
     const query1 = await Database.from('DepartmentMaster').select('Name', 'archive').where('OrganizationId', orgId).andWhere('Id', DeptId);
 
@@ -161,7 +160,7 @@ export default class DepartmentService {
       var appModule = "Department";
       var actionperformed;
       var activityBy = 1;
-      var getEmpName = await Helper.getempnameById(DeptId)       //getemployeeName
+      var getEmpName = await Helper.getEmpName(data.adminId)       //getemployeeName
 
       if (archiveStatus == 2) {
         actionperformed = ` ${data.Name} department has been edited by ${getEmpName} `;
