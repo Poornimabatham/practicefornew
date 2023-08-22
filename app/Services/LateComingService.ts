@@ -26,8 +26,10 @@ export default class LateComingService {
         Database.raw(
           `(SELECT TIMEDIFF(A.TimeIn, CASE WHEN S.TimeInGrace != '00:00:00' THEN S.TimeInGrace ELSE S.TimeIn END)) as latehours`
         ),
-        Database.raw(`A.TimeIn > (CASE WHEN S.TimeInGrace != '00:00:00' THEN S.TimeInGrace ELSE S.TimeIn END)
-    AND TIMEDIFF(A.TimeIn, CASE WHEN S.TimeInGrace != '00:00:00' THEN S.TimeInGrace ELSE S.TimeIn END) > '00:00:59' as l`),
+        Database.raw(
+          `A.TimeIn > (CASE WHEN S.TimeInGrace != '00:00:00' THEN S.TimeInGrace ELSE S.TimeIn END)
+    AND TIMEDIFF(A.TimeIn, CASE WHEN S.TimeInGrace != '00:00:00' THEN S.TimeInGrace ELSE S.TimeIn END) > '00:00:59' as l`
+        ),
         Database.raw("SUBSTRING_INDEX(EntryImage, '.com/', -1) AS EntryImage")
       )
       .where("A.OrganizationId", data.Orgid)
