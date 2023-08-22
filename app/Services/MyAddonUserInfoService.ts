@@ -1,10 +1,19 @@
 import Database from "@ioc:Adonis/Lucid/Database";
-import Helper from "App/Helper/Helper";
-const { DateTime } = require("luxon");
-import moment from "moment";
 
 export default class MyAddonUserInfoService {
   public static async getdetailsMyaddonuser(data) {
-  return "A"
-}
+    var Empid = data.empid;
+    var orgidId = data.orgid;
+
+    var result: any = {};
+
+    const UserMaster = await Database.from("UserMaster")
+      .where("EmployeeId", Empid)
+      .where("OrganizationId", orgidId);
+
+    UserMaster.forEach((row) => {
+      result.qrKioskPin = row.kioskPin;
+    });
+    return result;
+  }
 }
