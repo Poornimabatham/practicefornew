@@ -40,6 +40,7 @@ import  "../app/Routes/ClientsRoute"
 import "../app/Routes/getInfoRoute"
 import Redis from '@ioc:Adonis/Addons/Redis'
 
+import "../app/Routes/getDataToApplyRegRoute"
 // Route.get('/', async () => {
 //     return "Working fine!"
 // })
