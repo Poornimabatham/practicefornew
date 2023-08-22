@@ -395,12 +395,12 @@ export default class DailyAttendanceService {
                 TotalLoggedHours: string
             }
 
-            var LateComingsData: LateComingsList[] = [];
+            let LateComingsData: LateComingsList[] = [];
 
             if ((LateComingsQueryResult).length > 0) {
 
                 LateComingsQueryResult.forEach(async (row) => {
-                    var lateComingsList: LateComingsList = {
+                    let lateComingsList: LateComingsList = {
                         name: row.name,
                         TimeIn: row.TimeIn,
                         TimeOut: row.TimeOut,
