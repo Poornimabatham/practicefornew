@@ -392,14 +392,6 @@ export default class Helper {
 
     return { hours, minutes, seconds };
   };
-
-
-
-
-
-
-
-
   
   public static async getOvertimeForRegularization(timein, timeout, id) {
     var name:string = " ";
