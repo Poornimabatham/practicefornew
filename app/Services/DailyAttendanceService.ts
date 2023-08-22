@@ -1276,10 +1276,7 @@ export default class DailyAttendanceService {
                   let totalLoggedHours = "00:00:00";
                   let hoursPerDay = "0:00:00";
                   // cond=",overtime ='$calculatedOvertime',TotalLoggedHours='$totalLoggedHours'";
-                  cond = {
-                    overtime: calculatedOvertime,
-                    TotalLoggedHours: "19:19:19",
-                  };
+                 
 
                   const query = await Database.from("InterimAttendances")
                     .select("Id")
@@ -1295,10 +1292,6 @@ export default class DailyAttendanceService {
                     )
                     .where("AttendanceMasterId", AttendanceMasterId);
                   //console.log(query.toSQL().toNative());
-                  console.log(query);
-                  console.log(query[0].totalLoggedHours);
-                  console.log(query[0].hoursPerDay);
-                  console.log("fskugfjdsjsg");
 
                   if (query.length > 0) {
                     totalLoggedHours = query[0].totalLoggedHours;
@@ -1313,6 +1306,11 @@ export default class DailyAttendanceService {
                       "calculatedOvertime Case Three" + calculatedOvertime
                     );
                   }
+
+                  cond = {
+                    overtime: calculatedOvertime,
+                    TotalLoggedHours: totalLoggedHours,
+                  };
                 }
 
                 let disattreason = 0;
@@ -1352,10 +1350,6 @@ export default class DailyAttendanceService {
                 const affectedRows:any =   await Database.from("AttendanceMaster")
                   .where("id", AttendanceMasterId)
                   .update(updateFields);
-
-
-                // $sql = "UPDATE `AttendanceMaster` SET  `FakeLocationStatusTimeOut`='$FakeLocationOutStatus', `ExitImage`='" . $ExitImage . "',CheckOutLoc='$TimeOutAddress',latit_out='$LatitudeOut',longi_out='$LongitudeOut', TimeOut='$TimeOutTime',TimeOutDeviceId='$TimeOutDeviceId', `TimeOutDeviceName`='$TimeOutDeviceName',timeoutcity='$TimeOutCity', LastModifiedDate='$stamp',TimeOutApp='$TimeOutApp',
-                // timeoutdate='$TimeOutDate',TimeOutAppVersion='$TimeOutAppVersion',TimeOutGeoFence='$GeofenceOut',TimeOutDevice='$TimeOutDevice',AttendanceStatus=$attendance_sts,remarks='$TimeOutRemark',TimeOutStampApp='$TimeOutStampApp',TimeOutStampServer='$TimeOutStampServer' $cond WHERE id='$attendanceMasterId'";
               }
 
               if (MultipletimeStatus == 1 || shiftType == "3") {
