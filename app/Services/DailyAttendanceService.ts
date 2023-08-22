@@ -477,49 +477,50 @@ export default class DailyAttendanceService {
       }
       data["latecomings"] = LateComingsData;
       return data["latecomings"];
-    } else if (data.dataFor == "earlyleavings")
+    } else if (data.dataFor == "earlyleavings") {
+
       if (adminStatus == 2) {
         var DepartmentId = await Helper.getDepartmentIdByEmpID(data.EmployeeId);
         departmentCondition = `Dept_id=${DepartmentId}`;
       }
 
-    if (data.date != undefined && data.date != " ") {
-      var AttDate = data.date;
-      AttendanceDate = AttDate.toFormat("yyyy-MM-dd");
-    } else {
-      var currDate = moment().format("YYYY-MM-DD");
-      AttendanceDate = currDate;
-    }
+      if (data.date != undefined && data.date != " ") {
+        var AttDate = data.date;
+        AttendanceDate = AttDate.toFormat("yyyy-MM-dd");
+      } else {
+        var currDate = moment().format("YYYY-MM-DD");
+        AttendanceDate = currDate;
+      }
 
-    var earlyLeavingsQuery = Database.from("AttendanceMaster as A")
-      .select(
-        Database.raw(`CONCAT(E.FirstName,' ',E.LastName) as name`),
-        Database.raw(
-          `SUBSTRING_INDEX(A.EntryImage, '.com/', -1) as EntryImage`
-        ),
-        Database.raw(`SUBSTRING_INDEX(A.ExitImage, '.com/', -1) as ExitImage`),
-        Database.raw(`SUBSTR(A.checkInLoc, 1, 40) as checkInLoc`),
-        Database.raw(` SUBSTR(A.CheckOutLoc, 1, 40) as CheckOutLoc`),
-        "A.TimeIn as TimeIn",
-        "A.TimeOut as TimeOut",
-        "A.Desg_id",
-        "A.ShiftId",
-        "A.latit_in",
-        "A.longi_in",
-        "A.latit_out",
-        "A.longi_out",
-        "A.Id",
-        "A.multitime_sts",
-        "A.TotalLoggedHours",
-        "S.TimeIn as ShiftTimeIn",
-        "S.TimeOut as ShiftTimeOut"
-      )
-      .innerJoin("EmployeeMaster as E", "A.EmployeeId", "E.Id")
-      .innerJoin("ShiftMaster as S ", "A.ShiftId", "S.Id")
-      .where("A.OrganizationId", data.OrganizationId)
-      .where("A.Is_Delete", 0)
-      .whereRaw(
-        `CASE WHEN (S.shifttype=2 AND A.timeindate= A.timeoutdate) 
+      var earlyLeavingsQuery = Database.from("AttendanceMaster as A")
+        .select(
+          Database.raw(`CONCAT(E.FirstName,' ',E.LastName) as name`),
+          Database.raw(
+            `SUBSTRING_INDEX(A.EntryImage, '.com/', -1) as EntryImage`
+          ),
+          Database.raw(`SUBSTRING_INDEX(A.ExitImage, '.com/', -1) as ExitImage`),
+          Database.raw(`SUBSTR(A.checkInLoc, 1, 40) as checkInLoc`),
+          Database.raw(` SUBSTR(A.CheckOutLoc, 1, 40) as CheckOutLoc`),
+          "A.TimeIn as TimeIn",
+          "A.TimeOut as TimeOut",
+          "A.Desg_id",
+          "A.ShiftId",
+          "A.latit_in",
+          "A.longi_in",
+          "A.latit_out",
+          "A.longi_out",
+          "A.Id",
+          "A.multitime_sts",
+          "A.TotalLoggedHours",
+          "S.TimeIn as ShiftTimeIn",
+          "S.TimeOut as ShiftTimeOut"
+        )
+        .innerJoin("EmployeeMaster as E", "A.EmployeeId", "E.Id")
+        .innerJoin("ShiftMaster as S ", "A.ShiftId", "S.Id")
+        .where("A.OrganizationId", data.OrganizationId)
+        .where("A.Is_Delete", 0)
+        .whereRaw(
+          `CASE WHEN (S.shifttype=2 AND A.timeindate= A.timeoutdate) 
             THEN CONCAT(DATE_ADD(A.AttendanceDate, INTERVAL 1 DAY),' ',S.TimeOut) 
             WHEN(S.shifttype=2 AND A.timeindate!=A.timeoutdate) 
             THEN CONCAT(DATE_ADD(A.AttendanceDate, INTERVAL 1 DAY),' ',S.TimeOut)
@@ -542,80 +543,79 @@ export default class DailyAttendanceService {
             And A.TimeOut!='00:00:00' 
             OR A.AttendanceDate=${AttendanceDate} 
             And S.shifttype!=3 ORDER BY E.FirstName ASC`
-      )
-      .limit(limit)
-      .offset(offset);
+        )
+        .limit(limit)
+        .offset(offset);
 
-    if (data.DesignationId != 0 && data.DesignationId != undefined) {
-      designationCondition = `Desg_id= ${data.DesignationId}`; // From AttendanceMaster
-      earlyLeavingsQuery.whereRaw(designationCondition);
-    }
+      if (data.DesignationId != 0 && data.DesignationId != undefined) {
+        designationCondition = `Desg_id= ${data.DesignationId}`; // From AttendanceMaster
+        earlyLeavingsQuery.whereRaw(designationCondition);
+      }
 
-    if (departmentCondition != undefined) {
-      earlyLeavingsQuery.whereRaw(departmentCondition);
-    }
-    var earlyLeavingsQueryResult = await earlyLeavingsQuery;
+      if (departmentCondition != undefined) {
+        earlyLeavingsQuery.whereRaw(departmentCondition);
+      }
+      var earlyLeavingsQueryResult = await earlyLeavingsQuery;
 
-    interface earlyLeavingsInterface {
-      shift: string;
-      name: string;
-      TimeIn: string;
-      TimeOut: string;
-      EntryImage: string;
-      ExitImage: string;
-      CheckOutLoc: string;
-      checkInLoc: string;
-      latit_in: string;
-      longi_in: string;
-      latit_out: string;
-      longi_out: string;
-      status: string;
-      Id: number;
-      multitime_sts: string;
-      shiftType: number;
-      getInterimAttAvailableSts: string;
-      TotalLoggedHours: string;
-    }
-    var earlyleavings: earlyLeavingsInterface[] = [];
+      interface earlyLeavingsInterface {
+        shift: string;
+        name: string;
+        TimeIn: string;
+        TimeOut: string;
+        EntryImage: string;
+        ExitImage: string;
+        CheckOutLoc: string;
+        checkInLoc: string;
+        latit_in: string;
+        longi_in: string;
+        latit_out: string;
+        longi_out: string;
+        status: string;
+        Id: number;
+        multitime_sts: string;
+        shiftType: number;
+        getInterimAttAvailableSts: string;
+        TotalLoggedHours: string;
+      }
+      var earlyleavings: earlyLeavingsInterface[] = [];
 
-    if (earlyLeavingsQueryResult.length > 0) {
-      await Promise.all(
-        earlyLeavingsQueryResult.map(async (row) => {
-          var shiftTimeIn = row.ShiftTimeIn.slice(0, 5);
-          var shiftTimeOut = row.ShiftTimeOut.slice(0, 5);
-          var shift = shiftTimeIn + "-" + shiftTimeOut;
-          var TimeIn = row.TimeIn.slice(0, 5);
-          var TimeOut = row.TimeOut.slice(0, 5);
-          var shiftType = await Helper.getShiftType(row.ShiftId);
-          var getInterimAttAvailableSts = await Helper.getInterimAttAvailableSt(
-            row.Id
-          );
-          const earlyleavingsList: earlyLeavingsInterface = {
-            shift: shift,
-            name: row.name,
-            TimeIn: TimeIn,
-            TimeOut: TimeOut,
-            EntryImage: row.EntryImage,
-            ExitImage: row.ExitImage,
-            CheckOutLoc: row.CheckOutLoc,
-            checkInLoc: row.checkInLoc,
-            latit_in: row.latit_in,
-            longi_in: row.longi_in,
-            latit_out: row.latit_out,
-            longi_out: row.longi_out,
-            status: row.status,
-            Id: row.status,
-            multitime_sts: row.multitime_sts,
-            shiftType: shiftType,
-            getInterimAttAvailableSts: getInterimAttAvailableSts,
-            TotalLoggedHours: row.TotalLoggedHours,
-          };
-          earlyleavings.push(earlyleavingsList);
-        })
-      );
+      if (earlyLeavingsQueryResult.length > 0) {
+        await Promise.all(
+          earlyLeavingsQueryResult.map(async (row) => {
+            var shiftTimeIn = row.ShiftTimeIn.slice(0, 5);
+            var shiftTimeOut = row.ShiftTimeOut.slice(0, 5);
+            var shift = shiftTimeIn + "-" + shiftTimeOut;
+            var TimeIn = row.TimeIn.slice(0, 5);
+            var TimeOut = row.TimeOut.slice(0, 5);
+            var shiftType = await Helper.getShiftType(row.ShiftId);
+            var getInterimAttAvailableSts = await Helper.getInterimAttAvailableSt(row.Id);
+            const earlyleavingsList: earlyLeavingsInterface = {
+              shift: shift,
+              name: row.name,
+              TimeIn: TimeIn,
+              TimeOut: TimeOut,
+              EntryImage: row.EntryImage,
+              ExitImage: row.ExitImage,
+              CheckOutLoc: row.CheckOutLoc,
+              checkInLoc: row.checkInLoc,
+              latit_in: row.latit_in,
+              longi_in: row.longi_in,
+              latit_out: row.latit_out,
+              longi_out: row.longi_out,
+              status: row.status,
+              Id: row.status,
+              multitime_sts: row.multitime_sts,
+              shiftType: shiftType,
+              getInterimAttAvailableSts: getInterimAttAvailableSts,
+              TotalLoggedHours: row.TotalLoggedHours,
+            };
+            earlyleavings.push(earlyleavingsList);
+          })
+        )
+      }
       data["earlyleavings"] = earlyleavings;
+      return data["earlyleavings"];
     }
-    return data["earlyleavings"];
   }
 
   public static async saveTimeInOut(allDataOfTimeInOut) {
