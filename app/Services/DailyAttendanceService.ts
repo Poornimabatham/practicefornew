@@ -1712,7 +1712,7 @@ export default class DailyAttendanceService {
             console.log(calculatedOvertime);
             console.log(totalLoggedHours);
 
-            const cond1 = `overtime='${calculatedOvertime}', TotalLoggedHours='09:09:09'`;
+            const cond1 = `overtime='${calculatedOvertime}', TotalLoggedHours='${totalLoggedHours}'`;
 
             const updateResult = await AttendanceMaster.query()
               .where("id", AttendanceMasterId)
@@ -1777,7 +1777,11 @@ export default class DailyAttendanceService {
                 calculatedOvertime = result[0].overtime;
               }
 
-              //$this->db->query("UPDATE AttendanceMaster SET TotalLoggedHours='$totalLoggedHours',overtime='$calculatedOvertime' WHERE Id='$attendanceMasterId'");
+              const updateLoggedHour= Database.from('AttendanceMaster').where('Id',AttendanceMasterId).update({
+                TotalLoggedHours:totalLoggedHours,
+                overtime:calculatedOvertime
+              });
+             
             }
           }
         }
