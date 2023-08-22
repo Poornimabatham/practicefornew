@@ -62,9 +62,15 @@ export default class UsersettingsController {
        response.json(res)
     }
 
-    public async ChangeQrKioskPin({request , response}:HttpContextContract){
+    public async ChangeQrKioskPin({request,response}:HttpContextContract){
        const Validdata = await request.validate(UserSettingValidator.ChangeQR)
        const res       = await UserSettingService.ChangeQrKioskPin(Validdata)
+       response.json(res)
+    }
+
+    public async getRegDetailForApproval({request,response}:HttpContextContract){
+       const Validdata = await request.validate(UserSettingValidator.RegDetail)
+       const res       = await UserSettingService.getRegDetailForApproval(Validdata)
        response.json(res)
     }
 
