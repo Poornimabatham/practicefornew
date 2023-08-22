@@ -1,3 +1,3 @@
 import Route from '@ioc:Adonis/Core/Route'
 
-Route.get('/FetchLateComing','LatecomingsController.FetchLateComings')
+Route.get('/FetchLateComings','LatecomingsController.FetchLateComings')

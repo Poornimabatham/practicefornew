@@ -43,6 +43,7 @@ var EmployeeMaster_1 = require("App/Models/EmployeeMaster");
 var Organization_1 = require("App/Models/Organization");
 var ShiftMaster_1 = require("App/Models/ShiftMaster");
 var ZoneMaster_1 = require("App/Models/ZoneMaster");
+var moment_1 = require("moment");
 var Helper = /** @class */ (function () {
     function Helper() {
     }
@@ -550,6 +551,51 @@ var Helper = /** @class */ (function () {
                         }
                         _a.label = 4;
                     case 4: return [2 /*return*/, 0];
+                }
+            });
+        });
+    };
+    Helper.getOvertimeForRegularization = function (timein, timeout, id) {
+        return __awaiter(this, void 0, void 0, function () {
+            var name, selectShiftMasterData, _i, selectShiftMasterData_1, row, stime1, stime2, time1, time2, totaltime, stotaltime, overtime, overtimeInMinutes;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        name = " ";
+                        return [4 /*yield*/, Database_1["default"].from("ShiftMaster")
+                                .select("TimeIn", "TimeOut")
+                                .where("Id", id)];
+                    case 1:
+                        selectShiftMasterData = _a.sent();
+                        try {
+                            for (_i = 0, selectShiftMasterData_1 = selectShiftMasterData; _i < selectShiftMasterData_1.length; _i++) {
+                                row = selectShiftMasterData_1[_i];
+                                stime1 = moment_1["default"]("1980-01-01 " + row.TimeIn).unix();
+                                stime2 = moment_1["default"]("1980-01-01 " + row.TimeOut).unix();
+                                time1 = moment_1["default"]("1980-01-01 " + timein).unix();
+                                time2 = moment_1["default"]("1980-01-01 " + timeout).unix();
+                                totaltime = time2 - time1;
+                                stotaltime = stime2 - stime1;
+                                overtime = Math.abs(totaltime - stotaltime);
+                                overtimeInMinutes = overtime / 60;
+                                if (overtime > 0) {
+                                    name = moment_1["default"]()
+                                        .startOf("day")
+                                        .minutes(overtimeInMinutes)
+                                        .format("HH:mm:00");
+                                }
+                                if (totaltime - stotaltime < 0) {
+                                    name = "-" + ("" + name);
+                                }
+                                if (timein == "00:00:00") {
+                                    name = "00:00:00";
+                                }
+                            }
+                        }
+                        catch (error) {
+                            console.error(error.message);
+                        }
+                        return [2 /*return*/, name];
                 }
             });
         });

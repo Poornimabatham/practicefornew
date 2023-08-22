@@ -1,7 +1,6 @@
 import Database from "@ioc:Adonis/Lucid/Database";
 import Helper from "App/Helper/Helper";
 const { DateTime } = require("luxon");
-import moment from "moment";
 
 export default class LateComingService {
   public static async getLateComing(data) {
@@ -15,29 +14,29 @@ export default class LateComingService {
     }
 
     var lateComersList = Database.from("AttendanceMaster as A")
-    .innerJoin("EmployeeMaster as E", "E.Id", "A.EmployeeId")
-    .innerJoin("ShiftMaster as S", "S.Id", "A.ShiftId")
-    .select(
-      "E.FirstName",
-      "E.LastName",
-      "A.TimeIn as atimein",
-      "A.ShiftId",
-      "A.EmployeeId",
-      "A.AttendanceDate",
-      Database.raw(
-        `(SELECT TIMEDIFF(A.TimeIn, CASE WHEN S.TimeInGrace != '00:00:00' THEN S.TimeInGrace ELSE S.TimeIn END)) as latehours`
-      ),
-      Database.raw(
-        `A.TimeIn > (CASE WHEN S.TimeInGrace != '00:00:00' THEN S.TimeInGrace ELSE S.TimeIn END)
-  AND TIMEDIFF(A.TimeIn, CASE WHEN S.TimeInGrace != '00:00:00' THEN S.TimeInGrace ELSE S.TimeIn END) > '00:00:59' as l`
-      ),
-      Database.raw("SUBSTRING_INDEX(EntryImage, '.com/', -1) AS EntryImage")
-    )
-    .where("A.OrganizationId", data.Orgid)
-    .whereNotIn("A.AttendanceStatus", [2, 3, 5])
-    .whereNot("S.shifttype", 3)
-    .orderBy("E.FirstName", "asc")
-    .limit(limit);
+      .innerJoin("EmployeeMaster as E", "E.Id", "A.EmployeeId")
+      .innerJoin("ShiftMaster as S", "S.Id", "A.ShiftId")
+      .select(
+        "E.FirstName",
+        "E.LastName",
+        "A.TimeIn as atimein",
+        "A.ShiftId",
+        "A.EmployeeId",
+        "A.AttendanceDate",
+        Database.raw(
+          `(SELECT TIMEDIFF(A.TimeIn, CASE WHEN S.TimeInGrace != '00:00:00' THEN S.TimeInGrace ELSE S.TimeIn END)) as latehours`
+        ),
+        Database.raw(
+          `A.TimeIn > (CASE WHEN S.TimeInGrace != '00:00:00' THEN S.TimeInGrace ELSE S.TimeIn END)
+    AND TIMEDIFF(A.TimeIn, CASE WHEN S.TimeInGrace != '00:00:00' THEN S.TimeInGrace ELSE S.TimeIn END) > '00:00:59' as l`
+        ),
+        Database.raw("SUBSTRING_INDEX(EntryImage, '.com/', -1) AS EntryImage")
+      )
+      .where("A.OrganizationId", data.Orgid)
+      .whereNotIn("A.AttendanceStatus", [2, 3, 5])
+      .whereNot("S.shifttype", 3)
+      .orderBy("E.FirstName", "asc")
+      .limit(limit);
 
     const zone = await Helper.getTimeZone(data.Orgid);
 
@@ -76,51 +75,4 @@ export default class LateComingService {
 
     return response;
   }
-
-
-
-  public static async getOvertimeForRegularization(timein, timeout, id) {
-    var name:string = " ";
-    var selectShiftMasterData: any = await Database.from("ShiftMaster")
-      .select("TimeIn", "TimeOut")
-      .where("Id", id);
-     
-try{
-
-      
-    for (const row of selectShiftMasterData) {
-      const stime1 = moment(`1980-01-01 ${row.TimeIn}`).unix();
-    
-      const stime2 = moment(`1980-01-01 ${row.TimeOut}`).unix();
-      const time1 = moment(`1980-01-01 ${timein}`).unix();
-      const time2 = moment(`1980-01-01 ${timeout}`).unix();
-      const totaltime = time2 - time1;
-
-      const stotaltime = stime2 - stime1;
-      const overtime = Math.abs(totaltime - stotaltime);
-      const overtimeInMinutes = overtime / 60;
-
-      if (overtime > 0) {
-         name = moment()
-          .startOf("day")
-          .minutes(overtimeInMinutes)
-          .format("HH:mm:00");
-
-      }
-      if (totaltime - stotaltime < 0) {
-        name = "-" + `${name}`;
-
-        }
-      if (timein == "00:00:00") {
-        name = "00:00:00";
-      }
-    }
-  }
-
-  catch(error) {
-    console.error(error.message);
-  }
-return name
-
-}
 }

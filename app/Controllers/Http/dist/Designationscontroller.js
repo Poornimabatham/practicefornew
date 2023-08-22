@@ -36,21 +36,21 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-var MyAddonUserInfoService_1 = require("App/Services/MyAddonUserInfoService");
-var MyAddonUserInfoValidator_1 = require("App/Validators/MyAddonUserInfoValidator");
-var MyAddonUserInfoController = /** @class */ (function () {
-    function MyAddonUserInfoController() {
+var DesignationService_1 = require("App/Services/DesignationService");
+var DesignationValidator_1 = require("App/Validators/DesignationValidator");
+var DesignationsController = /** @class */ (function () {
+    function DesignationsController() {
     }
-    MyAddonUserInfoController.prototype.Fetchdata = function (_a) {
+    DesignationsController.prototype.retreiveDesign = function (_a) {
         var request = _a.request, response = _a.response;
         return __awaiter(this, void 0, void 0, function () {
             var a, b;
             return __generator(this, function (_b) {
                 switch (_b.label) {
-                    case 0: return [4 /*yield*/, request.validate(MyAddonUserInfoValidator_1["default"].Myaddonuserinfoschema)];
+                    case 0: return [4 /*yield*/, request.validate(DesignationValidator_1["default"].Designationschema)];
                     case 1:
                         a = _b.sent();
-                        return [4 /*yield*/, MyAddonUserInfoService_1["default"].getdetailsMyaddonuser(a)];
+                        return [4 /*yield*/, DesignationService_1["default"].getDesignation(a)];
                     case 2:
                         b = _b.sent();
                         return [2 /*return*/, response.json(b)];
@@ -58,6 +58,40 @@ var MyAddonUserInfoController = /** @class */ (function () {
             });
         });
     };
-    return MyAddonUserInfoController;
+    DesignationsController.prototype.AddDesign = function (_a) {
+        var request = _a.request, response = _a.response;
+        return __awaiter(this, void 0, void 0, function () {
+            var a, b;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0: return [4 /*yield*/, request.validate(DesignationValidator_1["default"].AddDesignationschema)];
+                    case 1:
+                        a = _b.sent();
+                        return [4 /*yield*/, DesignationService_1["default"].AddDesignation(a)];
+                    case 2:
+                        b = _b.sent();
+                        return [2 /*return*/, response.json(b)];
+                }
+            });
+        });
+    };
+    DesignationsController.prototype.UpdateDesign = function (_a) {
+        var request = _a.request, response = _a.response;
+        return __awaiter(this, void 0, void 0, function () {
+            var a, b;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0: return [4 /*yield*/, request.validate(DesignationValidator_1["default"].updateDesignationschema)];
+                    case 1:
+                        a = _b.sent();
+                        return [4 /*yield*/, DesignationService_1["default"].updateDesignation(a)];
+                    case 2:
+                        b = _b.sent();
+                        return [2 /*return*/, response.json(b)];
+                }
+            });
+        });
+    };
+    return DesignationsController;
 }());
-exports["default"] = MyAddonUserInfoController;
+exports["default"] = DesignationsController;
