@@ -27,7 +27,7 @@ export default class ClientsService {
       allClientList = await Database
         .from('ClientMaster as C')
         .select("C.Id", "C.Company", "C.Name", "C.Contact", "C.Email", "C.Address", "C.City", "C.Country", "C.Description", "C.Lat_Long", "C.radius", "C.OrganizationId", "C.status", "C.createdBy", "C.ModifiedDate", "C.ModifiedById", "C.Platform ", "C.Lat_Long", "C.radius",)
-        .where("C.OrganizationId", 10)
+        .where("C.OrganizationId", OrgId)
         .andWhereIn('C.status', [1, 2, 0])
         .andWhereNot('Country', 0)
         .groupBy('C.Id')
@@ -202,6 +202,7 @@ export default class ClientsService {
         .andWhereIn('C.status', [1, 2])
         .andWhereIn('CL.AssignStatus', [0, 1])
         .orderBy('CL.id', 'desc')
+        .limit(2)
     }
 
     return getClientList;
