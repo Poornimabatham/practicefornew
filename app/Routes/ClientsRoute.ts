@@ -1,8 +1,8 @@
 import Route from '@ioc:Adonis/Core/Route'
 
 Route.get('/getClients','ClientsController.index')
-Route.get('/addClient','ClientsController.create')
-Route.get('/editClient','ClientsController.edit')
+Route.post('/addClient','ClientsController.create')
+Route.post('/editClient','ClientsController.edit')
 Route.get('/getClientList','ClientsController.getClientList')
 
 
