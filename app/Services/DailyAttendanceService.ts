@@ -430,6 +430,7 @@ export default class DailyAttendanceService {
       }
 
       var LateComingsQueryResult = await LateComingsQuery;
+
       interface LateComingsList {
         name: string;
         TimeIn: string;
@@ -451,28 +452,32 @@ export default class DailyAttendanceService {
       var LateComingsData: LateComingsList[] = [];
 
       if (LateComingsQueryResult.length > 0) {
-        LateComingsQueryResult.forEach(async (row) => {
-          var lateComingsList: LateComingsList = {
-            name: row.name,
-            TimeIn: row.TimeIn,
-            TimeOut: row.TimeOut,
-            status: row.status,
-            EntryImage: row.EntryImage,
-            ExitImage: row.ExitImage,
-            checkInLoc: row.checkInLoc,
-            checkOutLoc: row.CheckOutLoc,
-            latit_in: row.latit_in,
-            latit_out: row.latit_out,
-            Id: row.Id,
-            multitime_sts: row.multitime_sts,
-            shiftType: await Helper.getShiftType(row.ShiftId),
-            getInterimAttAvailableSts: await Helper.getInterimAttAvailableSt(
-              row.Id
-            ),
-            TotalLoggedHours: row.TotalLoggedHours,
-          };
-          LateComingsData.push(lateComingsList);
-        });
+        await Promise.all(
+          LateComingsQueryResult.map(async (row) => {
+            var lateComingsList: LateComingsList = {
+              name: row.name,
+              TimeIn: row.TimeIn,
+              TimeOut: row.TimeOut,
+              status: row.status,
+              EntryImage: row.EntryImage,
+              ExitImage: row.ExitImage,
+              checkInLoc: row.checkInLoc,
+              checkOutLoc: row.CheckOutLoc,
+              latit_in: row.latit_in,
+              latit_out: row.latit_out,
+              Id: row.Id,
+              multitime_sts: row.multitime_sts,
+              shiftType: await Helper.getShiftType(row.ShiftId),
+              getInterimAttAvailableSts: await Helper.getInterimAttAvailableSt(
+                row.Id),
+
+              TotalLoggedHours: row.TotalLoggedHours,
+            }
+
+            LateComingsData.push(lateComingsList);
+
+          })
+        )
       } else {
         LateComingsData.push();
       }
