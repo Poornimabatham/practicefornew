@@ -13,4 +13,12 @@ export default class GetDataToRegValidator extends BaseValidator {
     month:schema.date.optional({ format: "yyyy-MM-dd" }),
     }),
   };
+
+  static GetDataTOCountRegschema = {
+    schema: schema.create({
+    uid:schema.number(),
+    orgid:schema.number(),
+    month:schema.date.optional({ format: "yyyy-MM-dd" }),
+    }),
+  };
 }
