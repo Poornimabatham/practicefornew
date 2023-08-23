@@ -127,8 +127,9 @@ export default class ClientsService {
     const platform: string = editclient.platform;
     const newLatLng: string = editclient.LatLong;
     let todayDate = new Date().toISOString().slice(0, 10);
-    let ClientList: any;
+    var ClientList: any;
     let sts: any;
+    let affectedRows;
 
     ClientList = await Database
       .from('ClientMaster as C')
@@ -136,41 +137,46 @@ export default class ClientsService {
       .where("C.OrganizationId", orgid)
       .andWhere("C.Id", clientId);
 
-   
-    if (ClientList[0].Contact == phone) {
-      sts = 'contactalreadyexists';
-      return sts;
-    }
-    else if (ClientList[0].Company == compName) {
-      sts = 'companynamealreadyexists';
-      return sts;
-    }
-    else if (ClientList[0].Email == email) {
-      sts = 'emailalreadyexists';
-      return sts;
-    }
-    else {
-      const affectedRows = await Database
-        .from('ClientMaster as C')
-        .where('id', clientId)
-        .andWhere("C.OrganizationId", orgid)
-        .update({
-          Company: compName,
-          Name: name,
-          Email: email,
-          Contact: phone,
-          Address: address,
-          City: city,
-          Country: countryCode,
-          Description: description,
-          ModifiedDate: todayDate,
-          ModifiedById: empid,
-          Platform: platform,
-          Lat_Long: newLatLng
-        });
+    if (ClientList.length > 0) {
 
-      return affectedRows;
+      if (ClientList[0].Contact == phone) {
+        sts = 'contactalreadyexists';
+        return sts;
+      }
+      else if (ClientList[0].Company == compName) {
+        sts = 'companynamealreadyexists';
+        return sts;
+      }
+      else if (ClientList[0].Email == email) {
+        sts = 'emailalreadyexists';
+        return sts;
+      }
+      else {
+        affectedRows = await Database
+          .from('ClientMaster as C')
+          .where('id', clientId)
+          .andWhere("C.OrganizationId", orgid)
+          .update({
+            Company: compName,
+            Name: name,
+            Email: email,
+            Contact: phone,
+            Address: address,
+            City: city,
+            Country: countryCode,
+            Description: description,
+            ModifiedDate: todayDate,
+            ModifiedById: empid,
+            Platform: platform,
+            Lat_Long: newLatLng
+          });
+        return affectedRows;
+
+      }
+    } else {
+      return "Client does not exist on this Id";
     }
+
   }
 
   static async getClientList(clientdata) {
