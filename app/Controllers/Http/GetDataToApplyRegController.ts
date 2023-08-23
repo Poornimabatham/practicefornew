@@ -11,4 +11,12 @@ export default class GetDataToApplyRegController {
         return response.json(Output);
 
     }
+
+    public async getRegularizationCount({ request,response }: HttpContextContract) {
+       
+        const ValidationInputDetails = await request.validate(GetDataToRegValidator.GetDataTOCountRegschema)
+        const Output = await GetDataToRegService.FetchRegularizationCount(ValidationInputDetails)
+        return response.json(Output);
+
+    }
 }

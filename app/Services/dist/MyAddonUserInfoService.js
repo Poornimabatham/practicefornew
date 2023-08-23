@@ -50,12 +50,15 @@ var MyAddonUserInfoService = /** @class */ (function () {
                         orgidId = data.orgid;
                         result = {};
                         return [4 /*yield*/, Database_1["default"].from("UserMaster")
+                                .select("*")
                                 .where("EmployeeId", Empid)
                                 .where("OrganizationId", orgidId)];
                     case 1:
                         UserMaster = _a.sent();
                         UserMaster.forEach(function (row) {
                             result.qrKioskPin = row.kioskPin;
+                            result.LoginSts = row.LoginSts;
+                            result.username_mobile = row.username_mobile;
                         });
                         return [2 /*return*/, result];
                 }
