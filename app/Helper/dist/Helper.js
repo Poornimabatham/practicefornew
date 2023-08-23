@@ -72,7 +72,13 @@ var Helper = /** @class */ (function () {
                             .where("Id", Database_1["default"].raw("(select TimeZone from Organization where id =" + orgid + "  LIMIT 1)"))];
                     case 1:
                         query1 = _a.sent();
-                        return [2 /*return*/, query1[0].name];
+                        if (query1.length > 0) {
+                            return [2 /*return*/, query1[0].name];
+                        }
+                        else {
+                            return [2 /*return*/, 0];
+                        }
+                        return [2 /*return*/];
                 }
             });
         });

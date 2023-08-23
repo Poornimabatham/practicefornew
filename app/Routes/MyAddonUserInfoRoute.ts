@@ -1,3 +1,3 @@
 import Route from '@ioc:Adonis/Core/Route'
 
-Route.get('/Fetchget','MyAddonUserController.Fetchdata')
+Route.get('/Fetchmyaddonisdata','MyAddonUserController.Fetchdata')
