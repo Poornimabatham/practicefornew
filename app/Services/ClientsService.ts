@@ -117,7 +117,7 @@ export default class ClientsService {
     const orgid: number = editclient.orgId;
     const compName: string = editclient.compName;
     const name: string = editclient.name;
-    const address: string = editclient.address;
+    const address: string = editclient.compAddress;
     const city: string = editclient.city;
     const countryCode: number = editclient.countryCode;
     const phone: number = editclient.phone;
@@ -125,7 +125,7 @@ export default class ClientsService {
     const description: string = editclient.description;
     const status: number = editclient.status;
     const platform: string = editclient.platform;
-    const newLatLng: string = editclient.Long;
+    const newLatLng: string = editclient.LatLong;
     let todayDate = new Date().toISOString().slice(0, 10);
     let ClientList: any;
     let sts: any;
@@ -136,6 +136,7 @@ export default class ClientsService {
       .where("C.OrganizationId", orgid)
       .andWhere("C.Id", clientId);
 
+   
     if (ClientList[0].Contact == phone) {
       sts = 'contactalreadyexists';
       return sts;
