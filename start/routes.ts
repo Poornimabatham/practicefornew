@@ -44,6 +44,8 @@ import "../app/Routes/getCDateAttnDeptWiseRoutes"
 
 import "../app/Routes/getDataToApplyRegRoute"
 import "../app/Routes/MyAddonUserInfoRoute"
+import "../app/Routes/StoreRatingRoute"
+import "../app/Routes/getLastTimeOutRoute"
 // Route.get('/', async () => {
 //     return "Working fine!"
 // })

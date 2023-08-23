@@ -42,6 +42,8 @@ require("../app/Routes/getEmpdataDepartmentWiseNewRoute");
 require("../app/Routes/getCDateAttnDeptWiseRoutes");
 require("../app/Routes/getDataToApplyRegRoute");
 require("../app/Routes/MyAddonUserInfoRoute");
+require("../app/Routes/StoreRatingRoute");
+require("../app/Routes/getLastTimeOutRoute");
 // Route.get('/', async () => {
 //     return "Working fine!"
 // })
