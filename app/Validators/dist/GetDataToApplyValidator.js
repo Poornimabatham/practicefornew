@@ -15,39 +15,27 @@ var __extends = (this && this.__extends) || (function () {
 exports.__esModule = true;
 var Validator_1 = require("@ioc:Adonis/Core/Validator");
 var BaseValidator_1 = require("./BaseValidator");
-var DesignationValidator = /** @class */ (function (_super) {
-    __extends(DesignationValidator, _super);
-    function DesignationValidator(ctx) {
+var GetDataToRegValidator = /** @class */ (function (_super) {
+    __extends(GetDataToRegValidator, _super);
+    function GetDataToRegValidator(ctx) {
         var _this = _super.call(this) || this;
         _this.ctx = ctx;
         return _this;
     }
-    DesignationValidator.AddDesignationschema = {
+    GetDataToRegValidator.GetDataTOapplyRegschema = {
         schema: Validator_1.schema.create({
             uid: Validator_1.schema.number(),
             orgid: Validator_1.schema.number(),
-            name: Validator_1.schema.string(),
-            sts: Validator_1.schema.number.optional(),
-            desc: Validator_1.schema.string.optional()
+            month: Validator_1.schema.date.optional({ format: "yyyy-MM-dd" })
         })
     };
-    DesignationValidator.Designationschema = {
+    GetDataToRegValidator.GetDataTOCountRegschema = {
         schema: Validator_1.schema.create({
+            uid: Validator_1.schema.number(),
             orgid: Validator_1.schema.number(),
-            status: Validator_1.schema.number.optional(),
-            pagename: Validator_1.schema.number.optional(),
-            currentpage: Validator_1.schema.number.optional(),
-            perpage: Validator_1.schema.number.optional()
+            month: Validator_1.schema.date.optional({ format: "yyyy-MM-dd" })
         })
     };
-    DesignationValidator.updateDesignationschema = {
-        schema: Validator_1.schema.create({
-            Updateid: Validator_1.schema.number(),
-            UpdateName: Validator_1.schema.string(),
-            sts: Validator_1.schema.number.optional(),
-            Updateorgid: Validator_1.schema.number.optional()
-        })
-    };
-    return DesignationValidator;
+    return GetDataToRegValidator;
 }(BaseValidator_1["default"]));
-exports["default"] = DesignationValidator;
+exports["default"] = GetDataToRegValidator;

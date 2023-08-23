@@ -343,11 +343,11 @@ export default class EmployeeService{
     }
 
     public async RegitserEmpDetail(reqdata:[]) {
-        var status = false;
+        let status = false;
         const zone = await Helper.getTimeZone(reqdata['Orgid']);
         const currentDateTime = moment().tz(zone).format('YYYY-MM-DD HH:mm:ss');
-        const countryId=await Helper.getCountryIdByOrg(reqdata['Orgid']);
-        var username:string;
+        //const countryId=await Helper.getCountryIdByOrg(reqdata['Orgid']);
+        var username:string="";
         if(reqdata['username'] != '' ){
              username=Helper.encode5t(reqdata['username']); 
             const CheckUsername:any = await Database.query().select('Id','username').from("UserMaster").where({username:username});
@@ -355,7 +355,7 @@ export default class EmployeeService{
                 return 2; //email already Exist
             }
         }
-        var contact:string;
+        var contact:number=0;
         if(reqdata['contact'] != '' ){
            
             contact= Helper.encode5t(reqdata['contact'].toString()); 
@@ -457,6 +457,7 @@ export default class EmployeeService{
             }
 
         }else{
+            status=false
             return 6;//not inserted in EmployeeMaster
         }
 
