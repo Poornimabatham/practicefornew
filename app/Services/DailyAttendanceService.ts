@@ -1063,7 +1063,7 @@ export default class DailyAttendanceService {
               };
               k++;
 
-              console.log("statusArray");
+              //console.log("statusArray");
               console.log(statusArray);
               // const statusEntry = {
               //   Time: TimeInTime,
