@@ -547,11 +547,16 @@ export default class DailyAttendanceService {
             ELSE SUBTIME(S.TimeOut, A.TimeIn) END) > '00:00:59'
             And A.TimeIn!='00:00:00' 
             And A.TimeOut!='00:00:00' 
-            OR A.AttendanceDate=${AttendanceDate} 
+            And A.AttendanceDate=${AttendanceDate} 
             And S.shifttype!=3 ORDER BY E.FirstName ASC`
         )
         .limit(limit)
-        .offset(offset);
+        .offset(offset)
+
+        return earlyLeavingsQuery
+      //   .debug(true).toSQL().toNative()
+      // console.log(earlyLeavingsQuery);
+      // return false
 
       if (data.DesignationId != 0 && data.DesignationId != undefined) {
         designationCondition = `Desg_id= ${data.DesignationId}`; // From AttendanceMaster
