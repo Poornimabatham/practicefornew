@@ -11,4 +11,4 @@ Route.put("/updatenotification","UsersettingsController.UpdateNotification");
 Route.get("/SetQr","UsersettingsController.setQrKioskPin")
 Route.put("/ChangeQR","UsersettingsController.ChangeQrKioskPin")
 Route.get("/Regularizeapprove","UsersettingsController.getRegDetailForApproval")
-
+Route.get('recoverPinLoginCredential','UsersettingsController.recoverPinLoginCredential')
