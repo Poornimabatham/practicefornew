@@ -249,28 +249,27 @@ export default class Helper {
       .where("Id", Id)
       .where("Is_Delete", 0);
 
-    return query[0].FirstName;
+    if (query.length > 0) {
+      return query[0].FirstName;
+    }
+    else{
+      return 0;
+    }
+
   }
 
-  public static async getName(
-    tablename: any,
-    getcol: any,
-    wherecol: any,
-    id: any
-  ) {
+  public static async getName(tablename: any, getcol: any, wherecol: any, id: any) {
     let name: string = "";
-    const query = await Database.query()
-      .from(tablename)
-      .select(getcol)
-      .where(wherecol, id);
+    const query = await Database.query().from(tablename).select(getcol).where(wherecol, id);
     const count = query.length;
     if (count > 0) {
       query.forEach((row) => {
         name = row[getcol];
-      });
-    }
+      })
+      }
     return name;
   }
+  
   public static async getShiftType(shiftId) {
     const defaultshifttype = 0;
     const allDataOfShiftMaster: any = await ShiftMaster.find(shiftId);
@@ -374,26 +373,20 @@ export default class Helper {
   }
 
   public static calculateOvertime = (startTime, endTime) => {
-    const [startHours, startMinutes, startSeconds] = startTime
-      .split(":")
-      .map(Number);
-    const [endHours, endMinutes, endSeconds] = endTime.split(":").map(Number);
-    const totalStartSeconds =
-      startHours * 3600 + startMinutes * 60 + startSeconds;
+
+    const [startHours, startMinutes, startSeconds] = startTime.split(':').map(Number);
+    const [endHours, endMinutes, endSeconds] = endTime.split(':').map(Number);
+    const totalStartSeconds = startHours * 3600 + startMinutes * 60 + startSeconds;
     const totalEndSeconds = endHours * 3600 + endMinutes * 60 + endSeconds;
     let timeDiffInSeconds = totalEndSeconds - totalStartSeconds;
 
-    // if (timeDiffInSeconds < 0) {
+    // if (timeDiffInSeconds < 0) { 
     //   timeDiffInSeconds += 24 * 3600; // Assuming time is within 24 hours range
     // }
-    const hours =
-      Math.floor(Math.abs(timeDiffInSeconds) / 3600) *
-      (timeDiffInSeconds < 0 ? 1 : 1);
+    const hours = Math.floor(Math.abs(timeDiffInSeconds) / 3600) * (timeDiffInSeconds < 0 ? 1 : 1);
     const remainingSeconds = Math.abs(timeDiffInSeconds) % 3600;
-    const minutes =
-      Math.floor(remainingSeconds / 60) * (timeDiffInSeconds < 0 ? 1 : 1);
-    const seconds =
-      Math.floor(remainingSeconds % 60) * (timeDiffInSeconds < 0 ? 1 : 1);
+    const minutes = Math.floor(remainingSeconds / 60) * (timeDiffInSeconds < 0 ? 1 : 1);
+    const seconds = Math.floor(remainingSeconds % 60) * (timeDiffInSeconds < 0 ? 1 : 1);
 
     return { hours, minutes, seconds };
   };
