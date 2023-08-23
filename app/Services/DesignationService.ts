@@ -2,7 +2,7 @@ import Database from "@ioc:Adonis/Lucid/Database";
 import Helper from "App/Helper/Helper";
 const moment = require("moment-timezone");
 import { DateTime } from "luxon";
-
+import EmployeeMaster from "App/Models/EmployeeMaster";
 export default class DesignationService {
   public static async AddDesignation(a) {
     const currentDate = new Date();
@@ -214,4 +214,39 @@ export default class DesignationService {
     }
     return result["status"];
   }
+  ///////////// AssignDesignation //////////
+  public static async assignDesignation(get){
+
+    var updateDesignaionset = await EmployeeMaster.query()
+    .where("Id",get.empid)
+    .andWhere("OrganizationId",get.Orgid)
+    .update("Designation", get.desigid)
+
+    if(updateDesignaionset.length>0){
+      const zone = await Helper.getTimeZone(get.Orgid);
+      const timezone = zone;
+      const date = moment().tz(timezone).toDate();
+ 
+      const orgid = get.Orgid;
+      const uid = get.adminid;  
+      const module = 'Attendance app';
+      const activityBy = 1
+      const appModule = 'Update Successfully';
+      const actionperformed = `<b>${get.designame}</b>. Designation has been assigned to <b>${get.empname}</b> by <b>${get.adminname}</b> from <b>${module}</b>`;
+ 
+     var getresult = await Helper.ActivityMasterInsert(date,orgid,uid,activityBy,appModule,actionperformed,module)
+     if(getresult){
+     return 'Successfully Inserted in ActivityMasterInsert';
+     }else{
+      return'Error inserting activity history';
+     }
+    }else{
+     return'Error inserting activity history';
+    }
+    }
+    
 }
+
+
+
+

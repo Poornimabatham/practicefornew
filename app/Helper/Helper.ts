@@ -5,7 +5,6 @@ import EmployeeMaster from "App/Models/EmployeeMaster";
 import Organization from "App/Models/Organization";
 import ShiftMaster from "App/Models/ShiftMaster";
 import ZoneMaster from "App/Models/ZoneMaster";
-
 export default class Helper {
   public static encode5t(str: any) {
     for (let i = 0; i < 5; i++) {
@@ -247,7 +246,7 @@ export default class Helper {
       .where("Id", Id)
       .where("Is_Delete", 0);
 
-    return query[0].FirstName;
+    return query;
   }
 
   public static async getName(tablename :any, getcol :any, wherecol:any, id:any) {
@@ -382,4 +381,22 @@ export default class Helper {
    return { hours, minutes, seconds };
   };
 
+  public static ActivityMasterInsert(date,orgid,uid,activityBy,appModule,actionperformed,module){
+
+    let InsertActivityHistoryMaster = Database
+    .table("ActivityHistoryMaster")
+    .insert({
+      LastModifiedDate: date,
+      LastModifiedById: uid,
+      module: module,
+      ActionPerformed:actionperformed,
+      OrganizationId:orgid,
+      activityBy: activityBy,
+      adminid: uid,
+      appmodule:appModule,
+    });
+  return InsertActivityHistoryMaster
+   }
 }
+
+
