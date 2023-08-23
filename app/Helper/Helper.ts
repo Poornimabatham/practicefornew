@@ -5,7 +5,7 @@ import EmployeeMaster from "App/Models/EmployeeMaster";
 import Organization from "App/Models/Organization";
 import ShiftMaster from "App/Models/ShiftMaster";
 import ZoneMaster from "App/Models/ZoneMaster";
-import moment from "moment";
+
 export default class Helper {
   public static encode5t(str: any) {
     for (let i = 0; i < 5; i++) {
@@ -247,14 +247,13 @@ export default class Helper {
       .select("FirstName", "LastName")
       .where("Id", Id)
       .where("Is_Delete", 0);
-
+    
     if (query.length > 0) {
       return query[0].FirstName;
     }
     else{
       return 0;
     }
-
   }
 
   public static async getName(tablename: any, getcol: any, wherecol: any, id: any) {
@@ -390,6 +389,23 @@ export default class Helper {
     return { hours, minutes, seconds };
   };
 
+  public static ActivityMasterInsert(date,orgid,uid,activityBy,appModule,actionperformed,module){
+
+    let InsertActivityHistoryMaster = Database
+    .table("ActivityHistoryMaster")
+    .insert({
+      LastModifiedDate: date,
+      LastModifiedById: uid,
+      module: module,
+      ActionPerformed:actionperformed,
+      OrganizationId:orgid,
+      activityBy: activityBy,
+      adminid: uid,
+      appmodule:appModule,
+    });
+  return InsertActivityHistoryMaster
+   }
+
   public static async getOvertimeForRegularization(timein, timeout, id) {
     var name: string = " ";
     var selectShiftMasterData: any = await Database.from("ShiftMaster")
@@ -428,3 +444,5 @@ export default class Helper {
     return name;
   }
 }
+
+
