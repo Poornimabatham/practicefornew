@@ -699,8 +699,8 @@ export default class DailyAttendanceService {
             GeofenceOutAreaId = "",
           } = jsonData[i][date[0]].interim[j];
 
-          console.log(jsonData[i][date[0]].interim[j]);
-          console.log("all data of");
+          //console.log(jsonData[i][date[0]].interim[j]);
+          //console.log("all data of");
           const zone = await Helper.getEmpTimeZone(UserId, OrganizationId);
           const defaultZone = DateTime.now().setZone(zone);
           let shiftType = await Helper.getShiftType(ShiftId);
@@ -710,8 +710,8 @@ export default class DailyAttendanceService {
           let currentDate = defaultZone.toFormat("yyyy-MM-dd");
           // console.log(defaultZone.minus({ days: 1 }).toFormat('yyyy-MM-dd, HH:mm:ss'));
           // console.log(defaultZone.toFormat('yyyy-MM-dd, HH:mm:ss'));
-          console.log(shiftType);
-          console.log("shifttype");
+          //console.log(shiftType);
+          //console.log("shifttype");
 
           if (shiftType == "1") {
             if (ShiftId == "0" || ShiftId == "" || ShiftId == "") {
@@ -806,7 +806,7 @@ export default class DailyAttendanceService {
             .select("*");
 
           let attendance_sts = result.length > 0 ? 4 : 1;
-          console.log(attendance_sts);
+          //console.log(attendance_sts);
 
           const query = await Database.from("AttendanceMaster")
             .where("EmployeeId", UserId)
@@ -824,9 +824,9 @@ export default class DailyAttendanceService {
             AttendanceDate,
             ShiftId
           );
-          console.log(UserId + "=>" + AttendanceDate + "=>" + ShiftId);
-          console.log(MultipletimeStatus);
-          console.log("MultipletimeStatus");
+          //console.log(UserId + "=>" + AttendanceDate + "=>" + ShiftId);
+          //console.log(MultipletimeStatus);
+          //console.log("MultipletimeStatus");
 
           const attendanceData = await AttendanceMaster.query()
             .where("EmployeeId", UserId)
@@ -841,9 +841,9 @@ export default class DailyAttendanceService {
             attTimeIn = attendanceData.TimeIn;
             attTimeOut = attendanceData.TimeOut;
 
-            console.log(
-              AttendanceMasterId + "=>" + attTimeIn + "=>" + attTimeOut
-            );
+            //console.log(
+              //AttendanceMasterId + "=>" + attTimeIn + "=>" + attTimeOut
+            //);
           }
 
           const EmployeeRecord = await EmployeeMaster.query()
@@ -866,7 +866,7 @@ export default class DailyAttendanceService {
             OwnerId = EmployeeRecord.OwnerId;
           }
 
-          console.log("shakir" + AttendanceMasterId);
+          //console.log("shakir" + AttendanceMasterId);
 
           if (SyncTimeIn == "1" && SyncTimeOut != "1") {
             console.log("case one for sync Attendance Only Time In");
@@ -920,7 +920,7 @@ export default class DailyAttendanceService {
                 [OrganizationId]
               );
 
-              console.log("attendanceMasterId=>" + AttendanceMasterId);
+            //  console.log("attendanceMasterId=>" + AttendanceMasterId);
               if (AttendanceMasterId == 0) {
                 const InsertAttendanceTimeiN = await Database.table(
                   "AttendanceMaster"
@@ -964,7 +964,7 @@ export default class DailyAttendanceService {
                     TimeInStampServer: TimeInStampServer,
                     ZoneId: GeofenceInAreaId,
                   });
-                console.log("AttendanceMasterId=>" + InsertAttendanceTimeiN[0]);
+              //  console.log("AttendanceMasterId=>" + InsertAttendanceTimeiN[0]);
                 AttendanceMasterId = InsertAttendanceTimeiN[0];
 
                 if (
@@ -1009,7 +1009,7 @@ export default class DailyAttendanceService {
                     interimAttendanceId = queryResult[0].Id;
                     console.log("Interim Attendance ID:", interimAttendanceId);
                   }
-                  console.log("Interim Attendance IDs:", interimAttendanceId);
+                //  console.log("Interim Attendance IDs:", interimAttendanceId);
 
                   if (interimAttendanceId == 0) {
                     // Insert into InterimAttendances
@@ -1064,7 +1064,7 @@ export default class DailyAttendanceService {
               k++;
 
               //console.log("statusArray");
-              console.log(statusArray);
+              //console.log(statusArray);
               // const statusEntry = {
               //   Time: TimeInTime,
               //   Date: AttendanceDate,
@@ -1740,9 +1740,10 @@ export default class DailyAttendanceService {
             }
           }
         }
-      } else {
-        console.log("array not working");
-      }
+      } 
+      // else {
+      //   console.log("array not working");
+      // }
     }
 
     return statusArray;
