@@ -1278,7 +1278,7 @@ export default class DailyAttendanceService {
                   let totalLoggedHours = "00:00:00";
                   let hoursPerDay = "0:00:00";
                   // cond=",overtime ='$calculatedOvertime',TotalLoggedHours='$totalLoggedHours'";
-                 
+
 
                   const query = await Database.from("InterimAttendances")
                     .select("Id")
@@ -1317,7 +1317,7 @@ export default class DailyAttendanceService {
 
                 let disattreason = 0;
                 let disappstatus = 0;
-                
+
                 const dynamicFields = {
                   FakeLocationStatusTimeOut: FakeLocationOutStatus,
                   ExitImage: ExitImage,
@@ -1346,10 +1346,10 @@ export default class DailyAttendanceService {
                 // console.log(dynamicFields);
                 // console.log("working-daone");
                 // console.log(cond);
-               
+
                 const updateFields = { ...dynamicFields, ...cond };
-                
-                const affectedRows:any =   await Database.from("AttendanceMaster")
+
+                const affectedRows: any = await Database.from("AttendanceMaster")
                   .where("id", AttendanceMasterId)
                   .update(updateFields);
               }
@@ -1457,13 +1457,12 @@ export default class DailyAttendanceService {
                     TotalLoggedHours: totalLoggedHours,
                   });
               }
-              if((shiftType=='1' || shiftType=='2') && (MultipletimeStatus!=1))
-              {
+              if ((shiftType == '1' || shiftType == '2') && (MultipletimeStatus != 1)) {
 
-                  let calculatedOvertime='00:00:00';
-                  let totalLoggedHours='00:00:00';
+                let calculatedOvertime = '00:00:00';
+                let totalLoggedHours = '00:00:00';
 
-                  const getOvertTime = await Database
+                const getOvertTime = await Database
                   .from('AttendanceMaster as A')
                   .select(
                     'A.TimeIn as attTimeIn',
@@ -1476,84 +1475,83 @@ export default class DailyAttendanceService {
                   .innerJoin('ShiftMaster as C', 'A.ShiftId', 'C.Id')
                   .where('A.Id', AttendanceMasterId)
                   .first(); // Use 'first()' to get the first row of the result
-                
+
                 console.log(result);
 
 
-                  if (getOvertTime > 0) 
-                  {
-                      totalLoggedHours=getOvertTime.TotalLoggedHours;
-                      calculatedOvertime=getOvertTime.overtime;                             
-                  }
+                if (getOvertTime > 0) {
+                  totalLoggedHours = getOvertTime.TotalLoggedHours;
+                  calculatedOvertime = getOvertTime.overtime;
+                }
 
-                  const updateLoggedHours = await Database.from(
-                    "AttendanceMaster"
-                  )
-                    .where("id", AttendanceMasterId)
-                    .update({
-                      overtime: calculatedOvertime,
-                      TotalLoggedHours: totalLoggedHours,
-                    });
+                const updateLoggedHours = await Database.from(
+                  "AttendanceMaster"
+                )
+                  .where("id", AttendanceMasterId)
+                  .update({
+                    overtime: calculatedOvertime,
+                    TotalLoggedHours: totalLoggedHours,
+                  });
 
               }
 
-              const results =  await Database
-      .from('AttendanceMaster as A')
-      .innerJoin('ShiftMaster as S', 'A.ShiftId', 'S.Id')
-      .select('S.TimeIn as ShiftTimeIn', 'S.TimeOut as ShiftTimeOut', 'S.shifttype', 'S.HoursPerDay')
-      .select(Database.raw(`(CASE
+              const results = await Database
+                .from('AttendanceMaster as A')
+                .innerJoin('ShiftMaster as S', 'A.ShiftId', 'S.Id')
+                .select('S.TimeIn as ShiftTimeIn', 'S.TimeOut as ShiftTimeOut', 'S.shifttype', 'S.HoursPerDay')
+                .select(Database.raw(`(CASE
             WHEN (S.shifttype = 1) THEN SEC_TO_TIME(TIME_TO_SEC(TIMEDIFF(S.TimeOut, S.TimeIn)) / 2)
             WHEN (S.shifttype = 2) THEN SEC_TO_TIME(TIME_TO_SEC(TIMEDIFF(CONCAT('2021-08-07', ' ', S.TimeOut), CONCAT('2021-08-06', ' ', S.TimeIn))) / 2)
             WHEN (S.shifttype = 3) THEN SEC_TO_TIME(TIME_TO_SEC(TIMEDIFF(S.HoursPerDay, A.TotalLoggedHours)) / 2)
             ELSE 0
         END) as halfshift`))
-      .select('A.TotalLoggedHours as TotalLoggedHours')
-      .where('A.Id', AttendanceMasterId);
+                .select('A.TotalLoggedHours as TotalLoggedHours')
+                .where('A.Id', AttendanceMasterId);
 
-      const halfshiftTimestamp = new Date(`1970-01-01T${results[0].halfshift}Z`).getTime();
-      const totalLoggedHoursTimestamp = new Date(`1970-01-01T${results[0].TotalLoggedHours}Z`).getTime();
+              const halfshiftTimestamp = new Date(`1970-01-01T${results[0].halfshift}Z`).getTime();
+              const totalLoggedHoursTimestamp = new Date(`1970-01-01T${results[0].TotalLoggedHours}Z`).getTime();
 
-        let halfDayStatus;
+              let halfDayStatus;
 
-        if (halfshiftTimestamp > totalLoggedHoursTimestamp) {
-            halfDayStatus = 13;
-        } else {
-            halfDayStatus = 0;
-        }
+              if (halfshiftTimestamp > totalLoggedHoursTimestamp) {
+                halfDayStatus = 13;
+              } else {
+                halfDayStatus = 0;
+              }
 
-        const updateHalfdayStatus= await Database.from('AttendanceMaster').where('Id',AttendanceMasterId).update({
-            Wo_H_Hd:halfDayStatus
-        })
+              const updateHalfdayStatus = await Database.from('AttendanceMaster').where('Id', AttendanceMasterId).update({
+                Wo_H_Hd: halfDayStatus
+              })
 
 
-        statusArray[k] = {
-          Time: TimeInTime,
-          Date: AttendanceDate,
-          Action: "TimeIn",
-          EmpId: UserId,
-          InterimId: Id,
-          InterimAttendanceId: interimAttendanceId,
-          AttendanceMasterId: AttendanceMasterId
-        };
-        
-        k++;
-       
-        statusArray[k] = {
-          Time: TimeOutTime,
-          Date: AttendanceDate,
-          Action: "TimeOut",
-          EmpId: UserId,
-          InterimId: Id,
-          InterimAttendanceId: interimAttendanceId,
-          AttendanceMasterId: AttendanceMasterId
-        };
-        
-        k++;
-        console.log('statusArray-case second');
-        console.log(statusArray);
-        
+              statusArray[k] = {
+                Time: TimeInTime,
+                Date: AttendanceDate,
+                Action: "TimeIn",
+                EmpId: UserId,
+                InterimId: Id,
+                InterimAttendanceId: interimAttendanceId,
+                AttendanceMasterId: AttendanceMasterId
+              };
 
-            } catch (error) {}
+              k++;
+
+              statusArray[k] = {
+                Time: TimeOutTime,
+                Date: AttendanceDate,
+                Action: "TimeOut",
+                EmpId: UserId,
+                InterimId: Id,
+                InterimAttendanceId: interimAttendanceId,
+                AttendanceMasterId: AttendanceMasterId
+              };
+
+              k++;
+              console.log('statusArray-case second');
+              console.log(statusArray);
+
+
+            } catch (error) { }
           } else if (SyncTimeIn != "1" && SyncTimeOut == "1") {
             console.log("case three for sync Attendance Only Time out");
             let ExitImage = ThumnailTimeOutPictureBase64;
@@ -1773,11 +1771,11 @@ export default class DailyAttendanceService {
                 calculatedOvertime = result[0].overtime;
               }
 
-              const updateLoggedHour= Database.from('AttendanceMaster').where('Id',AttendanceMasterId).update({
-                TotalLoggedHours:totalLoggedHours,
-                overtime:calculatedOvertime
+              const updateLoggedHour = Database.from('AttendanceMaster').where('Id', AttendanceMasterId).update({
+                TotalLoggedHours: totalLoggedHours,
+                overtime: calculatedOvertime
               });
-             
+
             }
           }
         }
@@ -1789,5 +1787,5 @@ export default class DailyAttendanceService {
     return statusArray;
   }
 
- 
+
 }
