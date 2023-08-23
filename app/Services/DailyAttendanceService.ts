@@ -1591,10 +1591,21 @@ export default class DailyAttendanceService {
 
                 console.log("TimeOutDate+=>1568");
 
-                let loggedHours = await Database.raw(
-                  `TIMEDIFF(CONCAT(?, ' ', ?), CONCAT(TimeInDate, ' ', TimeIn))`,
-                  [TimeOutDate, TimeOutTime]
-                );
+                // let loggedHours = await Database.raw(
+                //   `TIMEDIFF(CONCAT(?, ' ', ?), CONCAT(TimeInDate, ' ', TimeIn))`,
+                //   [TimeOutDate, TimeOutTime]
+                // );
+
+                const loggedHoursResult = await Database.from('InterimAttendances')
+              .select(Database.raw(`TIMEDIFF(CONCAT(?, ' ', ?), CONCAT(TimeInDate, ' ', TimeIn)) as loggedHours`, [TimeOutDate, TimeOutTime]))
+              .where('Id', interimAttendanceId)
+              .first();
+
+             const loggedHours = loggedHoursResult.loggedHours;
+
+                console.log(loggedHours);
+                console.log('loggedHours');
+               
 
                 const updateQuery = await Database.from("InterimAttendances")
                   .where("Id", interimAttendanceId)
@@ -1630,7 +1641,7 @@ export default class DailyAttendanceService {
                 .groupBy("A.Id", "A.ShiftId");
 
               if (calculateLoggedHours) {
-                let totalLoggedHours = calculateLoggedHours[0].totalLoggedHours;
+                    totalLoggedHours = calculateLoggedHours[0].totalLoggedHours;
                 let hoursPerDay = calculateLoggedHours[0].hoursPerDay;
 
                 console.log('totalLoggedHours line number 1629='+totalLoggedHours);
@@ -1641,7 +1652,7 @@ export default class DailyAttendanceService {
                   totalLoggedHours
                 );
                 console.log(hours + ":" + minutes + ":" + seconds);
-                let calculatedOvertime = hours + ":" + minutes + ":" + seconds;
+                 calculatedOvertime = hours + ":" + minutes + ":" + seconds;
                 console.log("calculatedOvertime" + calculatedOvertime);
               }
             }
