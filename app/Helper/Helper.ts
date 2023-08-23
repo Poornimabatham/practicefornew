@@ -33,7 +33,11 @@ export default class Helper {
           `(select TimeZone from Organization where id =${orgid}  LIMIT 1)`
         )
       );
-    return query1[0].name;
+    if (query1.length > 0) {
+      return query1[0].name;
+    } else {
+      return 0;
+    }
   }
 
   public static async getAdminStatus(id: any) {
@@ -243,14 +247,13 @@ export default class Helper {
       .select("FirstName", "LastName")
       .where("Id", Id)
       .where("Is_Delete", 0);
-
+    
     if (query.length > 0) {
       return query[0].FirstName;
     }
     else{
       return 0;
     }
-
   }
 
   public static async getName(tablename: any, getcol: any, wherecol: any, id: any) {
@@ -385,49 +388,61 @@ export default class Helper {
 
     return { hours, minutes, seconds };
   };
-  
+
+  public static ActivityMasterInsert(date,orgid,uid,activityBy,appModule,actionperformed,module){
+
+    let InsertActivityHistoryMaster = Database
+    .table("ActivityHistoryMaster")
+    .insert({
+      LastModifiedDate: date,
+      LastModifiedById: uid,
+      module: module,
+      ActionPerformed:actionperformed,
+      OrganizationId:orgid,
+      activityBy: activityBy,
+      adminid: uid,
+      appmodule:appModule,
+    });
+  return InsertActivityHistoryMaster
+   }
+
   public static async getOvertimeForRegularization(timein, timeout, id) {
-    var name:string = " ";
+    var name: string = " ";
     var selectShiftMasterData: any = await Database.from("ShiftMaster")
       .select("TimeIn", "TimeOut")
       .where("Id", id);
-     
-try{
 
-      
-    for (const row of selectShiftMasterData) {
-      const stime1 = moment(`1980-01-01 ${row.TimeIn}`).unix();
-    
-      const stime2 = moment(`1980-01-01 ${row.TimeOut}`).unix();
-      const time1 = moment(`1980-01-01 ${timein}`).unix();
-      const time2 = moment(`1980-01-01 ${timeout}`).unix();
-      const totaltime = time2 - time1;
+    try {
+      for (const row of selectShiftMasterData) {
+        const stime1 = moment(`1980-01-01 ${row.TimeIn}`).unix();
 
-      const stotaltime = stime2 - stime1;
-      const overtime = Math.abs(totaltime - stotaltime);
-      const overtimeInMinutes = overtime / 60;
+        const stime2 = moment(`1980-01-01 ${row.TimeOut}`).unix();
+        const time1 = moment(`1980-01-01 ${timein}`).unix();
+        const time2 = moment(`1980-01-01 ${timeout}`).unix();
+        const totaltime = time2 - time1;
 
-      if (overtime > 0) {
-         name = moment()
-          .startOf("day")
-          .minutes(overtimeInMinutes)
-          .format("HH:mm:00");
+        const stotaltime = stime2 - stime1;
+        const overtime = Math.abs(totaltime - stotaltime);
+        const overtimeInMinutes = overtime / 60;
 
-      }
-      if (totaltime - stotaltime < 0) {
-        name = "-" + `${name}`;
-
+        if (overtime > 0) {
+          name = moment()
+            .startOf("day")
+            .minutes(overtimeInMinutes)
+            .format("HH:mm:00");
         }
-      if (timein == "00:00:00") {
-        name = "00:00:00";
+        if (totaltime - stotaltime < 0) {
+          name = "-" + `${name}`;
+        }
+        if (timein == "00:00:00") {
+          name = "00:00:00";
+        }
       }
+    } catch (error) {
+      console.error(error.message);
     }
+    return name;
   }
-
-  catch(error) {
-    console.error(error.message);
-  }
-return name
-
 }
-}
+
+

@@ -58,6 +58,23 @@ var GetDataToApplyRegController = /** @class */ (function () {
             });
         });
     };
+    GetDataToApplyRegController.prototype.getRegularizationCount = function (_a) {
+        var request = _a.request, response = _a.response;
+        return __awaiter(this, void 0, void 0, function () {
+            var ValidationInputDetails, Output;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0: return [4 /*yield*/, request.validate(GetDataToApplyValidator_1["default"].GetDataTOCountRegschema)];
+                    case 1:
+                        ValidationInputDetails = _b.sent();
+                        return [4 /*yield*/, GetDataToApplyRegService_1["default"].FetchRegularizationCount(ValidationInputDetails)];
+                    case 2:
+                        Output = _b.sent();
+                        return [2 /*return*/, response.json(Output)];
+                }
+            });
+        });
+    };
     return GetDataToApplyRegController;
 }());
 exports["default"] = GetDataToApplyRegController;

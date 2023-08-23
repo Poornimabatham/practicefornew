@@ -1,7 +1,9 @@
 import moment from "moment";
 import Database from "@ioc:Adonis/Lucid/Database";
-const format = require('date-fns/format');
-const parseISO = require('date-fns/parseISO');
+const { DateTime } = require("luxon");
+
+const format = require("date-fns/format");
+const parseISO = require("date-fns/parseISO");
 export default class GetDataToRegService {
   public static async FetchingdatatoReg(data) {
     var count = 0;
@@ -10,7 +12,7 @@ export default class GetDataToRegService {
     const currentMonth = moment().endOf("month").format("YYYY-MM-DD");
 
     if (data.month != "null" || data.month != undefined) {
-      const currentmonth = moment(data.month).format("YYYY-MM-DD");
+      const currentMonth = moment(data.month).format("YYYY-MM-DD");
     }
 
     var MinTimes = "";
@@ -36,7 +38,7 @@ export default class GetDataToRegService {
       }
     }
 
-    const regularizeCount:any = await Database.from("AttendanceMaster")
+    const regularizeCount: any = await Database.from("AttendanceMaster")
       .where("OrganizationId", 1074)
       .whereNot("Is_Delete", 1)
       .where("EmployeeId", 7294)
@@ -89,7 +91,7 @@ export default class GetDataToRegService {
     console.log(attendanceData);
     var attendancearr: any = [];
     attendanceData.forEach((row) => {
-      const res1= {};
+      const res1 = {};
       res1["id"] = row.Id;
       res1["sts"] = row.AttendanceStatus;
       res1["device"] = row.device;
@@ -107,51 +109,84 @@ export default class GetDataToRegService {
           ? "00:00"
           : new Date(`1970-01-01T${row.TimeOut}Z`).toISOString().substr(11, 5);
       res1["timeOut"] = timeOut;
-      var date1:any = new Date(row.AttendanceDate);
+      var date1: any = new Date(row.AttendanceDate);
       res1["date1"] = date1;
-      var date2:any= new Date();
-res1['date2']=date2
-const diffInMilliseconds:number = date2 - date1;
+      var date2: any = new Date();
+      res1["date2"] = date2;
+      const diffInMilliseconds: number = date2 - date1;
 
-// Calculate the difference in days
-const diffInDays = Math.floor(diffInMilliseconds / (1000 * 60 * 60 * 24));
+      // Calculate the difference in days
+      const diffInDays = Math.floor(diffInMilliseconds / (1000 * 60 * 60 * 24));
 
-res1['diffInDays'] = diffInDays
-if(MaxDays!=0){
-  if(MaxDays!=0){
-    res1['resultsts']=0
-  }else{
-    res1['resultsts']=1
-  }
-}else{
-  res1['resultsts']=1
+      res1["diffInDays"] = diffInDays;
+      if (MaxDays != 0) {
+        if (MaxDays != 0) {
+          res1["resultsts"] = 0;
+        } else {
+          res1["resultsts"] = 1;
+        }
+      } else {
+        res1["resultsts"] = 1;
+      }
+      if (MinTimes != undefined) {
+        if (Regularizecount < parseInt(MinTimes)) {
+          res1["Regularizessts"] = 1;
+        } else {
+          res1["Regularizessts"] = 0;
+        }
+      } else {
+        res1["Regularizessts"] = 1;
+      }
 
-}
-if(MinTimes!=undefined){
-  if(Regularizecount <       parseInt(MinTimes) ){
-    res1['Regularizessts'] = 1;//for   showing
-  }else{
-    res1['Regularizessts'] = 0;//for not showing
-  }
-}else{
-   res1['Regularizessts'] = 1;
-}
-
-attendancearr.push(res1);
+      attendancearr.push(res1);
     });
 
-    var result:any={}
-    status=true;
+    var result: any = {};
+    status = true;
 
-const monthDate = parseISO(currentMonth);
+    const monthDate = parseISO(currentMonth);
 
-// Format the month and year using the date-fns library
-const formattedMonth = format(monthDate, 'MMMM yyyy');
-		result['month']=formattedMonth
-		result['Regularizecountdone'] =Regularizecount;
-		result['TotalRegularizecount'] =MinTimes;
-		result['regularizationsettingsts'] =regularizationsettingsts;
-		result['status']=status;
-    return result
+    const formattedMonth = format(monthDate, "MMMM yyyy");
+    result["month"] = formattedMonth;
+    result["Regularizecountdone"] = Regularizecount;
+    result["TotalRegularizecount"] = MinTimes;
+    result["regularizationsettingsts"] = regularizationsettingsts;
+    result["status"] = status;
+    return result;
+  }
+
+  public static async FetchRegularizationCount(data) {
+    var orgId = data.orgid;
+    var id = data.uid;
+    var month = data.month;
+
+    if (month != undefined) {
+      var month1 = new Date(data.month);
+      month = moment(month1).format("yyyy-MM-DD");
+    } else {
+      month = moment().format("yyyy-MM-DD");
+    }
+    const AttendanceMaster = await Database.from("AttendanceMaster")
+      .select(
+        Database.raw(
+          `(SELECT MinTimes FROM RegularizationSettings WHERE OrganizationId = ${orgId} and RegularizationSts = 1) as MinTimes`
+        ),
+        Database.raw(`count(RegularizeSts) as Regularizecount`)
+      )
+      .where("OrganizationId", orgId)
+      .whereNot("Is_Delete", 1)
+      .where("EmployeeId", id)
+      .whereRaw("Month(AttendanceDate) = Month(?)", [month])
+      .whereRaw("Year(AttendanceDate) = Year(?)", [month])
+      .whereRaw("AttendanceDate != CURDATE()")
+      .whereNotIn("RegularizeSts", [0, 1])
+      .orderBy("AttendanceDate", "desc");
+    const row1 = AttendanceMaster[0];
+    const data2 = {
+      MinTimes: row1 ? parseInt(row1.MinTimes) : 0,
+      Regularizecount: row1 ? parseInt(row1.Regularizecount) : 0,
+    };
+
+    return data2;
   }
 }

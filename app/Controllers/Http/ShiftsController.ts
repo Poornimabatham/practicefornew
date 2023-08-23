@@ -29,7 +29,7 @@ export default class ShiftsController {
   }
 
   public async update({ request, response }: HttpContextContract) {
-     const validatedparams = await request.validate(ShiftValidator.updateshift);
+    const validatedparams = await request.validate(ShiftValidator.updateshift);
     const result = await ShiftsService.updateShift(validatedparams);
     response.json(result);
   }

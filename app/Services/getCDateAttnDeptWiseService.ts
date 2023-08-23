@@ -39,7 +39,6 @@ export default class getCDateAttnDeptWiseService {
     }
 
     if (getData.datafor == "present") {
-      console.log("present");
       const getdataforPresentees = Database.query()
         .select([
           Database.raw(
