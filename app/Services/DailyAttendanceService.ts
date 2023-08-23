@@ -1318,7 +1318,7 @@ export default class DailyAttendanceService {
 
                 if (interimAttendanceId == 0) {
                   const InsertAttendanceTimeInOut = await Database.table(
-                    "AttendanceMaster"
+                    "InterimAttendances"
                   )
                     .returning("id")
                     .insert({
