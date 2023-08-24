@@ -58,19 +58,6 @@ export default class Helper {
     return query2[0].FirstName;
   }
 
-  public static async getAdminStatus(id: any) {
-    let status = 0;
-    const queryResult = await Database.query()
-      .from("UserMaster")
-      .select("appSuperviserSts")
-      .where("EmployeeId", id)
-      .first();
-    if (queryResult) {
-      status = queryResult.appSuperviserSts;
-    }
-    return status;
-  }
-
   public static generateToken(secretKey: string, data: any = {}) {
     try {
       const payload = {
