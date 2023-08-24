@@ -2,6 +2,7 @@ import Database from "@ioc:Adonis/Lucid/Database";
 import Helper from "App/Helper/Helper";
 import { DateTime } from 'luxon';
 import moment from 'moment-timezone';
+import EmployeeMaster from "App/Models/EmployeeMaster";
 
 export default class DepartmentService {
 
@@ -189,4 +190,35 @@ export default class DepartmentService {
 
     return result['status'];
   }
+
+    ///////////// assignDepartment //////////
+  public static async assignDepartment(get){
+
+    var updateDepartmentset = await EmployeeMaster.query()
+    .where("Id",get.empid)
+    .andWhere("OrganizationId",get.Orgid)
+    .update("Designation", get.deptid)
+
+    if(updateDepartmentset.length>0){
+      const zone = await Helper.getTimeZone(get.Orgid);
+      const timezone = zone;
+      const date = moment().tz(timezone).toDate();
+      console.log(date);
+ 
+      const orgid = get.Orgid;
+      const uid = get.adminid;  
+      const module = 'Attendance app';
+      const activityBy = 1
+      const appModule = 'Update Successfully';
+      const actionperformed = `<b>${get.deptname}</b>. Department has been assigned to <b>${get.empname}</b> by <b>${get.adminname}</b> from <b>${module}</b>`;
+ 
+     var getresult = await Helper.ActivityMasterInsert(date,orgid,uid,activityBy,appModule,actionperformed,module)
+     if(getresult){
+     return 'Successfully Inserted in ActivityMasterInsert';
+     }else{
+      return'Error inserting ActivityMasterInsert';
+     }
+    }else{
+     return'Error inserting ActivityMasterInsert';
+    }
 }
