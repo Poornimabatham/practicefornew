@@ -44,43 +44,49 @@ var LateComingService = /** @class */ (function () {
     }
     LateComingService.getLateComing = function (data) {
         return __awaiter(this, void 0, void 0, function () {
-            var Begin, month1, Date2, lateComersList, adminStatus, condition, Empid, response, Output;
+            var Begin, month1, Date2, lateComersList, adminstatus, condition, dptid, response, Output;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         Begin = (data.Currentpage - 1) * data.Perpage;
                         month1 = new Date(data.Date);
                         Date2 = moment_1["default"](month1).format("yyyy-MM-DD");
-                        lateComersList = Database_1["default"].from("AttendanceMaster as A")
-                            .innerJoin("EmployeeMaster as E", "E.Id", "A.EmployeeId")
-                            .innerJoin("ShiftMaster as S", "S.Id", "A.ShiftId")
-                            .select("E.FirstName", "E.LastName", "A.ShiftId", "A.EmployeeId", "A.ShiftId", "A.AttendanceDate", Database_1["default"].raw("(SELECT TIMEDIFF(A.TimeIn, CASE WHEN S.TimeInGrace != '00:00:00' THEN S.TimeInGrace ELSE S.TimeIn END))\n         as earlyby"), Database_1["default"].raw("A.TimeIn > (CASE WHEN S.TimeInGrace != '00:00:00' THEN S.TimeInGrace ELSE S.TimeIn END)\n  AND TIMEDIFF(A.TimeIn, CASE WHEN S.TimeInGrace != '00:00:00' THEN S.TimeInGrace ELSE S.TimeIn END) >\n  '00:00:59'"), Database_1["default"].raw("SUBSTRING_INDEX(EntryImage, '.com/', -1) AS EntryImage"))
-                            .andWhere("A.OrganizationId", data.Orgid)
-                            .andWhereNotIn("A.AttendanceStatus", [2, 3, 5])
-                            .andWhere("S.shifttype", "!=", 3)
-                            .andWhere(" E.Is_Delete", 0)
-                            .andWhere("A.AttendanceDate", Date2)
-                            .orderBy("E.FirstName", "desc");
-                        return [4 /*yield*/, Helper_1["default"].getAdminStatus(data.Empid)];
+                        return [4 /*yield*/, Database_1["default"].from("AttendanceMaster as A")
+                                .select(Database_1["default"].raw("SUBSTRING_INDEX(A.EntryImage, '.com/', -1) as EntryImage"), "E.FirstName", "E.LastName", "A.TimeIn as atimein", "A.AttendanceDate", Database_1["default"].raw("TIMEDIFF(A.TimeIn,CASE WHEN(S.TimeInGrace!='00:00:00') THEN S.TimeInGrace ELSE S.TimeIn END) as Earlyby"), "A.ShiftId")
+                                .from("AttendanceMaster as A")
+                                .innerJoin("EmployeeMaster as E", "E.Id", "A.EmployeeId")
+                                .innerJoin("ShiftMaster as S", "S.Id", "A.ShiftId")
+                                .whereNotNull("A.TimeIn")
+                                .where("A.OrganizationId", data.Orgid)
+                                .whereRaw("A.TimeIn > (CASE WHEN(S.TimeInGrace!='00:00:00') THEN S.TimeInGrace ELSE S.TimeIn END)")
+                                .whereRaw("TIMEDIFF(A.TimeIn,CASE WHEN(S.TimeInGrace!='00:00:00') THEN S.TimeInGrace ELSE S.TimeIn END) > '00:00:59'")
+                                .where("A.AttendanceDate", Date2)
+                                .where("E.Is_Delete", 0)
+                                .whereNotIn("A.AttendanceStatus", [2, 3, 5])
+                                .whereNot("S.shifttype", 3)
+                                .orderBy("E.FirstName", "asc")];
                     case 1:
-                        adminStatus = _a.sent();
-                        if (adminStatus == 2) {
-                            Empid = data.Empid;
-                            condition = "A.Dept_id = " + Empid;
-                            lateComersList = lateComersList.where("A.Dept_id", condition);
+                        lateComersList = _a.sent();
+                        return [4 /*yield*/, Helper_1["default"].getAdminStatus(data.Empid)];
+                    case 2:
+                        adminstatus = _a.sent();
+                        if (adminstatus == 0) {
+                            dptid = data.Empid;
+                            condition = "AND A.Dept_id = " + dptid;
                         }
                         response = [];
                         return [4 /*yield*/, lateComersList];
-                    case 2:
+                    case 3:
                         Output = _a.sent();
                         Output.forEach(function (element) {
                             var data2 = {};
-                            data2["lateBy"] = moment_1["default"](element.earlyby, 'HH:mm').format('HH:mm');
+                            data2["lateBy"] = element.Earlyby.substr(0, 5);
                             data2["timein"] = element.atimein ? element.atimein.substr(0, 5) : null;
                             data2["fullname"] = element.FirstName + " " + element.LastName;
                             data2["EntryImage"] = element.EntryImage;
                             data2["ShiftId"] = element.ShiftId;
-                            data2["AttendanceDate"] = moment_1["default"](element.AttendanceDate).format("YYYY/MM/DD");
+                            var date = new Date(element.AttendanceDate);
+                            data2["AttendanceDate"] = moment_1["default"](date).format("YYYY/MM/DD");
                             data2["A.EmployeeId"] = element.EmployeeId;
                             response.push(data2);
                         });
