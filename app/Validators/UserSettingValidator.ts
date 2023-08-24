@@ -100,6 +100,7 @@ export default class UserSettingValidator  {
       password:schema.string()
     })
    }
+
   /**
    * Custom messages for validation failures. You can make use of dot notation `(.)`
    * for targeting nested fields and array expressions `(*)` for targeting all
