@@ -72,7 +72,7 @@ export default class Usersettingservice{
        const Empid       = data.Empid;
        const Orgid       = data.Orgid;                                       
        const csv         = data.Csv;
-       const today       = data.Date;
+       const today       = new Date(data.Date);
        const loginEmp    = data.loginEmp;
        const currentPage = data.currentPage;
        const perpage     = data.perpage;
@@ -81,27 +81,27 @@ export default class Usersettingservice{
        const adminstatus = await Helper.getAdminStatus(loginEmp);
        const res:any[]   = [];
 
-       let date = new Date(today)
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
 
-      const new_date = `${year}-${month}-${day}`; 
+       let new_date = (moment(today).format("YYYY-MM-DD"))
+   
+       
 
        if(Empid != 0){
-            var query = Database.query().from('checkin_master').select('Id','EmployeeId','location','location_out','time','time_out',Database.raw(`SUBSTRING_INDEX(checkin_img, '.com/', -1) as checkin_img`),Database.raw(`SUBSTRING_INDEX(checkout_img, '.com/', -1) as checkout_img`),'client_name','description','latit','longi','latit_out','longi_out').where('OrganizationId',Orgid).andWhere('EmployeeId',Empid).andWhere('date',new_date).andWhereIn('EmployeeId',Database.raw(`SELECT Id from EmployeeMaster where OrganizationId = ${Orgid} AND Is_Delete = 0`)).orderBy("Id","asc").limit(perpage).offset(begin);  
+      
+            var query = Database.query().from('checkin_master').select('Id','EmployeeId','location','location_out','time','time_out',Database.raw(`SUBSTRING_INDEX(checkin_img, '.com/', -1) as checkin_img`),Database.raw(`SUBSTRING_INDEX(checkout_img, '.com/', -1) as checkout_img`),'client_name','description','latit','longi','latit_out','longi_out').where('OrganizationId',Orgid).andWhere('EmployeeId',Empid).andWhere('date',new_date).andWhereIn('EmployeeId',Database.raw(`SELECT Id from EmployeeMaster where OrganizationId = ${Orgid} AND Is_Delete = 0`)).orderBy("Id","asc")
           
         }else{
-            var query = Database.query().from('checkin_master').select('Id','EmployeeId','location','location_out','time','time_out',Database.raw(`SUBSTRING_INDEX(checkin_img, '.com/', -1) as checkin_img`),Database.raw(`SUBSTRING_INDEX(checkout_img, '.com/', -1) as checkout_img`),'client_name','description','latit','longi','latit_out','longi_out').where('OrganizationId',Orgid).andWhere('EmployeeId',Empid).andWhere('date',new_date).andWhereIn('EmployeeId',Database.raw(`SELECT Id from EmployeeMaster where OrganizationId = ${Orgid} AND Is_Delete = 0`)).orderBy("Id","asc").limit(perpage).offset(begin);
-        }
 
+            var query = Database.query().from('checkin_master').select('Id','EmployeeId','location','location_out','time','time_out',Database.raw(`SUBSTRING_INDEX(checkin_img, '.com/', -1) as checkin_img`),Database.raw(`SUBSTRING_INDEX(checkout_img, '.com/', -1) as checkout_img`),'client_name','description','latit','longi','latit_out','longi_out').where('OrganizationId',Orgid).andWhere('EmployeeId',Empid).andWhere('date',new_date).andWhereIn('EmployeeId',Database.raw(`SELECT Id from EmployeeMaster where OrganizationId = ${Orgid} AND Is_Delete = 0`)).orderBy("Id","asc")
+        }
+        
         if(adminstatus == 2){
           var dptid = await Helper.getDepartmentIdByEmpID(loginEmp);
           query = query.andWhere("Department",dptid) ;
         }
          
          var querydata = await query
-          
+
           querydata.forEach((row) => {
            
           const data: any    = {};
@@ -144,7 +144,7 @@ export default class Usersettingservice{
       const Empid        = data.Empid;
       const Orgid        = data.Orgid;
       const csv          = data.Csv;
-      const today        = data.Date;
+      const today        = new Date(data.Date);;
       const loginEmp     = data.loginEmp;
       const currentPage  = data.currentPage;                              
       const perpage      = data.perpage;
@@ -153,12 +153,9 @@ export default class Usersettingservice{
       const adminstatus  = await Helper.getAdminStatus(Empid);
       const res:any[]    = [];
 
-      let date = new Date(today)
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
+     
 
-      const new_date = `${year}-${month}-${day}`;  
+      const new_date = (moment(today).format("YYYY-MM-DD")) 
     
   
       if(Empid != 0){
@@ -351,6 +348,8 @@ export default class Usersettingservice{
       const result:any = {};
 
       const query = await Database.query().from('UserMaster').select('*').where('EmployeeId',empId).andWhere('OrganizationId',orgId);
+     
+      
 
       if(query.length > 0)
       {
@@ -443,12 +442,12 @@ export default class Usersettingservice{
               
                const res = {};
                res['total']        = total;
-               let attid           = row.Id;
+               let attid           = row.Id ? row.Id :0;
                res['Id']           = row.Id;
                res['employeeId']   = row.EmployeeId;
                res['employeeName'] = row.Name;
-               let regsts          = row.RegularizeSts;
-               res['device']       = row.device;
+               let regsts          = row.RegularizeSts ? row.RegularizeSts : 0 ;
+               res['device']       = row.device ? row.device :0;
 
                if(res['device'] == "Auto Time Out"){
                    res['deviceid'] = 1;
@@ -462,7 +461,7 @@ export default class Usersettingservice{
                
                res['requestedtimeout'] = moment(row.requestedtimeout).format("HH:mm:ss");
                
-               
+              
               
       
                if(regsts == 3)
@@ -486,10 +485,12 @@ export default class Usersettingservice{
                      
                      const qur =  await Database.query().from('RegularizationApproval').select('ApproverId').where('attendanceId',attid).andWhere('ApproverSts',regsts).andWhere('approverregularsts',0).orderBy
                      ('Id','asc').limit(1);
+                     
                      pstatus = qur[0].ApproverId;
-                   
-
+                    //  console.log(pstatus);return
+                        
                   }
+
                   const Name = await Helper.getEmpName(pstatus);
 
 
@@ -519,13 +520,28 @@ export default class Usersettingservice{
                   res['ApprovalIcon']=false;
                }
                 result.push(res); 
+                console.log(result);
+                
                 
             })
             );
-              return result; 
-                      
-        }
-         
+              return result;                
+        }   
+    }
+
+    static async recoverPinLoginCredential(data) {
+
+      const orgId = data.Orgid;
+      const empId = data.Empid;
+      const userName = await Helper.encode5t(data.userName);
+      const password = await Helper.encode5t(data.password);
+      var dataresult: [] = [];
+  
+      var recoverPinLoginCredentialQuery = await Database.from('UserMaster').select('*').where('Username', userName).orWhere('username_mobile', userName).andWhere('Password', password).andWhere('OrganizationId', orgId).andWhere('EmployeeId', empId);
+  
+      if (recoverPinLoginCredentialQuery.length > 0) {
+        dataresult['response'] = '1';
+      }
     }
 
 }
