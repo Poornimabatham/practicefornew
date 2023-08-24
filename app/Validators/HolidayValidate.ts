@@ -14,7 +14,7 @@ export default class HolidayValidate extends BaseValidator{
   }
   static HolidayInsert = {schema:schema.create({
     EmpId:schema.number(),
-    Name: schema.string([rules.alpha(),rules.maxLength(20),rules.minLength(2)]),
+    Name: schema.string(),
     Description: schema.string([rules.alpha(),rules.maxLength(20),rules.minLength(2)]),
     OrganizationId: schema.number(),
     DateFrom: schema.date.optional({format: 'yyyy-MM-dd'}),
