@@ -7,12 +7,14 @@ import moment from "moment";
 
 export default class DailyAttendanceService {
   public static async getpresentList(data) {
+
     var begin = (data.currentPage - 1) * data.perPage;
     var limit;
     var offset;
     var designationCondition;
     var departmentCondition;
     var AttendanceDate;
+
 
     if (data.currentPage != undefined && data.csv == undefined) {
       limit = data.perPage;
@@ -393,7 +395,6 @@ export default class DailyAttendanceService {
         AttendanceDate = currDate;
       }
 
-
       var LateComingsQuery = Database.from("EmployeeMaster as E")
         .select(
           Database.raw(`CONCAT(FirstName,' ',LastName) as name`),
@@ -521,40 +522,43 @@ export default class DailyAttendanceService {
           "A.multitime_sts",
           "A.TotalLoggedHours",
           "S.TimeIn as ShiftTimeIn",
-          "S.TimeOut as ShiftTimeOut"
+          "S.TimeOut as ShiftTimeOut",
+          "A.Desg_id"
         )
         .innerJoin("EmployeeMaster as E", "A.EmployeeId", "E.Id")
         .innerJoin("ShiftMaster as S ", "A.ShiftId", "S.Id")
         .where("A.OrganizationId", data.OrganizationId)
         .where("A.Is_Delete", 0)
-        .whereRaw(
-          `CASE WHEN (S.shifttype=2 AND A.timeindate= A.timeoutdate) 
-            THEN CONCAT(DATE_ADD(A.AttendanceDate, INTERVAL 1 DAY),' ',S.TimeOut) 
-            WHEN(S.shifttype=2 AND A.timeindate!=A.timeoutdate) 
-            THEN CONCAT(DATE_ADD(A.AttendanceDate, INTERVAL 1 DAY),' ',S.TimeOut)
-            ELSE CONCAT(A.AttendanceDate,' ',S.TimeOut)END >  CASE 
-            WHEN (A.timeoutdate!='0000-00-00') 
-            THEN CONCAT(A.timeoutdate,' ',A.TimeOut)  
-            WHEN(S.shifttype=2 AND A.timeindate!=A.timeoutdate)
-            THEN  CONCAT(A.timeoutdate,' ',A.TimeOut) 
-            ELSE CONCAT(A.AttendanceDate,' ',A.TimeOut) END  And A.TimeIn!='00:00:00' And A.TimeOut!='00:00:00' and A.AttendanceStatus NOT IN(2,3,5) And 
-            (CASE WHEN (A.timeoutdate!='0000-00-00')  
-            THEN (
-            CASE WHEN (S.shifttype=2 AND A.timeindate=A.timeoutdate) 
-            THEN TIMEDIFF(CONCAT(DATE_ADD(A.AttendanceDate, INTERVAL 1 DAY),' ',S.TimeOut),CONCAT(A.AttendanceDate,' ',A.TimeOut))       
-            ELSE TIMEDIFF((  
-            CASE WHEN (S.shifttype=2 AND A.timeindate!=A.timeoutdate) 
-            THEN CONCAT(DATE_ADD(A.AttendanceDate, INTERVAL 1 DAY),' ',S.TimeOut) 
-            ELSE  CONCAT(A.AttendanceDate,' ',S.TimeOut) END ) ,CONCAT(A.timeoutdate,' ',A.TimeOut)) END)
-            ELSE SUBTIME(S.TimeOut, A.TimeIn) END) > '00:00:59'
-            And A.TimeIn!='00:00:00' 
-            And A.TimeOut!='00:00:00' 
-            And A.AttendanceDate=${AttendanceDate} 
-            And S.shifttype!=3 ORDER BY E.FirstName ASC`
-        )
+        .whereRaw(`(CASE WHEN (S.shifttype=2 AND A.timeindate= A.timeoutdate) 
+        THEN CONCAT(DATE_ADD(A.AttendanceDate, INTERVAL 1 DAY),' ',S.TimeOut) 
+        WHEN(S.shifttype=2 AND A.timeindate!=A.timeoutdate) 
+        THEN CONCAT(DATE_ADD(A.AttendanceDate, INTERVAL 1 DAY),' ',S.TimeOut)
+        ELSE CONCAT(A.AttendanceDate,' ',S.TimeOut)END)
+         > 
+         (CASE 
+         WHEN (A.timeoutdate!='0000-00-00') 
+         THEN CONCAT(A.timeoutdate,' ',A.TimeOut)  
+         WHEN(S.shifttype=2 AND A.timeindate!=A.timeoutdate)
+         THEN  CONCAT(A.timeoutdate,' ',A.TimeOut) 
+         ELSE CONCAT(A.AttendanceDate,' ',A.TimeOut) END) `)
+        .whereRaw(` A.TimeIn!='00:00:00' And A.TimeOut!='00:00:00' and A.AttendanceStatus NOT IN (2,3,5)`)
+        .whereRaw(` (CASE WHEN (A.timeoutdate!='0000-00-00')  
+         THEN (
+         CASE WHEN (S.shifttype=2 AND A.timeindate=A.timeoutdate) 
+         THEN TIMEDIFF(CONCAT(DATE_ADD(A.AttendanceDate, INTERVAL 1 DAY),' ',S.TimeOut),CONCAT(A.AttendanceDate,' ',A.TimeOut))       
+         ELSE TIMEDIFF((  
+         CASE WHEN (S.shifttype=2 AND A.timeindate!=A.timeoutdate) 
+         THEN CONCAT(DATE_ADD(A.AttendanceDate, INTERVAL 1 DAY),' ',S.TimeOut) 
+         ELSE  CONCAT(A.AttendanceDate,' ',S.TimeOut) END ) ,
+         CONCAT(A.timeoutdate,' ',A.TimeOut)) END)
+         ELSE SUBTIME(S.TimeOut, A.TimeIn) END) > '00:00:59'`)
+        .whereRaw(`A.TimeIn!='00:00:00'`)
+        .whereRaw(`A.TimeOut!='00:00:00'`)
+        .andWhere('A.AttendanceDate', AttendanceDate)
+        .whereRaw('S.shifttype!=3')
+        .orderBy('E.FirstName', 'asc')
         .limit(limit)
         .offset(offset)
-
 
       if (data.DesignationId != 0 && data.DesignationId != undefined) {
         designationCondition = `Desg_id= ${data.DesignationId}`; // From AttendanceMaster
