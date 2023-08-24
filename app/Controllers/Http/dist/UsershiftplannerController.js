@@ -58,6 +58,23 @@ var UsershiftPlannerController = /** @class */ (function () {
             });
         });
     };
+    UsershiftPlannerController.prototype.storedeviceinfo = function (_a) {
+        var request = _a.request, response = _a.response;
+        return __awaiter(this, void 0, void 0, function () {
+            var a, b;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0: return [4 /*yield*/, request.validate(UsershiftplannerValidator_1["default"].InsertdeviceInfochema)];
+                    case 1:
+                        a = _b.sent();
+                        return [4 /*yield*/, UsershiftplannerService_1["default"].Storedeviceinformation(a)];
+                    case 2:
+                        b = _b.sent();
+                        return [2 /*return*/, response.json(b)];
+                }
+            });
+        });
+    };
     return UsershiftPlannerController;
 }());
 exports["default"] = UsershiftPlannerController;
