@@ -549,11 +549,12 @@ export default class DailyAttendanceService {
             ELSE SUBTIME(S.TimeOut, A.TimeIn) END) > '00:00:59'
             And A.TimeIn!='00:00:00' 
             And A.TimeOut!='00:00:00' 
-            OR A.AttendanceDate=${AttendanceDate} 
+            And A.AttendanceDate=${AttendanceDate} 
             And S.shifttype!=3 ORDER BY E.FirstName ASC`
         )
         .limit(limit)
-        .offset(offset);
+        .offset(offset)
+
 
       if (data.DesignationId != 0 && data.DesignationId != undefined) {
         designationCondition = `Desg_id= ${data.DesignationId}`; // From AttendanceMaster
@@ -842,7 +843,7 @@ export default class DailyAttendanceService {
             attTimeOut = attendanceData.TimeOut;
 
             //console.log(
-              //AttendanceMasterId + "=>" + attTimeIn + "=>" + attTimeOut
+            //AttendanceMasterId + "=>" + attTimeIn + "=>" + attTimeOut
             //);
           }
 
@@ -920,7 +921,7 @@ export default class DailyAttendanceService {
                 [OrganizationId]
               );
 
-            //  console.log("attendanceMasterId=>" + AttendanceMasterId);
+              //  console.log("attendanceMasterId=>" + AttendanceMasterId);
               if (AttendanceMasterId == 0) {
                 const InsertAttendanceTimeiN = await Database.table(
                   "AttendanceMaster"
@@ -964,7 +965,7 @@ export default class DailyAttendanceService {
                     TimeInStampServer: TimeInStampServer,
                     ZoneId: GeofenceInAreaId,
                   });
-              //  console.log("AttendanceMasterId=>" + InsertAttendanceTimeiN[0]);
+                //  console.log("AttendanceMasterId=>" + InsertAttendanceTimeiN[0]);
                 AttendanceMasterId = InsertAttendanceTimeiN[0];
 
                 if (
@@ -1009,7 +1010,7 @@ export default class DailyAttendanceService {
                     interimAttendanceId = queryResult[0].Id;
                     console.log("Interim Attendance ID:", interimAttendanceId);
                   }
-                //  console.log("Interim Attendance IDs:", interimAttendanceId);
+                  //  console.log("Interim Attendance IDs:", interimAttendanceId);
 
                   if (interimAttendanceId == 0) {
                     // Insert into InterimAttendances
@@ -1520,7 +1521,7 @@ export default class DailyAttendanceService {
               k++;
               console.log("statusArray-case second");
               console.log(statusArray);
-            } catch (error) {}
+            } catch (error) { }
           } else if (SyncTimeIn != "1" && SyncTimeOut == "1") {
             console.log("case three for sync Attendance Only Time out");
             let ExitImage = ThumnailTimeOutPictureBase64;
@@ -1597,15 +1598,15 @@ export default class DailyAttendanceService {
                 // );
 
                 const loggedHoursResult = await Database.from('InterimAttendances')
-              .select(Database.raw(`TIMEDIFF(CONCAT(?, ' ', ?), CONCAT(TimeInDate, ' ', TimeIn)) as loggedHours`, [TimeOutDate, TimeOutTime]))
-              .where('Id', interimAttendanceId)
-              .first();
+                  .select(Database.raw(`TIMEDIFF(CONCAT(?, ' ', ?), CONCAT(TimeInDate, ' ', TimeIn)) as loggedHours`, [TimeOutDate, TimeOutTime]))
+                  .where('Id', interimAttendanceId)
+                  .first();
 
-             const loggedHours = loggedHoursResult.loggedHours;
+                const loggedHours = loggedHoursResult.loggedHours;
 
                 console.log(loggedHours);
                 console.log('loggedHours');
-               
+
 
                 const updateQuery = await Database.from("InterimAttendances")
                   .where("Id", interimAttendanceId)
@@ -1631,28 +1632,28 @@ export default class DailyAttendanceService {
 
               const calculateLoggedHours = await Database.from(
                 "InterimAttendances as I"
-              ).select("A.Id","A.ShiftId",
-                  Database.raw(
-                    "SEC_TO_TIME(SUM(TIME_TO_SEC(I.LoggedHours))) as totalLoggedHours"
-                  ),
-                  Database.raw(`(SELECT (CASE WHEN (shifttype=1) THEN TIMEDIFF(TimeOut,TimeIn) WHEN (shifttype=2) THEN TIMEDIFF(CONCAT('2021-10-11', ' ', TimeOut), CONCAT('2021-10-10', ' ', TimeIn)) WHEN (shifttype=3) THEN HoursPerDay END) FROM ShiftMaster WHERE Id=A.ShiftId) as hoursPerDay`))
-                .innerJoin("AttendanceMaster as A","A.Id","I.AttendanceMasterId")
+              ).select("A.Id", "A.ShiftId",
+                Database.raw(
+                  "SEC_TO_TIME(SUM(TIME_TO_SEC(I.LoggedHours))) as totalLoggedHours"
+                ),
+                Database.raw(`(SELECT (CASE WHEN (shifttype=1) THEN TIMEDIFF(TimeOut,TimeIn) WHEN (shifttype=2) THEN TIMEDIFF(CONCAT('2021-10-11', ' ', TimeOut), CONCAT('2021-10-10', ' ', TimeIn)) WHEN (shifttype=3) THEN HoursPerDay END) FROM ShiftMaster WHERE Id=A.ShiftId) as hoursPerDay`))
+                .innerJoin("AttendanceMaster as A", "A.Id", "I.AttendanceMasterId")
                 .where("I.AttendanceMasterId", AttendanceMasterId)
                 .groupBy("A.Id", "A.ShiftId");
 
               if (calculateLoggedHours) {
-                    totalLoggedHours = calculateLoggedHours[0].totalLoggedHours;
+                totalLoggedHours = calculateLoggedHours[0].totalLoggedHours;
                 let hoursPerDay = calculateLoggedHours[0].hoursPerDay;
 
-                console.log('totalLoggedHours line number 1629='+totalLoggedHours);
-                console.log('hoursPerDay line number 1629='+hoursPerDay);
+                console.log('totalLoggedHours line number 1629=' + totalLoggedHours);
+                console.log('hoursPerDay line number 1629=' + hoursPerDay);
 
                 const { hours, minutes, seconds } = Helper.calculateOvertime(
                   hoursPerDay,
                   totalLoggedHours
                 );
                 console.log(hours + ":" + minutes + ":" + seconds);
-                 calculatedOvertime = hours + ":" + minutes + ":" + seconds;
+                calculatedOvertime = hours + ":" + minutes + ":" + seconds;
                 console.log("calculatedOvertime" + calculatedOvertime);
               }
             }
@@ -1674,8 +1675,8 @@ export default class DailyAttendanceService {
             let disappstatus = 2; //pending disaaprove
             let disattreason = "Outside Geofence";
 
-            console.log('calculate overunderTime= '+calculatedOvertime);
-            console.log('calculate loggedHours= '+totalLoggedHours);
+            console.log('calculate overunderTime= ' + calculatedOvertime);
+            console.log('calculate loggedHours= ' + totalLoggedHours);
 
             const cond1 = `overtime='${calculatedOvertime}', TotalLoggedHours='${totalLoggedHours}'`;
 
@@ -1751,7 +1752,7 @@ export default class DailyAttendanceService {
             }
           }
         }
-      } 
+      }
       // else {
       //   console.log("array not working");
       // }
