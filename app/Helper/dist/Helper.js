@@ -63,20 +63,22 @@ var Helper = /** @class */ (function () {
     };
     Helper.getTimeZone = function (orgid) {
         return __awaiter(this, void 0, void 0, function () {
-            var query1;
+            var TimeZone, query1;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, Database_1["default"].query()
-                            .from("ZoneMaster")
-                            .select("name")
-                            .where("Id", Database_1["default"].raw("(select TimeZone from Organization where id =" + orgid + "  LIMIT 1)"))];
+                    case 0:
+                        TimeZone = "Asia/kolkata";
+                        return [4 /*yield*/, Database_1["default"].query()
+                                .from("ZoneMaster")
+                                .select("name")
+                                .where("Id", Database_1["default"].raw("(select TimeZone from Organization where id =" + orgid + "  LIMIT 1)"))];
                     case 1:
                         query1 = _a.sent();
                         if (query1.length > 0) {
                             return [2 /*return*/, query1[0].name];
                         }
                         else {
-                            return [2 /*return*/, 0];
+                            return [2 /*return*/, TimeZone];
                         }
                         return [2 /*return*/];
                 }
@@ -107,16 +109,24 @@ var Helper = /** @class */ (function () {
     };
     Helper.getempnameById = function (empid) {
         return __awaiter(this, void 0, void 0, function () {
-            var query2;
+            var FirstName, query2;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, Database_1["default"].query()
-                            .from("EmployeeMaster")
-                            .select("FirstName")
-                            .where("Id", empid)];
+                    case 0:
+                        FirstName = '';
+                        return [4 /*yield*/, Database_1["default"].query()
+                                .from("EmployeeMaster")
+                                .select("FirstName")
+                                .where("Id", empid)];
                     case 1:
                         query2 = _a.sent();
-                        return [2 /*return*/, query2[0].FirstName];
+                        if (query2 > 0) {
+                            return [2 /*return*/, query2[0].FirstName];
+                        }
+                        else {
+                            return [2 /*return*/, FirstName];
+                        }
+                        return [2 /*return*/];
                 }
             });
         });
@@ -372,7 +382,13 @@ var Helper = /** @class */ (function () {
                             .where("Is_Delete", 0)];
                     case 1:
                         query = _a.sent();
-                        return [2 /*return*/, query[0].FirstName];
+                        if (query.length > 0) {
+                            return [2 /*return*/, query[0].FirstName];
+                        }
+                        else {
+                            return [2 /*return*/, 0];
+                        }
+                        return [2 /*return*/];
                 }
             });
         });
@@ -384,10 +400,7 @@ var Helper = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         name = "";
-                        return [4 /*yield*/, Database_1["default"].query()
-                                .from(tablename)
-                                .select(getcol)
-                                .where(wherecol, id)];
+                        return [4 /*yield*/, Database_1["default"].query().from(tablename).select(getcol).where(wherecol, id)];
                     case 1:
                         query = _a.sent();
                         count = query.length;
@@ -561,6 +574,21 @@ var Helper = /** @class */ (function () {
             });
         });
     };
+    Helper.ActivityMasterInsert = function (date, orgid, uid, activityBy, appModule, actionperformed, module) {
+        var InsertActivityHistoryMaster = Database_1["default"]
+            .table("ActivityHistoryMaster")
+            .insert({
+            LastModifiedDate: date,
+            LastModifiedById: uid,
+            module: module,
+            ActionPerformed: actionperformed,
+            OrganizationId: orgid,
+            activityBy: activityBy,
+            adminid: uid,
+            appmodule: appModule
+        });
+        return InsertActivityHistoryMaster;
+    };
     Helper.getOvertimeForRegularization = function (timein, timeout, id) {
         return __awaiter(this, void 0, void 0, function () {
             var name, selectShiftMasterData, _i, selectShiftMasterData_1, row, stime1, stime2, time1, time2, totaltime, stotaltime, overtime, overtimeInMinutes;
@@ -628,19 +656,32 @@ var Helper = /** @class */ (function () {
             });
         });
     };
+    Helper.myUrlEncode = function (string) {
+        return __awaiter(this, void 0, void 0, function () {
+            var entities, replacements, result, i, regex;
+            return __generator(this, function (_a) {
+                entities = ['%21', '%2A', '%27', '%28', '%29', '%3B', '%3A', '%40', '%26', '%3D', '%2B', '%24', '%2C', '%2F', '%3F', '%25', '%23', '%5B', '%5D'];
+                replacements = ['!', '*', "'", "(", ")", ";", ":", "@", "&", "=", "+", "$", ",", "/", "?", "%", "#", "[", "]"];
+                result = string;
+                for (i = 0; i < entities.length; i++) {
+                    regex = new RegExp(entities[i], 'g');
+                    result = result.replace(regex, replacements[i]);
+                }
+                console.log(result);
+                return [2 /*return*/];
+            });
+        });
+    };
     Helper.calculateOvertime = function (startTime, endTime) {
-        var _a = startTime
-            .split(":")
-            .map(Number), startHours = _a[0], startMinutes = _a[1], startSeconds = _a[2];
-        var _b = endTime.split(":").map(Number), endHours = _b[0], endMinutes = _b[1], endSeconds = _b[2];
+        var _a = startTime.split(':').map(Number), startHours = _a[0], startMinutes = _a[1], startSeconds = _a[2];
+        var _b = endTime.split(':').map(Number), endHours = _b[0], endMinutes = _b[1], endSeconds = _b[2];
         var totalStartSeconds = startHours * 3600 + startMinutes * 60 + startSeconds;
         var totalEndSeconds = endHours * 3600 + endMinutes * 60 + endSeconds;
         var timeDiffInSeconds = totalEndSeconds - totalStartSeconds;
-        // if (timeDiffInSeconds < 0) {
+        // if (timeDiffInSeconds < 0) { 
         //   timeDiffInSeconds += 24 * 3600; // Assuming time is within 24 hours range
         // }
-        var hours = Math.floor(Math.abs(timeDiffInSeconds) / 3600) *
-            (timeDiffInSeconds < 0 ? 1 : 1);
+        var hours = Math.floor(Math.abs(timeDiffInSeconds) / 3600) * (timeDiffInSeconds < 0 ? 1 : 1);
         var remainingSeconds = Math.abs(timeDiffInSeconds) % 3600;
         var minutes = Math.floor(remainingSeconds / 60) * (timeDiffInSeconds < 0 ? 1 : 1);
         var seconds = Math.floor(remainingSeconds % 60) * (timeDiffInSeconds < 0 ? 1 : 1);
