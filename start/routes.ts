@@ -41,6 +41,7 @@ import "../app/Routes/getInfoRoute"
 import Redis from '@ioc:Adonis/Addons/Redis'
 import "../app/Routes/getEmpdataDepartmentWiseNewRoute"
 import "../app/Routes/getCDateAttnDeptWiseRoutes"
+import "../app/Routes/UsershiftplannerRoute"
 import "../app/Routes/UserSettingRoute"
 import "../app/Routes/getDataToApplyRegRoute"
 import "../app/Routes/MyAddonUserInfoRoute"
@@ -53,14 +54,11 @@ import "../app/Routes/changePasswordOTPRoute"
 //     return "Working fine!"
 // })
 
-
-
 // Route.get('/', async () => {
 // await Redis.set('hello', 'world')
 // const value = await Redis.get('hello')
 //     return value
 // })
-
 
 import "../app/Routes/ApprovalRegularizationRoute"
 
