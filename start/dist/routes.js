@@ -41,6 +41,10 @@ require("../app/Routes/getInfoRoute");
 require("../app/Routes/getEmpdataDepartmentWiseNewRoute");
 require("../app/Routes/getCDateAttnDeptWiseRoutes");
 require("../app/Routes/UsershiftplannerRoute");
+require("../app/Routes/getDataToApplyRegRoute");
+require("../app/Routes/MyAddonUserInfoRoute");
+require("../app/Routes/StoreRatingRoute");
+require("../app/Routes/getLastTimeOutRoute");
 // Route.get('/', async () => {
 //     return "Working fine!"
 // })
@@ -49,3 +53,5 @@ require("../app/Routes/UsershiftplannerRoute");
 // const value = await Redis.get('hello')
 //     return value
 // })
+require("../app/Routes/ApprovalRegularizationRoute");
+

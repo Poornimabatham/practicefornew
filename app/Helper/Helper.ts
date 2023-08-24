@@ -5,7 +5,7 @@ import EmployeeMaster from "App/Models/EmployeeMaster";
 import Organization from "App/Models/Organization";
 import ShiftMaster from "App/Models/ShiftMaster";
 import ZoneMaster from "App/Models/ZoneMaster";
-
+import moment from "moment";
 export default class Helper {
   public static encode5t(str: any) {
     for (let i = 0; i < 5; i++) {
@@ -30,11 +30,14 @@ export default class Helper {
       .where(
         "Id",
         Database.raw(
-
           `(select TimeZone from Organization where id =${orgid}  LIMIT 1)`
         )
       );
-    return query1[0].name;
+    if (query1.length > 0) {
+      return query1[0].name;
+    } else {
+      return 0;
+    }
   }
 
   public static async getAdminStatus(id: any) {
@@ -56,19 +59,6 @@ export default class Helper {
       .select("FirstName")
       .where("Id", empid);
     return query2[0].FirstName;
-  }
-
-  public static async getAdminStatus(id: any) {
-    let status = 0;
-    const queryResult = await Database.query()
-      .from("UserMaster")
-      .select("appSuperviserSts")
-      .where("EmployeeId", id)
-      .first();
-    if (queryResult) {
-      status = queryResult.appSuperviserSts;
-    }
-    return status;
   }
 
   public static generateToken(secretKey: string, data: any = {}) {
@@ -115,7 +105,6 @@ export default class Helper {
     });
     return capitalizedWords.join(" ");
   }
-
 
   public static async getCountryIdByOrg1(orgid: number) {
     const getCountryId = await Database.from("Organization")
@@ -193,7 +182,7 @@ export default class Helper {
   }
 
   public static async getEmpTimeZone(userid, orgid) {
-    const defaultZone = "Asia/Kolkata";
+    let defaultZone = "Asia/Kolkata";
     const { CurrentCountry: country, timezone: id } =
       await EmployeeMaster.findByOrFail("Id", userid);
 
@@ -258,22 +247,27 @@ export default class Helper {
       .select("FirstName", "LastName")
       .where("Id", Id)
       .where("Is_Delete", 0);
-
-    return query[0].FirstName;
+    
+    if (query.length > 0) {
+      return query[0].FirstName;
+    }
+    else{
+      return 0;
+    }
   }
 
-  public static async getName(tablename :any, getcol :any, wherecol:any, id:any) {
-    let name :string = "";
+  public static async getName(tablename: any, getcol: any, wherecol: any, id: any) {
+    let name: string = "";
     const query = await Database.query().from(tablename).select(getcol).where(wherecol, id);
     const count = query.length;
     if (count > 0) {
-      query.forEach((row) => { 
-      name = row[getcol];
-      
+      query.forEach((row) => {
+        name = row[getcol];
       })
-    }
+      }
     return name;
-}
+  }
+  
   public static async getShiftType(shiftId) {
     const defaultshifttype = 0;
     const allDataOfShiftMaster: any = await ShiftMaster.find(shiftId);
@@ -356,18 +350,18 @@ export default class Helper {
 
   public static async getShiftMultipleTimeStatus(userId, today, shiftId) {
     const attendanceRecord = await AttendanceMaster.query()
-      .where('EmployeeId', userId)
-      .where('AttendanceDate', today)
-      .whereNot('TimeIn', '00:00:00')
-      .select('multitime_sts')
+      .where("EmployeeId", userId)
+      .where("AttendanceDate", today)
+      .whereNot("TimeIn", "00:00:00")
+      .select("multitime_sts")
       .first();
 
     if (attendanceRecord && attendanceRecord.multitime_sts) {
       return attendanceRecord.multitime_sts;
     } else {
       const shiftRecord = await ShiftMaster.query()
-        .where('Id', shiftId)
-        .select('MultipletimeStatus')
+        .where("Id", shiftId)
+        .select("MultipletimeStatus")
         .first();
       if (shiftRecord && shiftRecord.MultipletimeStatus) {
         return shiftRecord.MultipletimeStatus;
@@ -377,21 +371,97 @@ export default class Helper {
   }
 
   public static calculateOvertime = (startTime, endTime) => {
-    const [startHours, startMinutes,startSeconds] = startTime.split(':').map(Number);
-    const [endHours, endMinutes,endSeconds] = endTime.split(':').map(Number);
+
+    const [startHours, startMinutes, startSeconds] = startTime.split(':').map(Number);
+    const [endHours, endMinutes, endSeconds] = endTime.split(':').map(Number);
     const totalStartSeconds = startHours * 3600 + startMinutes * 60 + startSeconds;
     const totalEndSeconds = endHours * 3600 + endMinutes * 60 + endSeconds;
     let timeDiffInSeconds = totalEndSeconds - totalStartSeconds;
 
-  // if (timeDiffInSeconds < 0) { 
-  //   timeDiffInSeconds += 24 * 3600; // Assuming time is within 24 hours range
-  // }
-   const hours = Math.floor(Math.abs(timeDiffInSeconds) / 3600) * (timeDiffInSeconds < 0 ? 1 : 1);
-   const remainingSeconds = Math.abs(timeDiffInSeconds) % 3600;
-   const minutes = Math.floor(remainingSeconds / 60) * (timeDiffInSeconds < 0 ? 1 : 1);
-   const seconds = Math.floor(remainingSeconds % 60) * (timeDiffInSeconds < 0 ? 1 : 1);
-   
-   return { hours, minutes, seconds };
+    // if (timeDiffInSeconds < 0) { 
+    //   timeDiffInSeconds += 24 * 3600; // Assuming time is within 24 hours range
+    // }
+    const hours = Math.floor(Math.abs(timeDiffInSeconds) / 3600) * (timeDiffInSeconds < 0 ? 1 : 1);
+    const remainingSeconds = Math.abs(timeDiffInSeconds) % 3600;
+    const minutes = Math.floor(remainingSeconds / 60) * (timeDiffInSeconds < 0 ? 1 : 1);
+    const seconds = Math.floor(remainingSeconds % 60) * (timeDiffInSeconds < 0 ? 1 : 1);
+
+    return { hours, minutes, seconds };
   };
 
+  public static ActivityMasterInsert(date,orgid,uid,activityBy,appModule,actionperformed,module){
+
+    let InsertActivityHistoryMaster = Database
+    .table("ActivityHistoryMaster")
+    .insert({
+      LastModifiedDate: date,
+      LastModifiedById: uid,
+      module: module,
+      ActionPerformed:actionperformed,
+      OrganizationId:orgid,
+      activityBy: activityBy,
+      adminid: uid,
+      appmodule:appModule,
+    });
+  return InsertActivityHistoryMaster
+   }
+
+  public static async getOvertimeForRegularization(timein, timeout, id) {
+    var name: string = " ";
+    var selectShiftMasterData: any = await Database.from("ShiftMaster")
+      .select("TimeIn", "TimeOut")
+      .where("Id", id);
+
+    try {
+      for (const row of selectShiftMasterData) {
+        const stime1 = moment(`1980-01-01 ${row.TimeIn}`).unix();
+
+        const stime2 = moment(`1980-01-01 ${row.TimeOut}`).unix();
+        const time1 = moment(`1980-01-01 ${timein}`).unix();
+        const time2 = moment(`1980-01-01 ${timeout}`).unix();
+        const totaltime = time2 - time1;
+
+        const stotaltime = stime2 - stime1;
+        const overtime = Math.abs(totaltime - stotaltime);
+        const overtimeInMinutes = overtime / 60;
+
+        if (overtime > 0) {
+          name = moment()
+            .startOf("day")
+            .minutes(overtimeInMinutes)
+            .format("HH:mm:00");
+        }
+        if (totaltime - stotaltime < 0) {
+          name = "-" + `${name}`;
+        }
+        if (timein == "00:00:00") {
+          name = "00:00:00";
+        }
+      }
+    } catch (error) {
+      console.error(error.message);
+    }
+    return name;
+  }
+
+  public static async getShiftIdByEmpID(empid) {
+    let shift;
+    let getshiftid = await Database.from("ShiftMaster")
+      .select("Id")
+      .where(
+        "id",
+        Database.rawQuery(
+          `(SELECT Shift FROM EmployeeMaster where id=${empid})`
+        )
+      );
+
+    if (getshiftid.length > 0) {
+      shift= getshiftid[0].Id;
+      console.log(getshiftid);
+    }else{
+      return shift
+    }
+  }
 }
+
+

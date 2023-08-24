@@ -29,7 +29,8 @@ export default class DepartmentValidator extends BaseValidator {
     static updateDepartment = {
         schema: schema.create({
             OrganizationId: schema.number(),
-            Id: schema.number(),
+            DId: schema.number(),
+            adminId: schema.number(),
             archive: schema.number(),
             Name: schema.string.optional(),
             LastModifiedById: schema.number.optional(),
