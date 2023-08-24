@@ -182,7 +182,7 @@ export default class Helper {
   }
 
   public static async getEmpTimeZone(userid, orgid) {
-    const defaultZone = "Asia/Kolkata";
+    let defaultZone = "Asia/Kolkata";
     const { CurrentCountry: country, timezone: id } =
       await EmployeeMaster.findByOrFail("Id", userid);
 
@@ -442,6 +442,25 @@ export default class Helper {
       console.error(error.message);
     }
     return name;
+  }
+
+  public static async getShiftIdByEmpID(empid) {
+    let shift;
+    let getshiftid = await Database.from("ShiftMaster")
+      .select("Id")
+      .where(
+        "id",
+        Database.rawQuery(
+          `(SELECT Shift FROM EmployeeMaster where id=${empid})`
+        )
+      );
+
+    if (getshiftid.length > 0) {
+      shift= getshiftid[0].Id;
+      console.log(getshiftid);
+    }else{
+      return shift
+    }
   }
 }
 

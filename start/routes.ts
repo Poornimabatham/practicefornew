@@ -44,7 +44,11 @@ import "../app/Routes/getCDateAttnDeptWiseRoutes"
 import "../app/Routes/UserSettingRoute"
 import "../app/Routes/getDataToApplyRegRoute"
 import "../app/Routes/MyAddonUserInfoRoute"
+import "../app/Routes/StoreRatingRoute"
+import "../app/Routes/getLastTimeOutRoute"
+
 import "../app/Routes/changePasswordOTPRoute"
+
 // Route.get('/', async () => {
 //     return "Working fine!"
 // })
