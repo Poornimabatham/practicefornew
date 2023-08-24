@@ -186,7 +186,7 @@ export default class Helper {
   }
 
   public static async getEmpTimeZone(userid, orgid) {
-    const defaultZone = "Asia/Kolkata";
+    let defaultZone = "Asia/Kolkata";
     const { CurrentCountry: country, timezone: id } =
       await EmployeeMaster.findByOrFail("Id", userid);
 
@@ -251,14 +251,13 @@ export default class Helper {
       .select("FirstName", "LastName")
       .where("Id", Id)
       .where("Is_Delete", 0);
-
+    
     if (query.length > 0) {
       return query[0].FirstName;
     }
     else{
       return 0;
     }
-
   }
 
   public static async getName(tablename: any, getcol: any, wherecol: any, id: any) {
@@ -394,6 +393,23 @@ export default class Helper {
     return { hours, minutes, seconds };
   };
 
+  public static ActivityMasterInsert(date,orgid,uid,activityBy,appModule,actionperformed,module){
+
+    let InsertActivityHistoryMaster = Database
+    .table("ActivityHistoryMaster")
+    .insert({
+      LastModifiedDate: date,
+      LastModifiedById: uid,
+      module: module,
+      ActionPerformed:actionperformed,
+      OrganizationId:orgid,
+      activityBy: activityBy,
+      adminid: uid,
+      appmodule:appModule,
+    });
+  return InsertActivityHistoryMaster
+   }
+
   public static async getOvertimeForRegularization(timein, timeout, id) {
     var name: string = " ";
     var selectShiftMasterData: any = await Database.from("ShiftMaster")
@@ -431,4 +447,25 @@ export default class Helper {
     }
     return name;
   }
+
+  public static async getShiftIdByEmpID(empid) {
+    let shift;
+    let getshiftid = await Database.from("ShiftMaster")
+      .select("Id")
+      .where(
+        "id",
+        Database.rawQuery(
+          `(SELECT Shift FROM EmployeeMaster where id=${empid})`
+        )
+      );
+
+    if (getshiftid.length > 0) {
+      shift= getshiftid[0].Id;
+      console.log(getshiftid);
+    }else{
+      return shift
+    }
+  }
 }
+
+
