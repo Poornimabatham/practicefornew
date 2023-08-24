@@ -24,6 +24,7 @@ export default class Helper {
   }
 
   public static async getTimeZone(orgid: any) {
+    let TimeZone = "Asia/kolkata";
     const query1 = await Database.query()
       .from("ZoneMaster")
       .select("name")
@@ -36,7 +37,7 @@ export default class Helper {
     if (query1.length > 0) {
       return query1[0].name;
     } else {
-      return 0;
+      return TimeZone;
     }
   }
 
@@ -54,11 +55,16 @@ export default class Helper {
   }
 
   public static async getempnameById(empid: number) {
-    const query2 = await Database.query()
+    let FirstName = "";
+    const query2: any = await Database.query()
       .from("EmployeeMaster")
       .select("FirstName")
       .where("Id", empid);
-    return query2[0].FirstName;
+    if (query2 > 0) {
+      return query2[0].FirstName;
+    } else {
+      return FirstName;
+    }
   }
 
   public static generateToken(secretKey: string, data: any = {}) {
@@ -247,27 +253,34 @@ export default class Helper {
       .select("FirstName", "LastName")
       .where("Id", Id)
       .where("Is_Delete", 0);
-    
+
     if (query.length > 0) {
       return query[0].FirstName;
-    }
-    else{
+    } else {
       return 0;
     }
   }
 
-  public static async getName(tablename: any, getcol: any, wherecol: any, id: any) {
+  public static async getName(
+    tablename: any,
+    getcol: any,
+    wherecol: any,
+    id: any
+  ) {
     let name: string = "";
-    const query = await Database.query().from(tablename).select(getcol).where(wherecol, id);
+    const query = await Database.query()
+      .from(tablename)
+      .select(getcol)
+      .where(wherecol, id);
     const count = query.length;
     if (count > 0) {
       query.forEach((row) => {
         name = row[getcol];
-      })
-      }
+      });
+    }
     return name;
   }
-  
+
   public static async getShiftType(shiftId) {
     const defaultshifttype = 0;
     const allDataOfShiftMaster: any = await ShiftMaster.find(shiftId);
@@ -371,40 +384,53 @@ export default class Helper {
   }
 
   public static calculateOvertime = (startTime, endTime) => {
-
-    const [startHours, startMinutes, startSeconds] = startTime.split(':').map(Number);
-    const [endHours, endMinutes, endSeconds] = endTime.split(':').map(Number);
-    const totalStartSeconds = startHours * 3600 + startMinutes * 60 + startSeconds;
+    const [startHours, startMinutes, startSeconds] = startTime
+      .split(":")
+      .map(Number);
+    const [endHours, endMinutes, endSeconds] = endTime.split(":").map(Number);
+    const totalStartSeconds =
+      startHours * 3600 + startMinutes * 60 + startSeconds;
     const totalEndSeconds = endHours * 3600 + endMinutes * 60 + endSeconds;
     let timeDiffInSeconds = totalEndSeconds - totalStartSeconds;
 
-    // if (timeDiffInSeconds < 0) { 
+    // if (timeDiffInSeconds < 0) {
     //   timeDiffInSeconds += 24 * 3600; // Assuming time is within 24 hours range
     // }
-    const hours = Math.floor(Math.abs(timeDiffInSeconds) / 3600) * (timeDiffInSeconds < 0 ? 1 : 1);
+    const hours =
+      Math.floor(Math.abs(timeDiffInSeconds) / 3600) *
+      (timeDiffInSeconds < 0 ? 1 : 1);
     const remainingSeconds = Math.abs(timeDiffInSeconds) % 3600;
-    const minutes = Math.floor(remainingSeconds / 60) * (timeDiffInSeconds < 0 ? 1 : 1);
-    const seconds = Math.floor(remainingSeconds % 60) * (timeDiffInSeconds < 0 ? 1 : 1);
+    const minutes =
+      Math.floor(remainingSeconds / 60) * (timeDiffInSeconds < 0 ? 1 : 1);
+    const seconds =
+      Math.floor(remainingSeconds % 60) * (timeDiffInSeconds < 0 ? 1 : 1);
 
     return { hours, minutes, seconds };
   };
 
-  public static ActivityMasterInsert(date,orgid,uid,activityBy,appModule,actionperformed,module){
-
-    let InsertActivityHistoryMaster = Database
-    .table("ActivityHistoryMaster")
-    .insert({
+  public static ActivityMasterInsert(
+    date,
+    orgid,
+    uid,
+    activityBy,
+    appModule,
+    actionperformed,
+    module
+  ) {
+    let InsertActivityHistoryMaster = Database.table(
+      "ActivityHistoryMaster"
+    ).insert({
       LastModifiedDate: date,
       LastModifiedById: uid,
       module: module,
-      ActionPerformed:actionperformed,
-      OrganizationId:orgid,
+      ActionPerformed: actionperformed,
+      OrganizationId: orgid,
       activityBy: activityBy,
       adminid: uid,
-      appmodule:appModule,
+      appmodule: appModule,
     });
-  return InsertActivityHistoryMaster
-   }
+    return InsertActivityHistoryMaster;
+  }
 
   public static async getOvertimeForRegularization(timein, timeout, id) {
     var name: string = " ";
@@ -456,12 +482,55 @@ export default class Helper {
       );
 
     if (getshiftid.length > 0) {
-      shift= getshiftid[0].Id;
+      shift = getshiftid[0].Id;
       console.log(getshiftid);
-    }else{
-      return shift
+    } else {
+      return shift;
+    }
+  }
+
+  public static async myUrlEncode(country_code) {
+    const entities = [
+      "%20",
+      "%2B",
+      "%24",
+      "%2C",
+      "%2F",
+      "%3F",
+      "%25",
+      "%23",
+      "%5B",
+      "%5D",
+    ];
+    const replacements = [
+      "+",
+      "!",
+      "*",
+      "'",
+      "(",
+      ")",
+      ";",
+      ":",
+      "@",
+      "&",
+      "=",
+      "$",
+      ",",
+      "/",
+      "?",
+      "%",
+      "#",
+      "[",
+      "]",
+    ];
+
+    let encodedString = encodeURIComponent(country_code);
+    for (let i = 0; i < entities.length; i++) {
+      const entity = entities[i];
+      const replacement = replacements[i];
+      encodedString = encodedString.split(entity).join(replacement);
+
+      return encodedString;
     }
   }
 }
-
-

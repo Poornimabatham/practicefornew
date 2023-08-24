@@ -47,6 +47,7 @@ require("../app/Routes/MyAddonUserInfoRoute");
 require("../app/Routes/StoreRatingRoute");
 require("../app/Routes/GetLastTimeOutRoute");
 require("../app/Routes/changePasswordOTPRoute");
+require("../app/Routes/SelectCountryCodeRoute");
 // Route.get('/', async () => {
 //     return "Working fine!"
 // })
