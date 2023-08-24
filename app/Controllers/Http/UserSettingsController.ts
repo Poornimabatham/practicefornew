@@ -4,7 +4,7 @@ import UserSettingValidator from 'App/Validators/UserSettingValidator';
 import UsersettingValidator from 'App/Validators/UserSettingValidator';
 
 
-export default class UsersettingsController {
+export default class UserSettingsController {
   public async UpdatePass({ request, response }: HttpContextContract) {
     await request.validate(UsersettingValidator.usersetting)
     const changepassword = await UserSettingService.changepassword(request.all())
