@@ -606,6 +606,28 @@ var Helper = /** @class */ (function () {
             });
         });
     };
+    Helper.getShiftIdByEmpID = function (empid) {
+        return __awaiter(this, void 0, void 0, function () {
+            var shift, getshiftid;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, Database_1["default"].from("ShiftMaster")
+                            .select("Id")
+                            .where("id", Database_1["default"].rawQuery("(SELECT Shift FROM EmployeeMaster where id=" + empid + ")"))];
+                    case 1:
+                        getshiftid = _a.sent();
+                        if (getshiftid.length > 0) {
+                            shift = getshiftid[0].Id;
+                            console.log(getshiftid);
+                        }
+                        else {
+                            return [2 /*return*/, shift];
+                        }
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
     Helper.calculateOvertime = function (startTime, endTime) {
         var _a = startTime
             .split(":")
