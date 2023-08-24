@@ -1720,11 +1720,11 @@ export default class DailyAttendanceService {
 
               console.log("result->");
               console.log(result);
-              console.log(result[0].TotalLoggedHours);
+              console.log(result.TotalLoggedHours);
 
               if (result.length > 0) {
-                totalLoggedHours = result[0].TotalLoggedHours;
-                calculatedOvertime = result[0].overtime;
+                totalLoggedHours = result.TotalLoggedHours;
+                calculatedOvertime = result.overtime;
               }
 
               const updateLoggedHour = Database.from("AttendanceMaster")
