@@ -1,6 +1,8 @@
 import Database from "@ioc:Adonis/Lucid/Database";
 import helper from "../Helper/Helper";
-import * as moment from "moment-timezone";
+// import * as moment from "moment-timezone";
+import moment from "moment-timezone";
+import EmployeeMaster from "App/Models/EmployeeMaster";
 export default class ShiftsService {
   constructor() {}
 
@@ -283,46 +285,62 @@ export default class ShiftsService {
     }
   }
 
-  // assignShift
-  static async assignShift(data) {
-    const Orgid = data.Orgid;
-    const shiftid = data.shiftid;
-    // const shiftname = data.shiftname;
-    const empid = data.empid;
-    // const empname = data.empname;
-    // const adminid = data.adminid;
-    // const adminname = data.adminname;
-    const result= {};
-    const row: any = await Database.query()
-      .from("EmployeeMaster")
-      .where("Id", empid)
-      .andWhere("OrganizationId", Orgid)
-      .update("Shift", shiftid);
-    const count = row;
-    console.log(count > 0);
-    if (count > 0) {
+  //deleteInActivateShift
+  static async deleteInActivateShift(data) {
+    const orgid = data.orgId;
+    const Id = data.id;
+    // const empId = data.empId;
+    const result = {};
+    // let ShiftName :any = await helper.getShiftName(Id, orgid);
+    // console.log(ShiftName);
+    const getshiftdata: any = await Database.from("ShiftMaster")
+      .select("*")
+      .where("OrganizationId", orgid)
+      .andWhere("Id", Id)
+      .andWhere("archive", "1")
+      .delete();
+    if (getshiftdata > 0) {
       result["status"] = "true";
     } else {
       result["status"] = "false";
     }
     return result;
   }
+  ///////////// assignShift //////////
+  public static async assignShift(get) {
+    var updateShiftset = await EmployeeMaster.query()
+      .where("Id", get.empid)
+      .andWhere("OrganizationId", get.Orgid)
+      .update("Shift", get.shiftid);
 
-  //deleteInActivateShift
-  static async deleteInActivateShift(data) { 
-    const orgid = data.orgId;
-    const Id = data.id;
-    // const empId = data.empId;
-    const result= {};
-    // let ShiftName :any = await helper.getShiftName(Id, orgid);
-    // console.log(ShiftName);
-    const getshiftdata:any = await Database.from('ShiftMaster').select('*').where('OrganizationId', orgid).andWhere('Id', Id).andWhere('archive', '1').delete();   
-    if (getshiftdata > 0) {
-      result["status"] = "true";
-    } else { 
-      result["status"] ='false';
+    if (updateShiftset.length > 0) {
+      const zone = await helper.getTimeZone(get.Orgid);
+      const timezone = zone;
+      const date = moment().tz(timezone).toDate();
+
+      const orgid = get.Orgid;
+      const uid = get.adminid;
+      const module = "Attendance app";
+      const activityBy = 1;
+      const appModule = "Update Successfully";
+      const actionperformed = `<b>${get.shiftname}</b>. shift has been assigned to <b>${get.empname}</b> by <b>${get.adminname}</b> from <b>${module}</b>`;
+
+      var getresult = await helper.ActivityMasterInsert(
+        date,
+        orgid,
+        uid,
+        activityBy,
+        appModule,
+        actionperformed,
+        module
+      );
+      if (getresult) {
+        return "Successfully Inserted in ActivityMasterInsert";
+      } else {
+        return "Error inserting ActivityMasterInsert";
+      }
+    } else {
+      return "Error inserting ActivityMasterInsert";
     }
-    return result;
-    
   }
 }
