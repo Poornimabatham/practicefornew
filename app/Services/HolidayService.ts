@@ -128,7 +128,7 @@ var InsertHolidays = await Database
     const module = 'Attendance app';
     const activityBy = 1
     const appModule = 'Holiday';
-    const actionperformed = `${get.Name} holiday has been created by ${EmpName} from Attendance App`;
+    const actionperformed = `<b>${get.Name}</b>holiday has been created by<b>${EmpName}</b>from Attendance App`;
       
     await Database.insertQuery()
       .table('ActivityHistoryMaster')

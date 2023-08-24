@@ -2,7 +2,7 @@ import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import DepartmentValidator from "App/Validators/DepartmentValidator";
 import DepartmentService from "App/Services/DepartmentService";
 export default class DepartmentsController {
-  private data = []
+  private data = [];
   public async getdepartment({ request, response }: HttpContextContract) {
     const requestValidate = await request.validate(
       DepartmentValidator.getDepartment
@@ -37,16 +37,14 @@ export default class DepartmentsController {
     return response.json(service);
   }
 
-  public async assignDesignation({ request, response }: HttpContextContract) {
+  public async assignDepartment({ request, response }: HttpContextContract) {
     const getvalidData = await request.validate(
       DepartmentValidator.assignDepartment
     );
 
     this.data["Orgid"] = getvalidData.Orgid ? getvalidData.Orgid : 0;
     this.data["deptid"] = getvalidData.deptid ? getvalidData.deptid : 0;
-    this.data["deptname"] = getvalidData.deptname
-      ? getvalidData.deptname
-      : 0;
+    this.data["deptname"] = getvalidData.deptname ? getvalidData.deptname : 0;
     this.data["empid"] = getvalidData.empid ? getvalidData.empid : " ";
     this.data["adminid"] = getvalidData.adminid ? getvalidData.adminid : 0;
     this.data["empname"] = getvalidData.empname ? getvalidData.empname : 0;
