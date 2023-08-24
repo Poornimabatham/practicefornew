@@ -8,10 +8,12 @@ export default class changePasswordOTPService {
         var email = data.email;
         var phone = data.phone;
         var result: [] = [];
-
+       
+        
         if (phone != undefined) {
+          
             var phoneEncode = await Helper.encode5t(phone);
-            var selectphoneQuery = await Database.from('Usermaster').select('*').where('username_mobile', phoneEncode)
+            var selectphoneQuery = await Database.from('UserMaster').select('*').where('username_mobile', phoneEncode)
 
             if (selectphoneQuery.length > 0) {
                 result['status'] = '4';
