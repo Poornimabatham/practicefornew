@@ -1078,18 +1078,11 @@ export default class DailyAttendanceService {
             }
 
             try {
+              console.log("AttendanceMasterId=> "+AttendanceMasterId)
               let areaId = GeofenceInAreaId;
               let areaIdOut = GeofenceOutAreaId;
               if (AttendanceMasterId == 0) {
-                // if(($GeofenceIn=="Outside Geofence" && $GeofenceOut!="Outside Geofence") || ($GeofenceIn=="Outside Geofence" && $GeofenceOut=="Outside Geofence") || ($GeofenceIn!="Outside Geofence" && $GeofenceOut=="Outside Geofence"))
-                // {
-                //     if($geofencePerm==9|| $geofencePerm==13||$geofencePerm==11|| $geofencePerm==15)
-                //     {
-                //         $pageName="Outside Geofence";//to navigate notification Do not change it.
-                //         $NotificationId= sendManualPushNotification("('$orgTopic' in topics) && ('admin' in topics)","Outside Geofence", "$name has punched Attendance outside Geofence", "$UserId","$OrganizationId","$pageName");
-                //         $query=$this->db->query("UPDATE NotificationsList SET PageName = 'Outsidegeofance' WHERE Id = '$NotificationId' ");
-                //     }
-                // }
+              
                 let Zone_id = 0;
                 const InsertAttendanceTimeiN = await Database.table(
                   "AttendanceMaster",
@@ -1422,7 +1415,10 @@ export default class DailyAttendanceService {
                   .where("A.Id", AttendanceMasterId)
                   .first(); // Use 'first()' to get the first row of the result
 
+                console.log("result data");
                 console.log(result);
+                console.log(getOvertTime[0]);
+                console.log("result data");
 
                 if (getOvertTime > 0) {
                   totalLoggedHours = getOvertTime.TotalLoggedHours;
