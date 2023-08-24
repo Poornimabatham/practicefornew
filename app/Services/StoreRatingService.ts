@@ -1,7 +1,5 @@
 import Database from "@ioc:Adonis/Lucid/Database";
-import Helper from "App/Helper/Helper";
 import moment from "moment";
-import { DateTime } from "luxon";
 export default class StoreRatingService {
   public static async StoreRatings(data) {
     var Empid = data.empid;
@@ -9,11 +7,7 @@ export default class StoreRatingService {
     var Remark = data.remark;
     var Rating = data.rating;
     var res1;
-    // var zone = await Helper.getEmpTimeZone(Empid, organizationId);
-    // return zone
-    // const currentDateTimeIn = DateTime.local().setZone(zone);
-
-    // const date = currentDateTimeIn.toFormat("YYYY-MM-DD");
+   
     const date = moment().format('YYYY-MM-DD');
 
     const modifiedDate = moment().format("YYYY-MM-DD HH:mm:ss");
