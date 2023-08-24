@@ -41,7 +41,7 @@ import "../app/Routes/getInfoRoute"
 import Redis from '@ioc:Adonis/Addons/Redis'
 import "../app/Routes/getEmpdataDepartmentWiseNewRoute"
 import "../app/Routes/getCDateAttnDeptWiseRoutes"
-
+import "../app/Routes/UsershiftplannerRoute"
 // Route.get('/', async () => {
 //     return "Working fine!"
 // })

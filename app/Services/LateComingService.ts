@@ -1,56 +1,50 @@
 import Database from "@ioc:Adonis/Lucid/Database";
 import Helper from "App/Helper/Helper";
-const { DateTime } = require("luxon");
+import moment from "moment";
 
 export default class LateComingService {
   public static async getLateComing(data) {
     var Begin = (data.Currentpage - 1) * data.Perpage;
+    // var Date2 = data.Date;
 
-    let limit: any = {};
-    if (data.Csv == undefined) {
-      limit = `${Begin}`;
-    } else {
-      limit;
-    }
+    var month1 = new Date(data.Date);
+    var Date2 = moment(month1).format("yyyy-MM-DD");
 
-    var lateComersList = Database.from("AttendanceMaster as A")
-      .innerJoin("EmployeeMaster as E", "E.Id", "A.EmployeeId")
-      .innerJoin("ShiftMaster as S", "S.Id", "A.ShiftId")
+    const lateComersList = await Database.from("AttendanceMaster as A")
       .select(
+        Database.raw(
+          "SUBSTRING_INDEX(A.EntryImage, '.com/', -1) as EntryImage"
+        ),
         "E.FirstName",
         "E.LastName",
-        "A.TimeIn as atimein",
-        "A.ShiftId",
-        "A.EmployeeId",
-        "A.AttendanceDate",
+        "A.TimeIn as atimein","A.AttendanceDate",
         Database.raw(
-          `(SELECT TIMEDIFF(A.TimeIn, CASE WHEN S.TimeInGrace != '00:00:00' THEN S.TimeInGrace ELSE S.TimeIn END)) as latehours`
+          "TIMEDIFF(A.TimeIn,CASE WHEN(S.TimeInGrace!='00:00:00') THEN S.TimeInGrace ELSE S.TimeIn END) as Earlyby"
         ),
-        Database.raw(`A.TimeIn > (CASE WHEN S.TimeInGrace != '00:00:00' THEN S.TimeInGrace ELSE S.TimeIn END)
-    AND TIMEDIFF(A.TimeIn, CASE WHEN S.TimeInGrace != '00:00:00' THEN S.TimeInGrace ELSE S.TimeIn END) > '00:00:59' as l`),
-        Database.raw("SUBSTRING_INDEX(EntryImage, '.com/', -1) AS EntryImage")
+        "A.ShiftId"
       )
+      .from("AttendanceMaster as A")
+      .innerJoin("EmployeeMaster as E", "E.Id", "A.EmployeeId")
+      .innerJoin("ShiftMaster as S", "S.Id", "A.ShiftId")
+      .whereNotNull("A.TimeIn")
       .where("A.OrganizationId", data.Orgid)
+      .whereRaw(
+        "A.TimeIn > (CASE WHEN(S.TimeInGrace!='00:00:00') THEN S.TimeInGrace ELSE S.TimeIn END)"
+      )
+      .whereRaw(
+        "TIMEDIFF(A.TimeIn,CASE WHEN(S.TimeInGrace!='00:00:00') THEN S.TimeInGrace ELSE S.TimeIn END) > '00:00:59'"
+      )
+      .where("A.AttendanceDate", Date2)
+      .where("E.Is_Delete", 0)
       .whereNotIn("A.AttendanceStatus", [2, 3, 5])
       .whereNot("S.shifttype", 3)
-      .orderBy("E.FirstName", "asc")
-      .limit(limit);
+      .orderBy("E.FirstName", "asc");
 
-    const zone = await Helper.getTimeZone(data.Orgid);
-
-    if (data.Date == undefined) {
-      const currentDateTimeIn = DateTime.local().setZone(zone);
-
-      var Date2 = currentDateTimeIn.toFormat("yyyy-MM-dd");
-      lateComersList = lateComersList.where("A.AttendanceDate", Date2);
-    }
-
-    var adminStatus = await Helper.getAdminStatus(data.Empid);
+    var adminstatus = await Helper.getAdminStatus(data.Empid);
     var condition;
-    if (adminStatus == 2) {
-      const deptId = data.Empid;
-      condition = `A.Dept_id = ${deptId}`;
-      lateComersList = lateComersList.where("A.Dept_id", condition);
+    if (adminstatus == 0) {
+      const dptid = data.Empid;
+      condition = `AND A.Dept_id = ${dptid}`;
     }
 
     const response: any[] = [];
@@ -59,14 +53,18 @@ export default class LateComingService {
 
     Output.forEach((element) => {
       const data2: any = {};
-      data2["lateBy"] = element.latehours;
+
+      data2["lateBy"] =element.Earlyby.substr(0, 5)
 
       data2["timein"] = element.atimein ? element.atimein.substr(0, 5) : null;
 
       data2["fullname"] = `${element.FirstName} ${element.LastName}`;
       data2["EntryImage"] = element.EntryImage;
       data2["ShiftId"] = element.ShiftId;
-      data2["AttendanceDate"] = element.AttendanceDate;
+      let date = new Date(element.AttendanceDate);
+      data2["AttendanceDate"] = moment(date).format(
+        "YYYY/MM/DD"
+      );
       data2["A.EmployeeId"] = element.EmployeeId;
       response.push(data2);
     });
