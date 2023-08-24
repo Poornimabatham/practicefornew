@@ -8,6 +8,11 @@ export default class AttendancesController {
        
         let allDataOfTimeInOut= await request.all();
         const serviceResult = await DailyAttendanceService.saveTimeInOut(allDataOfTimeInOut);
-        return response.json(serviceResult);
+        console.log(serviceResult)
+        let jsonData = JSON.stringify(serviceResult);
+        console.log(jsonData);
+        console.log(response.json(jsonData))
+        console.log("controller")
+        return response.json(jsonData);
     }
 }
