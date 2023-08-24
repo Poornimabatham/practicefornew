@@ -46,7 +46,7 @@ import "../app/Routes/UserSettingRoute"
 import "../app/Routes/getDataToApplyRegRoute"
 import "../app/Routes/MyAddonUserInfoRoute"
 import "../app/Routes/StoreRatingRoute"
-import "../app/Routes/getLastTimeOutRoute"
+import "../app/Routes/GetLastTimeOutRoute"
 
 import "../app/Routes/changePasswordOTPRoute"
 

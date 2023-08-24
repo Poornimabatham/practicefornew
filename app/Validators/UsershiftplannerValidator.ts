@@ -13,4 +13,12 @@ export default class UsershiftplannerValidator extends BaseValidator {
       orgid: schema.number(),
     }),
   };
+
+  static InsertdeviceInfochema = {
+    schema: schema.create({
+      empid: schema.number(),
+      devicename: schema.string([rules.alphaNum()]),
+      deviceid: schema.string([rules.alphaNum()]),
+    }),
+  };
 }

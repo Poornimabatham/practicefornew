@@ -70,7 +70,7 @@ var LateComingService = /** @class */ (function () {
                         return [4 /*yield*/, Helper_1["default"].getAdminStatus(data.Empid)];
                     case 2:
                         adminstatus = _a.sent();
-                        if (adminstatus == 0) {
+                        if (adminstatus == 2) {
                             dptid = data.Empid;
                             condition = "AND A.Dept_id = " + dptid;
                         }

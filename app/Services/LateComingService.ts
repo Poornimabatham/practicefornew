@@ -5,7 +5,7 @@ import moment from "moment";
 export default class LateComingService {
   public static async getLateComing(data) {
     var Begin = (data.Currentpage - 1) * data.Perpage;
-    // var Date2 = data.Date;
+   
 
     var month1 = new Date(data.Date);
     var Date2 = moment(month1).format("yyyy-MM-DD");
@@ -17,7 +17,8 @@ export default class LateComingService {
         ),
         "E.FirstName",
         "E.LastName",
-        "A.TimeIn as atimein","A.AttendanceDate",
+        "A.TimeIn as atimein",
+        "A.AttendanceDate",
         Database.raw(
           "TIMEDIFF(A.TimeIn,CASE WHEN(S.TimeInGrace!='00:00:00') THEN S.TimeInGrace ELSE S.TimeIn END) as Earlyby"
         ),
@@ -42,7 +43,7 @@ export default class LateComingService {
 
     var adminstatus = await Helper.getAdminStatus(data.Empid);
     var condition;
-    if (adminstatus == 0) {
+    if (adminstatus == 2) {
       const dptid = data.Empid;
       condition = `AND A.Dept_id = ${dptid}`;
     }
@@ -54,7 +55,7 @@ export default class LateComingService {
     Output.forEach((element) => {
       const data2: any = {};
 
-      data2["lateBy"] =element.Earlyby.substr(0, 5)
+      data2["lateBy"] = element.Earlyby.substr(0, 5);
 
       data2["timein"] = element.atimein ? element.atimein.substr(0, 5) : null;
 
@@ -62,9 +63,7 @@ export default class LateComingService {
       data2["EntryImage"] = element.EntryImage;
       data2["ShiftId"] = element.ShiftId;
       let date = new Date(element.AttendanceDate);
-      data2["AttendanceDate"] = moment(date).format(
-        "YYYY/MM/DD"
-      );
+      data2["AttendanceDate"] = moment(date).format("YYYY/MM/DD");
       data2["A.EmployeeId"] = element.EmployeeId;
       response.push(data2);
     });

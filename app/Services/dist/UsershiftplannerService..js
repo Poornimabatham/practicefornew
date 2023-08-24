@@ -37,6 +37,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 exports.__esModule = true;
 var Database_1 = require("@ioc:Adonis/Lucid/Database");
+var moment_1 = require("moment");
 var UsershiftplannerService = /** @class */ (function () {
     function UsershiftplannerService() {
     }
@@ -50,22 +51,24 @@ var UsershiftplannerService = /** @class */ (function () {
                         organizationId = getvalue.orgid;
                         return [4 /*yield*/, Database_1["default"].from("AttendanceMaster as A")
                                 .innerJoin("ShiftMaster AS S", "A.ShiftId", "S.Id")
-                                .select("A.AttendanceDate", "A.TimeIn as PunchTimeIn", "A.TimeOut as PunchTimeOut", "A.AttendanceStatus", "A.ShiftId", "S.shifttype", "S.HoursPerDay", "S.TimeIn", "S.TimeOut", "A.disapprove_sts ").where("S.OrganizationId", organizationId).where("A.EmployeeId", userid)];
+                                .select("A.AttendanceDate", "A.TimeIn as PunchTimeIn", "A.TimeOut as PunchTimeOut", "A.AttendanceStatus", "A.ShiftId", "S.shifttype", "S.HoursPerDay", "S.TimeIn", "S.TimeOut", "A.disapprove_sts ")
+                                .where("S.OrganizationId", organizationId)
+                                .where("A.EmployeeId", userid)];
                     case 1:
                         selectAttendanceMasterList = _a.sent();
                         response = [];
                         selectAttendanceMasterList.forEach(function (element) {
                             var data = {};
-                            // data['AttendanceDate'] = moment(element.AttendanceDate).format('YYYY-MM-DD');
-                            data['AttendanceDate'] = element.AttendanceDate;
-                            data['AttendanceStatus'] = element.AttendanceStatus;
-                            data['ShiftType'] = element.shifttype;
-                            data['STimeIn'] = element.TimeIn;
-                            data['STimeOut'] = element.TimeOut;
-                            data['PunchTimeIn'] = element.PunchTimeIn;
-                            data['PunchTimeOut'] = element.PunchTimeOut;
-                            data['disapprove'] = element.disapprove_sts;
-                            data['Logged'] = element.HoursPerDay;
+                            var date = new Date(element.AttendanceDate);
+                            data["AttendanceDate"] = moment_1["default"](date).format("YYYY-MM-DD");
+                            data["AttendanceStatus"] = element.AttendanceStatus;
+                            data["ShiftType"] = element.shifttype;
+                            data["STimeIn"] = element.TimeIn.substr(0, 5);
+                            data["STimeOut"] = element.TimeOut.substr(0, 5);
+                            data["PunchTimeIn"] = element.PunchTimeIn.substr(0, 5);
+                            data["PunchTimeOut"] = element.PunchTimeOut.substr(0, 5);
+                            data["disapprove"] = element.disapprove_sts;
+                            data["Logged"] = element.HoursPerDay.substr(0, 5);
                             response.push(data);
                         });
                         return [2 /*return*/, response];
@@ -82,8 +85,8 @@ var UsershiftplannerService = /** @class */ (function () {
                         Empid = inputdata.empid;
                         Deviceid = inputdata.deviceid;
                         Devicename = inputdata.devicename;
-                        return [4 /*yield*/, Database_1["default"].from('EmployeeMaster')
-                                .where('Id', Empid)
+                        return [4 /*yield*/, Database_1["default"].from("EmployeeMaster")
+                                .where("Id", Empid)
                                 .update({
                                 DeviceName: Devicename,
                                 DeviceId: Deviceid
