@@ -1388,12 +1388,9 @@ export default class DailyAttendanceService {
             } catch (error) {}
           } else if (SyncTimeIn != "1" && SyncTimeOut == "1") {
             console.log("case three for sync Attendance Only Time out");
-            let ExitImage = ThumnailTimeOutPictureBase64;
-            let areaIdOut = GeofenceOutAreaId;
 
-            if (TimeOutPictureBase64 == "") {
-              ExitImage = "https://ubitech.ubihrm.com/public/avatars/male.png";
-            }
+            let ExitImage = ThumnailTimeOutPictureBase64=="" ? avtarImg : ThumnailTimeOutPictureBase64;
+            let areaIdOut = GeofenceOutAreaId;
 
             let calculatedOvertime = "00:00:00";
             let totalLoggedHours = "00:00:00";
@@ -1403,6 +1400,8 @@ export default class DailyAttendanceService {
               let timeOutAlreadySyncedId = 0;
               console.log(AttendanceMasterId);
               console.log("attendanceMasterId->timeout");
+            
+            
               if (AttendanceMasterId == 0) {
                 const getAttnadaceRecord = await Database.from(
                   "AttendanceMaster",
@@ -1434,11 +1433,14 @@ export default class DailyAttendanceService {
                 .where("AttendanceMasterId", AttendanceMasterId)
                 .orderBy("Id", "desc")
                 .first();
-              console.log(maxIdOfInterimAttendance);
+
+         
               if (maxIdOfInterimAttendance) {
                 interimAttendanceId = maxIdOfInterimAttendance.Id;
                 console.log("MAx Id Attendance ID:", interimAttendanceId);
               }
+
+      
               if (interimAttendanceId != 0) {
                 const alreadyMarkedTimeOutId = await Database.from(
                   "InterimAttendances",
@@ -1456,9 +1458,7 @@ export default class DailyAttendanceService {
                 console.log(TimeOutDate + " " + TimeOutTime);
 
                 console.log("TimeOutDate+=>1568");
-                const loggedHoursResult = await Database.from(
-                  "InterimAttendances",
-                )
+                const loggedHoursResult = await Database.from("InterimAttendances")
                   .select(
                     Database.raw(
                       `TIMEDIFF(CONCAT(?, ' ', ?), CONCAT(TimeInDate, ' ', TimeIn)) as loggedHours`,
@@ -1471,7 +1471,8 @@ export default class DailyAttendanceService {
                 const loggedHours = loggedHoursResult.loggedHours;
 
                 console.log(loggedHours);
-                console.log("loggedHours");
+                console.log("loggedHours->");
+        
 
                 const updateQuery = await Database.from("InterimAttendances")
                   .where("Id", interimAttendanceId)
@@ -1516,7 +1517,7 @@ export default class DailyAttendanceService {
                 .where("I.AttendanceMasterId", AttendanceMasterId)
                 .groupBy("A.Id", "A.ShiftId");
 
-              if (calculateLoggedHours) {
+              if (calculateLoggedHours.length > 0) {
                 totalLoggedHours = calculateLoggedHours[0].totalLoggedHours;
                 let hoursPerDay = calculateLoggedHours[0].hoursPerDay;
 
@@ -1534,6 +1535,7 @@ export default class DailyAttendanceService {
                 console.log("calculatedOvertime" + calculatedOvertime);
               }
             }
+
 
             // if(($GeofenceOut=="Outside Geofence")){
             //   let attendance_sts=2;//absent
@@ -1574,10 +1576,7 @@ export default class DailyAttendanceService {
                 TotalLoggedHours: totalLoggedHours,
               });
 
-            if (
-              (shiftType == "1" || shiftType == "2") &&
-              MultipletimeStatus != 1
-            ) {
+            if ((shiftType == "1" || shiftType == "2") && MultipletimeStatus != 1 ) {
               calculatedOvertime = "00:00:00";
               totalLoggedHours = "00:00:00";
 
@@ -1598,10 +1597,6 @@ export default class DailyAttendanceService {
                 .where("A.Id", AttendanceMasterId)
                 .first();
 
-              console.log("result->");
-              console.log(result);
-              console.log(result.TotalLoggedHours);
-
               if (result.length > 0) {
                 totalLoggedHours = result.TotalLoggedHours;
                 calculatedOvertime = result.overtime;
@@ -1613,6 +1608,8 @@ export default class DailyAttendanceService {
                   TotalLoggedHours: totalLoggedHours,
                   overtime: calculatedOvertime,
                 });
+
+                console.log('updateLoggedHour '+ updateLoggedHour);
             }
 
             statusArray[k] = {
