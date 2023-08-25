@@ -238,8 +238,6 @@ export default class Helper {
 
   public static async getShiftName(Id: number, orgid: number) {
     let ShiftName: any;
-    console.log(Id);
-    console.log(orgid);
     const getshiftname: any = await Database.from("ShiftMaster")
       .select("Name")
       .where("Id", Id)

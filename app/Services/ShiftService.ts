@@ -2,6 +2,8 @@ import Database from "@ioc:Adonis/Lucid/Database";
 import helper from "../Helper/Helper";
 // import * as moment from "moment-timezone";
 import moment from "moment-timezone";
+import Helper from "../Helper/Helper";
+// import LogicsOnly from "./getAttendances_service";
 import EmployeeMaster from "App/Models/EmployeeMaster";
 export default class ShiftsService {
   constructor() {}
@@ -285,34 +287,13 @@ export default class ShiftsService {
     }
   }
 
-  //deleteInActivateShift
-  static async deleteInActivateShift(data) {
-    const orgid = data.orgId;
-    const Id = data.id;
-    // const empId = data.empId;
-    const result = {};
-    // let ShiftName :any = await helper.getShiftName(Id, orgid);
-    // console.log(ShiftName);
-    const getshiftdata: any = await Database.from("ShiftMaster")
-      .select("*")
-      .where("OrganizationId", orgid)
-      .andWhere("Id", Id)
-      .andWhere("archive", "1")
-      .delete();
-    if (getshiftdata > 0) {
-      result["status"] = "true";
-    } else {
-      result["status"] = "false";
-    }
-    return result;
-  }
   ///////////// assignShift //////////
   public static async assignShift(get) {
     var updateShiftset = await EmployeeMaster.query()
       .where("Id", get.empid)
       .andWhere("OrganizationId", get.Orgid)
       .update("Shift", get.shiftid);
-
+    
     if (updateShiftset.length > 0) {
       const zone = await helper.getTimeZone(get.Orgid);
       const timezone = zone;
@@ -343,4 +324,35 @@ export default class ShiftsService {
       return "Error inserting ActivityMasterInsert";
     }
   }
+
+  static async deleteInActivateShift(data) { 
+    const orgid = data.orgId;
+    const Id = data.id;
+    const empId = data.empId;
+    const result= {};
+    let ShiftName :any = await Helper.getShiftName(Id,orgid);
+    
+    const Deleteshiftdata:any= await Database.from('ShiftMaster').select('*').where('OrganizationId', orgid).andWhere('Id', Id).andWhere('archive', '0').delete(); 
+      
+    if(Deleteshiftdata == 1)
+    {
+        const query = await Database.from('ShiftMasterChild').where('OrganizationId',orgid).andWhere('ShiftId',Id).delete();
+        if(query){ 
+          let date = moment().format("YY-MM-DD");
+          let appModule = "Delete Shift";
+          let  module = "Attendance App";
+          let activityBy = 1;
+          let actionperformed = `<b> ${ShiftName}</b>.Shift has been deleted successfully`;
+          let res = await Helper.ActivityMasterInsert(date,orgid,empId,activityBy,appModule,actionperformed,module)
+          result['status'] = true;
+        }else{
+          result['status'] = false;
+        }
+
+    }else{
+        result['status'] = false;
+    }
+
+     return result;
+ }
 }

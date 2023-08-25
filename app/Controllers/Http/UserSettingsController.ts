@@ -82,5 +82,12 @@ export default class UserSettingsController {
     return response.json(service);
   }
 
+  public async UpdateQrKioskPageReopen({request , response}:HttpContextContract){
+
+     const validata = await request.validate(UserSettingValidator.UpdateQR);
+     const res      = await UserSettingService.UpdateQrKioskPageReopen(validata);
+     response.json(res);
+  }
+
 
 }
