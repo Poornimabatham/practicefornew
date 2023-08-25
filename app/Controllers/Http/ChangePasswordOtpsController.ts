@@ -12,4 +12,13 @@ export default class ChangePasswordOtpsController {
 
         return response.json(service);
     }
+
+    public async newchangepass({ request, response }: HttpContextContract) {
+
+        const validatedata = await request.validate(ChangePasswordOtpValidator.newchangepass);
+
+        const service = await changePasswordOTPService.newchangepass(validatedata);
+
+         response.json(service);
+    }
 }
