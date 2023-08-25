@@ -1115,11 +1115,14 @@ export default class DailyAttendanceService {
                   });
               } else {
                 let cond;
-
                 if (MultipletimeStatus == 1 || shiftType == "3") {
                   let calculatedOvertime = "00:00:00";
                   let totalLoggedHours = "00:00:00";
                   let hoursPerDay = "0:00:00";
+                  cond = {
+                    overtime: calculatedOvertime,
+                    TotalLoggedHours: totalLoggedHours,
+                  };
                   const query = await Database.from("InterimAttendances")
                     .select("Id")
                     .select(
@@ -1142,10 +1145,7 @@ export default class DailyAttendanceService {
                     let calculatedOvertime = hours + ":" + minutes + ":" + seconds;
                     console.log("calculatedOvertime Case Three" + calculatedOvertime);
                   }
-                  cond = {
-                    overtime: calculatedOvertime,
-                    TotalLoggedHours: totalLoggedHours,
-                  };
+                  
                 }
 
                 let disattreason = 0;
@@ -1180,6 +1180,7 @@ export default class DailyAttendanceService {
                 const affectedRows = await Database.from("AttendanceMaster")
                   .where("id", AttendanceMasterId)
                   .update(updateFields);
+
               }
 
               if (MultipletimeStatus == 1 || shiftType == "3") {
@@ -1187,15 +1188,15 @@ export default class DailyAttendanceService {
                   const haveInterimId = await Database.from("InterimAttendances") 
                     .where("AttendanceMasterId", AttendanceMasterId)
                     .where("TimeIn", TimeInTime)
-                    .select("Id");
+                    .select("id");
 
                   if (haveInterimId.length > 0) {
-                    interimAttendanceId = haveInterimId[0].Id;
+                    interimAttendanceId = haveInterimId[0].id;
                   }
                 }
 
                 if (interimAttendanceId == 0) {
-                  const InsertAttendanceTimeInOut = await Database.table(
+                  const InsertAttendanceTimeInOut = Database.table(
                     "InterimAttendances",
                   )
                     .returning("id")
@@ -1240,17 +1241,21 @@ export default class DailyAttendanceService {
                       EmployeeId: UserId,
                       OrganizationId: OrganizationId,
                     });
-
-                  interimAttendanceId = InsertAttendanceTimeInOut[0];
+                    
+                    await InsertAttendanceTimeInOut;
+                    interimAttendanceId = InsertAttendanceTimeInOut[0];
                 }
               }
 
+
+            //update totalloggedhours and overtime in shifttype 3 AND MultipletimeStatus 1//
+                       
               if (MultipletimeStatus == 1 || shiftType == "3") {
                 let calculatedOvertime = "00:00:00";
                 let totalLoggedHours = "00:00:00";
                 let hoursPerDay = "00:00:00";
 
-                const query = await Database.from("InterimAttendances")
+                const query =  await Database.from("InterimAttendances")
                   .select("Id")
                   .select(
                     Database.raw(
@@ -1264,23 +1269,29 @@ export default class DailyAttendanceService {
                   )
                   .where("AttendanceMasterId", AttendanceMasterId);
 
-                const { hours, minutes, seconds } = Helper.calculateOvertime(
-                  hoursPerDay,
-                  totalLoggedHours,
-                );
+                  
+
+                  if(query.length > 0){
+                    hoursPerDay= query[0].hoursPerDay;
+                    totalLoggedHours= query[0].totalLoggedHours
+                  }
+
+                const { hours, minutes, seconds } = Helper.calculateOvertime(hoursPerDay,totalLoggedHours);
                 console.log(hours + ":" + minutes + ":" + seconds);
                 calculatedOvertime = hours + ":" + minutes + ":" + seconds;
-                console.log(
-                  "calculatedOvertime Case Three" + calculatedOvertime,
-                );
+                console.log("calculatedOvertime Case Three" + calculatedOvertime,);
 
-                const updateLoggedHours = await Database.from("AttendanceMaster")
+                const updateLoggedHours = Database.from("AttendanceMaster")
                   .where("id", AttendanceMasterId)
                   .update({
                     overtime: calculatedOvertime,
                     TotalLoggedHours: totalLoggedHours,
                   });
+
+                  await updateLoggedHours;
               }
+
+              // update totalloggedhours and overtime in shifttype 1 & 2 AND MultipletimeStatus 0 //
               if ((shiftType == "1" || shiftType == "2") && MultipletimeStatus != 1) {
                 let calculatedOvertime = "00:00:00";
                 let totalLoggedHours = "00:00:00";
@@ -1315,11 +1326,12 @@ export default class DailyAttendanceService {
                   TotalLoggedHours: totalLoggedHours,
                 });
           
-              const updateLoggedHours = await query;
+              await query;
               }
+              // update totalloggedhours and overtime in shifttype 1 & 2 AND MultipletimeStatus 0 //
 
              
-
+              ////////////////////////// Half Day Status /////////////////////
               const results = await Database.from("AttendanceMaster as A")
                 .innerJoin("ShiftMaster as S", "A.ShiftId", "S.Id")
                 .select(
