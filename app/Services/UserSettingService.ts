@@ -406,9 +406,8 @@ export default class Usersettingservice{
         let   startdate     = '';
         let   status        = false;
         const zone          = await Helper.getTimeZone(orgid);
-        let   enddate       = moment().tz(zone).format('YYYY-MM-DD');;
-   
-        
+        let   enddate       = moment().tz(zone).format('YYYY-MM-DD');
+      
         const leavestaus    = 'LeaveStatus';
             
         const query = await Database.query().from('Organization').select('CreatedDate').where('Id',orgid);
@@ -423,13 +422,15 @@ export default class Usersettingservice{
         let value    = query2[0].ActualValue;
         
 
-        let sql = Database.query().from('AttendanceMaster').select('*',Database.raw(`(SELECT IF(LastName!='',CONCAT(FirstName,' ',LastName),FirstName) FROM EmployeeMaster WHERE Id=EmployeeId) as Name`)).where(Database.raw(` DATE(AttendanceDate) between "${startdate}" and "${enddate}" `)).orderBy('RegularizeRequestDate','desc')        
+        var sql = Database.query().from('AttendanceMaster').select('*',Database.raw(`(SELECT IF(LastName!='',CONCAT(FirstName,' ',LastName),FirstName) FROM EmployeeMaster WHERE Id=EmployeeId) as Name`)).where(Database.raw(` DATE(AttendanceDate) between "${startdate}" and "${enddate}" `)).orderBy('RegularizeRequestDate','desc')
+             
 
         if(hrsts == 1 || devhrsts == 1){
           sql = sql.where(Database.raw(`OrganizationId=${orgid} and RegularizeSts=${value} and EmployeeId in (select Id from EmployeeMaster where Is_Delete=0 and (DOL='0000-00-00' or DOL>curdate()))`));
+
         }else{
           sql = sql.where(Database.raw(`OrganizationId=${orgid} and RegularizeSts=${value} AND Id IN (SELECT attendanceId FROM RegularizationApproval Where ApproverId=${userid}) and EmployeeId in (select Id from EmployeeMaster where Is_Delete=0 and (DOL='0000-00-00' or DOL>curdate()))`));
-        }
+        }        
 
         const sql11 = await sql;
         const total = sql11.length;
@@ -460,15 +461,14 @@ export default class Usersettingservice{
                res['regApplyDate']     = moment(row.RegularizeRequestDate).format("yyyy-MM-DD");
                
                res['requestedtimeout'] = moment(row.requestedtimeout).format("HH:mm:ss");
-               
-              
-              
+                     
       
                if(regsts == 3)
                {
                   res['regularizeSts'] = 'pending';
                   let pstatus          = 0;
                   let approverid       = row.ApproverId;
+                  
                   
                   if(approverid != 0)
                   {
@@ -478,21 +478,19 @@ export default class Usersettingservice{
                   {
                     pstatus = 0;
                   }
-                
+                  
+                  
                   
                   if(pstatus == 0)
                   {
                      
                      const qur =  await Database.query().from('RegularizationApproval').select('ApproverId').where('attendanceId',attid).andWhere('ApproverSts',regsts).andWhere('approverregularsts',0).orderBy
                      ('Id','asc').limit(1);
-                     
                      pstatus = qur[0].ApproverId;
-                    //  console.log(pstatus);return
                         
                   }
-
+                  
                   const Name = await Helper.getEmpName(pstatus);
-
 
                   if(pstatus != 0)
                   {
@@ -525,7 +523,7 @@ export default class Usersettingservice{
                 
             })
             );
-              return result;                
+            return result;                
         }   
     }
 
@@ -553,10 +551,15 @@ export default class Usersettingservice{
 
       const result = {};
 
+      const query = await Database.query().from('UserMaster').where('EmployeeId',userId).andWhere('OrganizationId',orgId).update({QrKioskPageReopen:status});
+     
+      if(query){
+        result['status'] = 1;
+      }else{
+        result['status'] = 2;
+      }
 
-
-
-
+      return result
 
     }
 
