@@ -42,7 +42,8 @@ export default class getCDateAttnDeptWiseService {
       const getdataforPresentees = Database.query()
         .select([
           Database.raw(
-            `(SELECT CONCAT(FirstName, ' ', LastName) FROM EmployeeMaster WHERE id = 'EmployeeId') AS name`
+            `(SELECT CONCAT(FirstName, ' ', LastName) FROM
+             EmployeeMaster WHERE id = 'EmployeeId') AS name`
           ),
           Database.raw(
             `IF((SELECT COUNT(id) FROM InterimAttendances WHERE AttendanceMasterId = Id) > 0, 'true', 'false') AS getInterimAttAvailableSts`

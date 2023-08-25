@@ -9,10 +9,8 @@ export default class SelectCountryCodeValidator extends BaseValidator {
 
   static fetchCountryCodeschema = {
     schema: schema.create({
-        countrycode:schema.string(),
-        countryname:schema.string(),
+      countrycode: schema.string(),
+      countryname: schema.string(),
     }),
   };
-
-  
 }
