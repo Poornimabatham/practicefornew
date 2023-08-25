@@ -49,6 +49,7 @@ import "../app/Routes/GetLastTimeOutRoute";
 import "../app/Routes/changePasswordOTPRoute";
 import "../app/Routes/SelectCountryCodeRoute"
 import "../app/Routes/ResetPasswordLinkRoute"
+import "../app/Routes/CheckUserEmailRoute"
 // Route.get('/', async () => {
 //     return "Working fine!"
 // })
