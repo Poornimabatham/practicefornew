@@ -12,4 +12,13 @@ export default class checkuseremailController {
 
     return response.json(result);
   }
+
+  public async CheckUserPhone({ request, response }: HttpContextContract) {
+    const inputValidation = await request.validate(
+      CheckUserEmailValidator.CheckUserPhoneSchema
+    );
+    const result = await CheckUserEmailService.CheckUserPhone(inputValidation);
+
+    return response.json(result);
+  }
 }

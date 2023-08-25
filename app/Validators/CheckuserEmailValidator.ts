@@ -12,4 +12,10 @@ export default class CheckUserEmailValidator extends BaseModel {
       email: schema.string(),
     }),
   };
+
+  static  CheckUserPhoneSchema= {
+    schema: schema.create({
+      phone: schema.string(),
+    }),
+  };
 }
