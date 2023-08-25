@@ -234,8 +234,6 @@ export default class Helper {
 
   public static async getShiftName(Id: number, orgid: number) {
     let ShiftName: any;
-    console.log(Id);
-    console.log(orgid);
     const getshiftname: any = await Database.from("ShiftMaster")
       .select("Name")
       .where("Id", Id)
@@ -407,7 +405,7 @@ export default class Helper {
       adminid: uid,
       appmodule:appModule,
     });
-  return InsertActivityHistoryMaster
+       return InsertActivityHistoryMaster
    }
 
   public static async getOvertimeForRegularization(timein, timeout, id) {

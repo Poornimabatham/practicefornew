@@ -544,4 +544,20 @@ export default class Usersettingservice{
       }
     }
 
+    
+    static async UpdateQrKioskPageReopen(data){
+
+      const userId = data.userId;
+      const orgId  = data.orgId;
+      const status = data.status;
+
+      const result = {};
+
+
+
+
+
+
+    }
+
 }
