@@ -705,6 +705,7 @@ export default class DailyAttendanceService {
           console.log(jsonData[i][date[0]].interim[j]);
 
           console.log("all data of");
+
           const zone = await Helper.getEmpTimeZone(UserId, OrganizationId);
           const defaultZone = DateTime.now().setZone(zone);
           let shiftType = await Helper.getShiftType(ShiftId);
@@ -804,6 +805,12 @@ export default class DailyAttendanceService {
             AttendanceDate,
             ShiftId,
           );
+
+          console.log('chakec multipleSts')
+          console.log(MultipletimeStatus)
+          console.log('chakec multipleSts')
+
+         
           
           const attendanceData = await AttendanceMaster.query()
             .where("EmployeeId", UserId)
@@ -817,6 +824,8 @@ export default class DailyAttendanceService {
             attTimeIn = attendanceData.TimeIn;
             attTimeOut = attendanceData.TimeOut;
           }
+          console.log("AttendanceMasterId=> "+AttendanceMasterId)
+        
 
           const EmployeeRecord = await EmployeeMaster.query()
             .where("Id", UserId)
@@ -832,6 +841,7 @@ export default class DailyAttendanceService {
 
           
           if (EmployeeRecord) {
+           
             Dept_id = EmployeeRecord.Department;
             Desg_id = EmployeeRecord.Designation;
             areaId = EmployeeRecord.area_assigned;
@@ -845,11 +855,13 @@ export default class DailyAttendanceService {
             
             try {
               areaId = GeofenceInAreaId;
+
+
               if (AttendanceMasterId == 0) {
                 const InsertAttendanceTimeiN = await Database.table(
                   "AttendanceMaster",
                 )
-                  .returning("id")
+                  .returning("Id")
                   .insert({
                     TimeInApp: TimeInApp,
                     FakeLocationStatusTimeIn: FakeLocationInStatus,
@@ -890,18 +902,29 @@ export default class DailyAttendanceService {
                   });
                
                 AttendanceMasterId = InsertAttendanceTimeiN[0];
+                console.log("case first in attendaceid zero")
+                console.log(AttendanceMasterId)
+                console.log("case first in attendaceid zero")
               }
 
               if (MultipletimeStatus == 1 || shiftType == "3") {
 
                 if (AttendanceMasterId != 0) {
+                  console.log("case first in MultipletimeStatus AttendanceMasterId not equal zero")
+                  console.log(AttendanceMasterId)
+                  console.log("case first in MultipletimeStatus AttendanceMasterId not equal zero")
+
                   const queryResult = await Database.from("InterimAttendances")
                     .select("Id")
                     .where("AttendanceMasterId", AttendanceMasterId)
-                    .andWhere("TimeIn", TimeInTime).first();
+                    .andWhere("TimeIn", TimeInTime);
+
+                  console.log("check if have interimAttendanceId");
+                  console.log(queryResult);
+                  console.log("check if have interimAttendanceId");
 
                   if (queryResult.length > 0) {
-                    interimAttendanceId = queryResult.Id;
+                    interimAttendanceId = queryResult[0].Id;
                     console.log("Interim Attendance ID:", interimAttendanceId);
                   }
                
@@ -934,7 +957,11 @@ export default class DailyAttendanceService {
                           OrganizationId: OrganizationId,
                         });
 
+                        
                         interimAttendanceId=InsertAttendanceInInterimTimeiN[0];
+                        console.log('InsertAttendanceInInterimTimeiN is zero');
+                        console.log(interimAttendanceId);
+                        console.log('InsertAttendanceInInterimTimeiN is zero');
                   }
                 }
               }
