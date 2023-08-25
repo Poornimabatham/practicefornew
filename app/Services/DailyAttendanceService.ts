@@ -7,12 +7,14 @@ import moment from "moment";
 
 export default class DailyAttendanceService {
   public static async getpresentList(data) {
+
     var begin = (data.currentPage - 1) * data.perPage;
     var limit;
     var offset;
     var designationCondition;
     var departmentCondition;
     var AttendanceDate;
+
 
     if (data.currentPage != undefined && data.csv == undefined) {
       limit = data.perPage;
@@ -42,8 +44,8 @@ export default class DailyAttendanceService {
         .whereIn(
           "EmployeeId",
           Database.rawQuery(
-            `(SELECT Id from EmployeeMaster where OrganizationId =${data.OrganizationId} AND Is_Delete = 0 )`
-          )
+            `(SELECT Id from EmployeeMaster where OrganizationId =${data.OrganizationId} AND Is_Delete = 0 )`,
+          ),
         )
         .count("Id as Id");
 
@@ -54,21 +56,21 @@ export default class DailyAttendanceService {
 
       var DailyAttPresentReportDataQueryResult;
       var DailyAttPresentReportDataQuery = Database.from(
-        "AttendanceMaster as A"
+        "AttendanceMaster as A",
       )
         .select(
           Database.raw("CONCAT(E.FirstName, ' ', E.LastName) as name"),
           Database.raw("SUBSTR(A.TimeIn, 1, 5) as `TimeIn`"),
           Database.raw(
-            "(SELECT shifttype FROM ShiftMaster WHERE Id = ShiftId) as shiftType"
+            "(SELECT shifttype FROM ShiftMaster WHERE Id = ShiftId) as shiftType",
           ),
           Database.raw("SUBSTR(A.TimeOut, 1, 5) as `TimeOut`"),
           Database.raw("'Present' as status"),
           Database.raw(
-            "SUBSTRING_INDEX(A.EntryImage, '.com/', -1) as EntryImage"
+            "SUBSTRING_INDEX(A.EntryImage, '.com/', -1) as EntryImage",
           ),
           Database.raw(
-            "SUBSTRING_INDEX(A.ExitImage, '.com/', -1) as ExitImage"
+            "SUBSTRING_INDEX(A.ExitImage, '.com/', -1) as ExitImage",
           ),
           Database.raw("SUBSTR(A.checkInLoc, 1, 40) as checkInLoc"),
           Database.raw("SUBSTR(A.CheckOutLoc, 1, 40) as CheckOutLoc"),
@@ -80,7 +82,7 @@ export default class DailyAttendanceService {
           "A.TotalLoggedHours",
           "A.AttendanceStatus",
           "A.ShiftId",
-          "A.multitime_sts"
+          "A.multitime_sts",
         )
         .innerJoin("EmployeeMaster as E", "A.EmployeeId", "E.Id")
         .innerJoin("DesignationMaster as DM", "A.Desg_id", "DM.Id")
@@ -174,8 +176,8 @@ export default class DailyAttendanceService {
           .whereIn(
             "EmployeeId",
             Database.rawQuery(
-              `(SELECT Id from EmployeeMaster where OrganizationId =${data.OrganizationId} AND Is_Delete = 0 )`
-            )
+              `(SELECT Id from EmployeeMaster where OrganizationId =${data.OrganizationId} AND Is_Delete = 0 )`,
+            ),
           )
           .count("Id as abscount");
 
@@ -188,19 +190,19 @@ export default class DailyAttendanceService {
         var absentCountQuery = Database.from("AttendanceMaster as A")
           .select(
             Database.raw(
-              "DATE_FORMAT(A.AttendanceDate,'%Y-%m-%d') as AttendanceDate"
+              "DATE_FORMAT(A.AttendanceDate,'%Y-%m-%d') as AttendanceDate",
             ),
             "A.Dept_id",
             "A.Desg_id",
             "A.AttendanceStatus",
             Database.raw(
-              "(select CONCAT(FirstName,' ',LastName) FROM EmployeeMaster where Id = EmployeeId) as name"
+              "(select CONCAT(FirstName,' ',LastName) FROM EmployeeMaster where Id = EmployeeId) as name",
             ),
             Database.raw(` '-' as TimeOut`),
             Database.raw(` '-' as TimeIn`),
             Database.raw(
-              `(select ApprovalStatus from AppliedLeave where EmployeeId = A.EmployeeId and ApprovalStatus = 2 and Date = ${AttendanceDate}) as LeaveStatus`
-            )
+              `(select ApprovalStatus from AppliedLeave where EmployeeId = A.EmployeeId and ApprovalStatus = 2 and Date = ${AttendanceDate}) as LeaveStatus`,
+            ),
           )
           .innerJoin("EmployeeMaster as E", "E.Id", "A.EmployeeId")
           .where("AttendanceDate", AttendanceDate)
@@ -209,8 +211,8 @@ export default class DailyAttendanceService {
           .whereIn(
             "EmployeeId",
             Database.raw(
-              `SELECT Id FROM EmployeeMaster WHERE OrganizationId= ${orgId} AND Is_Delete = 0`
-            )
+              `SELECT Id FROM EmployeeMaster WHERE OrganizationId= ${orgId} AND Is_Delete = 0`,
+            ),
           )
           .orderBy("name", "asc");
 
@@ -260,13 +262,14 @@ export default class DailyAttendanceService {
 
         data["absent"] = absentListResult;
         return data["absent"];
-      } //For Today's Absentees
+      }
+      //For Today's Absentees
       else {
         AttendanceDate = moment().format("yyyy-MM-DD");
 
         if (adminStatus == 2) {
           var departmentId = await Helper.getDepartmentIdByEmpID(
-            data.EmployeeId
+            data.EmployeeId,
           );
           departmentCondition = `Dept_id = ${departmentId}`;
         }
@@ -275,7 +278,7 @@ export default class DailyAttendanceService {
           .select(
             Database.raw(`CONCAT (E.FirstName, ' ' ,E.LastName)  as name`),
             Database.raw(` '-' as Timeout `),
-            Database.raw(` '-' as TimeOut `)
+            Database.raw(` '-' as TimeOut `),
           )
           .innerJoin("EmployeeMaster as E", "A.EmployeeId", "E.Id")
           .where("AttendanceDate", AttendanceDate)
@@ -297,15 +300,15 @@ export default class DailyAttendanceService {
         var AbsentCountQuery = Database.from("EmployeeMaster as E")
           .select(
             Database.raw(
-              "DATE_FORMAT(A.AttendanceDate,'%Y-%m-%d') as AttendanceDate"
+              "DATE_FORMAT(A.AttendanceDate,'%Y-%m-%d') as AttendanceDate",
             ),
             Database.raw(`CONCAT(E.FirstName, ' ', E.LastName) as name`),
             Database.raw(` '-' as TimeIn `),
             Database.raw(` '-' as TimeOut `),
             Database.raw(
-              `(select ApprovalStatus FROM AppliedLeave WHERE EmployeeId=E.Id AND ApprovalStatus=2 AND Date=${AttendanceDate}) as LeaveStatus`
+              `(select ApprovalStatus FROM AppliedLeave WHERE EmployeeId=E.Id AND ApprovalStatus=2 AND Date=${AttendanceDate}) as LeaveStatus`,
             ),
-            "A.AttendanceStatus"
+            "A.AttendanceStatus",
           )
           .innerJoin("AttendanceMaster as A", "A.EmployeeId", "E.Id")
           .innerJoin("ShiftMaster as S", "A.ShiftId", "S.Id")
@@ -317,7 +320,7 @@ export default class DailyAttendanceService {
               .where("A.AttendanceDate", AttendanceDate)
               .where("A.OrganizationId", data.OrganizationId)
               .whereIn("A.AttendanceStatus", [1, 8, 4, 7])
-              .whereNotIn("A.Wo_H_Hd", [11, 12])
+              .whereNotIn("A.Wo_H_Hd", [11, 12]),
           )
           .andWhere("E.OrganizationId", data.OrganizationId)
           .andWhere((builder) => {
@@ -325,8 +328,8 @@ export default class DailyAttendanceService {
               .where(
                 "E.Id",
                 Database.raw(
-                  `(select empid from ShiftPlanner WHERE ShiftPlanner.orgid=${data.OrganizationId} and ShiftPlanner.empid=E.Id)`
-                )
+                  `(select empid from ShiftPlanner WHERE ShiftPlanner.orgid=${data.OrganizationId} and ShiftPlanner.empid=E.Id)`,
+                ),
               )
               .orWhere("E.Id", Database.raw(`E.Shift`));
           })
@@ -393,7 +396,6 @@ export default class DailyAttendanceService {
         AttendanceDate = currDate;
       }
 
-
       var LateComingsQuery = Database.from("EmployeeMaster as E")
         .select(
           Database.raw(`CONCAT(FirstName,' ',LastName) as name`),
@@ -401,7 +403,7 @@ export default class DailyAttendanceService {
           Database.raw(`SUBSTR(TimeOut, 1, 5) as 'TimeOut'`),
           Database.raw(`'Present' as status`),
           Database.raw(
-            `SUBSTRING_INDEX(EntryImage, '.com/', -1) as EntryImage`
+            `SUBSTRING_INDEX(EntryImage, '.com/', -1) as EntryImage`,
           ),
           Database.raw(`SUBSTRING_INDEX(ExitImage, '.com/', -1) as ExitImage`),
           Database.raw(`SUBSTR(checkInLoc, 1, 40) as checkInLoc`),
@@ -413,13 +415,13 @@ export default class DailyAttendanceService {
           "A.Id",
           "multitime_sts",
           "ShiftId",
-          "TotalLoggedHours"
+          "TotalLoggedHours",
         )
         .where("E.Id", data.EmployeeId)
         .innerJoin("AttendanceMaster as A", "A.EmployeeId", "E.Id")
         .whereRaw(
-          `SUBSTRING((TimeIn), 1, 5) > SUBSTRING((SELECT (CASE WHEN (TimeInGrace) != '00:00:00' THEN (TimeInGrace) ELSE (TimeIn) END) FROM ShiftMaster WHERE ShiftMaster.Id = A.ShiftId), 1, 5) AND AttendanceDate="${AttendanceDate}" AND A.OrganizationId=${data.OrganizationId} AND AttendanceStatus IN (1,4,8) AND '3' NOT IN (Select shifttype from ShiftMaster where Id=ShiftId) order by name `
-        )
+          `SUBSTRING((TimeIn), 1, 5) > SUBSTRING((SELECT (CASE WHEN (TimeInGrace) != '00:00:00' THEN (TimeInGrace) ELSE (TimeIn) END) FROM ShiftMaster WHERE ShiftMaster.Id = A.ShiftId), 1, 5) AND AttendanceDate="${AttendanceDate}" AND A.OrganizationId=${data.OrganizationId} AND AttendanceStatus IN (1,4,8) AND '3' NOT IN (Select shifttype from ShiftMaster where Id=ShiftId) order by name `,
+        );
 
       if (data.DesignationId != 0 && data.DesignationId != undefined) {
         designationCondition = ` Desg_id= ${data.DesignationId}`; // From AttendanceMaster
@@ -469,22 +471,21 @@ export default class DailyAttendanceService {
               multitime_sts: row.multitime_sts,
               shiftType: await Helper.getShiftType(row.ShiftId),
               getInterimAttAvailableSts: await Helper.getInterimAttAvailableSt(
-                row.Id),
+                row.Id,
+              ),
 
               TotalLoggedHours: row.TotalLoggedHours,
-            }
+            };
 
             LateComingsData.push(lateComingsList);
-
-          })
-        )
+          }),
+        );
       } else {
         LateComingsData.push();
       }
       data["latecomings"] = LateComingsData;
       return data["latecomings"];
     } else if (data.dataFor == "earlyleavings") {
-
       if (adminStatus == 2) {
         var DepartmentId = await Helper.getDepartmentIdByEmpID(data.EmployeeId);
         departmentCondition = `Dept_id=${DepartmentId}`;
@@ -502,10 +503,10 @@ export default class DailyAttendanceService {
         .select(
           Database.raw(`CONCAT(E.FirstName,' ',E.LastName) as name`),
           Database.raw(
-            `SUBSTRING_INDEX(A.EntryImage, '.com/', -1) as EntryImage`
+            `SUBSTRING_INDEX(A.EntryImage, '.com/', -1) as EntryImage`,
           ),
           Database.raw(
-            `SUBSTRING_INDEX(A.ExitImage, '.com/', -1) as ExitImage`
+            `SUBSTRING_INDEX(A.ExitImage, '.com/', -1) as ExitImage`,
           ),
           Database.raw(`SUBSTR(A.checkInLoc, 1, 40) as checkInLoc`),
           Database.raw(` SUBSTR(A.CheckOutLoc, 1, 40) as CheckOutLoc`),
@@ -521,40 +522,42 @@ export default class DailyAttendanceService {
           "A.multitime_sts",
           "A.TotalLoggedHours",
           "S.TimeIn as ShiftTimeIn",
-          "S.TimeOut as ShiftTimeOut"
+          "S.TimeOut as ShiftTimeOut",
         )
         .innerJoin("EmployeeMaster as E", "A.EmployeeId", "E.Id")
         .innerJoin("ShiftMaster as S ", "A.ShiftId", "S.Id")
         .where("A.OrganizationId", data.OrganizationId)
         .where("A.Is_Delete", 0)
-        .whereRaw(
-          `CASE WHEN (S.shifttype=2 AND A.timeindate= A.timeoutdate) 
-            THEN CONCAT(DATE_ADD(A.AttendanceDate, INTERVAL 1 DAY),' ',S.TimeOut) 
-            WHEN(S.shifttype=2 AND A.timeindate!=A.timeoutdate) 
-            THEN CONCAT(DATE_ADD(A.AttendanceDate, INTERVAL 1 DAY),' ',S.TimeOut)
-            ELSE CONCAT(A.AttendanceDate,' ',S.TimeOut)END >  CASE 
-            WHEN (A.timeoutdate!='0000-00-00') 
-            THEN CONCAT(A.timeoutdate,' ',A.TimeOut)  
-            WHEN(S.shifttype=2 AND A.timeindate!=A.timeoutdate)
-            THEN  CONCAT(A.timeoutdate,' ',A.TimeOut) 
-            ELSE CONCAT(A.AttendanceDate,' ',A.TimeOut) END  And A.TimeIn!='00:00:00' And A.TimeOut!='00:00:00' and A.AttendanceStatus NOT IN(2,3,5) And 
-            (CASE WHEN (A.timeoutdate!='0000-00-00')  
-            THEN (
-            CASE WHEN (S.shifttype=2 AND A.timeindate=A.timeoutdate) 
-            THEN TIMEDIFF(CONCAT(DATE_ADD(A.AttendanceDate, INTERVAL 1 DAY),' ',S.TimeOut),CONCAT(A.AttendanceDate,' ',A.TimeOut))       
-            ELSE TIMEDIFF((  
-            CASE WHEN (S.shifttype=2 AND A.timeindate!=A.timeoutdate) 
-            THEN CONCAT(DATE_ADD(A.AttendanceDate, INTERVAL 1 DAY),' ',S.TimeOut) 
-            ELSE  CONCAT(A.AttendanceDate,' ',S.TimeOut) END ) ,CONCAT(A.timeoutdate,' ',A.TimeOut)) END)
-            ELSE SUBTIME(S.TimeOut, A.TimeIn) END) > '00:00:59'
-            And A.TimeIn!='00:00:00' 
-            And A.TimeOut!='00:00:00' 
-            And A.AttendanceDate=${AttendanceDate} 
-            And S.shifttype!=3 ORDER BY E.FirstName ASC`
-        )
+        .whereRaw(`(CASE WHEN (S.shifttype=2 AND A.timeindate= A.timeoutdate) 
+        THEN CONCAT(DATE_ADD(A.AttendanceDate, INTERVAL 1 DAY),' ',S.TimeOut) 
+        WHEN(S.shifttype=2 AND A.timeindate!=A.timeoutdate) 
+        THEN CONCAT(DATE_ADD(A.AttendanceDate, INTERVAL 1 DAY),' ',S.TimeOut)
+        ELSE CONCAT(A.AttendanceDate,' ',S.TimeOut)END)
+         > 
+         (CASE 
+         WHEN (A.timeoutdate!='0000-00-00') 
+         THEN CONCAT(A.timeoutdate,' ',A.TimeOut)  
+         WHEN(S.shifttype=2 AND A.timeindate!=A.timeoutdate)
+         THEN  CONCAT(A.timeoutdate,' ',A.TimeOut) 
+         ELSE CONCAT(A.AttendanceDate,' ',A.TimeOut) END) `)
+        .whereRaw(` A.TimeIn!='00:00:00' And A.TimeOut!='00:00:00' and A.AttendanceStatus NOT IN (2,3,5)`)
+        .whereRaw(` (CASE WHEN (A.timeoutdate!='0000-00-00')  
+         THEN (
+         CASE WHEN (S.shifttype=2 AND A.timeindate=A.timeoutdate) 
+         THEN TIMEDIFF(CONCAT(DATE_ADD(A.AttendanceDate, INTERVAL 1 DAY),' ',S.TimeOut),CONCAT(A.AttendanceDate,' ',A.TimeOut))       
+         ELSE TIMEDIFF((  
+         CASE WHEN (S.shifttype=2 AND A.timeindate!=A.timeoutdate) 
+         THEN CONCAT(DATE_ADD(A.AttendanceDate, INTERVAL 1 DAY),' ',S.TimeOut) 
+         ELSE  CONCAT(A.AttendanceDate,' ',S.TimeOut) END ) ,
+         CONCAT(A.timeoutdate,' ',A.TimeOut)) END)
+         ELSE SUBTIME(S.TimeOut, A.TimeIn) END) > '00:00:59'`)
+        .whereRaw(`A.TimeIn!='00:00:00'`)
+        .whereRaw(`A.TimeOut!='00:00:00'`)
+        .andWhere('A.AttendanceDate', AttendanceDate)
+        .whereRaw('S.shifttype!=3')
+        .orderBy('E.FirstName', 'asc')
         .limit(limit)
         .offset(offset)
-
 
       if (data.DesignationId != 0 && data.DesignationId != undefined) {
         designationCondition = `Desg_id= ${data.DesignationId}`; // From AttendanceMaster
@@ -620,7 +623,7 @@ export default class DailyAttendanceService {
               TotalLoggedHours: row.TotalLoggedHours,
             };
             earlyleavings.push(earlyleavingsList);
-          })
+          }),
         );
       }
       data["earlyleavings"] = earlyleavings;
@@ -638,9 +641,8 @@ export default class DailyAttendanceService {
     let HourlyRateId: number = 0;
     let Desg_id: number = 0;
     let Dept_id: number = 0;
+    let avtarImg="https://ubitech.ubihrm.com/public/avatars/male.png";
 
-    //console.log(jsonData[0]['2023-05-19']['interim'][0].StaffId);
-    //console.log(jsonData.length);
     for (let i = 0; i < jsonData.length; i++) {
       const date = Object.keys(jsonData[i]);
 
@@ -701,6 +703,7 @@ export default class DailyAttendanceService {
           } = jsonData[i][date[0]].interim[j];
 
           console.log(jsonData[i][date[0]].interim[j]);
+
           console.log("all data of");
           const zone = await Helper.getEmpTimeZone(UserId, OrganizationId);
           const defaultZone = DateTime.now().setZone(zone);
@@ -718,13 +721,13 @@ export default class DailyAttendanceService {
             if (ShiftId == "0" || ShiftId == "" || ShiftId == "") {
               ShiftId = await Helper.getassignedShiftTimes(
                 UserId,
-                AttendanceDate
+                AttendanceDate,
               );
             }
           }
 
           let getSettingOfPunchAttendace = await Database.from(
-            "licence_ubiattendance"
+            "licence_ubiattendance",
           )
             .select("allowOverTime", "Addon_AutoTimeOut")
             .where("OrganizationId", OrganizationId);
@@ -732,8 +735,7 @@ export default class DailyAttendanceService {
           let allowOverTime;
           if (getSettingOfPunchAttendace.length > 0) {
             let allowOverTime = getSettingOfPunchAttendace[0].allowOverTime;
-            let Addon_AutoTimeOut =
-              getSettingOfPunchAttendace[0].Addon_AutoTimeOut;
+            //let Addon_AutoTimeOut = getSettingOfPunchAttendace[0].Addon_AutoTimeOut;
             if (allowOverTime == 1) {
               allowOverTime = true;
             } else {
@@ -743,7 +745,7 @@ export default class DailyAttendanceService {
 
           if (allowOverTime == true && shiftType != 2) {
             let getlastAttendanceData = await Database.from(
-              "licence_ubiattendance"
+              "licence_ubiattendance",
             )
               .select("*")
               .where("EmployeeId", UserId)
@@ -762,28 +764,16 @@ export default class DailyAttendanceService {
             }
           }
 
-          let geofencePerm = await Helper.getNotificationPermission(
-            OrganizationId,
-            "OutsideGeofence"
-          );
-          let SuspiciousSelfiePerm = await Helper.getNotificationPermission(
-            OrganizationId,
-            "SuspiciousSelfie"
-          );
-          let SuspiciousDevicePerm = await Helper.getNotificationPermission(
-            OrganizationId,
-            "SuspiciousDevice"
-          );
+          let geofencePerm = await Helper.getNotificationPermission(OrganizationId,"OutsideGeofence");
+          let SuspiciousSelfiePerm = await Helper.getNotificationPermission(OrganizationId,"SuspiciousSelfie");
+          let SuspiciousDevicePerm = await Helper.getNotificationPermission(OrganizationId,"SuspiciousDevice");
 
-          let time =
-            defaultZone.toFormat("HH:mm:ss") == "00:00:00"
-              ? "23:59:00"
-              : defaultZone.toFormat("HH:mm:ss");
+          let time =defaultZone.toFormat("HH:mm:ss") == "00:00:00" ? "23:59:00" : defaultZone.toFormat("HH:mm:ss");
           let stamp = defaultZone.toFormat("yyyy-MM-dd, HH:mm:ss");
           let today = currentDate;
-          let currDate = currentDate;
+          //let currDate = currentDate;
           let name = await Helper.getEmpName(UserId);
-          console.log(name);
+          //console.log(name);
           let TimeInStampServer = defaultZone.toFormat("yyyy-MM-dd, HH:mm:ss");
           let TimeOutStampServer = defaultZone.toFormat("yyyy-MM-dd, HH:mm:ss");
 
@@ -807,8 +797,7 @@ export default class DailyAttendanceService {
             .select("*");
 
           let attendance_sts = result.length > 0 ? 4 : 1;
-          //console.log(attendance_sts);
-
+        
           const query = await Database.from("AttendanceMaster")
             .where("EmployeeId", UserId)
             .where("AttendanceDate", AttendanceDate)
@@ -823,12 +812,9 @@ export default class DailyAttendanceService {
           let MultipletimeStatus = await Helper.getShiftMultipleTimeStatus(
             UserId,
             AttendanceDate,
-            ShiftId
+            ShiftId,
           );
-          //console.log(UserId + "=>" + AttendanceDate + "=>" + ShiftId);
-          //console.log(MultipletimeStatus);
-          //console.log("MultipletimeStatus");
-
+          
           const attendanceData = await AttendanceMaster.query()
             .where("EmployeeId", UserId)
             .where("AttendanceDate", AttendanceDate)
@@ -838,13 +824,8 @@ export default class DailyAttendanceService {
           let attTimeOut = "00:00:00";
           if (attendanceData) {
             AttendanceMasterId = attendanceData.Id;
-            //AttendanceMasterId = 0;
             attTimeIn = attendanceData.TimeIn;
             attTimeOut = attendanceData.TimeOut;
-
-            //console.log(
-            //AttendanceMasterId + "=>" + attTimeIn + "=>" + attTimeOut
-            //);
           }
 
           const EmployeeRecord = await EmployeeMaster.query()
@@ -855,7 +836,7 @@ export default class DailyAttendanceService {
               "Designation",
               "area_assigned",
               "hourly_rate",
-              "OwnerId"
+              "OwnerId",
             )
             .first();
 
@@ -867,8 +848,6 @@ export default class DailyAttendanceService {
             OwnerId = EmployeeRecord.OwnerId;
           }
 
-          //console.log("shakir" + AttendanceMasterId);
-
           if (SyncTimeIn == "1" && SyncTimeOut != "1") {
             console.log("case one for sync Attendance Only Time In");
             let EntryImage = ThumnailTimeInPictureBase64;
@@ -878,53 +857,9 @@ export default class DailyAttendanceService {
 
             try {
               areaId = GeofenceInAreaId;
-
-              // Outside Geofence code
-              if (GeofenceIn === "Outside Geofence") {
-                if ([9, 13, 11, 15].includes(geofencePerm)) {
-                  const pageName = "Outside Geofence";
-                }
-
-                if (geofencePerm === 13) {
-                  const message = `<html>
-                                    <head>   
-                                    <meta http-equiv=Content-Type content="text/html; charset=windows-1252">
-                                    <meta name=Generator content="Microsoft Word 12 (filtered)">
-                                    <style>
-                                    </style>   
-                                    </head>   
-                                    <body lang=EN-US link=blue vlink=purple>    
-                                    <hr>
-                                    <br>${name} has punched TimeIn outside Geofence</br>
-                                    </hr>   
-                                    </body>  
-                                    </html>`;
-                  const headers = {};
-                  const subject = `Outside Geofence(${today})`;
-
-                  const query = await Database.raw(
-                    "SELECT email FROM admin_login WHERE OrganizationId = ? AND status = 1",
-                    [OrganizationId]
-                  );
-                  //const emails = query.rows.map((row) => row.email);
-
-                  // Send emails
-                  // for (const email of emails) {
-                  //   await sendEmail_new(email, subject, message, headers);
-                  // }
-                }
-              }
-
-              // DeviceVerification code
-              const deviceverificationpermQuery = await Database.raw(
-                "SELECT Addon_DeviceVerification FROM licence_ubiattendance WHERE OrganizationId = ?",
-                [OrganizationId]
-              );
-
-              //  console.log("attendanceMasterId=>" + AttendanceMasterId);
               if (AttendanceMasterId == 0) {
                 const InsertAttendanceTimeiN = await Database.table(
-                  "AttendanceMaster"
+                  "AttendanceMaster",
                 )
                   .returning("id")
                   .insert({
@@ -965,32 +900,8 @@ export default class DailyAttendanceService {
                     TimeInStampServer: TimeInStampServer,
                     ZoneId: GeofenceInAreaId,
                   });
-                //  console.log("AttendanceMasterId=>" + InsertAttendanceTimeiN[0]);
+               
                 AttendanceMasterId = InsertAttendanceTimeiN[0];
-
-                if (
-                  OrganizationId === "105999" ||
-                  OrganizationId === "10" ||
-                  OrganizationId === "168264"
-                ) {
-                  // Send mail logic for specific organizations
-                  // const mailQuery = await Database.raw("SELECT Subject, Body FROM All_mailers WHERE id = 30");
-                  // const subject = mailQuery.rows[0].Subject;
-                  // const mailbody = mailQuery.rows[0].Body;
-                  // const empQuery = await Database.raw(
-                  //   "SELECT E.CurrentEmailId, CONCAT(E.FirstName, ' ', E.LastName) as Name, o.Name as Orgname FROM EmployeeMaster E, Organization o WHERE E.Id = ? AND E.OrganizationId = o.Id AND o.Id = ?",
-                  //   [UserId, OrganizationId]
-                  // );
-                  // const username = empQuery.rows[0].Name;
-                  // const orgname = empQuery.rows[0].Orgname;
-                  // const emailIn = decode5t(empQuery.rows[0].CurrentEmailId);
-                  // const TimeInTme = moment(TimeInTime, 'HH:mm:ss').format('h:mm:ss A');
-                  // // Remaining mail logic...
-                  // const headers = {};
-                  // const message = mailbody; // Construct your message here
-                  // // Send email
-                  // await sendEmail_new(emailIn, subject, message, headers);
-                }
               } else if (AttendanceMasterId != 0 && attTimeIn == "00:00:00") {
                 // Update existing record in AttendanceMaster
                 // await Database.raw(
@@ -999,8 +910,10 @@ export default class DailyAttendanceService {
                 // );
               }
 
-              if (MultipletimeStatus == 1 || shiftType === "3") {
+              if (MultipletimeStatus == 1 || shiftType == "3") {
+
                 if (AttendanceMasterId != 0) {
+
                   const queryResult = await Database.from("InterimAttendances")
                     .select("Id")
                     .where("AttendanceMasterId", AttendanceMasterId)
@@ -1014,7 +927,6 @@ export default class DailyAttendanceService {
 
                   if (interimAttendanceId == 0) {
                     // Insert into InterimAttendances
-
                     const InsertAttendanceInInterimTimeiN =
                       await Database.table("InterimAttendances")
                         .returning("id")
@@ -1044,15 +956,6 @@ export default class DailyAttendanceService {
                   }
                 }
               }
-
-              // Send data on alfanar server
-              if (["90303", "225436"].includes(OrganizationId)) {
-              }
-
-              // Send data on sanjeevani server
-              if (OrganizationId === "148156") {
-              }
-
               statusArray[k] = {
                 Time: TimeInTime,
                 Date: AttendanceDate,
@@ -1063,52 +966,24 @@ export default class DailyAttendanceService {
                 AttendanceMasterId: AttendanceMasterId,
               };
               k++;
-
-              //console.log("statusArray");
-              //console.log(statusArray);
-              // const statusEntry = {
-              //   Time: TimeInTime,
-              //   Date: AttendanceDate,
-              //   Action: 'TimeIn',
-              //   EmpId: UserId,
-              //   InterimId: Id,
-              //   InterimAttendanceId: interimAttendanceId,
-              //   AttendanceMasterId: attendanceMasterId,
-              // };
-              // statusArray.push(statusEntry);
             } catch (error) {
               const errorMsg = "Message: " + error.message;
               const status = 0;
             }
           } else if (SyncTimeIn == "1" && SyncTimeOut == "1") {
-            console.log("case three mark both");
-            let EntryImage = ThumnailTimeInPictureBase64;
-            if (TimeInPictureBase64 == "") {
-              EntryImage = "https://ubitech.ubihrm.com/public/avatars/male.png";
-            }
-            let ExitImage = ThumnailTimeOutPictureBase64;
+            
+            console.log("*************case mark attendance both****************");
 
-            if (TimeOutPictureBase64 == "") {
-              ExitImage = "https://ubitech.ubihrm.com/public/avatars/male.png";
-            }
-
+            let EntryImage = ThumnailTimeInPictureBase64 == "" ? avtarImg : ThumnailTimeInPictureBase64;
+            let ExitImage = ThumnailTimeOutPictureBase64 == "" ? avtarImg : ThumnailTimeOutPictureBase64;
+        
             try {
               let areaId = GeofenceInAreaId;
               let areaIdOut = GeofenceOutAreaId;
+
               if (AttendanceMasterId == 0) {
-                // if(($GeofenceIn=="Outside Geofence" && $GeofenceOut!="Outside Geofence") || ($GeofenceIn=="Outside Geofence" && $GeofenceOut=="Outside Geofence") || ($GeofenceIn!="Outside Geofence" && $GeofenceOut=="Outside Geofence"))
-                // {
-                //     if($geofencePerm==9|| $geofencePerm==13||$geofencePerm==11|| $geofencePerm==15)
-                //     {
-                //         $pageName="Outside Geofence";//to navigate notification Do not change it.
-                //         $NotificationId= sendManualPushNotification("('$orgTopic' in topics) && ('admin' in topics)","Outside Geofence", "$name has punched Attendance outside Geofence", "$UserId","$OrganizationId","$pageName");
-                //         $query=$this->db->query("UPDATE NotificationsList SET PageName = 'Outsidegeofance' WHERE Id = '$NotificationId' ");
-                //     }
-                // }
                 let Zone_id = 0;
-                const InsertAttendanceTimeiN = await Database.table(
-                  "AttendanceMaster"
-                )
+                const InsertAttendanceTimeiN = await Database.table("AttendanceMaster")
                   .returning("id")
                   .insert({
                     TimeInApp: TimeInApp,
@@ -1233,36 +1108,28 @@ export default class DailyAttendanceService {
                   let calculatedOvertime = "00:00:00";
                   let totalLoggedHours = "00:00:00";
                   let hoursPerDay = "0:00:00";
-                  // cond=",overtime ='$calculatedOvertime',TotalLoggedHours='$totalLoggedHours'";
                   const query = await Database.from("InterimAttendances")
                     .select("Id")
                     .select(
                       Database.raw(
-                        "SEC_TO_TIME(SUM(TIME_TO_SEC(LoggedHours))) as totalLoggedHours"
-                      )
+                        "SEC_TO_TIME(SUM(TIME_TO_SEC(LoggedHours))) as totalLoggedHours",
+                      ),
                     )
                     .select(
                       Database.raw(
-                        `(select HoursPerDay from ShiftMaster where Id = '${ShiftId}') as hoursPerDay`
-                      )
+                        `(select HoursPerDay from ShiftMaster where Id = '${ShiftId}') as hoursPerDay`,
+                      ),
                     )
                     .where("AttendanceMasterId", AttendanceMasterId);
-                  //console.log(query.toSQL().toNative());
-
+                 
                   if (query.length > 0) {
                     totalLoggedHours = query[0].totalLoggedHours;
                     hoursPerDay = query[0].hoursPerDay;
-
-                    const { hours, minutes, seconds } =
-                      Helper.calculateOvertime(hoursPerDay, totalLoggedHours);
+                    const { hours, minutes, seconds } = Helper.calculateOvertime(hoursPerDay, totalLoggedHours);
                     console.log(hours + ":" + minutes + ":" + seconds);
-                    let calculatedOvertime =
-                      hours + ":" + minutes + ":" + seconds;
-                    console.log(
-                      "calculatedOvertime Case Three" + calculatedOvertime
-                    );
+                    let calculatedOvertime = hours + ":" + minutes + ":" + seconds;
+                    console.log("calculatedOvertime Case Three" + calculatedOvertime);
                   }
-
                   cond = {
                     overtime: calculatedOvertime,
                     TotalLoggedHours: totalLoggedHours,
@@ -1287,7 +1154,7 @@ export default class DailyAttendanceService {
                   timeoutdate: TimeOutDate,
                   TimeOutAppVersion: TimeOutAppVersion,
                   TimeOutGeoFence: GeofenceOut,
-                  TimeOutDevice: "nokia",
+                  TimeOutDevice: TimeOutDevice,
                   AttendanceStatus: attendance_sts,
                   remarks: TimeOutRemark,
                   TimeOutStampApp: TimeOutStampApp,
@@ -1297,12 +1164,7 @@ export default class DailyAttendanceService {
                   disapprovereason: disattreason,
                 };
 
-                // console.log(dynamicFields);
-                // console.log("working-daone");
-                // console.log(cond);
-
                 const updateFields = { ...dynamicFields, ...cond };
-
                 const affectedRows = await Database.from("AttendanceMaster")
                   .where("id", AttendanceMasterId)
                   .update(updateFields);
@@ -1310,9 +1172,7 @@ export default class DailyAttendanceService {
 
               if (MultipletimeStatus == 1 || shiftType == "3") {
                 if (AttendanceMasterId != 0) {
-                  const haveInterimId = await Database.from(
-                    "InterimAttendances"
-                  ) // The table name
+                  const haveInterimId = await Database.from("InterimAttendances") 
                     .where("AttendanceMasterId", AttendanceMasterId)
                     .where("TimeIn", TimeInTime)
                     .select("Id");
@@ -1324,7 +1184,7 @@ export default class DailyAttendanceService {
 
                 if (interimAttendanceId == 0) {
                   const InsertAttendanceTimeInOut = await Database.table(
-                    "InterimAttendances"
+                    "InterimAttendances",
                   )
                     .returning("id")
                     .insert({
@@ -1382,44 +1242,39 @@ export default class DailyAttendanceService {
                   .select("Id")
                   .select(
                     Database.raw(
-                      "SEC_TO_TIME(SUM(TIME_TO_SEC(LoggedHours))) as totalLoggedHours"
-                    )
+                      "SEC_TO_TIME(SUM(TIME_TO_SEC(LoggedHours))) as totalLoggedHours",
+                    ),
                   )
                   .select(
                     Database.raw(
-                      `(select HoursPerDay from ShiftMaster where Id = '${ShiftId}') as hoursPerDay`
-                    )
+                      `(select HoursPerDay from ShiftMaster where Id = '${ShiftId}') as hoursPerDay`,
+                    ),
                   )
                   .where("AttendanceMasterId", AttendanceMasterId);
 
                 const { hours, minutes, seconds } = Helper.calculateOvertime(
                   hoursPerDay,
-                  totalLoggedHours
+                  totalLoggedHours,
                 );
                 console.log(hours + ":" + minutes + ":" + seconds);
                 calculatedOvertime = hours + ":" + minutes + ":" + seconds;
                 console.log(
-                  "calculatedOvertime Case Three" + calculatedOvertime
+                  "calculatedOvertime Case Three" + calculatedOvertime,
                 );
 
-                const updateLoggedHours = await Database.from(
-                  "AttendanceMaster"
-                )
+                const updateLoggedHours = await Database.from("AttendanceMaster")
                   .where("id", AttendanceMasterId)
                   .update({
                     overtime: calculatedOvertime,
                     TotalLoggedHours: totalLoggedHours,
                   });
               }
-              if (
-                (shiftType == "1" || shiftType == "2") &&
-                MultipletimeStatus != 1
-              ) {
+              if ((shiftType == "1" || shiftType == "2") && MultipletimeStatus != 1) {
                 let calculatedOvertime = "00:00:00";
                 let totalLoggedHours = "00:00:00";
 
                 const getOvertTime = await Database.from(
-                  "AttendanceMaster as A"
+                  "AttendanceMaster as A",
                 )
                   .select(
                     "A.TimeIn as attTimeIn",
@@ -1427,32 +1282,31 @@ export default class DailyAttendanceService {
                     "C.TimeIn as shiftTimeIn",
                     "C.TimeOut as shiftTimeOut",
                     Database.raw(
-                      "TIMEDIFF(CONCAT(A.timeoutdate, ' ', A.TimeOut), CONCAT(A.timeindate, ' ', A.TimeIn)) as TotalLoggedHours"
+                      "TIMEDIFF(CONCAT(A.timeoutdate, ' ', A.TimeOut), CONCAT(A.timeindate, ' ', A.TimeIn)) as TotalLoggedHours",
                     ),
                     Database.raw(
-                      "(CASE WHEN (C.shifttype=2) THEN SUBTIME(TIMEDIFF(CONCAT('2021-08-21', ' ', C.TimeOut), CONCAT('2021-08-20', ' ', C.TimeIn)), TIMEDIFF(CONCAT(A.timeoutdate, ' ', A.TimeOut), CONCAT(A.timeindate, ' ', A.TimeIn))) ELSE SUBTIME(TIMEDIFF(A.TimeOut, A.TimeIn), TIMEDIFF(C.TimeOut, C.TimeIn)) END) as overtime"
-                    )
+                      "(CASE WHEN (C.shifttype=2) THEN SUBTIME(TIMEDIFF(CONCAT('2021-08-21', ' ', C.TimeOut), CONCAT('2021-08-20', ' ', C.TimeIn)), TIMEDIFF(CONCAT(A.timeoutdate, ' ', A.TimeOut), CONCAT(A.timeindate, ' ', A.TimeIn))) ELSE SUBTIME(TIMEDIFF(A.TimeOut, A.TimeIn), TIMEDIFF(C.TimeOut, C.TimeIn)) END) as overtime",
+                    ),
                   )
                   .innerJoin("ShiftMaster as C", "A.ShiftId", "C.Id")
                   .where("A.Id", AttendanceMasterId)
                   .first(); // Use 'first()' to get the first row of the result
 
-                console.log(result);
-
-                if (getOvertTime > 0) {
+                if (getOvertTime) {
                   totalLoggedHours = getOvertTime.TotalLoggedHours;
                   calculatedOvertime = getOvertTime.overtime;
                 }
-
-                const updateLoggedHours = await Database.from(
-                  "AttendanceMaster"
-                )
-                  .where("id", AttendanceMasterId)
-                  .update({
-                    overtime: calculatedOvertime,
-                    TotalLoggedHours: totalLoggedHours,
-                  });
+                const query = Database.from("AttendanceMaster")
+                .where("id", AttendanceMasterId)
+                .update({
+                  overtime: calculatedOvertime,
+                  TotalLoggedHours: totalLoggedHours,
+                });
+          
+              const updateLoggedHours = await query;
               }
+
+             
 
               const results = await Database.from("AttendanceMaster as A")
                 .innerJoin("ShiftMaster as S", "A.ShiftId", "S.Id")
@@ -1460,24 +1314,23 @@ export default class DailyAttendanceService {
                   "S.TimeIn as ShiftTimeIn",
                   "S.TimeOut as ShiftTimeOut",
                   "S.shifttype",
-                  "S.HoursPerDay"
+                  "S.HoursPerDay",
                 )
                 .select(
                   Database.raw(`(CASE
-            WHEN (S.shifttype = 1) THEN SEC_TO_TIME(TIME_TO_SEC(TIMEDIFF(S.TimeOut, S.TimeIn)) / 2)
-            WHEN (S.shifttype = 2) THEN SEC_TO_TIME(TIME_TO_SEC(TIMEDIFF(CONCAT('2021-08-07', ' ', S.TimeOut), CONCAT('2021-08-06', ' ', S.TimeIn))) / 2)
-            WHEN (S.shifttype = 3) THEN SEC_TO_TIME(TIME_TO_SEC(TIMEDIFF(S.HoursPerDay, A.TotalLoggedHours)) / 2)
-            ELSE 0
-        END) as halfshift`)
+                    WHEN (S.shifttype = 1) THEN SEC_TO_TIME(TIME_TO_SEC(TIMEDIFF(S.TimeOut, S.TimeIn)) / 2)
+                    WHEN (S.shifttype = 2) THEN SEC_TO_TIME(TIME_TO_SEC(TIMEDIFF(CONCAT('2021-08-07', ' ', S.TimeOut), CONCAT('2021-08-06', ' ', S.TimeIn))) / 2)
+                    WHEN (S.shifttype = 3) THEN SEC_TO_TIME(TIME_TO_SEC(TIMEDIFF(S.HoursPerDay, A.TotalLoggedHours)) / 2)
+                    ELSE 0 END) as halfshift`),
                 )
                 .select("A.TotalLoggedHours as TotalLoggedHours")
                 .where("A.Id", AttendanceMasterId);
 
               const halfshiftTimestamp = new Date(
-                `1970-01-01T${results[0].halfshift}Z`
+                `1970-01-01T${results[0].halfshift}Z`,
               ).getTime();
               const totalLoggedHoursTimestamp = new Date(
-                `1970-01-01T${results[0].TotalLoggedHours}Z`
+                `1970-01-01T${results[0].TotalLoggedHours}Z`,
               ).getTime();
 
               let halfDayStatus;
@@ -1489,7 +1342,7 @@ export default class DailyAttendanceService {
               }
 
               const updateHalfdayStatus = await Database.from(
-                "AttendanceMaster"
+                "AttendanceMaster",
               )
                 .where("Id", AttendanceMasterId)
                 .update({
@@ -1520,8 +1373,7 @@ export default class DailyAttendanceService {
 
               k++;
               console.log("statusArray-case second");
-              console.log(statusArray);
-            } catch (error) { }
+            } catch (error) {}
           } else if (SyncTimeIn != "1" && SyncTimeOut == "1") {
             console.log("case three for sync Attendance Only Time out");
             let ExitImage = ThumnailTimeOutPictureBase64;
@@ -1534,19 +1386,20 @@ export default class DailyAttendanceService {
             let calculatedOvertime = "00:00:00";
             let totalLoggedHours = "00:00:00";
             let hoursPerDay = "00:00:00";
+
             if (MultipletimeStatus == 1 || shiftType == "3") {
               let timeOutAlreadySyncedId = 0;
               console.log(AttendanceMasterId);
               console.log("attendanceMasterId->timeout");
               if (AttendanceMasterId == 0) {
                 const getAttnadaceRecord = await Database.from(
-                  "AttendanceMaster"
+                  "AttendanceMaster",
                 )
                   .select("Id")
                   .where("EmployeeId", UserId)
                   .whereBetween("AttendanceDate", [
                     Database.raw(
-                      `date_sub('${AttendanceDate}', interval 1 day)`
+                      `date_sub('${AttendanceDate}', interval 1 day)`,
                     ),
                     AttendanceDate,
                   ])
@@ -1557,13 +1410,13 @@ export default class DailyAttendanceService {
                   AttendanceMasterId = getAttnadaceRecord[0].Id;
                   console.log(
                     "attendanceMasterId Attendance ID:",
-                    AttendanceMasterId
+                    AttendanceMasterId,
                   );
                 }
               }
 
               const maxIdOfInterimAttendance = await Database.from(
-                "InterimAttendances"
+                "InterimAttendances",
               )
                 .select("Id")
                 .where("AttendanceMasterId", AttendanceMasterId)
@@ -1576,7 +1429,7 @@ export default class DailyAttendanceService {
               }
               if (interimAttendanceId != 0) {
                 const alreadyMarkedTimeOutId = await Database.from(
-                  "InterimAttendances"
+                  "InterimAttendances",
                 )
                   .select("Id")
                   .where("AttendanceMasterId", AttendanceMasterId)
@@ -1591,22 +1444,22 @@ export default class DailyAttendanceService {
                 console.log(TimeOutDate + " " + TimeOutTime);
 
                 console.log("TimeOutDate+=>1568");
-
-                // let loggedHours = await Database.raw(
-                //   `TIMEDIFF(CONCAT(?, ' ', ?), CONCAT(TimeInDate, ' ', TimeIn))`,
-                //   [TimeOutDate, TimeOutTime]
-                // );
-
-                const loggedHoursResult = await Database.from('InterimAttendances')
-                  .select(Database.raw(`TIMEDIFF(CONCAT(?, ' ', ?), CONCAT(TimeInDate, ' ', TimeIn)) as loggedHours`, [TimeOutDate, TimeOutTime]))
-                  .where('Id', interimAttendanceId)
+                const loggedHoursResult = await Database.from(
+                  "InterimAttendances",
+                )
+                  .select(
+                    Database.raw(
+                      `TIMEDIFF(CONCAT(?, ' ', ?), CONCAT(TimeInDate, ' ', TimeIn)) as loggedHours`,
+                      [TimeOutDate, TimeOutTime],
+                    ),
+                  )
+                  .where("Id", interimAttendanceId)
                   .first();
 
                 const loggedHours = loggedHoursResult.loggedHours;
 
                 console.log(loggedHours);
-                console.log('loggedHours');
-
+                console.log("loggedHours");
 
                 const updateQuery = await Database.from("InterimAttendances")
                   .where("Id", interimAttendanceId)
@@ -1631,13 +1484,23 @@ export default class DailyAttendanceService {
               }
 
               const calculateLoggedHours = await Database.from(
-                "InterimAttendances as I"
-              ).select("A.Id", "A.ShiftId",
-                Database.raw(
-                  "SEC_TO_TIME(SUM(TIME_TO_SEC(I.LoggedHours))) as totalLoggedHours"
-                ),
-                Database.raw(`(SELECT (CASE WHEN (shifttype=1) THEN TIMEDIFF(TimeOut,TimeIn) WHEN (shifttype=2) THEN TIMEDIFF(CONCAT('2021-10-11', ' ', TimeOut), CONCAT('2021-10-10', ' ', TimeIn)) WHEN (shifttype=3) THEN HoursPerDay END) FROM ShiftMaster WHERE Id=A.ShiftId) as hoursPerDay`))
-                .innerJoin("AttendanceMaster as A", "A.Id", "I.AttendanceMasterId")
+                "InterimAttendances as I",
+              )
+                .select(
+                  "A.Id",
+                  "A.ShiftId",
+                  Database.raw(
+                    "SEC_TO_TIME(SUM(TIME_TO_SEC(I.LoggedHours))) as totalLoggedHours",
+                  ),
+                  Database.raw(
+                    `(SELECT (CASE WHEN (shifttype=1) THEN TIMEDIFF(TimeOut,TimeIn) WHEN (shifttype=2) THEN TIMEDIFF(CONCAT('2021-10-11', ' ', TimeOut), CONCAT('2021-10-10', ' ', TimeIn)) WHEN (shifttype=3) THEN HoursPerDay END) FROM ShiftMaster WHERE Id=A.ShiftId) as hoursPerDay`,
+                  ),
+                )
+                .innerJoin(
+                  "AttendanceMaster as A",
+                  "A.Id",
+                  "I.AttendanceMasterId",
+                )
                 .where("I.AttendanceMasterId", AttendanceMasterId)
                 .groupBy("A.Id", "A.ShiftId");
 
@@ -1645,12 +1508,14 @@ export default class DailyAttendanceService {
                 totalLoggedHours = calculateLoggedHours[0].totalLoggedHours;
                 let hoursPerDay = calculateLoggedHours[0].hoursPerDay;
 
-                console.log('totalLoggedHours line number 1629=' + totalLoggedHours);
-                console.log('hoursPerDay line number 1629=' + hoursPerDay);
+                console.log(
+                  "totalLoggedHours line number 1629=" + totalLoggedHours,
+                );
+                console.log("hoursPerDay line number 1629=" + hoursPerDay);
 
                 const { hours, minutes, seconds } = Helper.calculateOvertime(
                   hoursPerDay,
-                  totalLoggedHours
+                  totalLoggedHours,
                 );
                 console.log(hours + ":" + minutes + ":" + seconds);
                 calculatedOvertime = hours + ":" + minutes + ":" + seconds;
@@ -1658,29 +1523,17 @@ export default class DailyAttendanceService {
               }
             }
 
-            statusArray[k] = {
-              Time: TimeOutTime,
-              Date: AttendanceDate,
-              Action: "TimeOut",
-              EmpId: UserId,
-              InterimId: Id,
-              InterimAttendanceId: interimAttendanceId,
-              AttendanceMasterId: AttendanceMasterId,
-            };
-
-            k++;
-
             // if(($GeofenceOut=="Outside Geofence")){
             //   let attendance_sts=2;//absent
             let disappstatus = 2; //pending disaaprove
             let disattreason = "Outside Geofence";
 
-            console.log('calculate overunderTime= ' + calculatedOvertime);
-            console.log('calculate loggedHours= ' + totalLoggedHours);
+            console.log("calculate overunderTime= " + calculatedOvertime);
+            console.log("calculate loggedHours= " + totalLoggedHours);
 
-            const cond1 = `overtime='${calculatedOvertime}', TotalLoggedHours='${totalLoggedHours}'`;
+            //const cond1 = `overtime='${calculatedOvertime}', TotalLoggedHours='${totalLoggedHours}'`;
 
-            const updateResult = await AttendanceMaster.query()
+            const updateResult: any = await AttendanceMaster.query()
               .where("id", AttendanceMasterId)
               .update({
                 FakeLocationStatusTimeOut: FakeLocationOutStatus,
@@ -1708,7 +1561,6 @@ export default class DailyAttendanceService {
                 overtime: calculatedOvertime,
                 TotalLoggedHours: totalLoggedHours,
               });
-            //console.log(updateResult);
 
             if (
               (shiftType == "1" || shiftType == "2") &&
@@ -1724,11 +1576,11 @@ export default class DailyAttendanceService {
                   "C.TimeIn as shiftTimeIn",
                   "C.TimeOut as shiftTimeOut",
                   Database.raw(
-                    "TIMEDIFF(CONCAT(A.timeoutdate, ' ', A.TimeOut), CONCAT(A.timeindate, ' ', A.TimeIn)) as TotalLoggedHours"
+                    "TIMEDIFF(CONCAT(A.timeoutdate, ' ', A.TimeOut), CONCAT(A.timeindate, ' ', A.TimeIn)) as TotalLoggedHours",
                   ),
                   Database.raw(
-                    "CASE WHEN (C.shifttype = 2) THEN SUBTIME(TIMEDIFF(CONCAT('2021-08-21', ' ', C.TimeOut), CONCAT('2021-08-20', ' ', C.TimeIn)), TIMEDIFF(CONCAT(A.timeoutdate, ' ', A.TimeOut), CONCAT(A.timeindate, ' ', A.TimeIn))) ELSE SUBTIME(TIMEDIFF(A.TimeOut, A.TimeIn), TIMEDIFF(C.TimeOut, C.TimeIn)) END as overtime"
-                  )
+                    "CASE WHEN (C.shifttype = 2) THEN SUBTIME(TIMEDIFF(CONCAT('2021-08-21', ' ', C.TimeOut), CONCAT('2021-08-20', ' ', C.TimeIn)), TIMEDIFF(CONCAT(A.timeoutdate, ' ', A.TimeOut), CONCAT(A.timeindate, ' ', A.TimeIn))) ELSE SUBTIME(TIMEDIFF(A.TimeOut, A.TimeIn), TIMEDIFF(C.TimeOut, C.TimeIn)) END as overtime",
+                  ),
                 )
                 .innerJoin("ShiftMaster as C", "C.Id", "=", "A.ShiftId")
                 .where("A.Id", AttendanceMasterId)
@@ -1736,11 +1588,11 @@ export default class DailyAttendanceService {
 
               console.log("result->");
               console.log(result);
-              console.log(result[0].TotalLoggedHours);
+              console.log(result.TotalLoggedHours);
 
               if (result.length > 0) {
-                totalLoggedHours = result[0].TotalLoggedHours;
-                calculatedOvertime = result[0].overtime;
+                totalLoggedHours = result.TotalLoggedHours;
+                calculatedOvertime = result.overtime;
               }
 
               const updateLoggedHour = Database.from("AttendanceMaster")
@@ -1750,6 +1602,18 @@ export default class DailyAttendanceService {
                   overtime: calculatedOvertime,
                 });
             }
+
+            statusArray[k] = {
+              Time: TimeOutTime,
+              Date: AttendanceDate,
+              Action: "TimeOut",
+              EmpId: UserId,
+              InterimId: Id,
+              InterimAttendanceId: interimAttendanceId,
+              AttendanceMasterId: AttendanceMasterId,
+            };
+
+            k++;
           }
         }
       }

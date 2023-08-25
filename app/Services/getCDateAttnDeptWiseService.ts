@@ -16,10 +16,10 @@ export default class getCDateAttnDeptWiseService {
     var zone = await Helper.getTimeZone(getData.orgid);
     var timeZone = zone;
 
-    const now = DateTime.now().setZone(timeZone);
-    const yesterday = now.minus({ days: 1 });
-
-    var getDate = getData.date ? getData.date : yesterday;
+    const currentDate = DateTime.now().setZone(timeZone);
+    // const yesterday = now.minus({ days: 1 });
+// return currentDate;
+    var getDate = getData.date ? getData.date : currentDate;
     var formattedDate1 = getDate.toFormat("yyyy-MM-dd");
     var dateTimeUTC = DateTime.fromISO(formattedDate1, {
       zone: "Pacific/Pago_Pago",
@@ -63,6 +63,7 @@ export default class getCDateAttnDeptWiseService {
           "longi_in",
           "latit_out",
           "longi_out",
+          "EmployeeId",
           "Id",
           "TotalLoggedHours",
           "AttendanceStatus",
