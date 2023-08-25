@@ -342,8 +342,8 @@ export default class ShiftsService {
           let appModule = "Delete Shift";
           let  module = "Attendance App";
           let activityBy = 1;
-          let actionperformed =  ShiftName + "Shift has been deleted successfully";
-          let res = await Helper.ActivityMasterInsert(date,orgid,empId,activityBy,actionperformed,module,appModule)
+          let actionperformed = `<b> ${ShiftName}</b>.Shift has been deleted successfully`;
+          let res = await Helper.ActivityMasterInsert(date,orgid,empId,activityBy,appModule,actionperformed,module)
           result['status'] = true;
         }else{
           result['status'] = false;
