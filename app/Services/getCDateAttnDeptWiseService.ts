@@ -1,7 +1,8 @@
-import { DateTime } from "luxon";
 import Helper from "App/Helper/Helper";
 import moment from "moment";
 import Database from "@ioc:Adonis/Lucid/Database";
+const { Duration, DateTime } = require("luxon");
+import luxon from "luxon";
 
 export default class getCDateAttnDeptWiseService {
   static async getCDateAttnDeptWise(getData) {
@@ -18,7 +19,7 @@ export default class getCDateAttnDeptWiseService {
 
     const currentDate = DateTime.now().setZone(timeZone);
     // const yesterday = now.minus({ days: 1 });
-// return currentDate;
+    // return currentDate;
     var getDate = getData.date ? getData.date : currentDate;
     var formattedDate1 = getDate.toFormat("yyyy-MM-dd");
     var dateTimeUTC = DateTime.fromISO(formattedDate1, {
@@ -29,7 +30,6 @@ export default class getCDateAttnDeptWiseService {
 
     var time = moment().format("HH:mm:ss");
     var cdate = moment().format("yyyy-MM-DD");
-
     let dept_cond = "";
     let dept_cond1 = "";
 
@@ -154,13 +154,13 @@ export default class getCDateAttnDeptWiseService {
         if ((await GetOthersdaysAbsentees).length > 0) {
           var storeReponse: getdataforAbsenteesInterface[] = [];
           var queryResult = await GetOthersdaysAbsentees;
-          //console.log(//queryResult);
+          //(//queryResult);
           //var i=0;
           queryResult.forEach(function (val) {
             var Name;
-            var Getname = val.name.trim(" ",true);
-            //console.log(Getname.split(" "));
-            
+            var Getname = val.name.trim(" ", true);
+            //(Getname.split(" "));
+
             if (Getname.split(" ").length > 3) {
               var words = Getname.split(" ", 4);
               var firstthree = words.slice(0, 3);
@@ -205,10 +205,10 @@ export default class getCDateAttnDeptWiseService {
           .orderBy("name", "asc");
         const getAbsenteesResult = await GetDataForTodaysAbsentees;
         const getDataforcondONAbsenteesToday = Database.query()
-       
+
           .from("EmployeeMaster as E")
           .innerJoin("ShiftMaster as S", "E.Shift", "S.Id")
-          .innerJoin("AttendanceMaster as A", "E.Id","A.EmployeeId")
+          .innerJoin("AttendanceMaster as A", "E.Id", "A.EmployeeId")
           .select([
             Database.raw(
               "DATE_FORMAT(AttendanceDate,'%Y-%m-%d') as AttendanceDate"
@@ -272,7 +272,6 @@ export default class getCDateAttnDeptWiseService {
         return MegedArrayResult;
       }
     } else if (getData.datafor == "latecomings") {
-
       var getdataforLatecomings = Database.from("EmployeeMaster AS E")
         .innerJoin("AttendanceMaster AS AM", "E.Id", "AM.EmployeeId")
         .select(
@@ -352,108 +351,136 @@ AM.shiftId), 1, 5)`
 
       return GetResponse;
     } else if (getData.datafor == "earlyleavings") {
-      console.log("earlyleaings");
+      let takeResponse: any[] = [];
 
-      const subquery = Database.from("ShiftMaster")
-        .select("shifttype")
-        .where("Id", "ShiftId");
-
-      const getdataforearlyleavings = Database.from("EmployeeMaster AS E")
-        .select("E.Shift", "E.Id", "E.FirstName")
-        .whereIn(
-          "Id",
-          Database.from("AttendanceMaster")
-            .select("EmployeeId")
-            .where("OrganizationId", getData.orgid)
-            .where("AttendanceDate", date)
-            .where("TimeIn", "!=", "00:00:00")
-            .whereNotIn("ShiftId", subquery)
+      var getdataforearlyleavings = await Database.query()
+        .select(
+          "E.Shift",
+          "E.Id",
+          "E.FirstName",
+          "E.LastName",
+          "S.shifttype",
+          "S.TimeIn",
+          "S.TimeOut"
         )
-        .where("OrganizationId", getData.orgid)
-        .where("is_Delete", 0)
-        .orderBy("FirstName")
-        .limit(4);
+        .from("EmployeeMaster as E")
+        .innerJoin("AttendanceMaster as A", "A.EmployeeId", "E.Id")
+        .innerJoin("ShiftMaster as S", "A.ShiftId", "S.Id")
+        .where("A.OrganizationId", getData.orgid)
+        .andWhere("E.OrganizationId", getData.orgid)
+        .andWhere("S.OrganizationId", getData.orgid)
+        .andWhere("A.AttendanceDate", date)
+        .andWhere("A.TimeIn", "!=", "00:00:00")
+        .where("S.shifttype", "!=", "3")
+        .andWhere("E.is_Delete", 0)
+        .orderBy("E.FirstName");
 
-      var queryResult = await getdataforearlyleavings;
-      var takeResponse: any[] = [];
-      await Promise.all(
-        queryResult.map(async (val) => {
-          var data: any = {};
+      if (getdataforearlyleavings.length > 0) {
+        var shiftout = getdataforearlyleavings[0].TimeOut;
+        var shiftIn = getdataforearlyleavings[0].TimeIn;
+        var shiftout1 = date + " " + getdataforearlyleavings[0].TimeOut;
+        var shiftType = getdataforearlyleavings[0].shifttype;
 
-          data["ShiftId"] = val.Shift;
-          data["Id"] = val.Id;
-          data["FirstName"] = val.FirstName;
+        if (shiftType == 2) {
+          ("22222");
 
-          var selectShiftMasterId = await Database.from("ShiftMaster")
-            .where("Id", data["ShiftId"])
-            .select("TimeIn", "TimeOut", "shifttype", "HoursPerDay");
-          if (selectShiftMasterId.length > 0) {
-            var shiftin = selectShiftMasterId[0].TimeIn;
-            var shiftout = selectShiftMasterId[0].TimeOut;
-            var shiftType = selectShiftMasterId[0].shifttype;
+          const nextdate = moment(date, "YYYY-MM-DD")
+            .add(1, "days")
+            .format("YYYY-MM-DD");
+          shiftout1 = nextdate + " " + getdataforearlyleavings[0].TimeOut;
+        }
 
-            if (shiftType == 2) {
-              const nextdate = moment(date, "YYYY-MM-DD")
-                .add(1, "days")
-                .format("YYYY-MM-DD");
+        var getqueryResult = await getdataforearlyleavings;
 
-              const shift = `${shiftin.substring(0, 5)} - ${shiftout.substring(
-                0,
-                5
-              )}`;
+        await Promise.all(
+          getqueryResult.map(async (val) => {
+            let data2: any = {};
+            data2["Id"] = val.Id;
+            const shift = `${shiftIn.substring(0, 5)} - ${shiftout.substring(
+              0,
+              5
+            )}`;
+           
+            data2["shift"] = shift;
+
+            const getdatafromAttendanceMaster = await Database.from(
+              "AttendanceMaster"
+            )
+              .select(
+                Database.raw('SUBSTR(TimeIn, 1, 5) as "TimeIn"'),
+                Database.raw('SUBSTR(TimeOut, 1, 5) as "TimeOut"'),
+                Database.raw("'Present' as status"),
+                Database.raw(
+                  "SUBSTRING_INDEX(EntryImage, '.com/', -1) as EntryImage"
+                ),
+                Database.raw(
+                  "SUBSTRING_INDEX(ExitImage, '.com/', -1) as ExitImage"
+                ),
+                Database.raw("SUBSTR(checkInLoc, 1, 40) as checkInLoc"),
+                Database.raw("SUBSTR(CheckOutLoc, 1, 40) as CheckOutLoc"),
+
+                "latit_in",
+                "longi_in",
+                "latit_out",
+                "longi_out",
+                "Id",
+                "multitime_sts",
+                "ShiftId",
+                "TotalLoggedHours",
+                "AttendanceDate",
+                "AttendanceStatus"
+              )
+              .where("EmployeeId", data2["Id"])
+              .andWhere(" OrganizationId", getData.orgid)
+              .andWhere("TimeOut", "<", "18:45:00")
+              .andWhere("AttendanceDate", date)
+              .whereIn("AttendanceStatus", [1, 3, 4, 5, 8]);
+
+            if ((await getdatafromAttendanceMaster.length) > 0) {
+              var data: any = {};
+              var row333 = await getdatafromAttendanceMaster;
+              data["ShiftId"] = val.Shift;
+              data["Id"] = val.Id;
+              data["name"] = val.FirstName + val.LastName;
+              data["shifttype"] = val.shifttype;
               data["shift"] = shift;
-              data["nextdate"] = nextdate;
+              data["FirstName"] = row333[0].FirstName;
+              data["TimeIn"] = row333[0].TimeIn;
+              data["TimeOut"] = row333[0].TimeOut;
+              var b = row333[0].TimeOut;
+
+              const formattedTime = moment(shiftout, "HH:mm:ss").format(
+                "HH:mm"
+              );
+              const startDateTime = DateTime.fromFormat(b, "HH:mm");
+              const endDateTime = DateTime.fromFormat(formattedTime, "HH:mm");
+
+              const Interval = endDateTime.diff(startDateTime, [
+                "hours",
+                "minutes"]);
+
+              const earlyby =  Interval.toFormat("hh:mm")
+
+              data["earlyby"] = earlyby;
+              data["EntryImage"] = row333[0].EntryImage;
+              data["ExitImage"] = row333[0].ExitImage;
+              data["checkInLoc"] = row333[0].checkInLoc;
+              data["CheckOutLoc"] = row333[0].CheckOutLoc;
+              data["latit_in"] = row333[0].latit_in;
+              data["longi_in"] = row333[0].longi_in;
+              data["status"] = row333[0].status;
+              data["Date"] = moment(row333[0].AttendanceDate).format(
+                "YYYY-MM-DD"
+              );
+              data["TotalLoggedHours"] = row333[0].TotalLoggedHours;
+              data["status"] = row333[0].AttendanceStatus;
+              data["multitime_sts"] = row333[0].status;
               takeResponse.push(data);
             }
-
-            if (cdate == date) {
-              const getdatafromAttendanceMaster = await Database.from(
-                "AttendanceMaster"
-              )
-                .select(
-                  Database.raw('SUBSTR(TimeIn, 1, 5) as "TimeIn"'),
-                  Database.raw('SUBSTR(TimeOut, 1, 5) as "TimeOut"'),
-                  Database.raw("'Present' as status"),
-                  Database.raw(
-                    "SUBSTRING_INDEX(EntryImage, '.com/', -1) as EntryImage"
-                  ),
-                  Database.raw(
-                    "SUBSTRING_INDEX(ExitImage, '.com/', -1) as ExitImage"
-                  ),
-                  Database.raw("SUBSTR(checkInLoc, 1, 40) as checkInLoc"),
-                  Database.raw("SUBSTR(CheckOutLoc, 1, 40) as CheckOutLoc"),
-                  "latit_in",
-                  "longi_in",
-                  "latit_out",
-                  "longi_out",
-                  "Id",
-                  "multitime_sts",
-                  "ShiftId",
-                  "TotalLoggedHours"
-                )
-                .where("EmployeeId", data["Id"])
-                .limit(limit);
-
-              if ((await getdatafromAttendanceMaster.length) > 0) {
-                var row333 = await getdatafromAttendanceMaster;
-                data["TimeIn"] = row333[0].TimeIn;
-
-                data["TimeOut"] = row333[1].TimeOut;
-                data["EntryImage"] = row333[2].EntryImage;
-                data["ExitImage"] = row333[3].ExitImage;
-                data["checkInLoc"] = row333[4].checkInLoc;
-                data["CheckOutLoc"] = row333[5].CheckOutLoc;
-                data["latit_in"] = row333[6].latit_in;
-                data["longi_in"] = row333[7].longi_in;
-                takeResponse.push(data);
-                return takeResponse;
-              }
-            }
-          }
-          takeResponse.push(data);
-        })
-      );
-      return takeResponse;
+          })
+        );
+        return takeResponse;
+      }
     }
   }
 }
