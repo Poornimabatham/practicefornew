@@ -47,4 +47,14 @@ export default class DesignationsController {
     return response.json(getResponsefromService);
     
   }
+
+  public async DesignationsGetStatus({ request, response }: HttpContextContract) {
+    const a = await request.validate(
+      DesignationValidator.DesignationStatusSchema
+    );
+
+    const b = await DesignationService.DesignationStatus(a);
+
+    return response.json(b);
+  }
 }

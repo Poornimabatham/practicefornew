@@ -58,4 +58,14 @@ export default class DepartmentsController {
 
     return response.json(getResponsefromService);
   }
+
+  public async GetDepartmentStatus({ request, response }: HttpContextContract) {
+    const requestValidate = await request.validate(
+      DepartmentValidator.DepartmentStatusSchema
+    );
+
+    const service = await DepartmentService.DepartmentStatus(requestValidate);
+
+    return response.json(service);
+  }
 }

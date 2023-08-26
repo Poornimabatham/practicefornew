@@ -226,4 +226,28 @@ export default class DepartmentService {
       return "Error inserting ActivityMasterInsert";
     }
   }
+
+  // GetDepartmentStatus
+
+  public static async DepartmentStatus(get) {
+    var orgId = get.orgid;
+    var deptId = get.Id;
+    const selectEmployeeList = await Database.from("EmployeeMaster")
+      .select(Database.raw("COUNT(*) as num"))
+      .where("OrganizationId", orgId)
+      .andWhere("Department", deptId)
+      .andWhere("Is_Delete", "!=", 2);
+
+    const result = await selectEmployeeList;
+    const selectAttendanceMasterList = await Database.from("AttendanceMaster")
+      .select(Database.raw("COUNT(*) as  totemp"))
+      .where("Dept_id", deptId)
+      .andWhere("OrganizationId", orgId);
+
+    const result2 = await selectAttendanceMasterList;
+    return {
+      num: result[0].num,
+      attNum: result2[0].totemp,
+    };
+  }
 }

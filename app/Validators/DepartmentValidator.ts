@@ -1,6 +1,6 @@
-import { schema } from '@ioc:Adonis/Core/Validator'
-import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import BaseValidator from './BaseValidator'
+import { schema } from "@ioc:Adonis/Core/Validator";
+import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
+import BaseValidator from "./BaseValidator";
 
 export default class DepartmentValidator extends BaseValidator {
   constructor(protected ctx: HttpContextContract) {
@@ -50,5 +50,11 @@ export default class DepartmentValidator extends BaseValidator {
       adminname: schema.string(),
     }),
   };
-}
 
+  static DepartmentStatusSchema = {
+    schema: schema.create({
+      orgid: schema.number(),
+      Id: schema.number(),
+    }),
+  };
+}

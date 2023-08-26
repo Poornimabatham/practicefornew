@@ -19,6 +19,6 @@ export default class ChangePasswordOtpsController {
 
         const service = await changePasswordOTPService.newchangepass(validatedata);
 
-         response.json(service);
+        return response.json(service);
     }
 }

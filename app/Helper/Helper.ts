@@ -534,6 +534,7 @@ export default class Helper {
     }
   }
 
+
   public static async getOrgName(id:number){
     let Name =''
   const queryResult = await Database.from("Organization").where("Id",id).select("Name")
@@ -541,8 +542,10 @@ export default class Helper {
 
 
     Name= queryResult[0].Name;
+    return Name
   }else{
     return Name
   }
+
   }
 }
