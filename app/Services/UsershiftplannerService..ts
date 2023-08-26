@@ -21,8 +21,8 @@ export default class UsershiftplannerService {
         "S.TimeOut",
         "A.disapprove_sts "
       )
-      .where("S.OrganizationId", organizationId)
-      .where("A.EmployeeId", userid);
+      .andWhere("S.OrganizationId", organizationId)
+      .where("A.EmployeeId", userid)
 
     const response: any[] = [];
     selectAttendanceMasterList.forEach((element) => {
@@ -32,12 +32,12 @@ export default class UsershiftplannerService {
 
       data["AttendanceStatus"] = element.AttendanceStatus;
       data["ShiftType"] = element.shifttype;
-      data["STimeIn"] = element.TimeIn.substr(0, 5);
-      data["STimeOut"] = element.TimeOut.substr(0, 5);
-      data["PunchTimeIn"] = element.PunchTimeIn.substr(0, 5);
-      data["PunchTimeOut"] = element.PunchTimeOut.substr(0, 5);
+      data["TimeIn"] = element.TimeIn
+      data["TimeOut"] = element.TimeOut
+      data["PunchTimeIn"] = element.PunchTimeIn
+      data["PunchTimeOut"] = element.PunchTimeOut
       data["disapprove"] = element.disapprove_sts;
-      data["Logged"] = element.HoursPerDay.substr(0, 5);
+      data["Logged"] = element.HoursPerDay
       response.push(data);
     });
     return response;

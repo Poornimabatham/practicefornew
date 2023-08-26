@@ -9,7 +9,7 @@ export default class GetappVersionValidator extends BaseValidator {
 
   static GetappVersionschema = {
     schema: schema.create({
-      platform: schema.string([rules.alphaNum()]),
+      platform: schema.string(),
     }),
   };
 }
