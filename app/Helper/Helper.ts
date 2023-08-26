@@ -541,6 +541,7 @@ export default class Helper {
 
 
     Name= queryResult[0].Name;
+    return Name
   }else{
     return Name
   }
