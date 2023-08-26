@@ -91,6 +91,26 @@ export default class UserSettingValidator  {
       divhrsts:schema.number()
      })
    }
+
+   static recoverPinLoginCredential  = {
+    schema:schema.create({
+      Orgid:schema.number(),
+      Empid:schema.number(),
+      userName:schema.string(),
+      password:schema.string()
+    })
+   }
+
+   static UpdateQR = {
+     
+      schema:schema.create({
+        userId:schema.number(),
+        orgId:schema.number(),
+        status:schema.number()
+
+      })
+   }
+
   /**
    * Custom messages for validation failures. You can make use of dot notation `(.)`
    * for targeting nested fields and array expressions `(*)` for targeting all

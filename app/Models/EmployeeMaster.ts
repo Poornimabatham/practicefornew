@@ -5,7 +5,7 @@ export default class EmployeeMaster extends BaseModel {
   public static table = 'EmployeeMaster'
 
   @column({ isPrimary: true })
-  public id: number
+  public Id: number
 
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime
@@ -25,6 +25,9 @@ export default class EmployeeMaster extends BaseModel {
   @column({columnName:'Designation'})
   public Designation: number
 
+  @column({columnName:'OrganizationId'})
+  public OrganizationId: number
+
   @column({columnName:'area_assigned'})
   public area_assigned: number
 
@@ -33,4 +36,7 @@ export default class EmployeeMaster extends BaseModel {
 
   @column({columnName:'OwnerId'})
   public OwnerId: number
+  
+  @column({columnName:'Shift'})
+  public Shift: number
 }

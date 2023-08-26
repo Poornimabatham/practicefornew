@@ -18,35 +18,44 @@
 |
 */
 
-
-import "../app/Routes/EmployeeRoute"
-import "../app/Routes/SignInRoute"
-import  "../app/Routes/DesignationRoute"
-import "../app/Routes/GeofenceRoute"
-import "../app/Routes/GeofenceRoute"
-import "../app/Routes/UserSettingRoute"
-import  "../app/Routes/DepartmentRoute"
-import  "../app/Routes/GetTokenRoute"
-import  '../app/Routes/ShiftRoute'
-import  '../app/Routes/HolidayRoute'
-import '../app/Routes/DailyAttendanceRoute'
-import  '../app/Routes/GetEarlyComingsRoute'
-import  '../app/Routes/getEarlyLeavingsRoutes'
-import "../app/Routes/LateComingRoute"
-import "../app/Routes/Report/GetplannerRoute"
-import "../app/Routes/getOutsidegeoRoute"
-import "../app/Routes/AttendanceRoute"
-import  "../app/Routes/ClientsRoute"
-import "../app/Routes/getInfoRoute"
-import Redis from '@ioc:Adonis/Addons/Redis'
-import "../app/Routes/getEmpdataDepartmentWiseNewRoute"
-import "../app/Routes/getCDateAttnDeptWiseRoutes"
+import "../app/Routes/EmployeeRoute";
+import "../app/Routes/SignInRoute";
+import "../app/Routes/DesignationRoute";
+import "../app/Routes/GeofenceRoute";
+import "../app/Routes/GeofenceRoute";
+import "../app/Routes/UserSettingRoute";
+import "../app/Routes/DepartmentRoute";
+import "../app/Routes/GetTokenRoute";
+import "../app/Routes/ShiftRoute";
+import "../app/Routes/HolidayRoute";
+import "../app/Routes/DailyAttendanceRoute";
+import "../app/Routes/GetEarlyComingsRoute";
+import "../app/Routes/getEarlyLeavingsRoutes";
+import "../app/Routes/LateComingRoute";
+import "../app/Routes/Report/GetplannerRoute";
+import "../app/Routes/getOutsidegeoRoute";
+import "../app/Routes/AttendanceRoute";
+import "../app/Routes/ClientsRoute";
+import "../app/Routes/getInfoRoute";
+import Redis from "@ioc:Adonis/Addons/Redis";
+import "../app/Routes/getEmpdataDepartmentWiseNewRoute";
+import "../app/Routes/getCDateAttnDeptWiseRoutes";
+import "../app/Routes/UsershiftplannerRoute";
+import "../app/Routes/UserSettingRoute";
+import "../app/Routes/getDataToApplyRegRoute";
+import "../app/Routes/MyAddonUserInfoRoute";
+import "../app/Routes/StoreRatingRoute";
+import "../app/Routes/GetLastTimeOutRoute";
+import "../app/Routes/changePasswordOTPRoute";
+import "../app/Routes/SelectCountryCodeRoute"
+import "../app/Routes/ResetPasswordLinkRoute"
+import "../app/Routes/CheckUserEmailRoute"
+import "../app/Routes/getInterimAttendancesRoute"
+import "../app/Routes/GetappVersionRoute"
 
 // Route.get('/', async () => {
 //     return "Working fine!"
 // })
-
-
 
 // Route.get('/', async () => {
 // await Redis.set('hello', 'world')
@@ -54,6 +63,4 @@ import "../app/Routes/getCDateAttnDeptWiseRoutes"
 //     return value
 // })
 
-
-
-
+import "../app/Routes/ApprovalRegularizationRoute";

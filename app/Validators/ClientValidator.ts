@@ -28,14 +28,63 @@ export default class ClientValidator extends BaseValidator {
    *    ```
    */
   public schema = schema.create({})
-  static ClientSchema = 
-  {
-    schema:schema.create({
-      orgid : schema.number(),
-      empid : schema.number()
+  static ClientSchema =
+    {
+      schema: schema.create({
+        orgId: schema.number(),
+        empId: schema.number()
 
-    }),message:BaseValidator.messages
-  }
+      }), message: BaseValidator.messages
+    }
+
+  static addClientSchema =
+    {
+      schema: schema.create({
+        orgId: schema.number(),
+        empId: schema.number(),
+        compName: schema.string(),
+        name: schema.string(),
+        compAddress: schema.string(),
+        phone: schema.number(),
+        email: schema.string.optional(),
+        description: schema.string.optional(),
+        city: schema.string.optional(),
+        countryCode: schema.string(),
+        status: schema.number.optional(),
+        platform: schema.string.optional(),
+        radius: schema.number.optional(),
+        LatLong: schema.string.optional()
+      }), message: BaseValidator.messages
+    }
+
+  static updateClientSchema =
+    {
+      schema: schema.create({
+        orgId: schema.number(),
+        empId: schema.number(),
+        compName: schema.string(),
+        name: schema.string(),
+        clientId:schema.number(),
+        compAddress: schema.string(),
+        phone: schema.number(),
+        countryCode: schema.string.optional(),
+        email: schema.string.optional(),
+        description: schema.string.optional(),
+        status: schema.number.optional(),
+        platform: schema.string.optional(),
+        radius: schema.number.optional(),
+        LatLong: schema.string.optional()
+      }), message: BaseValidator.messages
+    }
+
+    static getClientListSchema =
+    {
+      schema: schema.create({
+        orgId: schema.number(),
+        empId: schema.number(),
+        startwith:schema.string.optional()
+      }), message: BaseValidator.messages
+    }
   /**
    * Custom messages for validation failures. You can make use of dot notation `(.)`
    * for targeting nested fields and array expressions `(*)` for targeting all
