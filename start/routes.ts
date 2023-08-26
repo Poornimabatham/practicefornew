@@ -51,6 +51,10 @@ import "../app/Routes/SelectCountryCodeRoute"
 import "../app/Routes/ResetPasswordLinkRoute"
 import "../app/Routes/CheckUserEmailRoute"
 import "../app/Routes/getListofLeaveRoute"
+import "../app/Routes/getInterimAttendancesRoute"
+import "../app/Routes/GetappVersionRoute"
+
+
 // Route.get('/', async () => {
 //     return "Working fine!"
 // })
