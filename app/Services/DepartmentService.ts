@@ -250,4 +250,21 @@ export default class DepartmentService {
       attNum: result2[0].totemp,
     };
   }
+
+  public static async getEmpdataDepartmentWiseCount(getdata) {
+
+    const orgId = getdata.orgId;
+    const empId = getdata.empId;
+    const zone = await Helper.getTimeZone(orgId);
+    const defaultZone = DateTime.now().setZone(zone);
+    const date: string = defaultZone.toFormat("yyyy-MM-dd")
+    const todayDate = DateTime.now().toISODate();
+    const time: string = defaultZone.toFormat("HH:mm:ss")
+    var data = {};
+    data['departments'] = 0;
+    data['present'] = 0;
+    data['absent'] = 0;
+    data['total'] = 0;
+
+  }
 }

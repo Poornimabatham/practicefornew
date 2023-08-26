@@ -57,4 +57,12 @@ export default class DepartmentValidator extends BaseValidator {
       Id: schema.number(),
     }),
   };
+
+  static getEmpdataDepartmentWiseCount = {
+    schema: schema.create({
+      orgId: schema.number(),
+      empId: schema.number(),
+      date:schema.date()
+    }),
+  };
 }
