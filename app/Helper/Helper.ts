@@ -533,4 +533,16 @@ export default class Helper {
       return encodedString;
     }
   }
+
+  public static async getOrgName(id: number) {
+    let Name = ''
+    const queryResult = await Database.from("Organization").where("Id", id).select("Name")
+    if (queryResult.length > 0) {
+      Name = queryResult[0].Name;
+      return Name
+    }
+    else {
+      return Name;
+    }
+  }
 }
