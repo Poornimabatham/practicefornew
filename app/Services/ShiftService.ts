@@ -355,4 +355,39 @@ export default class ShiftsService {
 
      return result;
  }
+
+
+  static async getMultiShiftsList(data){
+
+   const  orgid = data.refno;
+   const emplid = data.empid;
+   const res:any[]= [];
+   let shiftid;
+
+   const shiftdata = await Database.query().from('ShiftPlanner as S').select('*').innerJoin('ShiftMaster as SM','S.shiftid','SM.Id').where('empid',emplid).andWhere('orgid',orgid)
+  
+   
+   if(shiftdata.length > 0)
+   {
+        
+        shiftdata.forEach(async(element) => {
+          let result:any = {};
+          result['shiftdate'] = moment(element.ShiftDate).format('YY-MM-DD');
+          shiftid = element.shiftid;
+          result['shiftid'] = shiftid;
+          result['weekoffStatus']=element.weekoffStatus;            
+          result['shiftTiming']= await Helper.getShiftType(shiftid) == '3' ? await Helper.getFlexiShift(shiftid) : await Helper.getShiftTimes(shiftid);
+          result['id'] = element.Id
+          result['shiftype'] =element.shifttype;
+          result['HoursPerDay']=element.HoursPerDay
+          res.push(result);
+            
+        });
+        return res;
+     }else{
+        return false
+     }
+
+  }
+
 }

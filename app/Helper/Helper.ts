@@ -7,9 +7,10 @@ import ShiftMaster from "App/Models/ShiftMaster";
 import ZoneMaster from "App/Models/ZoneMaster";
 import moment from "moment";
 export default class Helper {
-  public static encode5t(str: any) {
+  public static encode5t(str: string) {
+    var contactNum = str.toString() 
     for (let i = 0; i < 5; i++) {
-      str = Buffer.from(str).toString("base64");
+      str = Buffer.from(contactNum).toString("base64");
       str = str.split("").reverse().join("");
     }
     return str;
@@ -286,8 +287,6 @@ export default class Helper {
   public static async getShiftType(shiftId) {
     const defaultshifttype = 0;
     const allDataOfShiftMaster: any = await ShiftMaster.find(shiftId);
-    // console.log(allDataOfShiftMaster?.toSQL().toNative());
-
     if (allDataOfShiftMaster) {
       return allDataOfShiftMaster
         ? allDataOfShiftMaster.shifttype
@@ -485,7 +484,7 @@ export default class Helper {
 
     if (getshiftid.length > 0) {
       shift = getshiftid[0].Id;
-      console.log(getshiftid);
+      return shift;
     } else {
       return shift;
     }
@@ -534,5 +533,45 @@ export default class Helper {
 
       return encodedString;
     }
+  } 
+
+  public static async getDesignationId(name,orgid)
+  {
+    let desi ;
+    let designationdata = await Database.query().from('DesignationMaster').select('*').where('Name',name).andWhere('OrganizationId',orgid);
+    if(designationdata.length > 0){
+       desi = designationdata[0].Id;
+       return desi;
+    }else{
+       return desi;
+    }
   }
+
+  public static  async getFlexiShift(id)
+  {
+    let query = await Database.query().from('ShiftMaster').select('HoursPerDay').where('Id',id);
+    let HoursPerDay;
+    
+    if(query.length > 0){     
+      HoursPerDay = query[0].HoursPerDay;  
+      return HoursPerDay;
+    }else{
+      return HoursPerDay;
+    }
+  }
+
+  public static async getShiftTimes(id){
+
+    let query = await Database.query().from('ShiftMaster').select('TimeIn','TimeOut','HoursPerDay').where('Id',id)
+
+    if(query.length > 0){
+       if(query[0].TimeIn == '00:00:00' || query[0].TimeIn == ""){
+       }else{
+          return query[0].TimeIn + "-" +query[0].TimeOut;
+       }
+    }
+    
+  }
+
+
 }

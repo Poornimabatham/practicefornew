@@ -9,4 +9,5 @@ Route.post("/updateShift", "ShiftsController.update")
 
 Route.post("/deleteInActivateShift", "ShiftsController.destroy")
   //.middleware('throttle:global').middleware('auth')
-Route.patch("/assignShift","ShiftsController.assignShift")                                                                                                                                                               
+Route.patch("/assignShift","ShiftsController.assignShift")  
+Route.get('/Multishift',"ShiftsController.getMultiShiftsList")                                                                                                                                                             

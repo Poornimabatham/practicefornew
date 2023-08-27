@@ -61,6 +61,13 @@ export default class ShiftValidator {
     }),
   };
 
+  static MultiShift = {
+     schema:schema.create({
+        refno:schema.number(),
+        empid:schema.number()
+     })
+  }
+
   /*
    * Define schema to validate the "shape", "type", "formatting" and "integrity" of data.
    *
