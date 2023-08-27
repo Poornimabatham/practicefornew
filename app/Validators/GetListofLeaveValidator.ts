@@ -2,7 +2,7 @@ import { schema, CustomMessages } from '@ioc:Adonis/Core/Validator'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import BaseValidator from './BaseValidator'
 
-export default class ChangePasswordOtpValidator {
+export default class GetListofLeaveValidator {
   constructor(protected ctx: HttpContextContract) { }
 
   /*
@@ -24,20 +24,33 @@ export default class ChangePasswordOtpValidator {
    *     ])
    *    ```
    */
-  static changePasswordOTP = {
+  static getListofLeaveAll = {
     schema: schema.create({
-      email: schema.string.optional(),
-      phone: schema.string()
+      orgId: schema.number(),
+      empId: schema.number(),
+      pageName: schema.string(),
+      currentPage: schema.number.optional(),
+      perPage: schema.string.optional()
     }), message: BaseValidator.messages
   }
 
-  static newchangepass = {
+  static getListofLeave = {
     schema: schema.create({
-      changepassphone: schema.string(),
-      newpass: schema.string.optional()
+      orgId: schema.number(),
+      empId: schema.number(),
+      pageName: schema.string(),
+      currentPage: schema.number.optional(),
+      perPage: schema.string.optional()
     }), message: BaseValidator.messages
   }
 
+  static withdrawLeave = {
+    schema: schema.create({
+      orgId: schema.number(),
+      empId: schema.number(),
+      LeaveId: schema.number(),
+    }), message: BaseValidator.messages
+  }
   /**
    * Custom messages for validation failures. You can make use of dot notation `(.)`
    * for targeting nested fields and array expressions `(*)` for targeting all

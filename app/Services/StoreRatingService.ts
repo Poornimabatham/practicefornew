@@ -7,17 +7,19 @@ export default class StoreRatingService {
     var Remark = data.remark;
     var Rating = data.rating;
     var res1;
-   
-    const date = moment().format('YYYY-MM-DD');
+
+    const date = moment().format("YYYY-MM-DD");
 
     const modifiedDate = moment().format("YYYY-MM-DD HH:mm:ss");
-    var selectUbiAttendanceRatings:any = await Database.from("ubiAttendanceRatings")
+    var selectUbiAttendanceRatings: any = await Database.from(
+      "ubiAttendanceRatings"
+    )
       .where("EmployeeId", Empid)
       .andWhere("OrganizationId", organizationId)
       .select("*");
+
     const result = selectUbiAttendanceRatings.length;
     if (result > 0) {
-      console.log(selectUbiAttendanceRatings.length);
       var updateUbiAttendanceRatings = await Database.from(
         " ubiAttendanceRatings"
       )
@@ -37,7 +39,6 @@ export default class StoreRatingService {
 
       return data;
     } else {
-      console.log("kk");
       var insertUbiAttendanceRatings: any = await Database.insertQuery()
         .table("ubiAttendanceRatings")
         .insert({
@@ -52,9 +53,9 @@ export default class StoreRatingService {
     }
 
     if (res1) {
-      data["status"] = "1";
+      data["status"] = "TRUE";
     } else {
-      data["status"] = "0";
+      data["status"] = "FALSE";
     }
 
     return data;

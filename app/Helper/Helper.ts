@@ -41,23 +41,21 @@ export default class Helper {
       return TimeZone;
     }
   }
-  
 
   public static async getAdminStatus(id: any) {
-        let status = 0;
-        const queryResult = await Database.query()
-          .from("UserMaster")
-          .select("appSuperviserSts")
-          .where("EmployeeId", id)
-          .first();
-    
-        if (queryResult) {
-          status = queryResult.appSuperviserSts;
-        }
-    
-        return status;
-      }
+    let status = 0;
+    const queryResult = await Database.query()
+      .from("UserMaster")
+      .select("appSuperviserSts")
+      .where("EmployeeId", id)
+      .first();
 
+    if (queryResult) {
+      status = queryResult.appSuperviserSts;
+    }
+
+    return status;
+  }
 
   public static async getempnameById(empid: number) {
     let FirstName = "";
@@ -574,4 +572,18 @@ export default class Helper {
   }
 
 
+
+  public static async getOrgName(id:number){
+    let Name =''
+  const queryResult = await Database.from("Organization").where("Id",id).select("Name")
+  if (queryResult.length > 0) {
+
+
+    Name= queryResult[0].Name;
+    return Name
+  }else{
+    return Name
+  }
+
+  }
 }

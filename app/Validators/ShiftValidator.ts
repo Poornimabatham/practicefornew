@@ -67,6 +67,20 @@ export default class ShiftValidator {
         empid:schema.number()
      })
   }
+  static AssignShiftByDepart = {
+    schema: schema.create({
+      orgid: schema.number(),
+      shiftid: schema.number(),
+      departid: schema.number(),
+      date: schema.string(),
+      status: schema.number(),
+      WeekoffStatus: schema.number(),
+      adminid: schema.number(),
+      adminname: schema.string(),
+      departname:schema.string(),
+      shiftname:schema.string()
+    }),
+  };
 
   /*
    * Define schema to validate the "shape", "type", "formatting" and "integrity" of data.

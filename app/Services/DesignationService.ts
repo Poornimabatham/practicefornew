@@ -245,4 +245,28 @@ export default class DesignationService {
       return "Error inserting activity history";
     }
   }
+
+    // GetDesignationStatus
+
+  public static async DesignationStatus(get) {
+    var Orgid = get.orgid;
+    var DesigId = get.Id;
+
+    const selectEmployeeList = await Database.from("EmployeeMaster")
+      .select(Database.raw("COUNT(*) as num"))
+      .where("OrganizationId", Orgid)
+      .andWhere(" Designation", DesigId)
+
+    const result = await selectEmployeeList;
+    const selectAttendanceMasterList = await Database.from("AttendanceMaster")
+      .select(Database.raw("COUNT(*) as  totemp"))
+      .where("Desg_id", DesigId)
+      .andWhere("OrganizationId", Orgid);
+
+    const result2 = await selectAttendanceMasterList;
+    return {
+      num: result[0].num,
+      attNum: result2[0].totemp,
+    };
+  }
 }
