@@ -358,6 +358,42 @@ export default class ShiftsService {
      return result;
  }
 
+
+  static async getMultiShiftsList(data){
+
+   const  orgid = data.refno;
+   const emplid = data.empid;
+   const res:any[]= [];
+   let shiftid;
+
+   const shiftdata = await Database.query().from('ShiftPlanner as S').select('*').innerJoin('ShiftMaster as SM','S.shiftid','SM.Id').where('empid',emplid).andWhere('orgid',orgid)
+  
+   
+   if(shiftdata.length > 0)
+   {
+        
+        shiftdata.forEach(async(element) => {
+          let result:any = {};
+          result['shiftdate'] = moment(element.ShiftDate).format('YY-MM-DD');
+          shiftid = element.shiftid;
+          result['shiftid'] = shiftid;
+          result['weekoffStatus']=element.weekoffStatus;            
+          // result['shiftTiming']= await Helper.getShiftType(shiftid) == '3' ? await Helper.getFlexiShift(shiftid) : await Helper.getShiftTimes(shiftid);
+          result['shiftype'] =element.shifttype;
+          if(result['shiftype'] == "3"){
+             result['shiftTiming'] = element.HoursPerDay
+          }else{
+            result['shiftTiming'] = element.TimeIn + "-" + element.TimeOut
+          }
+          result['HoursPerDay']=element.HoursPerDay
+          res.push(result);            
+        })
+        return res;
+     }else{
+        return false
+     }
+  } 
+
  public static async AssignShiftByDepart(reqdata){
     const date = moment(reqdata['date']).format('YYYY-MM-DD'); 
     const zone = await Helper.getTimeZone(reqdata['Orgid']);

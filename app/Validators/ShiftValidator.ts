@@ -61,6 +61,12 @@ export default class ShiftValidator {
     }),
   };
 
+  static MultiShift = {
+     schema:schema.create({
+        refno:schema.number(),
+        empid:schema.number()
+     })
+  }
   static AssignShiftByDepart = {
     schema: schema.create({
       orgid: schema.number(),
