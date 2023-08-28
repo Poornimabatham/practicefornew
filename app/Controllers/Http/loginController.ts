@@ -28,6 +28,15 @@ export default class LoginController {
         }
       } 
   }
+
+   public async newregister_orgTemp({request,response}:HttpContextContract)
+   {
+
+     const validata = await request.validate(loginValidator.singupvalidator)
+     const res      = await loginService.newregister_orgTemp(validata)
+     response.json(res)
+
+   }
 }
 
  
