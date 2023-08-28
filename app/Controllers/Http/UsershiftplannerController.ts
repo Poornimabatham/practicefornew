@@ -2,7 +2,7 @@ import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import UsershiftplannerService from "App/Services/UsershiftplannerService.";
 import UsershiftplannerValidator from "App/Validators/UsershiftplannerValidator";
 
-export default class UsershiftPlannerController {
+export default class UsershiftplannerController {
   public async FetchUsershiftPlanner({
     request,
     response,
@@ -21,5 +21,11 @@ export default class UsershiftPlannerController {
     const a = await  request.validate(UsershiftplannerValidator.InsertdeviceInfochema)
     const b = await  UsershiftplannerService.Storedeviceinformation(a)
     return  response.json(b)      
+}
+
+public async getShiftDetailsShiftPlanner({request,response}:HttpContextContract){
+  const InputValidation = await request.validate(UsershiftplannerValidator.getShiftDetailsShiftPlanner)
+  const output = await UsershiftplannerService.getShiftDetailsdata(InputValidation)
+  return response.json(output)
 }
 }

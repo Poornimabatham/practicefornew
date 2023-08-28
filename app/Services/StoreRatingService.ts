@@ -1,12 +1,13 @@
 import Database from "@ioc:Adonis/Lucid/Database";
 import moment from "moment";
 export default class StoreRatingService {
-  public static async StoreRatings(data) {
-    var Empid = data.empid;
-    var organizationId = data.orgid;
-    var Remark = data.remark;
-    var Rating = data.rating;
+  public static async StoreRatings(get) {
+    var Empid = get.empid;
+    var organizationId = get.orgid;
+    var Remark = get.remark;
+    var Rating = get.rating;
     var res1;
+    const data = {};
 
     const date = moment().format("YYYY-MM-DD");
 
