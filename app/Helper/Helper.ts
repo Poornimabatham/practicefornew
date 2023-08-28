@@ -60,11 +60,11 @@ export default class Helper {
   public static async getempnameById(empid: number) {
     let FirstName = "";
     const query2: any = await Database.query()
-      .from("EmployeeMaster")
-      .select("FirstName")
+      .from("EmployeeMaster as E")
+      .select(Database.raw(`IF(E.lastname != '', CONCAT(E.FirstName, ' ', E.lastname), E.FirstName) as Name`))
       .where("Id", empid);
-    if (query2 > 0) {
-      return query2[0].FirstName;
+    if (query2.length > 0) {
+      return query2[0].Name;
     } else {
       return FirstName;
     }

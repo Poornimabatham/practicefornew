@@ -53,6 +53,7 @@ import "../app/Routes/CheckUserEmailRoute"
 import "../app/Routes/getListofLeaveRoute"
 import "../app/Routes/getInterimAttendancesRoute"
 import "../app/Routes/GetappVersionRoute"
+import "../app/Routes/Report/GetAttendanceEmployeewise";
 
 
 // Route.get('/', async () => {
