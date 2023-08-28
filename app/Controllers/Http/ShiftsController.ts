@@ -50,6 +50,11 @@ export default class ShiftsController {
     return response.json(getResponsefromService);
   }
 
+  public async getMultiShiftsList({request,response}){
+    const validata = await request.validate(ShiftValidator.MultiShift);
+    const res = await ShiftsService.getMultiShiftsList(validata)
+    response.json(res)
+  }
   /////////////ashish//////////////////////
   public async AssignShiftsByDepartment({ request, response }: HttpContextContract) {
 
