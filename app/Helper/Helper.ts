@@ -34,7 +34,7 @@ export default class Helper {
         Database.raw(
           `(select TimeZone from Organization where id =${orgid}  LIMIT 1)`
         )
-      );
+      ).toQuery();
     if (query1.length > 0) {
       return query1[0].name;
     } else {
@@ -488,6 +488,13 @@ export default class Helper {
     }
   }
 
+  public static async getShiftByEmpID(Id : any){
+    const query :any = await Database.query().from('ShiftMaster').select('Name').where('id',Id);
+    query.forEach((row:any)=>{
+      const Name = row.Name;
+      return Name;
+    })
+  }
   public static async myUrlEncode(country_code) {
     const entities = [
       "%20",

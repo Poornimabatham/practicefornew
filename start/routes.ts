@@ -37,7 +37,7 @@ import "../app/Routes/getOutsidegeoRoute";
 import "../app/Routes/AttendanceRoute";
 import "../app/Routes/ClientsRoute";
 import "../app/Routes/getInfoRoute";
-import Redis from "@ioc:Adonis/Addons/Redis";
+
 import "../app/Routes/getEmpdataDepartmentWiseNewRoute";
 import "../app/Routes/getCDateAttnDeptWiseRoutes";
 import "../app/Routes/UsershiftplannerRoute";
@@ -55,6 +55,8 @@ import "../app/Routes/getInterimAttendancesRoute"
 import "../app/Routes/GetappVersionRoute"
 import "../app/Routes/Report/GetAttendanceEmployeewise";
 
+import Redis from '@ioc:Adonis/Addons/Redis';
+import "../app/Routes/getUserMobileRoute";
 
 // Route.get('/', async () => {
 //     return "Working fine!"
