@@ -47,13 +47,13 @@ import "../app/Routes/MyAddonUserInfoRoute";
 import "../app/Routes/StoreRatingRoute";
 import "../app/Routes/GetLastTimeOutRoute";
 import "../app/Routes/changePasswordOTPRoute";
-import "../app/Routes/SelectCountryCodeRoute"
+import "../app/Routes/SelectCountryCodeRoute";
 import "../app/Routes/ResetPasswordLinkRoute"
 import "../app/Routes/CheckUserEmailRoute"
 import "../app/Routes/getListofLeaveRoute"
 import "../app/Routes/getInterimAttendancesRoute"
 import "../app/Routes/GetappVersionRoute"
-
+import "../app/Routes/TempAssignClientRoute"
 
 // Route.get('/', async () => {
 //     return "Working fine!"
