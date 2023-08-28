@@ -15,7 +15,7 @@ export default class GetLastTimeService {
       .toFormat("yyyy-MM-dd");
 
     var res: any = {};
-    const query = await Database.from("AttendanceMaster")
+    const AttendanceMasterList = await Database.from("AttendanceMaster")
       .where("EmployeeId", empid)
       .andWhere("OrganizationId", orgid)
       .andWhere("AttendanceDate", "<", Date)
@@ -23,9 +23,9 @@ export default class GetLastTimeService {
       .andWhereIn("AttendanceStatus", [1, 3, 5, 8])
       .andWhereBetween("AttendanceDate", [attDatePastTwodays, Date])
       .orderBy("AttendanceDate", "desc")
-      .limit(1);
+      .limit(1)
 
-    const output = await query;
+    const output = await AttendanceMasterList;
     output.forEach(async function (row) {
       var data: any = {};
       data["Id"] = row.Id;

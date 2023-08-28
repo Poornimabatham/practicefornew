@@ -2,9 +2,20 @@ import { schema, CustomMessages } from '@ioc:Adonis/Core/Validator'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import BaseValidator from './BaseValidator'
 
-export default class ChangePasswordOtpValidator {
-  constructor(protected ctx: HttpContextContract) { }
-
+export default class GetUsersMobileValidator extends BaseValidator {
+  constructor(protected ctx: HttpContextContract) {
+    super()
+  }
+  static UserMobile = {
+    schema: schema.create({
+      refno:schema.number(),
+      empid:schema.number(),
+      searchText:schema.string.optional(),
+      perPage:schema.number.optional(),
+      currentPage:schema.number.optional(),
+      pagename:schema.string.optional()
+    }),
+  }
   /*
    * Define schema to validate the "shape", "type", "formatting" and "integrity" of data.
    *
@@ -24,19 +35,7 @@ export default class ChangePasswordOtpValidator {
    *     ])
    *    ```
    */
-  static changePasswordOTP = {
-    schema: schema.create({
-      email: schema.string.optional(),
-      phone: schema.string()
-    }), message: BaseValidator.messages
-  }
-
-  static newchangepass = {
-    schema: schema.create({
-      changepassphone: schema.string(),
-      newpass: schema.string.optional()
-    }), message: BaseValidator.messages
-  }
+  public schema = schema.create({})
 
   /**
    * Custom messages for validation failures. You can make use of dot notation `(.)`
