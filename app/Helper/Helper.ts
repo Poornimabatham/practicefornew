@@ -7,9 +7,10 @@ import ShiftMaster from "App/Models/ShiftMaster";
 import ZoneMaster from "App/Models/ZoneMaster";
 import moment from "moment";
 export default class Helper {
-  public static encode5t(str: any) {
+  public static encode5t(str: string) {
+    var contactNum = str.toString() 
     for (let i = 0; i < 5; i++) {
-      str = Buffer.from(str).toString("base64");
+      str = Buffer.from(contactNum).toString("base64");
       str = str.split("").reverse().join("");
     }
     return str;
@@ -24,6 +25,7 @@ export default class Helper {
   }
 
   public static async getTimeZone(orgid: any) {
+    let TimeZone = "Asia/kolkata";
     const query1 = await Database.query()
       .from("ZoneMaster")
       .select("name")
@@ -36,7 +38,7 @@ export default class Helper {
     if (query1.length > 0) {
       return query1[0].name;
     } else {
-      return 0;
+      return TimeZone;
     }
   }
 
@@ -47,18 +49,25 @@ export default class Helper {
       .select("appSuperviserSts")
       .where("EmployeeId", id)
       .first();
+
     if (queryResult) {
       status = queryResult.appSuperviserSts;
     }
+
     return status;
   }
 
   public static async getempnameById(empid: number) {
-    const query2 = await Database.query()
-      .from("EmployeeMaster")
-      .select("FirstName")
+    let FirstName = "";
+    const query2: any = await Database.query()
+      .from("EmployeeMaster as E")
+      .select(Database.raw(`IF(E.lastname != '', CONCAT(E.FirstName, ' ', E.lastname), E.FirstName) as Name`))
       .where("Id", empid);
-    return query2[0].FirstName;
+    if (query2.length > 0) {
+      return query2[0].Name;
+    } else {
+      return FirstName;
+    }
   }
 
   public static generateToken(secretKey: string, data: any = {}) {
@@ -230,8 +239,6 @@ export default class Helper {
 
   public static async getShiftName(Id: number, orgid: number) {
     let ShiftName: any;
-    console.log(Id);
-    console.log(orgid);
     const getshiftname: any = await Database.from("ShiftMaster")
       .select("Name")
       .where("Id", Id)
@@ -247,32 +254,37 @@ export default class Helper {
       .select("FirstName", "LastName")
       .where("Id", Id)
       .where("Is_Delete", 0);
-    
+
     if (query.length > 0) {
       return query[0].FirstName;
-    }
-    else{
+    } else {
       return 0;
     }
   }
 
-  public static async getName(tablename: any, getcol: any, wherecol: any, id: any) {
+  public static async getName(
+    tablename: any,
+    getcol: any,
+    wherecol: any,
+    id: any
+  ) {
     let name: string = "";
-    const query = await Database.query().from(tablename).select(getcol).where(wherecol, id);
+    const query = await Database.query()
+      .from(tablename)
+      .select(getcol)
+      .where(wherecol, id);
     const count = query.length;
     if (count > 0) {
       query.forEach((row) => {
         name = row[getcol];
-      })
-      }
+      });
+    }
     return name;
   }
-  
+
   public static async getShiftType(shiftId) {
     const defaultshifttype = 0;
     const allDataOfShiftMaster: any = await ShiftMaster.find(shiftId);
-    // console.log(allDataOfShiftMaster?.toSQL().toNative());
-
     if (allDataOfShiftMaster) {
       return allDataOfShiftMaster
         ? allDataOfShiftMaster.shifttype
@@ -371,40 +383,53 @@ export default class Helper {
   }
 
   public static calculateOvertime = (startTime, endTime) => {
-
-    const [startHours, startMinutes, startSeconds] = startTime.split(':').map(Number);
-    const [endHours, endMinutes, endSeconds] = endTime.split(':').map(Number);
-    const totalStartSeconds = startHours * 3600 + startMinutes * 60 + startSeconds;
+    const [startHours, startMinutes, startSeconds] = startTime
+      .split(":")
+      .map(Number);
+    const [endHours, endMinutes, endSeconds] = endTime.split(":").map(Number);
+    const totalStartSeconds =
+      startHours * 3600 + startMinutes * 60 + startSeconds;
     const totalEndSeconds = endHours * 3600 + endMinutes * 60 + endSeconds;
     let timeDiffInSeconds = totalEndSeconds - totalStartSeconds;
 
-    // if (timeDiffInSeconds < 0) { 
+    // if (timeDiffInSeconds < 0) {
     //   timeDiffInSeconds += 24 * 3600; // Assuming time is within 24 hours range
     // }
-    const hours = Math.floor(Math.abs(timeDiffInSeconds) / 3600) * (timeDiffInSeconds < 0 ? 1 : 1);
+    const hours =
+      Math.floor(Math.abs(timeDiffInSeconds) / 3600) *
+      (timeDiffInSeconds < 0 ? 1 : 1);
     const remainingSeconds = Math.abs(timeDiffInSeconds) % 3600;
-    const minutes = Math.floor(remainingSeconds / 60) * (timeDiffInSeconds < 0 ? 1 : 1);
-    const seconds = Math.floor(remainingSeconds % 60) * (timeDiffInSeconds < 0 ? 1 : 1);
+    const minutes =
+      Math.floor(remainingSeconds / 60) * (timeDiffInSeconds < 0 ? 1 : 1);
+    const seconds =
+      Math.floor(remainingSeconds % 60) * (timeDiffInSeconds < 0 ? 1 : 1);
 
     return { hours, minutes, seconds };
   };
 
-  public static ActivityMasterInsert(date,orgid,uid,activityBy,appModule,actionperformed,module){
-
-    let InsertActivityHistoryMaster = Database
-    .table("ActivityHistoryMaster")
-    .insert({
+  public static ActivityMasterInsert(
+    date,
+    orgid,
+    uid,
+    activityBy,
+    appModule,
+    actionperformed,
+    module
+  ) {
+    let InsertActivityHistoryMaster = Database.table(
+      "ActivityHistoryMaster"
+    ).insert({
       LastModifiedDate: date,
       LastModifiedById: uid,
       module: module,
-      ActionPerformed:actionperformed,
-      OrganizationId:orgid,
+      ActionPerformed: actionperformed,
+      OrganizationId: orgid,
       activityBy: activityBy,
       adminid: uid,
-      appmodule:appModule,
+      appmodule: appModule,
     });
-  return InsertActivityHistoryMaster
-   }
+    return InsertActivityHistoryMaster;
+  }
 
   public static async getOvertimeForRegularization(timein, timeout, id) {
     var name: string = " ";
@@ -456,10 +481,10 @@ export default class Helper {
       );
 
     if (getshiftid.length > 0) {
-      shift= getshiftid[0].Id;
-      console.log(getshiftid);
-    }else{
-      return shift
+      shift = getshiftid[0].Id;
+      return shift;
+    } else {
+      return shift;
     }
   }
 
@@ -470,7 +495,148 @@ export default class Helper {
       return Name;
     })
   }
+  public static async myUrlEncode(country_code) {
+    const entities = [
+      "%20",
+      "%2B",
+      "%24",
+      "%2C",
+      "%2F",
+      "%3F",
+      "%25",
+      "%23",
+      "%5B",
+      "%5D",
+    ];
+    const replacements = [
+      "+",
+      "!",
+      "*",
+      "'",
+      "(",
+      ")",
+      ";",
+      ":",
+      "@",
+      "&",
+      "=",
+      "$",
+      ",",
+      "/",
+      "?",
+      "%",
+      "#",
+      "[",
+      "]",
+    ];
+
+    let encodedString = encodeURIComponent(country_code);
+    for (let i = 0; i < entities.length; i++) {
+      const entity = entities[i];
+      const replacement = replacements[i];
+      encodedString = encodedString.split(entity).join(replacement);
+
+      return encodedString;
+    }
+  } 
+
+  public static async getDesignationId(name,orgid)
+  {
+    let desi ;
+    let designationdata = await Database.query().from('DesignationMaster').select('*').where('Name',name).andWhere('OrganizationId',orgid);
+    if(designationdata.length > 0){
+       desi = designationdata[0].Id;
+       return desi;
+    }else{
+       return desi;
+    }
+  }
+
+  public static  async getFlexiShift(id)
+  {
+    let query = await Database.query().from('ShiftMaster').select('HoursPerDay').where('Id',id);
+    let HoursPerDay;
+    
+    if(query.length > 0){     
+      HoursPerDay = query[0].HoursPerDay;  
+      return HoursPerDay;
+    }else{
+      return HoursPerDay;
+    }
+  }
+
+  public static async getShiftTimes(id){
+
+    let query = await Database.query().from('ShiftMaster').select('TimeIn','TimeOut','HoursPerDay').where('Id',id)
+
+    if(query.length > 0){
+       if(query[0].TimeIn == '00:00:00' || query[0].TimeIn == ""){
+          return query[0].HoursPerDay;
+       }else{
+          return query[0].TimeIn + "-" +query[0].TimeOut;
+       }
+    }
+    
+  }
+
+
+
+ public static async getOrgName(id:number){
+  let Name =''
+  const queryResult = await Database.from("Organization").where("Id",id).select("Name")
+  if (queryResult.length > 0) {
+    Name= queryResult[0].Name;
+    return Name
+  }else{
+    return Name
+  }
+  }
+
+  public static async getAdminEmail(id){
+    let Email;
+    const query = await Database.from('Organization').where("Id",id).select('Email');
+    if(query.length > 0){
+       Email = query[0].Email;
+       return Email;
+    }else{
+       return Email = '';
+    }
+  }
+
+  public static async getAdminNamebyOrgId(orgid){
+     let Name ;
+    const query = await Database.from('admin_login').where('OrganizationId',orgid).select('name')
+    if(query.length > 0){
+      Name = query[0].name;
+      return Name;
+    }else{
+       return Name
+    }
+  }
+
+  public static async getEmpEmail(id){
+
+    const query = await Database.from('EmployeeMaster').where('Id',id).andWhere('Is_Delete',0).select('CurrentEmailId');
+     let Email;
+    if(query.length > 0){
+       Email = query[0].CurrentEmailId;
+       return Email;
+    }else{
+       return Email;
+    }
+  }
+
+  public static async getCountryNameById(id){
+
+     const query = await Database.from('CountryMaster').select('Name').where('Id',id)
+     let Name = '';
+     if(query.length){ 
+       Name = query[0].Name;
+       return Name;
+     }else{
+        return Name;
+     }
+  }
+
  
 }
-
-

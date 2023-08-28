@@ -40,22 +40,45 @@ export default class ShiftValidator {
       id: schema.number(),
     }),
   };
-  static assign = {
+
+  static Inactiveshift = {
+    schema: schema.create({
+      orgId: schema.number(),
+      id: schema.number(),
+      empId: schema.number(),
+    }),
+  };
+
+  static assignShift = {
     schema: schema.create({
       Orgid: schema.number(),
       shiftid: schema.number(),
       shiftname: schema.string(),
       empid: schema.number(),
       empname: schema.string(),
-      adminid: schema.number(),
+      adminid: schema.number.optional(),
       adminname: schema.string(),
     }),
   };
-  static Inactiveshift={ 
+
+  static MultiShift = {
+     schema:schema.create({
+        refno:schema.number(),
+        empid:schema.number()
+     })
+  }
+  static AssignShiftByDepart = {
     schema: schema.create({
-      orgId: schema.number(),
-      id: schema.number(),
-      empId: schema.number(),
+      orgid: schema.number(),
+      shiftid: schema.number(),
+      departid: schema.number(),
+      date: schema.string(),
+      status: schema.number(),
+      WeekoffStatus: schema.number(),
+      adminid: schema.number(),
+      adminname: schema.string(),
+      departname:schema.string(),
+      shiftname:schema.string()
     }),
   };
 

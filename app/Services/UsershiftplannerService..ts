@@ -23,6 +23,7 @@ export default class UsershiftplannerService {
       )
       .where("S.OrganizationId", organizationId)
       .where("A.EmployeeId", userid);
+
     const response: any[] = [];
     selectAttendanceMasterList.forEach((element) => {
       const data: any = {};

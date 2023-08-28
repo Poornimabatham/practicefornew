@@ -1,7 +1,5 @@
 import Database from "@ioc:Adonis/Lucid/Database";
-import Helper from "App/Helper/Helper";
 import moment from "moment";
-import { DateTime } from "luxon";
 export default class StoreRatingService {
   public static async StoreRatings(data) {
     var Empid = data.empid;
@@ -9,21 +7,19 @@ export default class StoreRatingService {
     var Remark = data.remark;
     var Rating = data.rating;
     var res1;
-    // var zone = await Helper.getEmpTimeZone(Empid, organizationId);
-    // return zone
-    // const currentDateTimeIn = DateTime.local().setZone(zone);
 
-    // const date = currentDateTimeIn.toFormat("YYYY-MM-DD");
-    const date = moment().format('YYYY-MM-DD');
+    const date = moment().format("YYYY-MM-DD");
 
     const modifiedDate = moment().format("YYYY-MM-DD HH:mm:ss");
-    var selectUbiAttendanceRatings:any = await Database.from("ubiAttendanceRatings")
+    var selectUbiAttendanceRatings: any = await Database.from(
+      "ubiAttendanceRatings"
+    )
       .where("EmployeeId", Empid)
       .andWhere("OrganizationId", organizationId)
       .select("*");
+
     const result = selectUbiAttendanceRatings.length;
     if (result > 0) {
-      console.log(selectUbiAttendanceRatings.length);
       var updateUbiAttendanceRatings = await Database.from(
         " ubiAttendanceRatings"
       )
@@ -43,7 +39,6 @@ export default class StoreRatingService {
 
       return data;
     } else {
-      console.log("kk");
       var insertUbiAttendanceRatings: any = await Database.insertQuery()
         .table("ubiAttendanceRatings")
         .insert({
@@ -58,9 +53,9 @@ export default class StoreRatingService {
     }
 
     if (res1) {
-      data["status"] = "1";
+      data["status"] = "TRUE";
     } else {
-      data["status"] = "0";
+      data["status"] = "FALSE";
     }
 
     return data;

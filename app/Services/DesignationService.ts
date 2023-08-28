@@ -6,19 +6,16 @@ import EmployeeMaster from "App/Models/EmployeeMaster";
 export default class DesignationService {
   public static async AddDesignation(a) {
     const currentDate = new Date();
-    console.log(currentDate);
 
     var designationList = await Database.query()
       .from("DesignationMaster")
       .where("Name", a.name)
       .andWhere("OrganizationId", a.orgid)
       .select("Id");
-    console.log(designationList);
 
     const result: any = [];
 
     const affectedRows = designationList.length;
-    console.log(affectedRows);
 
     if (affectedRows > 0) {
       result["status"] = -1;
@@ -57,21 +54,19 @@ export default class DesignationService {
       const activityby = 1;
       const actionPerformed = await Helper.getempnameById(a.uid);
 
-      const actionperformed2 = `${a.name} Designation  has been Added by  ${actionPerformed}from Attendance App`;
+      const actionperformed2 = `<b>${a.name}</b> Designation  has been Added by 
+       <b>${actionPerformed}</b>from Attendance App`;
 
-      const insertActivityHistoryMaster = await Database.insertQuery()
-        .table("ActivityHistoryMaster")
-        .insert({
-          LastModifiedDate: formattedDate,
-          LastModifiedById: a.uid,
-          ActionPerformed: actionperformed2,
-          Module: module,
-          OrganizationId: a.orgid,
-          ActivityBy: activityby,
-          adminid: a.uid,
-          AppModule: appModule,
-        });
-      result["status"] = 1;
+      const insertActivityHistoryMaster = await Helper.ActivityMasterInsert(
+        formattedDate,
+        a.orgid,
+        a.uid,
+        activityby,
+        module,
+        actionperformed2,
+        appModule
+      );
+      result["status"] = "Successfully Inserted in ActivityMasterInsert";
     }
     return result["status"];
   }
@@ -178,8 +173,8 @@ export default class DesignationService {
     const count = await updateDesignaion;
     if (count > 0) {
       const timezone = await Helper.getTimeZone(c.Updateorgid);
-
       var defaulttimeZone = moment().tz(timezone).toDate();
+
       const dateTime = DateTime.fromJSDate(defaulttimeZone);
       const formattedDate = dateTime.toFormat("yy-MM-dd HH:mm:ss");
 
@@ -191,62 +186,87 @@ export default class DesignationService {
       var getempname = await Helper.getempnameById(c.Updateid);
 
       if (res == 2) {
-        actionperformed = `${c.UpdateName} designation has been edited by ${getempname} `;
+        actionperformed = `<b>${c.UpdateName}</b>. designation has been edited by <b>${getempname}</b> `;
       } else if (res == 1) {
-        actionperformed = `${c.UpdateName} designation has been active by ${getempname} `;
+        actionperformed = `<b>${c.UpdateName}</b> designation has been active by <b>${getempname}</b>`;
       } else {
-        actionperformed = `${c.UpdateName} designation has been inactive by ${getempname} `;
+        actionperformed = `<b>${c.UpdateName}</b> designation has been inactive by <b>${getempname}</b> `;
       }
 
-      const insertActivityHistoryMaster: any = await Database.insertQuery()
-        .table("ActivityHistoryMaster")
-        .insert({
-          ActionPerformed: actionperformed,
-          AppModule: appModule,
-          LastModifiedById: c.uid,
-          LastModifiedDate: formattedDate,
-          Module: module,
-          OrganizationId: c.orgid,
-          ActivityBy: activityBy,
-          adminid: c.uid,
-        });
+      const insertActivityHistoryMaster: any =
+        await Helper.ActivityMasterInsert(
+          formattedDate,
+          c.orgid,
+          c.uid,
+          activityBy,
+          appModule,
+          actionperformed,
+          module
+        );
       result["status"] = "inserted in activity master";
     }
     return result["status"];
   }
+
   ///////////// AssignDesignation //////////
-  public static async assignDesignation(get){
-
+  public static async assignDesignation(get) {
     var updateDesignaionset = await EmployeeMaster.query()
-    .where("Id",get.empid)
-    .andWhere("OrganizationId",get.Orgid)
-    .update("Designation", get.desigid)
+      .where("Id", get.empid)
+      .andWhere("OrganizationId", get.Orgid)
+      .update("Designation", get.desigid);
 
-    if(updateDesignaionset.length>0){
+    if (updateDesignaionset.length > 0) {
       const zone = await Helper.getTimeZone(get.Orgid);
       const timezone = zone;
       const date = moment().tz(timezone).toDate();
- 
+
       const orgid = get.Orgid;
-      const uid = get.adminid;  
-      const module = 'Attendance app';
-      const activityBy = 1
-      const appModule = 'Update Successfully';
+      const uid = get.adminid;
+      const module = "Attendance app";
+      const activityBy = 1;
+      const appModule = "Update Successfully";
       const actionperformed = `<b>${get.designame}</b>. Designation has been assigned to <b>${get.empname}</b> by <b>${get.adminname}</b> from <b>${module}</b>`;
- 
-     var getresult = await Helper.ActivityMasterInsert(date,orgid,uid,activityBy,appModule,actionperformed,module)
-     if(getresult){
-     return 'Successfully Inserted in ActivityMasterInsert';
-     }else{
-      return'Error inserting activity history';
-     }
-    }else{
-     return'Error inserting activity history';
+
+      var getresult = await Helper.ActivityMasterInsert(
+        date,
+        orgid,
+        uid,
+        activityBy,
+        appModule,
+        actionperformed,
+        module
+      );
+      if (getresult) {
+        return "Successfully Inserted in ActivityMasterInsert";
+      } else {
+        return "Error inserting activity history";
+      }
+    } else {
+      return "Error inserting activity history";
     }
-    }
-    
+  }
+
+    // GetDesignationStatus
+
+  public static async DesignationStatus(get) {
+    var Orgid = get.orgid;
+    var DesigId = get.Id;
+
+    const selectEmployeeList = await Database.from("EmployeeMaster")
+      .select(Database.raw("COUNT(*) as num"))
+      .where("OrganizationId", Orgid)
+      .andWhere(" Designation", DesigId)
+
+    const result = await selectEmployeeList;
+    const selectAttendanceMasterList = await Database.from("AttendanceMaster")
+      .select(Database.raw("COUNT(*) as  totemp"))
+      .where("Desg_id", DesigId)
+      .andWhere("OrganizationId", Orgid);
+
+    const result2 = await selectAttendanceMasterList;
+    return {
+      num: result[0].num,
+      attNum: result2[0].totemp,
+    };
+  }
 }
-
-
-
-

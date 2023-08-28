@@ -169,18 +169,20 @@ export default class GetDataToRegService {
     const AttendanceMaster = await Database.from("AttendanceMaster")
       .select(
         Database.raw(
-          `(SELECT MinTimes FROM RegularizationSettings WHERE OrganizationId = ${orgId} and RegularizationSts = 1) as MinTimes`
+          `(SELECT MinTimes FROM RegularizationSettings WHERE OrganizationId = ${orgId} and RegularizationSts = 1)
+           as MinTimes`
         ),
         Database.raw(`count(RegularizeSts) as Regularizecount`)
       )
       .where("OrganizationId", orgId)
-      .whereNot("Is_Delete", 1)
+      .andWhereNot("Is_Delete", 1)
       .where("EmployeeId", id)
       .whereRaw("Month(AttendanceDate) = Month(?)", [month])
       .whereRaw("Year(AttendanceDate) = Year(?)", [month])
       .whereRaw("AttendanceDate != CURDATE()")
-      .whereNotIn("RegularizeSts", [0, 1])
-      .orderBy("AttendanceDate", "desc");
+      .andWhereNot("RegularizeSts", 0)
+      .andWhereNot("RegularizeSts", 1)
+      .orderBy("AttendanceDate", "desc").debug(true).toSQL().toNative()
     const row1 = AttendanceMaster[0];
     const data2 = {
       MinTimes: row1 ? parseInt(row1.MinTimes) : 0,

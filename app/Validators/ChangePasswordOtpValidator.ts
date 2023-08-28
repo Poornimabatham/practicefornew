@@ -27,7 +27,14 @@ export default class ChangePasswordOtpValidator {
   static changePasswordOTP = {
     schema: schema.create({
       email: schema.string.optional(),
-      phone: schema.string.optional()
+      phone: schema.string()
+    }), message: BaseValidator.messages
+  }
+
+  static newchangepass = {
+    schema: schema.create({
+      changepassphone: schema.string(),
+      newpass: schema.string.optional()
     }), message: BaseValidator.messages
   }
 

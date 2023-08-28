@@ -100,6 +100,27 @@ export default class UserSettingValidator  {
       password:schema.string()
     })
    }
+
+   static UpdateQR = {
+     
+      schema:schema.create({
+        userId:schema.number(),
+        orgId:schema.number(),
+        status:schema.number()
+
+      })
+   }
+
+   static demoSchedule = {
+      schema:schema.create({
+        orgId:schema.number(),
+        empId:schema.number(),
+        newDate:schema.date.optional({format:'yyyy-MM-dd'}),
+        selectTime:schema.string(),
+        cardTitle:schema.string()
+      })
+   }
+
   /**
    * Custom messages for validation failures. You can make use of dot notation `(.)`
    * for targeting nested fields and array expressions `(*)` for targeting all
