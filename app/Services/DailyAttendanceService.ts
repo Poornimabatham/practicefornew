@@ -1280,7 +1280,7 @@ export default class DailyAttendanceService {
                 if (getAttnadaceRecord.length > 0) {
                   AttendanceMasterId = getAttnadaceRecord[0].Id;
                 }
-              }
+              }  
 
               const maxIdOfInterimAttendance = await Database.from(
                 "InterimAttendances")
@@ -1289,6 +1289,10 @@ export default class DailyAttendanceService {
                 .orderBy("Id", "desc")
                 .first();
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 2b6466e2d3c83cdf9938ebb94a6523a89957171c
               if (maxIdOfInterimAttendance) {
                 interimAttendanceId = maxIdOfInterimAttendance.Id;
               }
@@ -1320,6 +1324,13 @@ export default class DailyAttendanceService {
 
                 const loggedHours = loggedHoursResult.loggedHours;
 
+<<<<<<< HEAD
+=======
+                console.log(loggedHours);
+                console.log("loggedHours->");
+
+
+>>>>>>> 2b6466e2d3c83cdf9938ebb94a6523a89957171c
                 const updateQuery = await Database.from("InterimAttendances")
                   .where("Id", interimAttendanceId)
                   .update({
