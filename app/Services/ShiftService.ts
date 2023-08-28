@@ -1,6 +1,6 @@
 import Database from "@ioc:Adonis/Lucid/Database";
 import helper from "../Helper/Helper";
-import * as moment from "moment-timezone";
+import  moment from "moment-timezone";
 export default class ShiftsService {
   constructor() {}
 

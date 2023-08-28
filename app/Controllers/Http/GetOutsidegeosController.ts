@@ -18,7 +18,7 @@ export default class GetOutsidegeosController {
       validatedparams
     );
     console.log(result)
-    response.json(result)
+    return result
   }
 
   public async edit({}: HttpContextContract) {}
