@@ -378,13 +378,16 @@ export default class ShiftsService {
           shiftid = element.shiftid;
           result['shiftid'] = shiftid;
           result['weekoffStatus']=element.weekoffStatus;            
-          result['shiftTiming']= await Helper.getShiftType(shiftid) == '3' ? await Helper.getFlexiShift(shiftid) : await Helper.getShiftTimes(shiftid);
-          result['id'] = element.Id
+          // result['shiftTiming']= await Helper.getShiftType(shiftid) == '3' ? await Helper.getFlexiShift(shiftid) : await Helper.getShiftTimes(shiftid);
           result['shiftype'] =element.shifttype;
+          if(result['shiftype'] == "3"){
+             result['shiftTiming'] = element.HoursPerDay
+          }else{
+            result['shiftTiming'] = element.TimeIn + "-" + element.TimeOut
+          }
           result['HoursPerDay']=element.HoursPerDay
-          res.push(result);
-            
-        });
+          res.push(result);            
+        })
         return res;
      }else{
         return false

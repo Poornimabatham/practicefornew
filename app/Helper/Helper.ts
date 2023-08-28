@@ -564,6 +564,7 @@ export default class Helper {
 
     if(query.length > 0){
        if(query[0].TimeIn == '00:00:00' || query[0].TimeIn == ""){
+          return query[0].HoursPerDay;
        }else{
           return query[0].TimeIn + "-" +query[0].TimeOut;
        }
@@ -573,17 +574,62 @@ export default class Helper {
 
 
 
-  public static async getOrgName(id:number){
-    let Name =''
+ public static async getOrgName(id:number){
+  let Name =''
   const queryResult = await Database.from("Organization").where("Id",id).select("Name")
   if (queryResult.length > 0) {
-
-
     Name= queryResult[0].Name;
     return Name
   }else{
     return Name
   }
-
   }
+
+  public static async getAdminEmail(id){
+    let Email;
+    const query = await Database.from('Organization').where("Id",id).select('Email');
+    if(query.length > 0){
+       Email = query[0].Email;
+       return Email;
+    }else{
+       return Email = '';
+    }
+  }
+
+  public static async getAdminNamebyOrgId(orgid){
+     let Name ;
+    const query = await Database.from('admin_login').where('OrganizationId',orgid).select('name')
+    if(query.length > 0){
+      Name = query[0].name;
+      return Name;
+    }else{
+       return Name
+    }
+  }
+
+  public static async getEmpEmail(id){
+
+    const query = await Database.from('EmployeeMaster').where('Id',id).andWhere('Is_Delete',0).select('CurrentEmailId');
+     let Email;
+    if(query.length > 0){
+       Email = query[0].CurrentEmailId;
+       return Email;
+    }else{
+       return Email;
+    }
+  }
+
+  public static async getCountryNameById(id){
+
+     const query = await Database.from('CountryMaster').select('Name').where('Id',id)
+     let Name = '';
+     if(query.length){ 
+       Name = query[0].Name;
+       return Name;
+     }else{
+        return Name;
+     }
+  }
+
+ 
 }

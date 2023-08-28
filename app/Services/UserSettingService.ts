@@ -563,4 +563,73 @@ export default class Usersettingservice{
 
     }
 
+    static async demoScheduleRequest(data)
+    {
+
+      const orgid = data.orgId;
+      const empid = data.empId;
+      const newDate = moment(new Date(data.newDate)).format("YYYY-MM-DD");
+      const Time = data.selectTime;
+      const cardtitle = data.cardTitle;
+      let result:any = {}
+      let response:any[]=[];
+      let currentDate = moment().format("YYYY-MM-DD");
+
+      const Adminmail = await Helper.getAdminEmail(orgid);
+      const Adminname = await Helper.getAdminNamebyOrgId(orgid);
+      const empmail = await Helper.getEmpEmail(empid);
+      const Email = await Helper.decode5t(empmail);  
+      const Emp_Name = await Helper.getEmpName(empid);
+      let contactemail;
+      let contactNumber;
+      let CreatedDate;
+      let CountryId;
+
+      if(newDate != '')
+      {
+          const demoquery = await Database.query().select('*').from('ScheduleDemoDetail').where('OrgnanizationId',orgid).andWhere(Database.raw(`ScheduleDate >= "${currentDate}"`))
+  
+          if(demoquery.length > 0)
+          {
+              
+              result['sts'] = 0;
+              result['date'] = moment(demoquery[0].ScheduleDate).format('YYYY-MM-DD');
+              result['Time'] = demoquery[0].ScheduleTime;
+              response.push(result)
+              
+          }
+          else
+          {     
+              const query = await Database.query().from('Organization').select('Name','PhoneNumber','Email','CreatedDate','Country','countrycode').where('Id',orgid)
+
+              const organizationName = query[0].Name;
+              const PhoneNumber = query[0].PhoneNumber;
+              CreatedDate = query[0].CreatedDate;
+              const Email = query[0].Email;
+              CountryId = query[0].Country;
+              const countryname = await Helper.getCountryNameById(CountryId)
+              contactNumber = await Helper.encode5t(PhoneNumber)
+              contactemail = await Helper.encode5t(Email);
+
+        
+              const demoInsert = await Database.table('ScheduleDemoDetail').insert({OrgnanizationId:orgid,ScheduleDate:newDate,ScheduleTime:Time,EmployeeId:empid,Email:contactemail,PhoneNumber:contactNumber,RegisteredDate:CreatedDate,CountryId:CountryId,CreateDate:currentDate,cardTitle:cardtitle})
+              result['sts'] = true
+              response.push(result)
+
+              if(demoInsert){
+                //////Email functionality
+              }
+
+          }
+       }else{
+               result['sts'] =1;
+               result['date'] = "";
+               result['Time'] = "";
+               response.push(result)
+
+       }
+         
+         return response;
+    }
+
 }
