@@ -97,5 +97,12 @@ export default class UserSettingsController {
 
   }
 
+  public async getTeamPunchInfo({request,response}:HttpContextContract){
+
+    const validata = await request.validate(UserSettingValidator.Teampunchinfo)
+    const res = await UserSettingService.getTeamPunchInfo(validata)
+    response.json(res)
+  }
+
 
 }
