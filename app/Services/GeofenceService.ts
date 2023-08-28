@@ -178,12 +178,14 @@ export default class getgeofenceservice {
   // +++++++++++assignGeoFenceEmployee++++++++++++++
 
   public static async assignGeoFenceEmployee(data : any){
-    console.log(data);
+
     const orgId = data.OrganizationId ? data.OrganizationId : 0;
     const Gid = data.area_assigned ? data.area_assigned: 0 ;
     const Empid = data.Id ? data.Id : 0;
     const adminid= data.adminid ? data.adminid : 0;
-    let result:any[] = [] ; 
+    let result:any={} ;
+    let affected2 :number = 0; 
+    let geo_name :string = '';
     const query1 :any = await Database.query().from('EmployeeMaster').select('area_assigned as areaIds').where('Id',Empid).andWhere('OrganizationId',orgId).andWhere('area_assigned','!=',0);
     if(query1.length > 0)
     {
@@ -191,7 +193,6 @@ export default class getgeofenceservice {
      // const aid = count(explode (",", $row->areaIds))+1;
       const areaIdsArray = query1[0].areaIds.split(',');
       const aid = areaIdsArray.length + 1;
-      console.log(aid);
       
       if(aid <= 10)
       {
@@ -222,7 +223,7 @@ export default class getgeofenceservice {
       const query2 = await Database.query().from('EmployeeMaster').select('area_assigned').where('Id',Empid).andWhere('OrganizationId',orgId).update({
         'area_assigned' : Gid
       })
-      let affected2 = query2.length;
+      affected2 = query2.length;
 
         if( affected2 > 0)
         {
@@ -234,6 +235,29 @@ export default class getgeofenceservice {
         }
          
     }
+    const query22 :any = await Database.rawQuery(
+      "SELECT Name FROM Geo_Settings WHERE Id = ? AND OrganizationId = ?",
+      [Gid, orgId]
+    );
+    
+    const row = query22[0];
+    if (row) {
+        geo_name = row[0].Name;
+    }
+    if(affected2 > 2){
+      const EmployeeName = await Helper.getEmpName(Empid);
+      const adminname = await Helper.getEmpName(adminid);
+      const zone= await Helper.getTimeZone(orgId);
+      const defaultZone = DateTime.now().setZone(zone);
+      const date =  defaultZone.toFormat("yyyy-MM-dd HH:ii:ss");
+      const appModule = "Registered FaceID";
+      const module = "Attendance App"; 
+      const actionperformed = "<b>"+geo_name+"</b> Geo-fence has been assigned to  <b>"+EmployeeName+"</b> by <b>"+adminname+"</b> from<b> Attendance App  </b>";
+      const activityby = '1';
+      const activity = await Helper.ActivityMasterInsert(date,orgId,adminid,activityby,appModule,actionperformed,module);
+    }
+    return result;
+    
 
   }
 }
