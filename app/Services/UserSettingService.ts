@@ -587,8 +587,8 @@ export default class Usersettingservice{
 
       if(newDate != '')
       {
-          const demoquery = await Database.query().select('*').from('ScheduleDemoDetail').where('OrgnanizationId',orgid).andWhere(Database.raw(`ScheduleDate >= "${currentDate}"`))
-  
+          const demoquery = await Database.query().select('*').from('ScheduleDemoDetail').where('OrgnanizationId',orgid).andWhere(Database.raw(`ScheduleDate >= "${newDate}"`))
+             
           if(demoquery.length > 0)
           {
               
@@ -602,23 +602,24 @@ export default class Usersettingservice{
           {     
               const query = await Database.query().from('Organization').select('Name','PhoneNumber','Email','CreatedDate','Country','countrycode').where('Id',orgid)
 
-              const organizationName = query[0].Name;
-              const PhoneNumber = query[0].PhoneNumber;
-              CreatedDate = query[0].CreatedDate;
-              const Email = query[0].Email;
-              CountryId = query[0].Country;
-              const countryname = await Helper.getCountryNameById(CountryId)
-              contactNumber = await Helper.encode5t(PhoneNumber)
-              contactemail = await Helper.encode5t(Email);
-
-        
-              const demoInsert = await Database.table('ScheduleDemoDetail').insert({OrgnanizationId:orgid,ScheduleDate:newDate,ScheduleTime:Time,EmployeeId:empid,Email:contactemail,PhoneNumber:contactNumber,RegisteredDate:CreatedDate,CountryId:CountryId,CreateDate:currentDate,cardTitle:cardtitle})
-              result['sts'] = true
-              response.push(result)
-
-              if(demoInsert){
-                //////Email functionality
+              if(query.length > 0)
+              {
+                  const organizationName = query[0].Name;
+                  const PhoneNumber = query[0].PhoneNumber;
+                  CreatedDate = query[0].CreatedDate;
+                  const Email = query[0].Email;
+                  CountryId = query[0].Country;
+                  const countryname = await Helper.getCountryNameById(CountryId)
+                  contactNumber = await Helper.encode5t(PhoneNumber)
+                  contactemail = await Helper.encode5t(Email);
               }
+        
+                const demoInsert = await Database.table('ScheduleDemoDetail').insert({OrgnanizationId:orgid,ScheduleDate:newDate,ScheduleTime:Time,EmployeeId:empid,Email:contactemail,PhoneNumber:contactNumber,RegisteredDate:CreatedDate,CountryId:CountryId,CreateDate:currentDate,cardTitle:cardtitle})
+                result['sts'] = true
+                response.push(result)
+                if(demoInsert){
+                  //////Email functionality
+                }
 
           }
        }else{
