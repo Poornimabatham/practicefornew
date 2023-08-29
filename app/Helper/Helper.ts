@@ -28,15 +28,15 @@ export default class Helper {
     let TimeZone = "Asia/kolkata";
     const query1 = await Database.query()
       .from("ZoneMaster")
-      .select("name")
+      .select("Name")
       .where(
         "Id",
         Database.raw(
           `(select TimeZone from Organization where id =${orgid}  LIMIT 1)`
         )
-      ).toQuery();
+      )
     if (query1.length > 0) {
-      return query1[0].name;
+      return query1[0].Name;
     } else {
       return TimeZone;
     }
