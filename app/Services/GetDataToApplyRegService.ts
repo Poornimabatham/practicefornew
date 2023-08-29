@@ -1,19 +1,20 @@
 import moment from "moment";
 import Database from "@ioc:Adonis/Lucid/Database";
 
-const format = require("date-fns/format");
-const parseISO = require("date-fns/parseISO");
-const { DateTime } = require('luxon');
+const { DateTime } = require("luxon");
 
 export default class GetDataToRegService {
   public static async FetchingdatatoReg(data) {
     var count = 0;
     var status = false;
 
-    const currentMonth = moment().endOf("month").format("YYYY-MM-DD");
+    var currentMonth = data.month;
 
-    if ( data.month != undefined) {
-      const currentMonth = moment(data.month).format("YYYY-MM-DD");
+    if (data.month != undefined) {
+      var month1 = new Date(data.month);
+      currentMonth = moment(month1).format("yyyy-MM-DD");
+    } else {
+      currentMonth = moment().format("yyyy-MM-DD");
     }
 
     var MinTimes = "";
@@ -40,18 +41,17 @@ export default class GetDataToRegService {
     }
 
     const regularizeCount: any = await Database.from("AttendanceMaster")
-      .where("OrganizationId", 1074)
-      .whereNot("Is_Delete", 1)
-      .where("EmployeeId", 7294)
-      .whereRaw(`MONTH(AttendanceDate) = MONTH('${currentMonth}')`)
-      .whereNot("AttendanceDate", Database.raw("CURDATE()"))
-      .whereNotIn("RegularizeSts", [0, 1])
+      .where("OrganizationId", data.orgid)
+      .andWhereNot("Is_Delete", 1)
+      .andWhere("EmployeeId", data.uid)
+      .andWhereRaw(`MONTH(AttendanceDate) = MONTH('${currentMonth}')`)
+      .andWhere("AttendanceDate", Database.raw("CURDATE()"))
+      .andWhereNotIn("RegularizeSts", [0, 1])
+      .orderBy(" AttendanceDate", "desc")
       .count("RegularizeSts as Regularizecount");
 
-
-    
     const affected_rows = regularizeCount.length;
-    
+
     if (affected_rows) {
       Regularizecount = regularizeCount[0].Regularizecount;
     }
@@ -88,27 +88,27 @@ export default class GetDataToRegService {
       .whereRaw(`YEAR(AttendanceDate) = YEAR('${currentMonth}')`)
       .whereNot("AttendanceDate", Database.raw("CURDATE()"))
       .whereIn("RegularizeSts", [0, 1])
-      .orderBy("AttendanceDate", "desc")
+      .orderBy("AttendanceDate", "desc");
 
-    const attendanceData = await selectAttendancemasterList ;
+    const attendanceData = await selectAttendancemasterList;
     var attendancearr: any = [];
     attendanceData.forEach((row) => {
       const res1 = {};
       res1["id"] = row.Id;
       res1["sts"] = row.AttendanceStatus;
-      let date =new Date(row.AttendanceDate)
-      res1['AttendanceDate'] = moment(date).format("YYYY/MM/DD");
+      let date = new Date(row.AttendanceDate);
+      res1["AttendanceDate"] = moment(date).format("YYYY/MM/DD");
       res1["device"] = row.device;
       var timeIn =
         row.TimeIn == "00:00:00"
           ? "00:00"
-          :  DateTime.fromSQL(row.TimeIn).toFormat('HH:mm');
-           
+          : DateTime.fromSQL(row.TimeIn).toFormat("HH:mm");
+
       res1["timeIn"] = timeIn;
       var timeOut =
         row.TimeOut == "00:00:00"
-          ? "00:00":
-          DateTime.fromSQL(row.TimeOut).toFormat('HH:mm');
+          ? "00:00"
+          : DateTime.fromSQL(row.TimeOut).toFormat("HH:mm");
       res1["timeOut"] = timeOut;
       var date1: any = new Date(row.AttendanceDate);
       // res1["date1"] = moment(date1).format("YYYY/MM/DD");
@@ -121,7 +121,7 @@ export default class GetDataToRegService {
 
       res1["diffInDays"] = diffInDays;
       if (MaxDays != 0) {
-        if (diffInDays>MaxDays) {
+        if (diffInDays > MaxDays) {
           res1["resultsts"] = 0;
         } else {
           res1["resultsts"] = 1;
@@ -142,18 +142,18 @@ export default class GetDataToRegService {
       attendancearr.push(res1);
     });
 
-    return attendanceData
     var result: any = {};
     status = true;
 
-    const monthDate = parseISO(currentMonth);
+    // return currentMonth
+    const parsedDate = DateTime.fromISO(currentMonth);
+    const formattedDate = parsedDate.toFormat("MMMM yyyy");
 
-    const formattedMonth = format(monthDate, "MMMM yyyy");
-    result["month"] = formattedMonth;
+    result["month"] = formattedDate;
 
-    result['data'] = attendancearr
+    result["data"] = attendancearr;
     result["Regularizecountdone"] = Regularizecount;
-    result["TotalRegularizecount"] = MinTimes;
+    result["TotalRegularizecount"] = parseInt(MinTimes);
     result["regularizationsettingsts"] = regularizationsettingsts;
     result["status"] = status;
     return result;
@@ -186,7 +186,7 @@ export default class GetDataToRegService {
       .whereRaw("AttendanceDate != CURDATE()")
       .andWhereNot("RegularizeSts", 0)
       .andWhereNot("RegularizeSts", 1)
-      .orderBy("AttendanceDate", "desc").debug(true).toSQL().toNative()
+      .orderBy("AttendanceDate", "desc");
     const row1 = AttendanceMaster[0];
     const data2 = {
       MinTimes: row1 ? parseInt(row1.MinTimes) : 0,

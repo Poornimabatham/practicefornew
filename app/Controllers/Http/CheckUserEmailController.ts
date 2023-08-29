@@ -4,7 +4,7 @@ import CheckUserEmailService from "App/Services/CheckuserEmailService";
 import CheckUserEmailValidator from "App/Validators/CheckuserEmailValidator";
 
 export default class CheckUserEmailController{
-  public async CheckUserEmail({ request, response }: HttpContextContract) {
+  public async CheckUserEmaildata({ request, response }: HttpContextContract) {
     const inputValidation = await request.validate(
       CheckUserEmailValidator.CheckUserEmailSchema
     );
@@ -13,7 +13,7 @@ export default class CheckUserEmailController{
     return response.json(result);
   }
 
-  public async CheckUserPhone({ request, response }: HttpContextContract) {
+  public async CheckUserPhonedata({ request, response }: HttpContextContract) {
     const inputValidation = await request.validate(
       CheckUserEmailValidator.CheckUserPhoneSchema
     );
