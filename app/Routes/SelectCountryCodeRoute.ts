@@ -1,4 +1,4 @@
 import Route from '@ioc:Adonis/Core/Route'
 
 
-Route.get('/selectcountryid','SelectCountryCodeController.FetchCountryCode')
+Route.get('/selectcountryid','SelectCountrycodeController.FetchCountryCode')

@@ -40,16 +40,7 @@ export default class ChangePasswordOtpValidator {
     message: BaseValidator.messages,
   };
 
-  static Changepass = {
-    schema: schema.create({
-      uid: schema.number(),
-      refno: schema.number(),
-      pwd: schema.string(),
-      npwd: schema.string(),
-      email:schema.string([rules.email()])
-    }),
-    message: BaseValidator.messages,
-  };
+  
   /**
    * Custom messages for validation failures. You can make use of dot notation `(.)`
    * for targeting nested fields and array expressions `(*)` for targeting all
