@@ -43,11 +43,13 @@ export default class changePasswordOTPService {
         if (phone != undefined) {
             var encodephone = await Helper.encode5t(phone);
             var affectedRows;
+            var encodeNewPassword;
+
             if (newpassword != undefined) {
-                var encodeNewPassword = await Helper.encode5t(newpassword);
+                encodeNewPassword = await Helper.encode5t(newpassword);
             }
 
-            var selectQuery = await Database.from('UserMaster').select('Id', 'appSuperviserSts', 'Username', 'Password').where('username_mobile', encodephone);
+            var selectQuery = await Database.from('UserMaster').select('Id', 'appSuperviserSts', 'Username', 'Password').where('username_mobile', encodephone)
 
             if (selectQuery[0].Password == encodeNewPassword) {
                 return "Password should not be same as previous Password";

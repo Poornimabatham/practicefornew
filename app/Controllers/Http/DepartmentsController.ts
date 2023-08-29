@@ -1,22 +1,14 @@
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import DepartmentValidator from "App/Validators/DepartmentValidator";
 import DepartmentService from "App/Services/DepartmentService";
-import User from "App/Models/User";
-import AuthenticationTable from "App/Models/AuthenticationTable";
-import Redis from "@ioc:Adonis/Addons/Redis";
-
-
 export default class DepartmentsController {
   private data = [];
   public async getdepartment({ request, response }: HttpContextContract) {
-    const apitoken = await Redis.get('token')
-    console.log(apitoken);
-    console.log('apitoken');
-    return
+
     const requestValidate = await request.validate(
       DepartmentValidator.getDepartment
     );
- 
+
     const service: any = await DepartmentService.getdepartment(requestValidate);
 
     if (service.length > 0) {
@@ -87,23 +79,4 @@ export default class DepartmentsController {
     return response.json(service);
   }
 
-  static async register({ request, response }: HttpContextContract) {
-
-    const { email, password } = request.all();
-    const user = await AuthenticationTable.create({ email, password })
-    return user
-
-  }
-
-  public async login({ request, response, auth }: HttpContextContract) {
-
-    const email = request.input('email');
-    const pass = request.input('password')
-     const token = await auth.attempt(email, pass)
-    await Redis.set('token', token.token)
-     return token.token;
-   
-
-
-  }
 }
