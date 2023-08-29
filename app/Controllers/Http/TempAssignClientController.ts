@@ -1,7 +1,6 @@
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import TempAssignClientService from "App/Services/TempAssignClientService";
 import TempAssignClientValidator from "App/Validators/TempAssignClientValidator";
-
 export default class  TempAssignClientController {
   public async TempAssignClientdata({
     request,

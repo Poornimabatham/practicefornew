@@ -1289,10 +1289,6 @@ export default class DailyAttendanceService {
                 .orderBy("Id", "desc")
                 .first();
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 2b6466e2d3c83cdf9938ebb94a6523a89957171c
               if (maxIdOfInterimAttendance) {
                 interimAttendanceId = maxIdOfInterimAttendance.Id;
               }
@@ -1324,13 +1320,6 @@ export default class DailyAttendanceService {
 
                 const loggedHours = loggedHoursResult.loggedHours;
 
-<<<<<<< HEAD
-=======
-                console.log(loggedHours);
-                console.log("loggedHours->");
-
-
->>>>>>> 2b6466e2d3c83cdf9938ebb94a6523a89957171c
                 const updateQuery = await Database.from("InterimAttendances")
                   .where("Id", interimAttendanceId)
                   .update({
@@ -1452,10 +1441,6 @@ export default class DailyAttendanceService {
                   overtime: calculatedOvertime,
                 });
 
-<<<<<<< HEAD
-=======
-              console.log('updateLoggedHour ' + updateLoggedHour);
->>>>>>> 2b6466e2d3c83cdf9938ebb94a6523a89957171c
             }
 
             statusArray[k] = {
