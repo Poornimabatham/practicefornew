@@ -22,5 +22,12 @@ export default class ChangePasswordOtpsController {
         return response.json(service);
     }
 
-   
+    public async changePassword({ request, response }: HttpContextContract) {
+
+        const validatedata = await request.validate(ChangePasswordOtpValidator.Changepass);
+
+        const service = await changePasswordOTPService.changepass(validatedata);
+
+        return response.json(service);
+    }
 }
