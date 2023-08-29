@@ -1280,7 +1280,7 @@ export default class DailyAttendanceService {
                 if (getAttnadaceRecord.length > 0) {
                   AttendanceMasterId = getAttnadaceRecord[0].Id;
                 }
-              }  
+              }    
 
               const maxIdOfInterimAttendance = await Database.from(
                 "InterimAttendances")
