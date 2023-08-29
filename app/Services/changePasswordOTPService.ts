@@ -142,12 +142,9 @@ export default class changePasswordOTPService {
       if (querysts > 0) {
         data2["status"] = 1;
 
-        
+        const today = DateTime.now();
+        const formattedDate = today.toFormat("yy-MM-dd HH:mm:ss");
 
-
-        const zone = await Helper.getTimeZone(orgid);
-        const defaultZone = DateTime.now().setZone(zone);
-        const formattedDate: string = defaultZone.toFormat("yy-MM-dd HH:mm:ss'");
         var id = uid;
 
         var appModule = "Password";

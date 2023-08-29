@@ -8,9 +8,8 @@ import ZoneMaster from "App/Models/ZoneMaster";
 import moment from "moment";
 export default class Helper {
   public static encode5t(str: string) {
-    var contactNum = str.toString() 
     for (let i = 0; i < 5; i++) {
-      str = Buffer.from(contactNum).toString("base64");
+      str = Buffer.from(str).toString("base64");
       str = str.split("").reverse().join("");
     }
     return str;
