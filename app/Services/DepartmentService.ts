@@ -259,12 +259,24 @@ export default class DepartmentService {
     const defaultZone = DateTime.now().setZone(zone);
     const date: string = defaultZone.toFormat("yyyy-MM-dd")
     const todayDate = DateTime.now().toISODate();
-    const time: string = defaultZone.toFormat("HH:mm:ss")
+    const currenttime: string = defaultZone.toFormat("HH:mm:ss")
     var data = {};
     data['departments'] = 0;
     data['present'] = 0;
     data['absent'] = 0;
     data['total'] = 0;
+    var selectCountQuery
 
+    if (getdata.date = todayDate) {
+      selectCountQuery = await Database.from('DepartmentMaster').select(
+        Database.raw(`(select count(id) from EmployeeMaster where OrganizationId = ${orgId} and Is_Delete=0 and archive = 1 )  as total`),
+        Database.raw(`(select count(id) from AttendanceMaster where AttendanceStatus in (1,4,8) AND AttendanceDate = ${getdata.date} and OrganizationId=${orgId})  as 'present'`),
+        Database.raw(`(Select count(Id) from EmployeeMaster where OrganizationId = ${orgId} AND Is_Delete=0 and archive = 1 AND ( ID NOT IN (SELECT EmployeeId from AttendanceMaster  where OrganizationId = ${orgId} AND AttendanceStatus in (1,4,8) AND AttendanceDate = ${date})) ) as absent`)
+      )
+        .where('OrganizationId', orgId)
+      // .count('Id as departments')
+    }
+
+    return selectCountQuery
   }
 }
