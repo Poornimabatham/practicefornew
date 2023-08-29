@@ -121,6 +121,16 @@ export default class UserSettingValidator  {
       })
    }
 
+
+   static Teampunchinfo = {
+      schema:schema.create({
+        uid:schema.number(),
+        orgid:schema.number(),
+        date:schema.date.optional({format:'yyyy-MM-dd'}),
+      })
+   }
+
+
   /**
    * Custom messages for validation failures. You can make use of dot notation `(.)`
    * for targeting nested fields and array expressions `(*)` for targeting all

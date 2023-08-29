@@ -8,9 +8,8 @@ import ZoneMaster from "App/Models/ZoneMaster";
 import moment from "moment";
 export default class Helper {
   public static encode5t(str: string) {
-    var contactNum = str.toString() 
     for (let i = 0; i < 5; i++) {
-      str = Buffer.from(contactNum).toString("base64");
+      str = Buffer.from(str).toString("base64");
       str = str.split("").reverse().join("");
     }
     return str;
@@ -28,15 +27,15 @@ export default class Helper {
     let TimeZone = "Asia/kolkata";
     const query1 = await Database.query()
       .from("ZoneMaster")
-      .select("name")
+      .select("Name")
       .where(
         "Id",
         Database.raw(
           `(select TimeZone from Organization where id =${orgid}  LIMIT 1)`
         )
-      ).toQuery();
+      )
     if (query1.length > 0) {
-      return query1[0].name;
+      return query1[0].Name;
     } else {
       return TimeZone;
     }
