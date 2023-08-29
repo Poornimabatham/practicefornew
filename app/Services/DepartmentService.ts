@@ -254,10 +254,10 @@ export default class DepartmentService {
   public static async getEmpdataDepartmentWiseCount(getdata) {
 
     const orgId = getdata.orgId;
-    const empId = getdata.empId;
+    const inpdate = getdata.date;
+    const formattedInpDate = inpdate.toFormat("yyyy-MM-dd");
     const zone = await Helper.getTimeZone(orgId);
     const defaultZone = DateTime.now().setZone(zone);
-    const date: string = defaultZone.toFormat("yyyy-MM-dd")
     const todayDate = DateTime.now().toISODate();
     const currenttime: string = defaultZone.toFormat("HH:mm:ss")
     var data = {};
@@ -265,18 +265,45 @@ export default class DepartmentService {
     data['present'] = 0;
     data['absent'] = 0;
     data['total'] = 0;
-    var selectCountQuery
+    var selectCountQuery;
 
-    if (getdata.date = todayDate) {
+    if (formattedInpDate == todayDate) {
       selectCountQuery = await Database.from('DepartmentMaster').select(
         Database.raw(`(select count(id) from EmployeeMaster where OrganizationId = ${orgId} and Is_Delete=0 and archive = 1 )  as total`),
-        Database.raw(`(select count(id) from AttendanceMaster where AttendanceStatus in (1,4,8) AND AttendanceDate = ${getdata.date} and OrganizationId=${orgId})  as 'present'`),
-        Database.raw(`(Select count(Id) from EmployeeMaster where OrganizationId = ${orgId} AND Is_Delete=0 and archive = 1 AND ( ID NOT IN (SELECT EmployeeId from AttendanceMaster  where OrganizationId = ${orgId} AND AttendanceStatus in (1,4,8) AND AttendanceDate = ${date})) ) as absent`)
+        Database.raw(`(select count(id) from AttendanceMaster where AttendanceStatus in (1,4,8) AND AttendanceDate = '${todayDate}' and OrganizationId=${orgId})  as 'present'`),
+        Database.raw(`(Select count(Id) from EmployeeMaster where OrganizationId = ${orgId} AND Is_Delete=0 and archive = 1 AND ( ID NOT IN (SELECT EmployeeId from AttendanceMaster  where OrganizationId = ${orgId} AND AttendanceStatus in (1,4,8) AND AttendanceDate = '${todayDate}')AND  Shift NOT IN (Select id from ShiftMaster where OrganizationId = ${orgId} AND TimeIn > '${currenttime}')) ) as absent`)
       )
         .where('OrganizationId', orgId)
-      // .count('Id as departments')
+        .count('Id as departments');
+
+      if (selectCountQuery.length > 0) {
+        selectCountQuery.forEach((row) => {
+          data['departments'] = row.departments;
+          data['total'] = row.total;
+          data['present'] = row.present;
+          data['absent'] = row.absent;
+        })
+      }
     }
 
-    return selectCountQuery
+    else {
+      var selectCountQuery1 = await Database.from('DepartmentMaster').select(
+        Database.raw(`(select count(id) from EmployeeMaster where OrganizationId = ${orgId} and Is_Delete=0 and archive = 1 )  as total`),
+        Database.raw(`(select count(id) from AttendanceMaster where AttendanceStatus in (1,4,8) AND AttendanceDate = '${formattedInpDate}' and OrganizationId=${orgId})  as present`),
+        Database.raw(`(Select count(Id) from EmployeeMaster where OrganizationId = ${orgId} AND Is_Delete=0 and archive = 1 AND ( ID NOT IN (SELECT EmployeeId from AttendanceMaster  where OrganizationId = ${orgId} AND AttendanceStatus in (1,4,8) AND AttendanceDate = '${formattedInpDate}')))  as absent`)
+      )
+        .where('OrganizationId', orgId)
+        .count('Id as departments');
+
+      if (selectCountQuery1.length > 0) {
+        selectCountQuery1.forEach((row) => {
+          data['departments'] = row.departments;
+          data['total'] = row.total;
+          data['present'] = row.present;
+          data['absent'] = row.absent;
+        })
+      }
+    }
+    return data
   }
 }
