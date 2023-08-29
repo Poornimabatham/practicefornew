@@ -10,4 +10,11 @@ export default class ResetPasswordLinkController {
     const Output = await ResetPasswordLinkService.ResetPassword(Validationinput);
     return Output;
   }
+  public async   getAllowAttToUser ({ request }: HttpContextContract) {
+    const Validationinput = await request.validate(
+     ResetPasswordLinkValidator.getAllowAttToUserschema
+    );
+    const Output = await ResetPasswordLinkService.getAllowAttToUserData(Validationinput);
+    return Output;
+  }
 }
