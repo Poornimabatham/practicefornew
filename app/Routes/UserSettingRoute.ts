@@ -16,4 +16,6 @@ Route.get('recoverPinLoginCredential','UserSettingsController.recoverPinLoginCre
 Route.put("/UpdateQR",'UserSettingsController.UpdateQrKioskPageReopen')
 Route.post("/demoScheduleRequest","UserSettingsController.demoScheduleRequest")
 Route.get("/getTeamPunchInfo","UserSettingsController.getTeamPunchInfo")
-Route.get('/GetQrKioskStatus','UserSettingsController.getQrKioskStatus')
+Route.get('/GetQrKioskStatus', 'UserSettingsController.getQrKioskStatus')
+
+Route.get("/getReferDiscountRequest","UserSettingsController.getReferDiscountRequest");
