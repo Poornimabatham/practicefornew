@@ -71,7 +71,6 @@ export default class LateComingService {
   }
 
   public static async getLateComingCsv(data) {
-    var Begin = (data.Currentpage - 1) * data.Perpage;
 
     var month1 = new Date(data.Date);
     var Date2 = moment(month1).format("yyyy-MM-DD");

@@ -93,13 +93,6 @@ export default class GetEarlyComingsService {
 
   static async EarlyCommersCsv(getData) {
     const sendResponse: EarlyCommersInterface[] = [];
-    const Begin = (getData.currentPage - 1) * getData.perPage;
-    var limit;
-    if (getData.csv == " ") {
-      limit = Begin;
-    } else {
-      limit;
-    }
 
     var currDate = DateTime.now().setZone(timeZone);
     var getDate = getData.date ? getData.date : currDate;
@@ -141,7 +134,6 @@ export default class GetEarlyComingsService {
       .whereNotIn("A.AttendanceStatus", [2, 3, 5])
       .whereNot("S.shifttype", 3)
       .orderBy("Earlyby", "desc")
-      .limit(limit);
 
     const adminStatus = await Helper.getAdminStatus(getData.empid);
     var ConditionForadminStatus = "";
