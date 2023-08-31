@@ -382,7 +382,6 @@ AM.shiftId), 1, 5)`
         var shiftType = getdataforearlyleavings[0].shifttype;
 
         if (shiftType == 2) {
-          ("22222");
 
           const nextdate = moment(date, "YYYY-MM-DD")
             .add(1, "days")
@@ -428,7 +427,7 @@ AM.shiftId), 1, 5)`
                 "ShiftId",
                 "TotalLoggedHours",
                 "AttendanceDate",
-                "AttendanceStatus"
+               "AttendanceStatus"
               )
               .where("EmployeeId", data2["Id"])
               .andWhere(" OrganizationId", getData.orgid)
