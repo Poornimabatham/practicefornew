@@ -57,6 +57,8 @@ import "../app/Routes/TempAssignClientRoute"
 import "../app/Routes/Report/GetAttendanceEmployeewise";
 import Redis from '@ioc:Adonis/Addons/Redis';
 import "../app/Routes/getUserMobileRoute";
+import "../app/Routes/GetWeekendsRoute";
+import "../app/Routes/GetunderovertimeRoute";
 // Route.get('/', async () => {
 //     return "Working fine!"
 // })
