@@ -1,6 +1,6 @@
 import Route from '@ioc:Adonis/Core/Route'
 
-Route.get('/emplist','EmployeesController.emplist')
+Route.get('/emplist','EmployeesController.emplist').middleware('throttle:global')
 Route.post('/deleteEmployee','EmployeesController.deleteEmployee')
 Route.post('/getSelfieUpdate','EmployeesController.updateSelfistatus');
 Route.post('/getAllowAttToUser','EmployeesController.getAllowAttToUser');

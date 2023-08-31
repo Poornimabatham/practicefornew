@@ -21,8 +21,6 @@ export default class CheckUserEmailService {
   }
 
 
-
-
   public static async CheckUserPhone(data){
     var phone =data.phone
         var  result:any={}

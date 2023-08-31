@@ -1319,7 +1319,6 @@ export default class DailyAttendanceService {
                   .first();
 
                 const loggedHours = loggedHoursResult.loggedHours;
-
                 const updateQuery = await Database.from("InterimAttendances")
                   .where("Id", interimAttendanceId)
                   .update({
@@ -1370,9 +1369,7 @@ export default class DailyAttendanceService {
                   hoursPerDay,
                   totalLoggedHours,
                 );
-                console.log(hours + ":" + minutes + ":" + seconds);
                 calculatedOvertime = hours + ":" + minutes + ":" + seconds;
-                console.log("calculatedOvertime" + calculatedOvertime);
               }
             }
 
