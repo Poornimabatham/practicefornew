@@ -266,6 +266,8 @@ export default class DepartmentService {
     let successMsg = "";
     let weekofflg = false;
     let halfflg = false;
+    
+    
 
     if(datafor == "Yesterday"){
       date = predate;
@@ -313,7 +315,8 @@ export default class DepartmentService {
         res['empid'] = element.Id;
         let dayOfMonth = defaultZone.day;    
         let weekNumber = Math.ceil(dayOfMonth / 7);
-        let dayofdate = 1 + defaultZone.weakday;
+        
+      
 
  
         
