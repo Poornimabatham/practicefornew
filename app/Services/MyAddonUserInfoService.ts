@@ -14,8 +14,7 @@ export default class MyAddonUserInfoService {
 
     UserMaster.forEach((row) => {
       result.qrKioskPin = row.kioskPin;
-      result.LoginSts = row.LoginSts;
-      result.username_mobile = row.username_mobile;
+  
     });
     return result;
   }

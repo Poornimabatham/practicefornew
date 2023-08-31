@@ -1,6 +1,7 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import ShiftsService from 'App/Services/ShiftService';
 import ShiftValidator from 'App/Validators/ShiftValidator';
+import { eachQuarterOfInterval } from 'date-fns';
 
 export default class ShiftsController {
   private data = []
@@ -49,4 +50,48 @@ export default class ShiftsController {
 
     return response.json(getResponsefromService);
   }
+
+  public async getMultiShiftsList({request,response}){
+    const validata = await request.validate(ShiftValidator.MultiShift);
+    const res = await ShiftsService.getMultiShiftsList(validata)
+    response.json(res)
+  }
+  /////////////ashish//////////////////////
+  public async AssignShiftsByDepartment({ request, response }: HttpContextContract) {
+
+    try{
+    const getvalidData = await request.validate(ShiftValidator.AssignShiftByDepart);
+
+    this.data["Orgid"] =getvalidData.orgid;
+    this.data["shiftid"] = getvalidData.shiftid;
+    this.data["status"] = getvalidData.status;
+    this.data['departid']=getvalidData.departid;
+    this.data['date']=getvalidData.date;
+    this.data['WeekoffStatus']=getvalidData.WeekoffStatus;
+    this.data["shiftname"] = getvalidData.shiftname;
+    this.data["departname"] = getvalidData.departname;
+    this.data["adminid"] = getvalidData.adminid;
+    this.data["adminname"] = getvalidData.adminname;
+
+    const result=await ShiftsService.AssignShiftByDepart(this.data);
+      if(result['status']=='false'){
+        response.status(400).send({Message:"Invalid Response"});  
+      }else{
+        response.status(200).send({Message:"Success",Response:result['status']});  
+      }
+    }catch(Error){
+      response.status(400).send({Message:"Invalid Request",Name:Error})
+    }
+
+    //return response.json(getResponsefromService);
+  }
+  public async shiftcheck({ request, response }: HttpContextContract) {
+    const inputvalidation = await request.validate(ShiftValidator.shiftcheck)
+    const result = await  ShiftsService.ShiftCheckData(inputvalidation)
+    return response.json(result)
+    
+  }
+
+
+
 }

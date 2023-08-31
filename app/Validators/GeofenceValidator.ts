@@ -24,6 +24,24 @@ export default class GeofenceValidator {
       LastModifiedById:schema.number()
     }), message: BaseValidator.messages
   }
+  static addpolygon = {
+    schema:schema.create({
+      Name : schema.string(),
+      Lat_Long : schema.string(),
+      OrganizationId : schema.number(),
+      Location : schema.string(),
+      LastModifiedById : schema.number(),
+      Status : schema.number()
 
+    })
+  }
+  static assignGeofence = {
+    schema:schema.create({
+      area_assigned :schema.number(),
+      OrganizationId :schema.number(),
+      Id : schema.number(),
+      adminid : schema.number()
+    })
+  }
   public messages: CustomMessages = {}
 }

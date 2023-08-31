@@ -49,6 +49,13 @@ export default class DesignationValidator  extends BaseValidator{
      })
    }
 
+
+   static DesignationStatusSchema = {
+    schema: schema.create({
+      orgid: schema.number(),
+      Id: schema.number(),
+    }),
+  };
   }
   
 

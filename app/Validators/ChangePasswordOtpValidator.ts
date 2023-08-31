@@ -1,9 +1,9 @@
-import { schema, CustomMessages } from '@ioc:Adonis/Core/Validator'
-import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import BaseValidator from './BaseValidator'
+import { schema,rules, CustomMessages } from "@ioc:Adonis/Core/Validator";
+import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
+import BaseValidator from "./BaseValidator";
 
 export default class ChangePasswordOtpValidator {
-  constructor(protected ctx: HttpContextContract) { }
+  constructor(protected ctx: HttpContextContract) {}
 
   /*
    * Define schema to validate the "shape", "type", "formatting" and "integrity" of data.
@@ -27,10 +27,29 @@ export default class ChangePasswordOtpValidator {
   static changePasswordOTP = {
     schema: schema.create({
       email: schema.string.optional(),
-      phone: schema.string()
-    }), message: BaseValidator.messages
-  }
+      phone: schema.string(),
+    }),
+    message: BaseValidator.messages,
+  };
 
+  static newchangepass = {
+    schema: schema.create({
+      changepassphone: schema.string(),
+      newpass: schema.string.optional(),
+    }),
+    message: BaseValidator.messages,
+  };
+
+  static Changepass = {
+    schema: schema.create({
+      uid: schema.number(),
+      refno: schema.number(),
+      pwd: schema.string(),
+      npwd: schema.string(),
+      email:schema.string([rules.email()])
+    }),
+    message: BaseValidator.messages,
+  };
   /**
    * Custom messages for validation failures. You can make use of dot notation `(.)`
    * for targeting nested fields and array expressions `(*)` for targeting all
@@ -42,5 +61,5 @@ export default class ChangePasswordOtpValidator {
    * }
    *
    */
-  public messages: CustomMessages = {}
+  public messages: CustomMessages = {};
 }

@@ -309,6 +309,7 @@ export default class DailyAttendanceService {
               `(select ApprovalStatus FROM AppliedLeave WHERE EmployeeId=E.Id AND ApprovalStatus=2 AND Date=${AttendanceDate}) as LeaveStatus`,
             ),
             "A.AttendanceStatus",
+
           )
           .innerJoin("AttendanceMaster as A", "A.EmployeeId", "E.Id")
           .innerJoin("ShiftMaster as S", "A.ShiftId", "S.Id")
@@ -641,7 +642,11 @@ export default class DailyAttendanceService {
     let HourlyRateId: number = 0;
     let Desg_id: number = 0;
     let Dept_id: number = 0;
-    let avtarImg="https://ubitech.ubihrm.com/public/avatars/male.png";
+    let avtarImg = "https://ubitech.ubihrm.com/public/avatars/male.png";
+
+    // console.log(jsonData.length)
+    // console.log(jsonData[0]['2023-08-26'].interim.length)
+    // console.log('jsonlength')
 
     for (let i = 0; i < jsonData.length; i++) {
       const date = Object.keys(jsonData[i]);
@@ -702,20 +707,16 @@ export default class DailyAttendanceService {
             GeofenceOutAreaId = "",
           } = jsonData[i][date[0]].interim[j];
 
-          console.log(jsonData[i][date[0]].interim[j]);
+           console.log(jsonData[i][date[0]].interim[j]);
+           console.log("all data of");
+          // console.log(j);
+          // console.log("all data of");
 
-          console.log("all data of");
           const zone = await Helper.getEmpTimeZone(UserId, OrganizationId);
           const defaultZone = DateTime.now().setZone(zone);
           let shiftType = await Helper.getShiftType(ShiftId);
-          let attDatePastOneDay = defaultZone
-            .minus({ days: 1 })
-            .toFormat("yyyy-MM-dd");
+          let attDatePastOneDay = defaultZone.minus({ days: 1 }).toFormat("yyyy-MM-dd");
           let currentDate = defaultZone.toFormat("yyyy-MM-dd");
-          // console.log(defaultZone.minus({ days: 1 }).toFormat('yyyy-MM-dd, HH:mm:ss'));
-          // console.log(defaultZone.toFormat('yyyy-MM-dd, HH:mm:ss'));
-          //console.log(shiftType);
-          //console.log("shifttype");
 
           if (shiftType == "1") {
             if (ShiftId == "0" || ShiftId == "" || ShiftId == "") {
@@ -726,9 +727,7 @@ export default class DailyAttendanceService {
             }
           }
 
-          let getSettingOfPunchAttendace = await Database.from(
-            "licence_ubiattendance",
-          )
+          let getSettingOfPunchAttendace = await Database.from("licence_ubiattendance")
             .select("allowOverTime", "Addon_AutoTimeOut")
             .where("OrganizationId", OrganizationId);
 
@@ -764,16 +763,14 @@ export default class DailyAttendanceService {
             }
           }
 
-          let geofencePerm = await Helper.getNotificationPermission(OrganizationId,"OutsideGeofence");
-          let SuspiciousSelfiePerm = await Helper.getNotificationPermission(OrganizationId,"SuspiciousSelfie");
-          let SuspiciousDevicePerm = await Helper.getNotificationPermission(OrganizationId,"SuspiciousDevice");
+          let geofencePerm = await Helper.getNotificationPermission(OrganizationId, "OutsideGeofence");
+          let SuspiciousSelfiePerm = await Helper.getNotificationPermission(OrganizationId, "SuspiciousSelfie");
+          let SuspiciousDevicePerm = await Helper.getNotificationPermission(OrganizationId, "SuspiciousDevice");
 
-          let time =defaultZone.toFormat("HH:mm:ss") == "00:00:00" ? "23:59:00" : defaultZone.toFormat("HH:mm:ss");
-          let stamp = defaultZone.toFormat("yyyy-MM-dd, HH:mm:ss");
+          let time = defaultZone.toFormat("HH:mm:ss") == "00:00:00" ? "23:59:00" : defaultZone.toFormat("HH:mm:ss");
+          let stamp = defaultZone.toFormat("yyyy-MM-dd HH:mm:ss");
           let today = currentDate;
-          //let currDate = currentDate;
           let name = await Helper.getEmpName(UserId);
-          //console.log(name);
           let TimeInStampServer = defaultZone.toFormat("yyyy-MM-dd, HH:mm:ss");
           let TimeOutStampServer = defaultZone.toFormat("yyyy-MM-dd, HH:mm:ss");
 
@@ -797,7 +794,7 @@ export default class DailyAttendanceService {
             .select("*");
 
           let attendance_sts = result.length > 0 ? 4 : 1;
-        
+
           const query = await Database.from("AttendanceMaster")
             .where("EmployeeId", UserId)
             .where("AttendanceDate", AttendanceDate)
@@ -814,7 +811,7 @@ export default class DailyAttendanceService {
             AttendanceDate,
             ShiftId,
           );
-          
+
           const attendanceData = await AttendanceMaster.query()
             .where("EmployeeId", UserId)
             .where("AttendanceDate", AttendanceDate)
@@ -827,6 +824,8 @@ export default class DailyAttendanceService {
             attTimeIn = attendanceData.TimeIn;
             attTimeOut = attendanceData.TimeOut;
           }
+         // console.log("AttendanceMasterId=> "+AttendanceMasterId)
+        
 
           const EmployeeRecord = await EmployeeMaster.query()
             .where("Id", UserId)
@@ -840,7 +839,9 @@ export default class DailyAttendanceService {
             )
             .first();
 
+
           if (EmployeeRecord) {
+
             Dept_id = EmployeeRecord.Department;
             Desg_id = EmployeeRecord.Designation;
             areaId = EmployeeRecord.area_assigned;
@@ -849,19 +850,15 @@ export default class DailyAttendanceService {
           }
 
           if (SyncTimeIn == "1" && SyncTimeOut != "1") {
+            let interimAttendanceIdss=0
             console.log("case one for sync Attendance Only Time In");
-            let EntryImage = ThumnailTimeInPictureBase64;
-            if (TimeInPictureBase64 == "") {
-              EntryImage = "https://ubitech.ubihrm.com/public/avatars/male.png";
-            }
-
+            let EntryImage = ThumnailTimeInPictureBase64=="" ? avtarImg : ThumnailTimeInPictureBase64;
             try {
               areaId = GeofenceInAreaId;
               if (AttendanceMasterId == 0) {
                 const InsertAttendanceTimeiN = await Database.table(
-                  "AttendanceMaster",
-                )
-                  .returning("id")
+                  "AttendanceMaster")
+                  .returning("Id")
                   .insert({
                     TimeInApp: TimeInApp,
                     FakeLocationStatusTimeIn: FakeLocationInStatus,
@@ -900,20 +897,14 @@ export default class DailyAttendanceService {
                     TimeInStampServer: TimeInStampServer,
                     ZoneId: GeofenceInAreaId,
                   });
-               
+
                 AttendanceMasterId = InsertAttendanceTimeiN[0];
-              } else if (AttendanceMasterId != 0 && attTimeIn == "00:00:00") {
-                // Update existing record in AttendanceMaster
-                // await Database.raw(
-                //   "UPDATE AttendanceMaster SET TimeInApp = ?, FakeLocationStatusTimeIn = ?, EmployeeId = ?, ... WHERE Id = ?",
-                //   [TimeInApp, FakeLocationInStatus, UserId, ..., attendanceMasterId]
-                // );
               }
 
               if (MultipletimeStatus == 1 || shiftType == "3") {
 
                 if (AttendanceMasterId != 0) {
-
+          
                   const queryResult = await Database.from("InterimAttendances")
                     .select("Id")
                     .where("AttendanceMasterId", AttendanceMasterId)
@@ -921,9 +912,7 @@ export default class DailyAttendanceService {
 
                   if (queryResult.length > 0) {
                     interimAttendanceId = queryResult[0].Id;
-                    console.log("Interim Attendance ID:", interimAttendanceId);
                   }
-                  //  console.log("Interim Attendance IDs:", interimAttendanceId);
 
                   if (interimAttendanceId == 0) {
                     // Insert into InterimAttendances
@@ -953,6 +942,8 @@ export default class DailyAttendanceService {
                           EmployeeId: UserId,
                           OrganizationId: OrganizationId,
                         });
+
+                        interimAttendanceId=InsertAttendanceInInterimTimeiN[0];
                   }
                 }
               }
@@ -970,16 +961,18 @@ export default class DailyAttendanceService {
               const errorMsg = "Message: " + error.message;
               const status = 0;
             }
-          } else if (SyncTimeIn == "1" && SyncTimeOut == "1") {
-            
+          } 
+          //******************************start second case****************************//
+          else if (SyncTimeIn == "1" && SyncTimeOut == "1") {
             console.log("*************case mark attendance both****************");
-
-            let EntryImage = ThumnailTimeInPictureBase64 == "" ? avtarImg : ThumnailTimeInPictureBase64;
-            let ExitImage = ThumnailTimeOutPictureBase64 == "" ? avtarImg : ThumnailTimeOutPictureBase64;
+             let interimAttendanceIds=0
+             let EntryImage = ThumnailTimeInPictureBase64 == "" ? avtarImg : ThumnailTimeInPictureBase64;
+             let ExitImage = ThumnailTimeOutPictureBase64 == "" ? avtarImg : ThumnailTimeOutPictureBase64;
         
-            try {
-              let areaId = GeofenceInAreaId;
-              let areaIdOut = GeofenceOutAreaId;
+             try {
+
+               let areaId = GeofenceInAreaId;
+               let areaIdOut = GeofenceOutAreaId;
 
               if (AttendanceMasterId == 0) {
                 let Zone_id = 0;
@@ -1040,150 +1033,24 @@ export default class DailyAttendanceService {
                     areaIdTimeOut: areaIdOut,
                     ZoneId: Zone_id,
                   });
-
                 AttendanceMasterId = InsertAttendanceTimeiN[0];
-              } else if (
-                AttendanceMasterId != 0 &&
-                attTimeIn == "00:00:00" &&
-                attTimeOut == "00:00:00"
-              ) {
-                await Database.from("AttendanceMaster")
-                  .where("id", AttendanceMasterId)
-                  .update({
-                    TimeInApp: TimeInApp,
-                    TimeOutApp: TimeOutApp,
-                    FakeLocationStatusTimeIn: FakeLocationInStatus,
-                    FakeLocationStatusTimeOut: FakeLocationOutStatus,
-                    EmployeeId: UserId,
-                    AttendanceDate: AttendanceDate,
-                    AttendanceStatus: "1",
-                    TimeIn: TimeInTime,
-                    TimeOut: TimeOutTime,
-                    ShiftId: ShiftId,
-                    Dept_id: Dept_id,
-                    Desg_id: Desg_id,
-                    areaId: areaId,
-                    HourlyRateId: HourlyRateId,
-                    OrganizationId: OrganizationId,
-                    CreatedDate: today,
-                    CreatedById: UserId,
-                    LastModifiedDate: stamp,
-                    LastModifiedById: UserId,
-                    OwnerId: UserId,
-                    EntryImage: EntryImage,
-                    ExitImage: ExitImage,
-                    checkInLoc: TimeInAddress,
-                    checkOutLoc: TimeOutAddress,
-                    device: "mobile",
-                    latit_in: LatitudeIn,
-                    longi_in: LongitudeIn,
-                    latit_out: LatitudeOut,
-                    longi_out: LongitudeOut,
-                    timeindate: AttendanceDate,
-                    timeoutdate: AttendanceDate,
-                    Platform: Platform,
-                    TimeInDeviceName: TimeInDeviceName,
-                    TimeOutDeviceName: TimeOutDeviceName,
-                    timeincity: TimeInCity,
-                    timeoutcity: TimeOutCity,
-                    TimeInAppVersion: TimeInAppVersion,
-                    TimeOutAppVersion: TimeOutAppVersion,
-                    TimeInGeoFence: GeofenceIn,
-                    TimeOutGeoFence: GeofenceOut,
-                    TimeInDevice: TimeInDevice,
-                    TimeOutDevice: TimeOutDevice,
-                    multitime_sts: MultipletimeStatus,
-                    remark: TimeInRemark,
-                    remarks: TimeOutRemark,
-                    TimeInStampApp: TimeInStampApp,
-                    TimeOutStampApp: TimeOutStampApp,
-                    TimeInStampServer: TimeInStampServer,
-                    TimeOutStampServer: TimeOutStampServer,
-                    areaIdTimeOut: areaIdOut,
-                  });
-              } else {
-                let cond;
-
-                if (MultipletimeStatus == 1 || shiftType == "3") {
-                  let calculatedOvertime = "00:00:00";
-                  let totalLoggedHours = "00:00:00";
-                  let hoursPerDay = "0:00:00";
-                  const query = await Database.from("InterimAttendances")
-                    .select("Id")
-                    .select(
-                      Database.raw(
-                        "SEC_TO_TIME(SUM(TIME_TO_SEC(LoggedHours))) as totalLoggedHours",
-                      ),
-                    )
-                    .select(
-                      Database.raw(
-                        `(select HoursPerDay from ShiftMaster where Id = '${ShiftId}') as hoursPerDay`,
-                      ),
-                    )
-                    .where("AttendanceMasterId", AttendanceMasterId);
-                 
-                  if (query.length > 0) {
-                    totalLoggedHours = query[0].totalLoggedHours;
-                    hoursPerDay = query[0].hoursPerDay;
-                    const { hours, minutes, seconds } = Helper.calculateOvertime(hoursPerDay, totalLoggedHours);
-                    console.log(hours + ":" + minutes + ":" + seconds);
-                    let calculatedOvertime = hours + ":" + minutes + ":" + seconds;
-                    console.log("calculatedOvertime Case Three" + calculatedOvertime);
-                  }
-                  cond = {
-                    overtime: calculatedOvertime,
-                    TotalLoggedHours: totalLoggedHours,
-                  };
-                }
-
-                let disattreason = 0;
-                let disappstatus = 0;
-
-                const dynamicFields = {
-                  FakeLocationStatusTimeOut: FakeLocationOutStatus,
-                  ExitImage: ExitImage,
-                  CheckOutLoc: TimeOutAddress,
-                  latit_out: LatitudeOut,
-                  longi_out: LongitudeOut,
-                  TimeOut: TimeOutTime,
-                  TimeOutDeviceId: TimeOutDeviceId,
-                  TimeOutDeviceName: TimeOutDeviceName,
-                  timeoutcity: TimeOutCity,
-                  LastModifiedDate: stamp,
-                  TimeOutApp: TimeOutApp,
-                  timeoutdate: TimeOutDate,
-                  TimeOutAppVersion: TimeOutAppVersion,
-                  TimeOutGeoFence: GeofenceOut,
-                  TimeOutDevice: TimeOutDevice,
-                  AttendanceStatus: attendance_sts,
-                  remarks: TimeOutRemark,
-                  TimeOutStampApp: TimeOutStampApp,
-                  TimeOutStampServer: TimeOutStampServer,
-                  areaIdTimeOut: areaIdOut,
-                  disapprove_sts: disappstatus,
-                  disapprovereason: disattreason,
-                };
-
-                const updateFields = { ...dynamicFields, ...cond };
-                const affectedRows = await Database.from("AttendanceMaster")
-                  .where("id", AttendanceMasterId)
-                  .update(updateFields);
               }
-
               if (MultipletimeStatus == 1 || shiftType == "3") {
+                
                 if (AttendanceMasterId != 0) {
-                  const haveInterimId = await Database.from("InterimAttendances") 
+                  const query =  Database.from("InterimAttendances") 
                     .where("AttendanceMasterId", AttendanceMasterId)
                     .where("TimeIn", TimeInTime)
-                    .select("Id");
-
+                    .select("id");
+                  const haveInterimId: any = await query;                    
                   if (haveInterimId.length > 0) {
-                    interimAttendanceId = haveInterimId[0].Id;
+                    interimAttendanceId = haveInterimId[0].id;
                   }
                 }
 
                 if (interimAttendanceId == 0) {
-                  const InsertAttendanceTimeInOut = await Database.table(
+                  console.log("new Insert Query");
+                  const query = Database.table(
                     "InterimAttendances",
                   )
                     .returning("id")
@@ -1229,10 +1096,13 @@ export default class DailyAttendanceService {
                       OrganizationId: OrganizationId,
                     });
 
-                  interimAttendanceId = InsertAttendanceTimeInOut[0];
+                  let InsertAttendanceTimeInOut  = await query
+                   interimAttendanceIds = InsertAttendanceTimeInOut[0];
                 }
               }
-
+            
+            // //update totalloggedhours and overtime in shifttype 3 AND MultipletimeStatus 1//
+                       
               if (MultipletimeStatus == 1 || shiftType == "3") {
                 let calculatedOvertime = "00:00:00";
                 let totalLoggedHours = "00:00:00";
@@ -1252,23 +1122,28 @@ export default class DailyAttendanceService {
                   )
                   .where("AttendanceMasterId", AttendanceMasterId);
 
-                const { hours, minutes, seconds } = Helper.calculateOvertime(
-                  hoursPerDay,
-                  totalLoggedHours,
-                );
+
+
+                if (query.length > 0) {
+                  hoursPerDay = query[0].hoursPerDay;
+                  totalLoggedHours = query[0].totalLoggedHours
+                }
+
+                const { hours, minutes, seconds } = Helper.calculateOvertime(hoursPerDay, totalLoggedHours);
                 console.log(hours + ":" + minutes + ":" + seconds);
                 calculatedOvertime = hours + ":" + minutes + ":" + seconds;
-                console.log(
-                  "calculatedOvertime Case Three" + calculatedOvertime,
-                );
+                console.log("calculatedOvertime Case Three" + calculatedOvertime,);
 
-                const updateLoggedHours = await Database.from("AttendanceMaster")
+                const updateLoggedHours = Database.from("AttendanceMaster")
                   .where("id", AttendanceMasterId)
                   .update({
                     overtime: calculatedOvertime,
                     TotalLoggedHours: totalLoggedHours,
                   });
+                  await updateLoggedHours;
               }
+
+              // update totalloggedhours and overtime in shifttype 1 & 2 AND MultipletimeStatus 0 //
               if ((shiftType == "1" || shiftType == "2") && MultipletimeStatus != 1) {
                 let calculatedOvertime = "00:00:00";
                 let totalLoggedHours = "00:00:00";
@@ -1296,18 +1171,16 @@ export default class DailyAttendanceService {
                   totalLoggedHours = getOvertTime.TotalLoggedHours;
                   calculatedOvertime = getOvertTime.overtime;
                 }
-                const query = Database.from("AttendanceMaster")
+                const query = await Database.from("AttendanceMaster")
                 .where("id", AttendanceMasterId)
                 .update({
                   overtime: calculatedOvertime,
                   TotalLoggedHours: totalLoggedHours,
                 });
-          
-              const updateLoggedHours = await query;
               }
+            //// update totalloggedhours and overtime in shifttype 1 & 2 AND MultipletimeStatus 0 //
 
-             
-
+            //////////////////////////// Half Day Status /////////////////////
               const results = await Database.from("AttendanceMaster as A")
                 .innerJoin("ShiftMaster as S", "A.ShiftId", "S.Id")
                 .select(
@@ -1343,11 +1216,10 @@ export default class DailyAttendanceService {
 
               const updateHalfdayStatus = await Database.from(
                 "AttendanceMaster",
-              )
-                .where("Id", AttendanceMasterId)
+              ).where("Id", AttendanceMasterId)
                 .update({
                   Wo_H_Hd: halfDayStatus,
-                });
+              });
 
               statusArray[k] = {
                 Time: TimeInTime,
@@ -1355,10 +1227,9 @@ export default class DailyAttendanceService {
                 Action: "TimeIn",
                 EmpId: UserId,
                 InterimId: Id,
-                InterimAttendanceId: interimAttendanceId,
+                InterimAttendanceId: interimAttendanceIds,
                 AttendanceMasterId: AttendanceMasterId,
               };
-
               k++;
 
               statusArray[k] = {
@@ -1367,30 +1238,30 @@ export default class DailyAttendanceService {
                 Action: "TimeOut",
                 EmpId: UserId,
                 InterimId: Id,
-                InterimAttendanceId: interimAttendanceId,
+                InterimAttendanceId: interimAttendanceIds,
                 AttendanceMasterId: AttendanceMasterId,
               };
-
               k++;
-              console.log("statusArray-case second");
-            } catch (error) {}
-          } else if (SyncTimeIn != "1" && SyncTimeOut == "1") {
-            console.log("case three for sync Attendance Only Time out");
-            let ExitImage = ThumnailTimeOutPictureBase64;
+             //console.log(statusArray);
+             } catch (error) {
+
+             }
+
+            
+          } 
+          //******************************End second case****************************//
+          //******************************start third case****************************//
+          else if (SyncTimeIn != "1" && SyncTimeOut == "1") {
+
+            let ExitImage = ThumnailTimeOutPictureBase64 == "" ? avtarImg : ThumnailTimeOutPictureBase64;
             let areaIdOut = GeofenceOutAreaId;
-
-            if (TimeOutPictureBase64 == "") {
-              ExitImage = "https://ubitech.ubihrm.com/public/avatars/male.png";
-            }
-
             let calculatedOvertime = "00:00:00";
             let totalLoggedHours = "00:00:00";
             let hoursPerDay = "00:00:00";
 
             if (MultipletimeStatus == 1 || shiftType == "3") {
               let timeOutAlreadySyncedId = 0;
-              console.log(AttendanceMasterId);
-              console.log("attendanceMasterId->timeout");
+            
               if (AttendanceMasterId == 0) {
                 const getAttnadaceRecord = await Database.from(
                   "AttendanceMaster",
@@ -1405,28 +1276,24 @@ export default class DailyAttendanceService {
                   ])
                   .orderBy("AttendanceDate", "desc")
                   .limit(1);
-                console.log("getAttnadaceRecord");
+               
                 if (getAttnadaceRecord.length > 0) {
                   AttendanceMasterId = getAttnadaceRecord[0].Id;
-                  console.log(
-                    "attendanceMasterId Attendance ID:",
-                    AttendanceMasterId,
-                  );
                 }
-              }
+              }    
 
               const maxIdOfInterimAttendance = await Database.from(
-                "InterimAttendances",
-              )
+                "InterimAttendances")
                 .select("Id")
                 .where("AttendanceMasterId", AttendanceMasterId)
                 .orderBy("Id", "desc")
                 .first();
-              console.log(maxIdOfInterimAttendance);
+
               if (maxIdOfInterimAttendance) {
                 interimAttendanceId = maxIdOfInterimAttendance.Id;
-                console.log("MAx Id Attendance ID:", interimAttendanceId);
               }
+
+
               if (interimAttendanceId != 0) {
                 const alreadyMarkedTimeOutId = await Database.from(
                   "InterimAttendances",
@@ -1441,12 +1308,7 @@ export default class DailyAttendanceService {
                   timeOutAlreadySyncedId = alreadyMarkedTimeOutId.Id;
                 }
 
-                console.log(TimeOutDate + " " + TimeOutTime);
-
-                console.log("TimeOutDate+=>1568");
-                const loggedHoursResult = await Database.from(
-                  "InterimAttendances",
-                )
+                const loggedHoursResult = await Database.from("InterimAttendances")
                   .select(
                     Database.raw(
                       `TIMEDIFF(CONCAT(?, ' ', ?), CONCAT(TimeInDate, ' ', TimeIn)) as loggedHours`,
@@ -1457,9 +1319,6 @@ export default class DailyAttendanceService {
                   .first();
 
                 const loggedHours = loggedHoursResult.loggedHours;
-
-                console.log(loggedHours);
-                console.log("loggedHours");
 
                 const updateQuery = await Database.from("InterimAttendances")
                   .where("Id", interimAttendanceId)
@@ -1504,15 +1363,9 @@ export default class DailyAttendanceService {
                 .where("I.AttendanceMasterId", AttendanceMasterId)
                 .groupBy("A.Id", "A.ShiftId");
 
-              if (calculateLoggedHours) {
+              if (calculateLoggedHours.length > 0) {
                 totalLoggedHours = calculateLoggedHours[0].totalLoggedHours;
                 let hoursPerDay = calculateLoggedHours[0].hoursPerDay;
-
-                console.log(
-                  "totalLoggedHours line number 1629=" + totalLoggedHours,
-                );
-                console.log("hoursPerDay line number 1629=" + hoursPerDay);
-
                 const { hours, minutes, seconds } = Helper.calculateOvertime(
                   hoursPerDay,
                   totalLoggedHours,
@@ -1523,15 +1376,8 @@ export default class DailyAttendanceService {
               }
             }
 
-            // if(($GeofenceOut=="Outside Geofence")){
-            //   let attendance_sts=2;//absent
             let disappstatus = 2; //pending disaaprove
             let disattreason = "Outside Geofence";
-
-            console.log("calculate overunderTime= " + calculatedOvertime);
-            console.log("calculate loggedHours= " + totalLoggedHours);
-
-            //const cond1 = `overtime='${calculatedOvertime}', TotalLoggedHours='${totalLoggedHours}'`;
 
             const updateResult: any = await AttendanceMaster.query()
               .where("id", AttendanceMasterId)
@@ -1562,10 +1408,7 @@ export default class DailyAttendanceService {
                 TotalLoggedHours: totalLoggedHours,
               });
 
-            if (
-              (shiftType == "1" || shiftType == "2") &&
-              MultipletimeStatus != 1
-            ) {
+            if ((shiftType == "1" || shiftType == "2") && MultipletimeStatus != 1) {
               calculatedOvertime = "00:00:00";
               totalLoggedHours = "00:00:00";
 
@@ -1586,10 +1429,6 @@ export default class DailyAttendanceService {
                 .where("A.Id", AttendanceMasterId)
                 .first();
 
-              console.log("result->");
-              console.log(result);
-              console.log(result.TotalLoggedHours);
-
               if (result.length > 0) {
                 totalLoggedHours = result.TotalLoggedHours;
                 calculatedOvertime = result.overtime;
@@ -1601,6 +1440,7 @@ export default class DailyAttendanceService {
                   TotalLoggedHours: totalLoggedHours,
                   overtime: calculatedOvertime,
                 });
+
             }
 
             statusArray[k] = {
@@ -1615,11 +1455,10 @@ export default class DailyAttendanceService {
 
             k++;
           }
+          //******************************End third case****************************//
         }
       }
-      // else {
-      //   console.log("array not working");
-      // }
+      
     }
 
     return statusArray;

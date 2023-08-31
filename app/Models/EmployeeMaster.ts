@@ -36,4 +36,7 @@ export default class EmployeeMaster extends BaseModel {
 
   @column({columnName:'OwnerId'})
   public OwnerId: number
+  
+  @column({columnName:'Shift'})
+  public Shift: number
 }

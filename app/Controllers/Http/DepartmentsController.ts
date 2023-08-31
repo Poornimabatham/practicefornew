@@ -4,6 +4,7 @@ import DepartmentService from "App/Services/DepartmentService";
 export default class DepartmentsController {
   private data = [];
   public async getdepartment({ request, response }: HttpContextContract) {
+
     const requestValidate = await request.validate(
       DepartmentValidator.getDepartment
     );
@@ -58,4 +59,24 @@ export default class DepartmentsController {
 
     return response.json(getResponsefromService);
   }
+
+  public async GetDepartmentStatus({ request, response }: HttpContextContract) {
+    const requestValidate = await request.validate(
+      DepartmentValidator.DepartmentStatusSchema
+    );
+
+    const service = await DepartmentService.DepartmentStatus(requestValidate);
+
+    return response.json(service);
+  }
+
+  public async getEmpdataDepartmentWiseCount({ request, response }: HttpContextContract) {
+    const requestValidate = await request.validate(
+      DepartmentValidator.getEmpdataDepartmentWiseCount);
+
+    const service = await DepartmentService.getEmpdataDepartmentWiseCount(requestValidate);
+
+    return response.json(service);
+  }
+
 }

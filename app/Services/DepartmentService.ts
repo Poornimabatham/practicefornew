@@ -226,4 +226,84 @@ export default class DepartmentService {
       return "Error inserting ActivityMasterInsert";
     }
   }
+
+  // GetDepartmentStatus
+
+  public static async DepartmentStatus(get) {
+    var orgId = get.orgid;
+    var deptId = get.Id;
+    const selectEmployeeList = await Database.from("EmployeeMaster")
+      .select(Database.raw("COUNT(*) as num"))
+      .where("OrganizationId", orgId)
+      .andWhere("Department", deptId)
+      .andWhere("Is_Delete", "!=", 2);
+
+    const result = await selectEmployeeList;
+    const selectAttendanceMasterList = await Database.from("AttendanceMaster")
+      .select(Database.raw("COUNT(*) as  totemp"))
+      .where("Dept_id", deptId)
+      .andWhere("OrganizationId", orgId);
+
+    const result2 = await selectAttendanceMasterList;
+    return {
+      num: result[0].num,
+      attNum: result2[0].totemp,
+    };
+  }
+
+  public static async getEmpdataDepartmentWiseCount(getdata) {
+
+    const orgId = getdata.orgId;
+    const inpdate = getdata.date;
+    const formattedInpDate = inpdate.toFormat("yyyy-MM-dd");
+    const zone = await Helper.getTimeZone(orgId);
+    const defaultZone = DateTime.now().setZone(zone);
+    const todayDate = DateTime.now().toISODate();
+    const currenttime: string = defaultZone.toFormat("HH:mm:ss")
+    var data = {};
+    data['departments'] = 0;
+    data['present'] = 0;
+    data['absent'] = 0;
+    data['total'] = 0;
+    var selectCountQuery;
+
+    if (formattedInpDate == todayDate) {
+      selectCountQuery = await Database.from('DepartmentMaster').select(
+        Database.raw(`(select count(id) from EmployeeMaster where OrganizationId = ${orgId} and Is_Delete=0 and archive = 1 )  as total`),
+        Database.raw(`(select count(id) from AttendanceMaster where AttendanceStatus in (1,4,8) AND AttendanceDate = '${todayDate}' and OrganizationId=${orgId})  as 'present'`),
+        Database.raw(`(Select count(Id) from EmployeeMaster where OrganizationId = ${orgId} AND Is_Delete=0 and archive = 1 AND ( ID NOT IN (SELECT EmployeeId from AttendanceMaster  where OrganizationId = ${orgId} AND AttendanceStatus in (1,4,8) AND AttendanceDate = '${todayDate}')AND  Shift NOT IN (Select id from ShiftMaster where OrganizationId = ${orgId} AND TimeIn > '${currenttime}')) ) as absent`)
+      )
+        .where('OrganizationId', orgId)
+        .count('Id as departments');
+
+      if (selectCountQuery.length > 0) {
+        selectCountQuery.forEach((row) => {
+          data['departments'] = row.departments;
+          data['total'] = row.total;
+          data['present'] = row.present;
+          data['absent'] = row.absent;
+        })
+      }
+    }
+
+    else {
+      var selectCountQuery1 = await Database.from('DepartmentMaster').select(
+        Database.raw(`(select count(id) from EmployeeMaster where OrganizationId = ${orgId} and Is_Delete=0 and archive = 1 )  as total`),
+        Database.raw(`(select count(id) from AttendanceMaster where AttendanceStatus in (1,4,8) AND AttendanceDate = '${formattedInpDate}' and OrganizationId=${orgId})  as present`),
+        Database.raw(`(Select count(Id) from EmployeeMaster where OrganizationId = ${orgId} AND Is_Delete=0 and archive = 1 AND ( ID NOT IN (SELECT EmployeeId from AttendanceMaster  where OrganizationId = ${orgId} AND AttendanceStatus in (1,4,8) AND AttendanceDate = '${formattedInpDate}')))  as absent`)
+      )
+        .where('OrganizationId', orgId)
+        .count('Id as departments');
+
+      if (selectCountQuery1.length > 0) {
+        selectCountQuery1.forEach((row) => {
+          data['departments'] = row.departments;
+          data['total'] = row.total;
+          data['present'] = row.present;
+          data['absent'] = row.absent;
+        })
+      }
+    }
+    return data
+  }
 }

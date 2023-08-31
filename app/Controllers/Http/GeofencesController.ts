@@ -21,5 +21,16 @@ public async addgeofence({request,response}: HttpContextContract){
 
     return response.json(ser);
 }
+public async addpolygon({request,response}:HttpContextContract){
+    const req = await request.validate(GeofenceValidator.addpolygon);
+    const result = await getgeofenceservice.addpolygon(req);
+    console.log(result);
+    return response.json(result);
+}
+public async assignGeoFenceEmployee({request,response}:HttpContextContract){
+    const req = await request.validate(GeofenceValidator.assignGeofence);
+    const res = await getgeofenceservice.assignGeoFenceEmployee(req);
+    return response.json(res);
+}
 
 }

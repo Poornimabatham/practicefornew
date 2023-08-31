@@ -12,3 +12,7 @@ Route.get("/SetQr","UserSettingsController.setQrKioskPin")
 Route.put("/ChangeQR","UserSettingsController.ChangeQrKioskPin")
 Route.get("/Regularizeapprove","UserSettingsController.getRegDetailForApproval")
 Route.get('recoverPinLoginCredential','UserSettingsController.recoverPinLoginCredential')
+Route.put("/UpdateQR",'UserSettingsController.UpdateQrKioskPageReopen')
+Route.post("/demoScheduleRequest","UserSettingsController.demoScheduleRequest")
+Route.get("/getTeamPunchInfo","UserSettingsController.getTeamPunchInfo")
+
