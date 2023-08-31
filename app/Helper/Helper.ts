@@ -7,6 +7,12 @@ import ShiftMaster from "App/Models/ShiftMaster";
 import ZoneMaster from "App/Models/ZoneMaster";
 import moment from "moment";
 export default class Helper {
+  static weekOfMonth(date: string) {
+    throw new Error("Method not implemented.");
+  }
+  static encrypt(arg0: string) {
+    throw new Error("Method not implemented.");
+  }
   public static encode5t(str: string) {
     for (let i = 0; i < 5; i++) {
       str = Buffer.from(str).toString("base64");
@@ -25,7 +31,8 @@ export default class Helper {
 
   public static async getTimeZone(orgid: any) {
     let TimeZone = "Asia/kolkata";
-    const query1 = await Database.query()
+    let Name = '' ;
+    const query1:any = await Database.query()
       .from("ZoneMaster")
       .select("Name")
       .where(
@@ -635,5 +642,7 @@ export default class Helper {
     }
   }
 
+  
 
+ 
 }

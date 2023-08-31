@@ -5,6 +5,9 @@ Route.post('/addDepartment', 'DepartmentsController.addDepartment')
 Route.post('/updateDepartment', 'DepartmentsController.updateDepartment')
 // ////// assignDepartment //////
 Route.patch("/assignDepartment", "DepartmentsController.assignDepartment");
-Route.get("/getDepartmentstatus", "DepartmentsController.GetDepartmentStatus");
-Route.get('getEmpdataDepartmentWiseCount', "DepartmentsController.getEmpdataDepartmentWiseCount")
+Route.get("/getDepartmentstatus", "DepartmentsController.GetDepartmentStatus").middleware('throttle:global');
+Route.get("/getDeptEmp", "DepartmentsController.getDeptEmp").middleware('throttle:global');
+
+
+Route.get('getEmpdataDepartmentWiseCount', "DepartmentsController.getEmpdataDepartmentWiseCount").middleware('throttle:global')
 
