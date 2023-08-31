@@ -7,6 +7,9 @@ import ShiftMaster from "App/Models/ShiftMaster";
 import ZoneMaster from "App/Models/ZoneMaster";
 import moment from "moment";
 export default class Helper {
+  static encrypt(arg0: string) {
+    throw new Error("Method not implemented.");
+  }
   public static encode5t(str: string) {
     var contactNum = str.toString() 
     for (let i = 0; i < 5; i++) {
@@ -26,17 +29,19 @@ export default class Helper {
 
   public static async getTimeZone(orgid: any) {
     let TimeZone = "Asia/kolkata";
-    const query1 = await Database.query()
+    let Name = '' ;
+    const query1:any = await Database.query()
       .from("ZoneMaster")
-      .select("name")
+      .select("Name")
       .where(
         "Id",
         Database.raw(
           `(select TimeZone from Organization where id =${orgid}  LIMIT 1)`
         )
-      ).toQuery();
+      );
     if (query1.length > 0) {
-      return query1[0].name;
+      Name = query1[0].Name;
+      return Name
     } else {
       return TimeZone;
     }
@@ -637,6 +642,8 @@ export default class Helper {
         return Name;
      }
   }
+
+
 
  
 }

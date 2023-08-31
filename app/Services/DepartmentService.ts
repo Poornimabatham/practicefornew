@@ -250,4 +250,82 @@ export default class DepartmentService {
       attNum: result2[0].totemp,
     };
   }
+
+  public static async getDeptEmp(data){
+
+    const orgId = data.orgid;
+    const deptid = data.deptid;
+    const empid = data.empid;
+    const datafor = data.datafor;
+    let res:any = {};
+    const zone = await Helper.getTimeZone(orgId);
+    const defaultZone = DateTime.now().setZone(zone);  
+    let date = defaultZone.toFormat("yyyy-MM-dd");
+    let predate = defaultZone.minus({ days: 1 }).toFormat("yyyy-MM-dd");
+    let status = false
+    let successMsg = "";
+
+    if(datafor == "Yesterday"){
+      date = predate;
+      res['data_date'] = predate;
+    }else{
+      res['data_date'] = date;     
+    }
+
+    
+    let holidayquery = await Database.query().from('HolidayMaster').select('Id').where('OrganizationId',orgId).andWhere(Database.raw(`"${date}" between DateFrom and DateTo`))
+
+    let holidaycount = holidayquery.length;
+
+    let adminstatus = await Helper.getAdminStatus(empid); 
+
+    let query = Database.query().from('EmployeeMaster').select('Id','EmployeeCode','InPushNotificationStatus','OutPushNotificationStatus','FirstName','LastName','Shift','ImageName').where('OrganizationId',orgId).andWhere('Is_Delete',0).andWhere('archive',"!=",0).andWhere('DOL','0000-00-00').andWhere('DOL','>=',date).orderBy('FirstName','asc')
+
+    if(adminstatus == 2)
+    {
+       var dptid = await Helper.getDepartmentIdByEmpID(empid);
+       query = query.andWhere("Department",dptid)
+    }
+    if(datafor=='')
+    {
+       query = query.andWhere(Database.raw(`Id not in (select EmployeeId from AttendanceMaster where AttendanceDate="${date}" and OrganizationId = "${orgId}")`));
+    }
+    if(datafor=='Yesterday')
+    {
+       query = query.andWhere(Database.raw(`Id in (select EmployeeId from AttendanceMaster where  AttendanceDate="${date}" and OrganizationId ="${orgId}" and ((TimeIn!='00:00:00' AND TimeOut !='00:00:00' and device ='Auto Time Out' AND Timein = Timeout )))`));
+    }else{
+       query = query.andWhere(Database.raw(`Id not in (select EmployeeId from AttendanceMaster where  AttendanceDate="${date}" and OrganizationId ="${orgId}" and ((TimeIn!='00:00:00' AND TimeOut!='00:00:00') or AttendanceStatus=2))`));
+    }
+
+   let querydata = await query
+   let count = querydata.length
+   if(count >= 1){
+      
+      status = true;
+      successMsg = count +" record found";
+      querydata.forEach(element => {
+        
+      });
+   }
+
+  
+   
+
+    
+
+    
+
+
+
+
+    
+    
+  
+    
+
+
+
+
+
+  }
 }

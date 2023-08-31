@@ -57,4 +57,13 @@ export default class DepartmentValidator extends BaseValidator {
       Id: schema.number(),
     }),
   };
+
+  static DeptEmp = {
+     schema:schema.create({
+        orgid:schema.number(),
+        deptid:schema.number.optional(),
+        empid:schema.number(),
+        datafor:schema.string()
+     })
+  }
 }

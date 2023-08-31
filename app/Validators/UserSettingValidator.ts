@@ -120,8 +120,7 @@ export default class UserSettingValidator  {
         cardTitle:schema.string()
       })
    }
-
-
+   
    static Teampunchinfo = {
       schema:schema.create({
         uid:schema.number(),

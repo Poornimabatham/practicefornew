@@ -1,6 +1,6 @@
 import Route from '@ioc:Adonis/Core/Route'
 
-
+Route.get('changepassword','UserSettingsController.UpdatePass')
 Route.get("/Updateprofile",'UserSettingsController.UpdateProfile').middleware('throttle:global')
 Route.get("/PunchvisitCsv",'UserSettingsController.getPunchInfoCsv');
 Route.get("/getPunchInfo","UserSettingsController.getPunchInfo");
