@@ -4,6 +4,7 @@ import DepartmentService from "App/Services/DepartmentService";
 export default class DepartmentsController {
   private data = [];
   public async getdepartment({ request, response }: HttpContextContract) {
+
     const requestValidate = await request.validate(
       DepartmentValidator.getDepartment
     );
@@ -73,4 +74,13 @@ export default class DepartmentsController {
      const validata = await request.validate(DepartmentValidator.DeptEmp)
      const res = await DepartmentService.getDeptEmp(validata);
   }
+  public async getEmpdataDepartmentWiseCount({ request, response }: HttpContextContract) {
+    const requestValidate = await request.validate(
+      DepartmentValidator.getEmpdataDepartmentWiseCount);
+
+    const service = await DepartmentService.getEmpdataDepartmentWiseCount(requestValidate);
+
+    return response.json(service);
+  }
+
 }

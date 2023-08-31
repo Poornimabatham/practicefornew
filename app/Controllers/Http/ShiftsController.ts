@@ -1,6 +1,7 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import ShiftsService from 'App/Services/ShiftService';
 import ShiftValidator from 'App/Validators/ShiftValidator';
+import { eachQuarterOfInterval } from 'date-fns';
 
 export default class ShiftsController {
   private data = []
@@ -83,6 +84,12 @@ export default class ShiftsController {
     }
 
     //return response.json(getResponsefromService);
+  }
+  public async shiftcheck({ request, response }: HttpContextContract) {
+    const inputvalidation = await request.validate(ShiftValidator.shiftcheck)
+    const result = await  ShiftsService.ShiftCheckData(inputvalidation)
+    return response.json(result)
+    
   }
 
 

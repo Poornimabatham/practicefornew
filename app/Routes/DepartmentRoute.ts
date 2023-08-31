@@ -9,4 +9,5 @@ Route.get("/getDepartmentstatus", "DepartmentsController.GetDepartmentStatus");
 Route.get("/getDeptEmp", "DepartmentsController.getDeptEmp");
 
 
+Route.get('getEmpdataDepartmentWiseCount', "DepartmentsController.getEmpdataDepartmentWiseCount")
 

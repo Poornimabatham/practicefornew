@@ -11,9 +11,8 @@ export default class Helper {
     throw new Error("Method not implemented.");
   }
   public static encode5t(str: string) {
-    var contactNum = str.toString() 
     for (let i = 0; i < 5; i++) {
-      str = Buffer.from(contactNum).toString("base64");
+      str = Buffer.from(str).toString("base64");
       str = str.split("").reverse().join("");
     }
     return str;
@@ -38,10 +37,9 @@ export default class Helper {
         Database.raw(
           `(select TimeZone from Organization where id =${orgid}  LIMIT 1)`
         )
-      );
+      ).toQuery();
     if (query1.length > 0) {
-      Name = query1[0].Name;
-      return Name
+      return query1[0].name;
     } else {
       return TimeZone;
     }
@@ -493,9 +491,9 @@ export default class Helper {
     }
   }
 
-  public static async getShiftByEmpID(Id : any){
-    const query :any = await Database.query().from('ShiftMaster').select('Name').where('id',Id);
-    query.forEach((row:any)=>{
+  public static async getShiftByEmpID(Id: any) {
+    const query: any = await Database.query().from('ShiftMaster').select('Name').where('id', Id);
+    query.forEach((row: any) => {
       const Name = row.Name;
       return Name;
     })
@@ -543,107 +541,103 @@ export default class Helper {
 
       return encodedString;
     }
-  } 
+  }
 
-  public static async getDesignationId(name,orgid)
-  {
-    let desi ;
-    let designationdata = await Database.query().from('DesignationMaster').select('*').where('Name',name).andWhere('OrganizationId',orgid);
-    if(designationdata.length > 0){
-       desi = designationdata[0].Id;
-       return desi;
-    }else{
-       return desi;
+  public static async getDesignationId(name, orgid) {
+    let desi;
+    let designationdata = await Database.query().from('DesignationMaster').select('*').where('Name', name).andWhere('OrganizationId', orgid);
+    if (designationdata.length > 0) {
+      desi = designationdata[0].Id;
+      return desi;
+    } else {
+      return desi;
     }
   }
 
-  public static  async getFlexiShift(id)
-  {
-    let query = await Database.query().from('ShiftMaster').select('HoursPerDay').where('Id',id);
+  public static async getFlexiShift(id) {
+    let query = await Database.query().from('ShiftMaster').select('HoursPerDay').where('Id', id);
     let HoursPerDay;
-    
-    if(query.length > 0){     
-      HoursPerDay = query[0].HoursPerDay;  
+
+    if (query.length > 0) {
+      HoursPerDay = query[0].HoursPerDay;
       return HoursPerDay;
-    }else{
+    } else {
       return HoursPerDay;
     }
   }
 
-  public static async getShiftTimes(id){
+  public static async getShiftTimes(id) {
 
-    let query = await Database.query().from('ShiftMaster').select('TimeIn','TimeOut','HoursPerDay').where('Id',id)
+    let query = await Database.query().from('ShiftMaster').select('TimeIn', 'TimeOut', 'HoursPerDay').where('Id', id)
 
-    if(query.length > 0){
-       if(query[0].TimeIn == '00:00:00' || query[0].TimeIn == ""){
-          return query[0].HoursPerDay;
-       }else{
-          return query[0].TimeIn + "-" +query[0].TimeOut;
-       }
+    if (query.length > 0) {
+      if (query[0].TimeIn == '00:00:00' || query[0].TimeIn == "") {
+        return query[0].HoursPerDay;
+      } else {
+        return query[0].TimeIn + "-" + query[0].TimeOut;
+      }
     }
-    
+
   }
 
 
 
- public static async getOrgName(id:number){
-  let Name =''
-  const queryResult = await Database.from("Organization").where("Id",id).select("Name")
-  if (queryResult.length > 0) {
-    Name= queryResult[0].Name;
-    return Name
-  }else{
-    return Name
-  }
+  public static async getOrgName(id: number) {
+    let Name = ''
+    const queryResult = await Database.from("Organization").where("Id", id).select("Name")
+    if (queryResult.length > 0) {
+      Name = queryResult[0].Name;
+      return Name
+    } else {
+      return Name
+    }
   }
 
-  public static async getAdminEmail(id){
+  public static async getAdminEmail(id) {
     let Email;
-    const query = await Database.from('Organization').where("Id",id).select('Email');
-    if(query.length > 0){
-       Email = query[0].Email;
-       return Email;
-    }else{
-       return Email = '';
+    const query = await Database.from('Organization').where("Id", id).select('Email');
+    if (query.length > 0) {
+      Email = query[0].Email;
+      return Email;
+    } else {
+      return Email = '';
     }
   }
 
-  public static async getAdminNamebyOrgId(orgid){
-     let Name ;
-    const query = await Database.from('admin_login').where('OrganizationId',orgid).select('name')
-    if(query.length > 0){
+  public static async getAdminNamebyOrgId(orgid) {
+    let Name;
+    const query = await Database.from('admin_login').where('OrganizationId', orgid).select('name')
+    if (query.length > 0) {
       Name = query[0].name;
       return Name;
-    }else{
-       return Name
+    } else {
+      return Name
     }
   }
 
-  public static async getEmpEmail(id){
+  public static async getEmpEmail(id) {
 
-    const query = await Database.from('EmployeeMaster').where('Id',id).andWhere('Is_Delete',0).select('CurrentEmailId');
-     let Email;
-    if(query.length > 0){
-       Email = query[0].CurrentEmailId;
-       return Email;
-    }else{
-       return Email;
+    const query = await Database.from('EmployeeMaster').where('Id', id).andWhere('Is_Delete', 0).select('CurrentEmailId');
+    let Email;
+    if (query.length > 0) {
+      Email = query[0].CurrentEmailId;
+      return Email;
+    } else {
+      return Email;
     }
   }
 
-  public static async getCountryNameById(id){
+  public static async getCountryNameById(id) {
 
-     const query = await Database.from('CountryMaster').select('Name').where('Id',id)
-     let Name = '';
-     if(query.length){ 
-       Name = query[0].Name;
-       return Name;
-     }else{
-        return Name;
-     }
+    const query = await Database.from('CountryMaster').select('Name').where('Id', id)
+    let Name = '';
+    if (query.length) {
+      Name = query[0].Name;
+      return Name;
+    } else {
+      return Name;
+    }
   }
-
-
 
  
 }

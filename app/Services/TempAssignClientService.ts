@@ -21,7 +21,9 @@ export default class TempAssignClientService {
     if (res > 0) {
       data2["sts"] = "2"; // if row already exist
       //return $data;
-      return data2;
+
+
+
     }
     var insertClientList = Database.table("clientlist").insert({
       employeeid: id,
