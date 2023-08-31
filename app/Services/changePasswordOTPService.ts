@@ -30,7 +30,7 @@ export default class changePasswordOTPService {
       }
     }
 
-
+  }
   public static async newchangepass(data) {
     var phone = data.changepassphone;
     var newpassword = data.newpass;
@@ -119,7 +119,7 @@ export default class changePasswordOTPService {
       }
     }
     // return data2;
-    if (data2["status"] == 2 && data2["status"] != 3) {
+    if (data2["status"] != 2 && data2["status"] != 3) {
       const updateusermaster: any = await Database.from("UserMaster")
         .where("EmployeeId", uid)
         .andWhere(" OrganizationId", orgid)
