@@ -27,8 +27,8 @@ export default class GetDataToRegService {
     )
       .select("MaxDays", "MinTimes")
       .where("OrganizationId", data.orgid)
-      .where("RegularizationSts", 1)
-      .first();
+      .andWhere("RegularizationSts", 1)
+    .first()
     const row = selectRegularizationSettings;
     count = row ? 1 : 0;
 
@@ -48,14 +48,14 @@ export default class GetDataToRegService {
       .andWhere("AttendanceDate", Database.raw("CURDATE()"))
       .andWhereNotIn("RegularizeSts", [0, 1])
       .orderBy(" AttendanceDate", "desc")
-      .count("RegularizeSts as Regularizecount");
-
+      .count("RegularizeSts as Regularizecount")
     const affected_rows = regularizeCount.length;
 
     if (affected_rows) {
       Regularizecount = regularizeCount[0].Regularizecount;
     }
 
+    // var cd =   moment().format("yyyy-MM-DD");
     const selectAttendancemasterList = Database.from("AttendanceMaster")
       .select(
         "Id",
@@ -65,31 +65,40 @@ export default class GetDataToRegService {
         "TimeIn",
         "TimeOut"
       )
-      .where("OrganizationId", 10)
-      .whereNot("Is_Delete", 1)
-      .whereIn("device", ["Auto Time Out", "Absentee Cron"])
-      .orWhere((query) => {
-        query
-          .where("device", "Cron")
-          .where("AttendanceStatus", 8)
-          .where("TimeIn", "00:00:00")
-          .where("TimeOut", "00:00:00");
-      })
-      .orWhere((query) => {
-        query.where("device", "Cron").whereIn("AttendanceStatus", [4, 10]);
-      })
+      .where("OrganizationId", data.orgid)
+      .andWhereNot("Is_Delete", 1)
+      .andWhere("device", "Auto Time Out")
       .andWhere((query) => {
         query
-          .where("TimeIn", Database.raw("TimeOut"))
-          .orWhere("TimeOut", "00:00:00");
+          .whereColumn('TimeIn', 'TimeOut')         
+           .orWhere("TimeOut", "00:00:00");
+      })
+      .orWhere((query) => {
+        query.where("device", "Absentee Cron")
+        .andWhere(" TimeIn",'00:00:00')
+        .andWhere("TimeOut",'00:00:00')
+      })
+      .orWhere((query) => {
+        query.where("device", " Cron")
+        .andWhere(" TimeIn",'00:00:00')
+        .andWhere("TimeOut",'00:00:00')
+        .andWhere('AttendanceStatus',8)
+        
+      })
+      .orWhere( (query)=> {
+        query.where('device', 'Cron')
+          .andWhere((query) => {
+            query.whereColumn('TimeIn', 'TimeOut')
+              .orWhere('TimeOut', '00:00:00');
+          })
+          .andWhereIn('AttendanceStatus', [4, 10]);
       })
       .andWhere("EmployeeId", data.uid)
       .whereRaw(`MONTH(AttendanceDate) = MONTH('${currentMonth}')`)
-      .whereRaw(`YEAR(AttendanceDate) = YEAR('${currentMonth}')`)
-      .whereNot("AttendanceDate", Database.raw("CURDATE()"))
-      .whereIn("RegularizeSts", [0, 1])
-      .orderBy("AttendanceDate", "desc");
-
+      .andWhereRaw(`YEAR(AttendanceDate) = YEAR('${currentMonth}')`)
+      .andWhereNot("AttendanceDate", Database.raw("CURDATE()") )
+      .andWhereIn("RegularizeSts", [0, 1])
+      .orderBy("AttendanceDate", "desc").limit(10)
     const attendanceData = await selectAttendancemasterList;
     var attendancearr: any = [];
     attendanceData.forEach((row) => {
@@ -119,7 +128,7 @@ export default class GetDataToRegService {
       // Calculate the difference in days
       const diffInDays = Math.floor(diffInMilliseconds / (1000 * 60 * 60 * 24));
 
-      res1["diffInDays"] = diffInDays;
+      // res1["diffInDays"] = diffInDays;
       if (MaxDays != 0) {
         if (diffInDays > MaxDays) {
           res1["resultsts"] = 0;

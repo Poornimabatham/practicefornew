@@ -29,8 +29,7 @@ export default class changePasswordOTPService {
         result["status"] = "5";
       }
     }
-    return result["status"];
-  }
+
 
   public static async newchangepass(data) {
     var phone = data.changepassphone;
@@ -74,6 +73,7 @@ export default class changePasswordOTPService {
               });
             if (updateAdminLoginQuery) {
               affectedRows = 1;
+
             }
           }
 
