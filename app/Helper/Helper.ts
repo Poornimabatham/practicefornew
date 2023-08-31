@@ -7,6 +7,9 @@ import ShiftMaster from "App/Models/ShiftMaster";
 import ZoneMaster from "App/Models/ZoneMaster";
 import moment from "moment";
 export default class Helper {
+  static weekOfMonth(date: string) {
+    throw new Error("Method not implemented.");
+  }
   static encrypt(arg0: string) {
     throw new Error("Method not implemented.");
   }
@@ -638,6 +641,8 @@ export default class Helper {
       return Name;
     }
   }
+
+  
 
  
 }

@@ -264,6 +264,8 @@ export default class DepartmentService {
     let predate = defaultZone.minus({ days: 1 }).toFormat("yyyy-MM-dd");
     let status = false
     let successMsg = "";
+    let weekofflg = false;
+    let halfflg = false;
 
     if(datafor == "Yesterday"){
       date = predate;
@@ -298,12 +300,25 @@ export default class DepartmentService {
     }
 
    let querydata = await query
+ 
    let count = querydata.length
    if(count >= 1){
       
       status = true;
       successMsg = count +" record found";
       querydata.forEach(element => {
+
+        res['OutPushNotificationStatus'] = element.OutPushNotificationStatus;
+        res['InPushNotificationStatus'] = element.InPushNotificationStatus;
+        res['empid'] = element.Id;
+        let dayOfMonth = defaultZone.day;    
+        let weekNumber = Math.ceil(dayOfMonth / 7);
+        let dayofdate = 1 + defaultZone.weakday;
+
+ 
+        
+
+
         
       });
    }
