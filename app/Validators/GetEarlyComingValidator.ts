@@ -25,8 +25,6 @@ export default class GetEarlyComingValidator extends BaseValidator {
       deptId: schema.number.optional(),
       orgid: schema.number.optional(),
       csv: schema.string.optional(),
-      currentPage: schema.number.optional(),
-      perPage: schema.number.optional(),
       date: schema.date.optional({ format: "yyyy-MM-dd" }),
     }),
   };
