@@ -30,14 +30,16 @@ import "../app/Routes/ShiftRoute";
 import "../app/Routes/HolidayRoute";
 import "../app/Routes/DailyAttendanceRoute";
 import "../app/Routes/GetEarlyComingsRoute";
+import "../app/Routes/getEarlyComingsCsvRoutes";
 import "../app/Routes/getEarlyLeavingsRoutes";
+import "../app/Routes/getEarlyLeavingCsvRoutes";
 import "../app/Routes/LateComingRoute";
+import "../app/Routes/getlateComingsCsvRoutes";
 import "../app/Routes/Report/GetplannerRoute";
 import "../app/Routes/getOutsidegeoRoute";
 import "../app/Routes/AttendanceRoute";
 import "../app/Routes/ClientsRoute";
 import "../app/Routes/getInfoRoute";
-
 import "../app/Routes/getEmpdataDepartmentWiseNewRoute";
 import "../app/Routes/getCDateAttnDeptWiseRoutes";
 import "../app/Routes/UsershiftplannerRoute";
@@ -50,13 +52,12 @@ import "../app/Routes/changePasswordOTPRoute";
 import "../app/Routes/SelectCountryCodeRoute";
 import "../app/Routes/ResetPasswordLinkRoute"
 import "../app/Routes/CheckUserEmailRoute"
+import "../app/Routes/getAppDetailRoutes"
 import "../app/Routes/getListofLeaveRoute"
 import "../app/Routes/getInterimAttendancesRoute"
 import "../app/Routes/GetappVersionRoute"
-
 import "../app/Routes/TempAssignClientRoute"
 import "../app/Routes/Report/GetAttendanceEmployeewise";
-
 import Redis from '@ioc:Adonis/Addons/Redis';
 import "../app/Routes/getUserMobileRoute";
 // Route.get('/', async () => {
