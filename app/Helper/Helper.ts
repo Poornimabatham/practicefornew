@@ -40,9 +40,9 @@ export default class Helper {
         Database.raw(
           `(select TimeZone from Organization where id =${orgid}  LIMIT 1)`
         )
-      ).toQuery();
+      )
     if (query1.length > 0) {
-      return query1[0].name;
+      return query1[0].Name;
     } else {
       return TimeZone;
     }
