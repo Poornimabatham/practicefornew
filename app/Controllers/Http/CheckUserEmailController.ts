@@ -1,14 +1,11 @@
+
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 
 import CheckUserEmailService from "App/Services/CheckuserEmailService";
 import CheckUserEmailValidator from "App/Validators/CheckuserEmailValidator";
 
 export default class CheckUserEmailController{
-<<<<<<< HEAD
-  public async CheckUserEmail({ request, response }: HttpContextContract) {
-=======
   public async CheckUserEmaildata({ request, response }: HttpContextContract) {
->>>>>>> 871124dd6f71680c74cc9989f4b9e5702abfc21e
     const inputValidation = await request.validate(
       CheckUserEmailValidator.CheckUserEmailSchema
     );
