@@ -16,4 +16,15 @@ export default class LatecomingValidator extends BaseValidator {
       Perpage: schema.number(),
     }),
   };
+
+  static getlateComingsCsvSchema  = {
+    schema: schema.create({
+      Orgid: schema.number(),
+      Date: schema.date.optional({ format: "yyyy-MM-dd" }),
+      Empid: schema.number(),
+      Csv: schema.number.optional(),
+      Currentpage: schema.number(),
+      Perpage: schema.number(),
+    }),
+  };
 }

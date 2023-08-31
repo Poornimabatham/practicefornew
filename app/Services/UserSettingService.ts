@@ -667,6 +667,27 @@ export default class Usersettingservice {
     return respons;
   }
 
+  static async GetQrKioskStatus(data) {
+    var result: {} = {};
+
+    const selectQuery = await Database.from('UserMaster')
+      .select('QrKioskPageReopen', 'kioskPin')
+      .where('EmployeeId', '=', data.EmpId)
+      .andWhere('OrganizationId', '=', data.OrgId)
+
+    if (selectQuery.length > 0) {
+      selectQuery.forEach(function (row) {
+        result['response'] = row.QrKioskPageReopen;
+        result['kioskpin'] = row.kioskPin;
+      });
+    }
+    else {
+      result['response'] = '0';
+    }
+
+    return result;
+  }
+
 
 
 }

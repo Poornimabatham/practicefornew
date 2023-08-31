@@ -70,6 +70,10 @@ export default class DepartmentsController {
     return response.json(service);
   }
 
+  public async getDeptEmp({request , response}:HttpContextContract){
+     const validata = await request.validate(DepartmentValidator.DeptEmp)
+     const res = await DepartmentService.getDeptEmp(validata);
+  }
   public async getEmpdataDepartmentWiseCount({ request, response }: HttpContextContract) {
     const requestValidate = await request.validate(
       DepartmentValidator.getEmpdataDepartmentWiseCount);
