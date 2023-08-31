@@ -82,14 +82,14 @@ export default class UserSettingsController {
     return response.json(service);
   }
 
-  public async UpdateQrKioskPageReopen({request , response}:HttpContextContract){
+  public async UpdateQrKioskPageReopen({ request, response }: HttpContextContract) {
 
-     const validata = await request.validate(UserSettingValidator.UpdateQR);
-     const res      = await UserSettingService.UpdateQrKioskPageReopen(validata);
-     response.json(res);
+    const validata = await request.validate(UserSettingValidator.UpdateQR);
+    const res = await UserSettingService.UpdateQrKioskPageReopen(validata);
+    response.json(res);
   }
 
-  public async demoScheduleRequest({request,response}:HttpContextContract){
+  public async demoScheduleRequest({ request, response }: HttpContextContract) {
 
     const validata = await request.validate(UserSettingValidator.demoSchedule)
     const res = await UserSettingService.demoScheduleRequest(validata)
@@ -97,12 +97,20 @@ export default class UserSettingsController {
 
   }
 
-  public async getTeamPunchInfo({request,response}:HttpContextContract){
+  public async getTeamPunchInfo({ request, response }: HttpContextContract) {
 
     const validata = await request.validate(UserSettingValidator.Teampunchinfo)
     const res = await UserSettingService.getTeamPunchInfo(validata)
     response.json(res)
   }
 
+  public async getQrKioskStatus({ request, response }: HttpContextContract) {
+
+    const reqdata = await request.validate(UserSettingValidator.GetQrKioskStatus);
+
+    const serviceRes = await UserSettingService.GetQrKioskStatus(reqdata);
+
+    return response.json(serviceRes);
+  }
 
 }
