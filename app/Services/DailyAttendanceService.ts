@@ -4,6 +4,7 @@ import AttendanceMaster from "App/Models/AttendanceMaster";
 import EmployeeMaster from "App/Models/EmployeeMaster";
 import { DateTime } from "luxon";
 import moment from "moment";
+import { from } from "./../../contracts/env";
 
 export default class DailyAttendanceService {
   public static async getpresentList(data) {
@@ -527,17 +528,17 @@ export default class DailyAttendanceService {
         .where("A.OrganizationId", data.OrganizationId)
         .where("A.Is_Delete", 0)
         .whereRaw(
-          `(CASE WHEN (S.shifttype=2 AND A.timeindate= A.timeoutdate) 
-        THEN CONCAT(DATE_ADD(A.AttendanceDate, INTERVAL 1 DAY),' ',S.TimeOut) 
-        WHEN(S.shifttype=2 AND A.timeindate!=A.timeoutdate) 
+          `(CASE WHEN (S.shifttype=2 AND A.timeindate= A.timeoutdate)
+        THEN CONCAT(DATE_ADD(A.AttendanceDate, INTERVAL 1 DAY),' ',S.TimeOut)
+        WHEN(S.shifttype=2 AND A.timeindate!=A.timeoutdate)
         THEN CONCAT(DATE_ADD(A.AttendanceDate, INTERVAL 1 DAY),' ',S.TimeOut)
         ELSE CONCAT(A.AttendanceDate,' ',S.TimeOut)END)
-         > 
-         (CASE 
-         WHEN (A.timeoutdate!='0000-00-00') 
+         >
+         (CASE
+         WHEN (A.timeoutdate!='0000-00-00')
          THEN CONCAT(A.timeoutdate,' ',A.TimeOut)  
          WHEN(S.shifttype=2 AND A.timeindate!=A.timeoutdate)
-         THEN  CONCAT(A.timeoutdate,' ',A.TimeOut) 
+         THEN  CONCAT(A.timeoutdate,' ',A.TimeOut)
          ELSE CONCAT(A.AttendanceDate,' ',A.TimeOut) END) `
         )
         .whereRaw(
@@ -546,11 +547,11 @@ export default class DailyAttendanceService {
         .whereRaw(
           ` (CASE WHEN (A.timeoutdate!='0000-00-00')  
          THEN (
-         CASE WHEN (S.shifttype=2 AND A.timeindate=A.timeoutdate) 
-         THEN TIMEDIFF(CONCAT(DATE_ADD(A.AttendanceDate, INTERVAL 1 DAY),' ',S.TimeOut),CONCAT(A.AttendanceDate,' ',A.TimeOut))       
+         CASE WHEN (S.shifttype=2 AND A.timeindate=A.timeoutdate)
+         THEN TIMEDIFF(CONCAT(DATE_ADD(A.AttendanceDate, INTERVAL 1 DAY),' ',S.TimeOut),CONCAT(A.AttendanceDate,' ',A.TimeOut))      
          ELSE TIMEDIFF((  
-         CASE WHEN (S.shifttype=2 AND A.timeindate!=A.timeoutdate) 
-         THEN CONCAT(DATE_ADD(A.AttendanceDate, INTERVAL 1 DAY),' ',S.TimeOut) 
+         CASE WHEN (S.shifttype=2 AND A.timeindate!=A.timeoutdate)
+         THEN CONCAT(DATE_ADD(A.AttendanceDate, INTERVAL 1 DAY),' ',S.TimeOut)
          ELSE  CONCAT(A.AttendanceDate,' ',S.TimeOut) END ) ,
          CONCAT(A.timeoutdate,' ',A.TimeOut)) END)
          ELSE SUBTIME(S.TimeOut, A.TimeIn) END) > '00:00:59'`
@@ -660,9 +661,19 @@ export default class DailyAttendanceService {
     // console.log('jsonlength')
 
     await Promise.all(jsonData.map(async(row,i)=>{
+     // const date = Object.keys(jsonData[i]);
+   // }))
+
+
+
+    //for (let i = 0; i < jsonData.length; i++) {
       const date = Object.keys(jsonData[i]);
 
       if (Array.isArray(jsonData[i][date[0]].interim)) {
+       // await Promise.all(jsonData[i][date[0]].interim.map(async(rows,j)=>{
+         
+      //  }))
+
         for (let j = 0; j < jsonData[i][date[0]].interim.length; j++) {
           let {
             Id = 0,
@@ -863,7 +874,7 @@ export default class DailyAttendanceService {
             .where("EmployeeId", UserId)
             .where("AttendanceDate", AttendanceDate)
             .select("Id", "TimeIn", "TimeOut")
-            .first();
+            .first();    
 
           let attTimeIn = "00:00:00";
           let attTimeOut = "00:00:00";
@@ -898,6 +909,10 @@ export default class DailyAttendanceService {
             HourlyRateId = EmployeeRecord.hourly_rate;
             OwnerId = EmployeeRecord.OwnerId;
           }
+		  
+		  
+		  console.log(SyncTimeIn == "1" && SyncTimeOut == "1");
+		  console.log("start Case");
 
           if (SyncTimeIn == "1" && SyncTimeOut != "1") {
             let interimAttendanceIdss = 0;
@@ -1152,6 +1167,7 @@ export default class DailyAttendanceService {
               }
 
               if (MultipletimeStatus == 1 || shiftType == "3") {
+			  let getInterimAttIds=0;
                 if (AttendanceMasterId != 0) {
                   const queryResult = await Database.from("InterimAttendances")
                     .select("Id")
@@ -1159,10 +1175,10 @@ export default class DailyAttendanceService {
                     .andWhere("TimeIn", TimeInTime);
 
                   if (queryResult.length > 0) {
-                    interimAttendanceId = queryResult[0].Id;
+                    getInterimAttIds = queryResult[0].Id;
                   }
 
-                  if (interimAttendanceId == 0) {
+                  if (getInterimAttIds == 0) {
                     // Insert into InterimAttendances
                     const InsertAttendanceInInterimTimeiN =
                       await Database.table("InterimAttendances")
@@ -1212,6 +1228,7 @@ export default class DailyAttendanceService {
           }
           //******************************start second case****************************//
           else if (SyncTimeIn == "1" && SyncTimeOut == "1") {
+		  console.log("inside both case");
             //let interimAttendanceIds=0
             console.log(
               "*************case mark attendance both****************"
@@ -1244,39 +1261,39 @@ export default class DailyAttendanceService {
                   }
                 }
                 console.log("shakir+deviceverificationperm"+ deviceverificationperm);
-                if (deviceverificationperm == 1) {
-                  let employeeDeviceId: any = await Database.from(
-                    "EmployeeMaster"
-                  )
-                    .select("DeviceId")
-                    .where("Id", `${UserId}`)
-                    .first();
-                  if (employeeDeviceId) {
-                    let verifieddevice = employeeDeviceId.DeviceId;
-                    let suspiciousdevice = 0;
-                    if (
-                      verifieddevice == TimeInDeviceId &&
-                      verifieddevice == TimeOutDeviceId
-                    ) {
-                      suspiciousdevice = 0;
-                    } else {
-                      suspiciousdevice = 1;
-                      // if(SuspiciousDevicePerm==9|| SuspiciousDevicePerm==13||SuspiciousDevicePerm==11|| SuspiciousDevicePerm==15)
-                      // {
-                      //   $pageName="Suspicious Device";//to navigate notification Do not change it.
-                      //   sendManualPushNotification("('$orgTopic' in topics) && ('admin' in topics)","Suspicious Device", "$name's Attendance Device does not match", "$UserId","$OrganizationId","$pageName");
-                      // }
-                      if (
-                        SuspiciousDevicePerm == 5 ||
-                        SuspiciousDevicePerm == 13 ||
-                        SuspiciousDevicePerm == 7 ||
-                        SuspiciousDevicePerm == 15
-                      ) {
-                        /////////////Enter code of Suspicious Device///////////
-                      }
-                    }
-                  }
-                }
+                // if (deviceverificationperm == 1) {
+                //   let employeeDeviceId: any = await Database.from(
+                //     "EmployeeMaster"
+                //   )
+                //     .select("DeviceId")
+                //     .where("Id", `${UserId}`)
+                //     .first();
+                //   if (employeeDeviceId) {
+                //     let verifieddevice = employeeDeviceId.DeviceId;
+                //     let suspiciousdevice = 0;
+                //     if (
+                //       verifieddevice == TimeInDeviceId &&
+                //       verifieddevice == TimeOutDeviceId
+                //     ) {
+                //       suspiciousdevice = 0;
+                //     } else {
+                //       suspiciousdevice = 1;
+                //       // if(SuspiciousDevicePerm==9|| SuspiciousDevicePerm==13||SuspiciousDevicePerm==11|| SuspiciousDevicePerm==15)
+                //       // {
+                //       //   $pageName="Suspicious Device";//to navigate notification Do not change it.
+                //       //   sendManualPushNotification("('$orgTopic' in topics) && ('admin' in topics)","Suspicious Device", "$name's Attendance Device does not match", "$UserId","$OrganizationId","$pageName");
+                //       // }
+                //       if (
+                //         SuspiciousDevicePerm == 5 ||
+                //         SuspiciousDevicePerm == 13 ||
+                //         SuspiciousDevicePerm == 7 ||
+                //         SuspiciousDevicePerm == 15
+                //       ) {
+                //         /////////////Enter code of Suspicious Device///////////
+                //       }
+                //     }
+                //   }
+                // }
                 let Zone_id = 0;
 
                 if (
@@ -1410,20 +1427,20 @@ export default class DailyAttendanceService {
                 AttendanceMasterId = InsertAttendanceTimeiN[0];
               console.log("shakir+AFETR INSERT AttendanceMasterId"+ AttendanceMasterId);
 
-                if((areaId12 != 0)&&(Geofencests == 1)&&(outside_geofence_setting == "1") && ((GeofenceIn=="Outside Geofence" && GeofenceOut!="Outside Geofence") || (GeofenceIn=="Outside Geofence" && GeofenceOut=="Outside Geofence") || (GeofenceIn!="Outside Geofence" && GeofenceOut=="Outside Geofence"))) 
-                  {   
+                if((areaId12 != 0)&&(Geofencests == 1)&&(outside_geofence_setting == "1") && ((GeofenceIn=="Outside Geofence" && GeofenceOut!="Outside Geofence") || (GeofenceIn=="Outside Geofence" && GeofenceOut=="Outside Geofence") || (GeofenceIn!="Outside Geofence" && GeofenceOut=="Outside Geofence")))
+                  {  
                      
                                  let empId;
                                  let ShiftId1;
                                  let deptid1;
                                  let Desg_id1;
                                  let timein1;
-                                 let timeout1; 
+                                 let timeout1;
                                  let TimeInDate1;
                                  let TimeOutDate1;
                                  let attdate;
                                  let remarkfordisapprove;
-                                
+                               
 
                                const getAttendanceData=await Database.from("AttendanceMaster").select("EmployeeId","ShiftId","Dept_id","Desg_id","TimeIn","TimeOut","timeindate","timeoutdate","AttendanceDate").where("Id",AttendanceMasterId).first()
                                 if(getAttendanceData) {
@@ -1432,7 +1449,7 @@ export default class DailyAttendanceService {
                                     deptid1=getAttendanceData.Dept_id;
                                     Desg_id1=getAttendanceData.Desg_id;
                                     timein1=getAttendanceData.TimeIn;
-                                    timeout1=getAttendanceData.TimeOut; 
+                                    timeout1=getAttendanceData.TimeOut;
                                     TimeInDate1= getAttendanceData.timeindate;
                                     TimeOutDate1= getAttendanceData.timeoutdate;
                                     attdate=getAttendanceData.AttendanceDate;
@@ -1440,7 +1457,7 @@ export default class DailyAttendanceService {
 
                                 let empcode="";
                                 let empname="";
-                                TimeInDate=attdate; 
+                                TimeInDate=attdate;
                                 disattreason="Outside Geofence";
                                 disappstatus=0;
 
@@ -1466,22 +1483,30 @@ export default class DailyAttendanceService {
                             }
               }
 
-              
+             console.log("MultipletimeStatus===>"+MultipletimeStatus);
               if (MultipletimeStatus == 1 || shiftType == "3") {
+			  let interimAttIds=0;
                 if (AttendanceMasterId != 0) {
                   const query = Database.from("InterimAttendances")
                     .where("AttendanceMasterId", AttendanceMasterId)
                     .where("TimeIn", TimeInTime)
                     .select("id");
+				
+					
                   const haveInterimId: any = await query;
+				  
+				  console.log("check interim Ids")
+				  console.log(haveInterimId);
+				  console.log(haveInterimId.length > 0);
+				  console.log("check interim Ids")
                   if (haveInterimId.length > 0) {
-                    interimAttendanceId = haveInterimId[0].id;
+                    interimAttIds = haveInterimId[0].id;
                   }
                 }
 
                 console.log("deepak"+TimeInTime);
-                console.log("deepak"+interimAttendanceId);
-                if (interimAttendanceId == 0) {
+                console.log("deepak"+interimAttendanceIds);
+                if (interimAttIds == 0) {
                   console.log("new Insert Query for interim");
 
                   const query = Database.table("InterimAttendances")
@@ -1706,11 +1731,11 @@ export default class DailyAttendanceService {
                             // $NotificationId= sendManualPushNotification("('$orgTopic' in topics) && ('admin' in topics)","Outside Geofence", "$name has punched Attendance outside Geofence", "$UserId","$OrganizationId","$pageName");
                             // $query=$this->db->query("UPDATE NotificationsList SET PageName = 'Outsidegeofance' WHERE Id = '$NotificationId' ");
                         }
-						
-					                	if(geofencePerm == 13){
+
+                if(geofencePerm == 13){
                               ///////////send outside geofence mail code here////////////
                             }
-                        
+                       
                     }
 
                     if (deviceverificationperm == 1) {
@@ -1862,7 +1887,9 @@ export default class DailyAttendanceService {
                   hoursPerDay,
                   totalLoggedHours
                 );
+                console.log(hours + ":" + minutes + ":" + seconds);
                 calculatedOvertime = hours + ":" + minutes + ":" + seconds;
+                console.log("calculatedOvertime" + calculatedOvertime);
               }
             }
              
@@ -1948,20 +1975,20 @@ export default class DailyAttendanceService {
               });
 
 
-              if((areaId12 != 0)&&(Geofencests == 1)&&(outside_geofence_setting == "1") && (GeofenceOut=="Outside Geofence")) 
-                  {   
+              if((areaId12 != 0)&&(Geofencests == 1)&&(outside_geofence_setting == "1") && (GeofenceOut=="Outside Geofence"))
+                  {  
                      
                                  let empId;
                                  let ShiftId1;
                                  let deptid1;
                                  let Desg_id1;
                                  let timein1;
-                                 let timeout1; 
+                                 let timeout1;
                                  let TimeInDate1;
                                  let TimeOutDate1;
                                  let attdate;
                                  let remarkfordisapprove;
-                                
+                               
 
                                const getAttendanceData=await Database.from("AttendanceMaster").select("EmployeeId","ShiftId","Dept_id","Desg_id","TimeIn","TimeOut","timeindate","timeoutdate","AttendanceDate").where("Id",AttendanceMasterId).first()
                                 if(getAttendanceData) {
@@ -1970,7 +1997,7 @@ export default class DailyAttendanceService {
                                     deptid1=getAttendanceData.Dept_id;
                                     Desg_id1=getAttendanceData.Desg_id;
                                     timein1=getAttendanceData.TimeIn;
-                                    timeout1=getAttendanceData.TimeOut; 
+                                    timeout1=getAttendanceData.TimeOut;
                                     TimeInDate1= getAttendanceData.timeindate;
                                     TimeOutDate1= getAttendanceData.timeoutdate;
                                     attdate=getAttendanceData.AttendanceDate;
@@ -1978,7 +2005,7 @@ export default class DailyAttendanceService {
 
                                 let empcode="";
                                 let empname="";
-                                TimeInDate=attdate; 
+                                TimeInDate=attdate;
                                 disattreason="Outside Geofence";
                                 disappstatus=0;
 
