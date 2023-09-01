@@ -22,7 +22,6 @@ import "../app/Routes/EmployeeRoute";
 import "../app/Routes/SignInRoute";
 import "../app/Routes/DesignationRoute";
 import "../app/Routes/GeofenceRoute";
-import "../app/Routes/GeofenceRoute";
 import "../app/Routes/UserSettingRoute";
 import "../app/Routes/DepartmentRoute";
 import "../app/Routes/GetTokenRoute";

@@ -1,3 +1,4 @@
+import { Request } from '@adonisjs/core/build/standalone';
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
 import UserSettingService from 'App/Services/UserSettingService';
 import UserSettingValidator from 'App/Validators/UserSettingValidator';
@@ -127,8 +128,17 @@ export default class UserSettingsController {
   }
 
   public async getReferDiscountRequest({ response }: HttpContextContract) {
-    
-    const serviceRes = await UserSettingService.getReferDiscountRequestService()
+    const serviceRes = await UserSettingService.getReferDiscountRequestService();
+    return response.json(serviceRes);
+  }
+  private data = [];
+  public async DeleteAccount({ request,response }: HttpContextContract) {
+    const reqData = await request.validate(UserSettingValidator.DeleteAccount)
+    this.data["reason"] = reqData.reason ? reqData.reason : 0;
+    this.data["refid"] = reqData.refid ? reqData.refid : 0;
+    this.data["uid"] = reqData.uid ? reqData.uid : 0;
+    this.data["date"] = reqData.date ? reqData.date : 0;
+    const serviceRes = await UserSettingService.DeleteAccount(this.data);
     return response.json(serviceRes);
   }
 }
