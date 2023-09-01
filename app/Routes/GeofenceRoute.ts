@@ -6,3 +6,4 @@ Route.get('/addpolygon','GeofencesController.addpolygon')
 //.middleware('throttle:global').middleware('auth')
 Route.post('/assignGeoFenceEmployee','GeofencesController.assignGeoFenceEmployee')
 //.middleware('throttle:global').middleware('auth')
+Route.get("/DeleteGeoFence", "GeofencesController.deleteGeoFence");

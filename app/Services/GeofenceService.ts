@@ -260,7 +260,7 @@ export default class
     
   }
 
-  public async deleteGeoFence() {
-    
+  public static async deleteGeoFence(getdata) {
+    return getdata
   }
 }
