@@ -5,6 +5,7 @@ import EmployeeMaster from "App/Models/EmployeeMaster";
 import Organization from "App/Models/Organization";
 import ShiftMaster from "App/Models/ShiftMaster";
 import ZoneMaster from "App/Models/ZoneMaster";
+import { DateTime } from "luxon";
 import moment from "moment";
 export default class Helper {
   static weekOfMonth(date: string) {
@@ -32,8 +33,8 @@ export default class Helper {
 
   public static async getTimeZone(orgid: any) {
     let TimeZone = "Asia/kolkata";
-    let Name = '' ;
-    const query1:any = await Database.query()
+    let Name = '';
+    const query1: any = await Database.query()
       .from("ZoneMaster")
       .select("Name")
       .where(
@@ -685,6 +686,41 @@ export default class Helper {
     }
   }
 
+
+  public static async getShiftplannershiftIdByEmpID(EmpId: number, date: string) {
+    let selectQuery = await Database.from('ShiftPlanner').select('shiftid').where('empid', EmpId).where('ShiftDate', date)
+    if (selectQuery.length > 0) {
+      return selectQuery[0].shiftid;
+    }
+    else {
+      return 0;
+    }
+
+  }
+
+  public static async getweeklyoffnew(date: string, shiftid: number, empid: number, orgid: number) {
+
+    var dateTime = DateTime.fromISO(date);
+    var dayOfWeek = dateTime.weekday + 1; // Convert Luxon weekday to 1-7 format
+    var weekOfMonth = Math.ceil(dateTime.day / 7);
+    var week;
+    var selectQuery = await Database.from('ShiftMasterChild').select('WeekOff').where('OrganizationId', orgid).where('Day', dayOfWeek).where('ShiftId', shiftid);
+
+    var flag = false;
+    if (selectQuery.length > 0) {
+      const weekOffString = selectQuery[0].WeekOff;
+      week = weekOffString.split(',');  // Split the comma-separated string into an array
+      flag = true;
+    }
+
+    if (flag && week[weekOfMonth - 1] == 1) {
+      return 'WeekOff';
+    } else {
+      return 'noWeekOff';
+    }
+  }
+
+
   static async getAreaInfo(Id) {
     const query = await Database.from("Geo_Settings")
       .select("Lat_Long", "Radius")
@@ -754,4 +790,5 @@ export default class Helper {
       return sts;
     }
   }
+
 }

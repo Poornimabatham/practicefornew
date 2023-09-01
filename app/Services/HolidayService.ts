@@ -119,7 +119,6 @@ var InsertHolidays = await Database
   if(InsertHolidays.length > 0){
                
     const zone = await Helper.getTimeZone(get.OrganizationId);
-    return zone
     const timezone = zone;
     const date = moment().tz(timezone).toDate();
     
