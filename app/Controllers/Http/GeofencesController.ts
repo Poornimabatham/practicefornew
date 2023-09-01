@@ -32,11 +32,12 @@ export default class GeofencesController {
     const res = await getgeofenceservice.assignGeoFenceEmployee(req);
     return response.json(res);
   }
-
+    private data= []
     public async deleteGeoFence({ request, response }: HttpContextContract){
-      const validdata = await request.validate(
-        GeofenceValidator.deleteGeoFence
-        );
-        const serviceresp = await getgeofenceservice.deleteGeoFence;
+        let validdata = await request.validate(GeofenceValidator.deleteGeoFence);
+        this.data["area_assigned"] = validdata.area_assigned ? validdata.area_assigned : " ";
+        this.data["OrganizationId"] = validdata.OrganizationId ? validdata.OrganizationId : " ";
+      let serviceresp = await getgeofenceservice.deleteGeoFence(validdata)
+      return response.json(serviceresp);
   }
 }
