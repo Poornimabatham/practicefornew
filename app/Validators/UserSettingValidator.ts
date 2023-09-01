@@ -39,7 +39,9 @@ export default class UserSettingValidator {
       Orgid: schema.number(),
       Empid: schema.number(),
     })
+
   }
+
 
   static Notification = {
     schema: schema.create({

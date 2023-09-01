@@ -8,6 +8,12 @@ import ZoneMaster from "App/Models/ZoneMaster";
 import { DateTime } from "luxon";
 import moment from "moment";
 export default class Helper {
+  static weekOfMonth(date: string) {
+    throw new Error("Method not implemented.");
+  }
+  static encrypt(arg0: string) {
+    throw new Error("Method not implemented.");
+  }
   public static encode5t(str: string) {
     for (let i = 0; i < 5; i++) {
       str = Buffer.from(str).toString("base64");
@@ -26,7 +32,8 @@ export default class Helper {
 
   public static async getTimeZone(orgid: any) {
     let TimeZone = "Asia/kolkata";
-    const query1 = await Database.query()
+    let Name = '';
+    const query1: any = await Database.query()
       .from("ZoneMaster")
       .select("Name")
       .where(
@@ -649,20 +656,24 @@ export default class Helper {
 
   public static async getweeklyoffnew(date: string, shiftid: number, empid: number, orgid: number) {
 
-    const dateTime = DateTime.fromISO(date);
-    const dayOfWeek = dateTime.weekday + 1; // Convert Luxon weekday to 1-7 format
-    const weekOfMonth = Math.ceil(dateTime.day / 7);
+    var dateTime = DateTime.fromISO(date);
+    var dayOfWeek = dateTime.weekday + 1; // Convert Luxon weekday to 1-7 format
+    var weekOfMonth = Math.ceil(dateTime.day / 7);
     var week;
     var selectQuery = await Database.from('ShiftMasterChild').select('WeekOff').where('OrganizationId', orgid).where('Day', dayOfWeek).where('ShiftId', shiftid);
 
     var flag = false;
     if (selectQuery.length > 0) {
       const weekOffString = selectQuery[0].WeekOff;
-      var week = weekOffString.split(','); // Split the comma-separated string into an array
+      week = weekOffString.split(',');  // Split the comma-separated string into an array
       flag = true;
     }
-    if (flag && week[weekOfMonth] - 1 == 1) {
-      return selectQuery[0].WeekOff;
+
+    if (flag && week[weekOfMonth - 1] == 1) {
+      return 'WeekOff';
+    } else {
+      return 'noWeekOff';
     }
   }
+
 }
