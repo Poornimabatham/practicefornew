@@ -659,7 +659,7 @@ export default class DailyAttendanceService {
     // console.log(jsonData[0]['2023-08-26'].interim.length)
     // console.log('jsonlength')
 
-    await Promise.all(jsonData.map(async(row,i)=>{
+    await Promise.all(jsonData.map(async (row, i) => {
       const date = Object.keys(jsonData[i]);
 
       if (Array.isArray(jsonData[i][date[0]].interim)) {
@@ -1087,7 +1087,7 @@ export default class DailyAttendanceService {
                     TimeOutDate: TimeOutDate,
                     disapprove_datetime: disapprove_datetime,
                     //disapp_sts: disappstatus,
-                    disapprovereason:disattreason,
+                    disapprovereason: disattreason,
                     disapp_reason: GeofenceIn,
                     disapp_remark: remarkfordisapprove,
                   }); ////ashish endd////////
@@ -1229,7 +1229,7 @@ export default class DailyAttendanceService {
             try {
               let areaId = GeofenceInAreaId;
               let areaIdOut = GeofenceOutAreaId;
-              console.log("shakir+AttendanceMasterId"+ AttendanceMasterId);
+              console.log("shakir+AttendanceMasterId" + AttendanceMasterId);
 
               if (AttendanceMasterId == 0) {
                 if (GeofenceIn == "Outside Geofence") {
@@ -1243,7 +1243,7 @@ export default class DailyAttendanceService {
                     ///////////Out side Geofence code start Here///
                   }
                 }
-                console.log("shakir+deviceverificationperm"+ deviceverificationperm);
+                console.log("shakir+deviceverificationperm" + deviceverificationperm);
                 if (deviceverificationperm == 1) {
                   let employeeDeviceId: any = await Database.from(
                     "EmployeeMaster"
@@ -1290,8 +1290,8 @@ export default class DailyAttendanceService {
                   outside_geofence_setting = await Helper.getSettingByOrgId(
                     OrganizationId
                   ); //disapprove_setting on h
-                  console.log("shakir+areaId12"+ areaId12);
-                  console.log("shakir+outside_geofence_setting"+ outside_geofence_setting);
+                  console.log("shakir+areaId12" + areaId12);
+                  console.log("shakir+outside_geofence_setting" + outside_geofence_setting);
                 }
                 Geofencests = addonGeoFenceStst;
                 if (
@@ -1404,69 +1404,68 @@ export default class DailyAttendanceService {
                     TimeOutStampServer: TimeOutStampServer,
                     areaIdTimeOut: areaIdOut,
                     //disapp_sts: disappstatus,
-                    disapprovereason:disattreason,
+                    disapprovereason: disattreason,
                     ZoneId: Zone_id,
                   });
                 AttendanceMasterId = InsertAttendanceTimeiN[0];
-              console.log("shakir+AFETR INSERT AttendanceMasterId"+ AttendanceMasterId);
+                console.log("shakir+AFETR INSERT AttendanceMasterId" + AttendanceMasterId);
 
-                if((areaId12 != 0)&&(Geofencests == 1)&&(outside_geofence_setting == "1") && ((GeofenceIn=="Outside Geofence" && GeofenceOut!="Outside Geofence") || (GeofenceIn=="Outside Geofence" && GeofenceOut=="Outside Geofence") || (GeofenceIn!="Outside Geofence" && GeofenceOut=="Outside Geofence"))) 
-                  {   
-                     
-                                 let empId;
-                                 let ShiftId1;
-                                 let deptid1;
-                                 let Desg_id1;
-                                 let timein1;
-                                 let timeout1; 
-                                 let TimeInDate1;
-                                 let TimeOutDate1;
-                                 let attdate;
-                                 let remarkfordisapprove;
-                                
+                if ((areaId12 != 0) && (Geofencests == 1) && (outside_geofence_setting == "1") && ((GeofenceIn == "Outside Geofence" && GeofenceOut != "Outside Geofence") || (GeofenceIn == "Outside Geofence" && GeofenceOut == "Outside Geofence") || (GeofenceIn != "Outside Geofence" && GeofenceOut == "Outside Geofence"))) {
 
-                               const getAttendanceData=await Database.from("AttendanceMaster").select("EmployeeId","ShiftId","Dept_id","Desg_id","TimeIn","TimeOut","timeindate","timeoutdate","AttendanceDate").where("Id",AttendanceMasterId).first()
-                                if(getAttendanceData) {
-                                    empId=getAttendanceData.EmployeeId;
-                                    ShiftId1=getAttendanceData.ShiftId;
-                                    deptid1=getAttendanceData.Dept_id;
-                                    Desg_id1=getAttendanceData.Desg_id;
-                                    timein1=getAttendanceData.TimeIn;
-                                    timeout1=getAttendanceData.TimeOut; 
-                                    TimeInDate1= getAttendanceData.timeindate;
-                                    TimeOutDate1= getAttendanceData.timeoutdate;
-                                    attdate=getAttendanceData.AttendanceDate;
-                                }
+                  let empId;
+                  let ShiftId1;
+                  let deptid1;
+                  let Desg_id1;
+                  let timein1;
+                  let timeout1;
+                  let TimeInDate1;
+                  let TimeOutDate1;
+                  let attdate;
+                  let remarkfordisapprove;
 
-                                let empcode="";
-                                let empname="";
-                                TimeInDate=attdate; 
-                                disattreason="Outside Geofence";
-                                disappstatus=0;
 
-                                const insertDataOnDisapprovAtt=await Database.table("Disapprove_approve").insert({
-                                  AttendanceId:AttendanceMasterId,
-                                  EmployeeId:UserId,
-                                  EmployeeCode:empcode,
-                                  EmployeeName:empname,
-                                  ShiftId:ShiftId1,
-                                  deptid:deptid1,
-                                  desgid:Desg_id1,
-                                  AttendanceDate:attdate,
-                                  OrganizationId:OrganizationId,
-                                  TimeIn:timein1,
-                                  TimeOut:timeout1,
-                                  TimeInDate:TimeInDate1,
-                                  TimeOutDate:TimeOutDate1,
-                                  disapprove_datetime:currentDate,
-                                  disapp_sts:disappstatus,
-                                  disapp_reason:disattreason,
-                                  disapp_remark:remarkfordisapprove
-                                })
-                            }
+                  const getAttendanceData = await Database.from("AttendanceMaster").select("EmployeeId", "ShiftId", "Dept_id", "Desg_id", "TimeIn", "TimeOut", "timeindate", "timeoutdate", "AttendanceDate").where("Id", AttendanceMasterId).first()
+                  if (getAttendanceData) {
+                    empId = getAttendanceData.EmployeeId;
+                    ShiftId1 = getAttendanceData.ShiftId;
+                    deptid1 = getAttendanceData.Dept_id;
+                    Desg_id1 = getAttendanceData.Desg_id;
+                    timein1 = getAttendanceData.TimeIn;
+                    timeout1 = getAttendanceData.TimeOut;
+                    TimeInDate1 = getAttendanceData.timeindate;
+                    TimeOutDate1 = getAttendanceData.timeoutdate;
+                    attdate = getAttendanceData.AttendanceDate;
+                  }
+
+                  let empcode = "";
+                  let empname = "";
+                  TimeInDate = attdate;
+                  disattreason = "Outside Geofence";
+                  disappstatus = 0;
+
+                  const insertDataOnDisapprovAtt = await Database.table("Disapprove_approve").insert({
+                    AttendanceId: AttendanceMasterId,
+                    EmployeeId: UserId,
+                    EmployeeCode: empcode,
+                    EmployeeName: empname,
+                    ShiftId: ShiftId1,
+                    deptid: deptid1,
+                    desgid: Desg_id1,
+                    AttendanceDate: attdate,
+                    OrganizationId: OrganizationId,
+                    TimeIn: timein1,
+                    TimeOut: timeout1,
+                    TimeInDate: TimeInDate1,
+                    TimeOutDate: TimeOutDate1,
+                    disapprove_datetime: currentDate,
+                    disapp_sts: disappstatus,
+                    disapp_reason: disattreason,
+                    disapp_remark: remarkfordisapprove
+                  })
+                }
               }
 
-              
+
               if (MultipletimeStatus == 1 || shiftType == "3") {
                 if (AttendanceMasterId != 0) {
                   const query = Database.from("InterimAttendances")
@@ -1479,8 +1478,8 @@ export default class DailyAttendanceService {
                   }
                 }
 
-                console.log("deepak"+TimeInTime);
-                console.log("deepak"+interimAttendanceId);
+                console.log("deepak" + TimeInTime);
+                console.log("deepak" + interimAttendanceId);
                 if (interimAttendanceId == 0) {
                   console.log("new Insert Query for interim");
 
@@ -1529,7 +1528,7 @@ export default class DailyAttendanceService {
                     });
 
                   let InsertAttendanceTimeInOut = await query;
-                  console.log("////////////////"+InsertAttendanceTimeInOut)
+                  console.log("////////////////" + InsertAttendanceTimeInOut)
                   interimAttendanceIds = InsertAttendanceTimeInOut[0];
                 }
               }
@@ -1683,7 +1682,7 @@ export default class DailyAttendanceService {
               };
               k++;
               //console.log(statusArray);
-            } catch (error) {}
+            } catch (error) { }
           }
           //******************************End second case****************************//
           //******************************start third case****************************//
@@ -1698,51 +1697,49 @@ export default class DailyAttendanceService {
             let hoursPerDay = "00:00:00";
 
 
-                  if((GeofenceOut=="Outside Geofence"))
-                    {
-                        if(geofencePerm==9|| geofencePerm==13||geofencePerm==11|| geofencePerm==15)
-                        {
-                            // $pageName="Outside Geofence";//to navigate notification Do not change it.
-                            // $NotificationId= sendManualPushNotification("('$orgTopic' in topics) && ('admin' in topics)","Outside Geofence", "$name has punched Attendance outside Geofence", "$UserId","$OrganizationId","$pageName");
-                            // $query=$this->db->query("UPDATE NotificationsList SET PageName = 'Outsidegeofance' WHERE Id = '$NotificationId' ");
-                        }
-						
-					                	if(geofencePerm == 13){
-                              ///////////send outside geofence mail code here////////////
-                            }
-                        
-                    }
+            if ((GeofenceOut == "Outside Geofence")) {
+              if (geofencePerm == 9 || geofencePerm == 13 || geofencePerm == 11 || geofencePerm == 15) {
+                // $pageName="Outside Geofence";//to navigate notification Do not change it.
+                // $NotificationId= sendManualPushNotification("('$orgTopic' in topics) && ('admin' in topics)","Outside Geofence", "$name has punched Attendance outside Geofence", "$UserId","$OrganizationId","$pageName");
+                // $query=$this->db->query("UPDATE NotificationsList SET PageName = 'Outsidegeofance' WHERE Id = '$NotificationId' ");
+              }
 
-                    if (deviceverificationperm == 1) {
-                      let employeeDeviceId: any = await Database.from(
-                        "EmployeeMaster"
-                      )
-                        .select("DeviceId")
-                        .where("Id", `${UserId}`)
-                        .first();
-                      if (employeeDeviceId) {
-                        let verifieddevice = employeeDeviceId.DeviceId;
-                        let suspiciousdevice = 0;
-                        if (verifieddevice == TimeOutDeviceId) {
-                          suspiciousdevice = 0;
-                        } else {
-                          suspiciousdevice = 1;
-                          // if(SuspiciousDevicePerm==9|| SuspiciousDevicePerm==13||SuspiciousDevicePerm==11|| SuspiciousDevicePerm==15)
-                          // {
-                          //   $pageName="Suspicious Device";//to navigate notification Do not change it.
-                          //   sendManualPushNotification("('$orgTopic' in topics) && ('admin' in topics)","Suspicious Device", "$name's Attendance Device does not match", "$UserId","$OrganizationId","$pageName");
-                          // }
-                          if (
-                            SuspiciousDevicePerm == 5 ||
-                            SuspiciousDevicePerm == 13 ||
-                            SuspiciousDevicePerm == 7 ||
-                            SuspiciousDevicePerm == 15
-                          ) {
-                            /////////////Enter code of Suspicious Device///////////
-                          }
-                        }
-                      }
-                    }
+              if (geofencePerm == 13) {
+                ///////////send outside geofence mail code here////////////
+              }
+
+            }
+
+            if (deviceverificationperm == 1) {
+              let employeeDeviceId: any = await Database.from(
+                "EmployeeMaster"
+              )
+                .select("DeviceId")
+                .where("Id", `${UserId}`)
+                .first();
+              if (employeeDeviceId) {
+                let verifieddevice = employeeDeviceId.DeviceId;
+                let suspiciousdevice = 0;
+                if (verifieddevice == TimeOutDeviceId) {
+                  suspiciousdevice = 0;
+                } else {
+                  suspiciousdevice = 1;
+                  // if(SuspiciousDevicePerm==9|| SuspiciousDevicePerm==13||SuspiciousDevicePerm==11|| SuspiciousDevicePerm==15)
+                  // {
+                  //   $pageName="Suspicious Device";//to navigate notification Do not change it.
+                  //   sendManualPushNotification("('$orgTopic' in topics) && ('admin' in topics)","Suspicious Device", "$name's Attendance Device does not match", "$UserId","$OrganizationId","$pageName");
+                  // }
+                  if (
+                    SuspiciousDevicePerm == 5 ||
+                    SuspiciousDevicePerm == 13 ||
+                    SuspiciousDevicePerm == 7 ||
+                    SuspiciousDevicePerm == 15
+                  ) {
+                    /////////////Enter code of Suspicious Device///////////
+                  }
+                }
+              }
+            }
 
 
 
@@ -1865,7 +1862,7 @@ export default class DailyAttendanceService {
                 calculatedOvertime = hours + ":" + minutes + ":" + seconds;
               }
             }
-             
+
 
 
             if (
@@ -1911,7 +1908,7 @@ export default class DailyAttendanceService {
                 }
               }
 
-              if ( GeofenceOut == "Outside Geofence" ) {
+              if (GeofenceOut == "Outside Geofence") {
                 attendance_sts = 2;
                 disappstatus = 2; //pending disaaprove
                 disattreason = "Outside Geofence";
@@ -1948,60 +1945,59 @@ export default class DailyAttendanceService {
               });
 
 
-              if((areaId12 != 0)&&(Geofencests == 1)&&(outside_geofence_setting == "1") && (GeofenceOut=="Outside Geofence")) 
-                  {   
-                     
-                                 let empId;
-                                 let ShiftId1;
-                                 let deptid1;
-                                 let Desg_id1;
-                                 let timein1;
-                                 let timeout1; 
-                                 let TimeInDate1;
-                                 let TimeOutDate1;
-                                 let attdate;
-                                 let remarkfordisapprove;
-                                
+            if ((areaId12 != 0) && (Geofencests == 1) && (outside_geofence_setting == "1") && (GeofenceOut == "Outside Geofence")) {
 
-                               const getAttendanceData=await Database.from("AttendanceMaster").select("EmployeeId","ShiftId","Dept_id","Desg_id","TimeIn","TimeOut","timeindate","timeoutdate","AttendanceDate").where("Id",AttendanceMasterId).first()
-                                if(getAttendanceData) {
-                                    empId=getAttendanceData.EmployeeId;
-                                    ShiftId1=getAttendanceData.ShiftId;
-                                    deptid1=getAttendanceData.Dept_id;
-                                    Desg_id1=getAttendanceData.Desg_id;
-                                    timein1=getAttendanceData.TimeIn;
-                                    timeout1=getAttendanceData.TimeOut; 
-                                    TimeInDate1= getAttendanceData.timeindate;
-                                    TimeOutDate1= getAttendanceData.timeoutdate;
-                                    attdate=getAttendanceData.AttendanceDate;
-                                }
+              let empId;
+              let ShiftId1;
+              let deptid1;
+              let Desg_id1;
+              let timein1;
+              let timeout1;
+              let TimeInDate1;
+              let TimeOutDate1;
+              let attdate;
+              let remarkfordisapprove;
 
-                                let empcode="";
-                                let empname="";
-                                TimeInDate=attdate; 
-                                disattreason="Outside Geofence";
-                                disappstatus=0;
 
-                                const insertDataOnDisapprovAtt=await Database.table("Disapprove_approve").insert({
-                                  AttendanceId:AttendanceMasterId,
-                                  EmployeeId:UserId,
-                                  EmployeeCode:empcode,
-                                  EmployeeName:empname,
-                                  ShiftId:ShiftId1,
-                                  deptid:deptid1,
-                                  desgid:Desg_id1,
-                                  AttendanceDate:attdate,
-                                  OrganizationId:OrganizationId,
-                                  TimeIn:timein1,
-                                  TimeOut:timeout1,
-                                  TimeInDate:TimeInDate1,
-                                  TimeOutDate:TimeOutDate1,
-                                  disapprove_datetime:currentDate,
-                                  disapp_sts:disappstatus,
-                                  disapp_reason:disattreason,
-                                  disapp_remark:remarkfordisapprove
-                                })
-                            }
+              const getAttendanceData = await Database.from("AttendanceMaster").select("EmployeeId", "ShiftId", "Dept_id", "Desg_id", "TimeIn", "TimeOut", "timeindate", "timeoutdate", "AttendanceDate").where("Id", AttendanceMasterId).first()
+              if (getAttendanceData) {
+                empId = getAttendanceData.EmployeeId;
+                ShiftId1 = getAttendanceData.ShiftId;
+                deptid1 = getAttendanceData.Dept_id;
+                Desg_id1 = getAttendanceData.Desg_id;
+                timein1 = getAttendanceData.TimeIn;
+                timeout1 = getAttendanceData.TimeOut;
+                TimeInDate1 = getAttendanceData.timeindate;
+                TimeOutDate1 = getAttendanceData.timeoutdate;
+                attdate = getAttendanceData.AttendanceDate;
+              }
+
+              let empcode = "";
+              let empname = "";
+              TimeInDate = attdate;
+              disattreason = "Outside Geofence";
+              disappstatus = 0;
+
+              const insertDataOnDisapprovAtt = await Database.table("Disapprove_approve").insert({
+                AttendanceId: AttendanceMasterId,
+                EmployeeId: UserId,
+                EmployeeCode: empcode,
+                EmployeeName: empname,
+                ShiftId: ShiftId1,
+                deptid: deptid1,
+                desgid: Desg_id1,
+                AttendanceDate: attdate,
+                OrganizationId: OrganizationId,
+                TimeIn: timein1,
+                TimeOut: timeout1,
+                TimeInDate: TimeInDate1,
+                TimeOutDate: TimeOutDate1,
+                disapprove_datetime: currentDate,
+                disapp_sts: disappstatus,
+                disapp_reason: disattreason,
+                disapp_remark: remarkfordisapprove
+              })
+            }
 
             if (
               (shiftType == "1" || shiftType == "2") &&
@@ -2050,14 +2046,14 @@ export default class DailyAttendanceService {
               AttendanceMasterId: AttendanceMasterId,
             };
 
-            k++;      
+            k++;
           }
           //******************************End third case****************************//
         }
-     // }));
+        // }));
       }
-    //}
-  }));
+      //}
+    }));
 
     return statusArray;
   }
