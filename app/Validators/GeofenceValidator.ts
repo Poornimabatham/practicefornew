@@ -48,12 +48,8 @@ export default class GeofenceValidator {
 
   static deleteGeoFence = {
     schema: schema.create({
-      Name: schema.string(),
-      Lat_Long: schema.string(),
-      OrganizationId: schema.number(),
-      Location: schema.string(),
-      LastModifiedById: schema.number(),
-      Status: schema.number(),
+      area_assigned: schema.string.optional(),
+      OrganizationId: schema.string.optional(),
     }),
   };
 }
