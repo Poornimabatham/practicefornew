@@ -17,38 +17,41 @@ export default class GetDataToRegService {
       currentMonth = moment().format("yyyy-MM-DD");
     }
 
-    var MinTimes = "";
-    var MaxDays = 0;
     var Regularizecount = 0;
-    var regularizationsettingsts = 0;
     // $attendancearr=array();
-    const selectRegularizationSettings = await Database.from(
+    const selectRegularizationSettings:any = await Database.from(
       "RegularizationSettings"
     )
-      .select("MaxDays", "MinTimes")
-      .where("OrganizationId", data.orgid)
-      .where("RegularizationSts", 1)
-      .first();
-    const row = selectRegularizationSettings;
-    count = row ? 1 : 0;
-
-    if (count >= 1) {
-      regularizationsettingsts = 1;
-      if (row) {
-        MaxDays = row.MaxDays;
-        MinTimes = row.MinTimes;
-      }
-    }
+    .select('MaxDays', 'MinTimes')
+    .where('OrganizationId', data.orgid)
+    .where('RegularizationSts', 1);
+  
+  const results = await selectRegularizationSettings;
+  
+  const count1 = results.length;
+  
+  let regularizationsettingsts = 0;
+  let MaxDays = 0;
+  let MinTimes = 0;
+  
+  if (count1 >= 1) {
+    regularizationsettingsts = 1;
+    MaxDays = results[0].MaxDays;
+    MinTimes = results[0].MinTimes;
+  }
 
     const regularizeCount: any = await Database.from("AttendanceMaster")
       .where("OrganizationId", data.orgid)
       .andWhereNot("Is_Delete", 1)
       .andWhere("EmployeeId", data.uid)
-      .andWhereRaw(`MONTH(AttendanceDate) = MONTH('${currentMonth}')`)
+      .whereRaw(`MONTH(AttendanceDate) = MONTH('${currentMonth}')`)
       .andWhere("AttendanceDate", Database.raw("CURDATE()"))
-      .andWhereNotIn("RegularizeSts", [0, 1])
+      .andWhere(
+        Database.raw(` ("RegularizeSts" = 0 OR "RegularizeSts" = 1)
+      `)
+      )
       .orderBy(" AttendanceDate", "desc")
-      .count("RegularizeSts as Regularizecount");
+    .count("RegularizeSts as Regularizecount");
 
     const affected_rows = regularizeCount.length;
 
@@ -56,6 +59,7 @@ export default class GetDataToRegService {
       Regularizecount = regularizeCount[0].Regularizecount;
     }
 
+    // var cd =   moment().format("yyyy-MM-DD");
     const selectAttendancemasterList = Database.from("AttendanceMaster")
       .select(
         "Id",
@@ -65,32 +69,25 @@ export default class GetDataToRegService {
         "TimeIn",
         "TimeOut"
       )
-      .where("OrganizationId", 10)
-      .whereNot("Is_Delete", 1)
-      .whereIn("device", ["Auto Time Out", "Absentee Cron"])
-      .orWhere((query) => {
-        query
-          .where("device", "Cron")
-          .where("AttendanceStatus", 8)
-          .where("TimeIn", "00:00:00")
-          .where("TimeOut", "00:00:00");
-      })
-      .orWhere((query) => {
-        query.where("device", "Cron").whereIn("AttendanceStatus", [4, 10]);
-      })
-      .andWhere((query) => {
-        query
-          .where("TimeIn", Database.raw("TimeOut"))
-          .orWhere("TimeOut", "00:00:00");
-      })
+      .where("OrganizationId", data.orgid)
+      .andWhereNot("Is_Delete", 1)
+      .andWhere(
+        Database.raw(`((device ='Auto Time Out'  and (TimeIn=TimeOut or TimeOut='00:00:00')) or 
+      (device ='Absentee Cron' and  TimeIn='00:00:00' and TimeOut='00:00:00') or 
+      (device ='Cron' and  TimeIn='00:00:00' and TimeOut='00:00:00' and AttendanceStatus=8) or 
+      (device ='Cron' and  (TimeIn=TimeOut or TimeOut='00:00:00') and AttendanceStatus in (4,10))) `)
+      )
       .andWhere("EmployeeId", data.uid)
       .whereRaw(`MONTH(AttendanceDate) = MONTH('${currentMonth}')`)
-      .whereRaw(`YEAR(AttendanceDate) = YEAR('${currentMonth}')`)
-      .whereNot("AttendanceDate", Database.raw("CURDATE()"))
-      .whereIn("RegularizeSts", [0, 1])
+      .andWhereRaw(`YEAR(AttendanceDate) = YEAR('${currentMonth}')`)
+      .andWhereNot("AttendanceDate", Database.raw("CURDATE()"))
+      .andWhere(
+        Database.raw(` ("RegularizeSts" = 0 OR "RegularizeSts" = 1)
+      `)
+      )
       .orderBy("AttendanceDate", "desc");
-
     const attendanceData = await selectAttendancemasterList;
+
     var attendancearr: any = [];
     attendanceData.forEach((row) => {
       const res1 = {};
@@ -119,7 +116,7 @@ export default class GetDataToRegService {
       // Calculate the difference in days
       const diffInDays = Math.floor(diffInMilliseconds / (1000 * 60 * 60 * 24));
 
-      res1["diffInDays"] = diffInDays;
+      // res1["diffInDays"] = diffInDays;
       if (MaxDays != 0) {
         if (diffInDays > MaxDays) {
           res1["resultsts"] = 0;
@@ -130,7 +127,8 @@ export default class GetDataToRegService {
         res1["resultsts"] = 1;
       }
       if (MinTimes != undefined) {
-        if (Regularizecount < parseInt(MinTimes)) {
+
+        if (Regularizecount < MinTimes) {
           res1["Regularizessts"] = 1;
         } else {
           res1["Regularizessts"] = 0;
@@ -153,7 +151,7 @@ export default class GetDataToRegService {
 
     result["data"] = attendancearr;
     result["Regularizecountdone"] = Regularizecount;
-    result["TotalRegularizecount"] = parseInt(MinTimes);
+    result["TotalRegularizecount"] = MinTimes;
     result["regularizationsettingsts"] = regularizationsettingsts;
     result["status"] = status;
     return result;

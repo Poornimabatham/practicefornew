@@ -5,5 +5,5 @@ Route.post('/addDesignations', 'DesignationsController.AddDesign')
 Route.put('/updateDesignations', 'DesignationsController.UpdateDesign')
 ////// assignDesignation //////
 Route.patch('/AssignDesignation', 'DesignationsController.assignDesignation')
-Route.get("/getDesignationsstatus", "DesignationsController.DesignationsGetStatus");
+Route.get("/getDesignationsstatus", "DesignationsController.DesignationsGetStatus").middleware('throttle:global');
 

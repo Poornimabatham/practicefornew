@@ -70,4 +70,10 @@
     ExitImage:string;
     status: string;
     TimeOut:string;
-  }
+}
+  
+  interface getAppDetail {
+    appVersion: string;
+    updateStatus: string;
+    checkMandUpdate: string;
+  }  
