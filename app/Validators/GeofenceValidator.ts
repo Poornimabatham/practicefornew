@@ -8,40 +8,48 @@ export default class GeofenceValidator {
   static getgeofence = {
     schema: schema.create({
       OrganizationId: schema.number(),
-      currentpage:schema.number(),
-      perpage:schema.number(),
-      pagename:schema.string()
-    }), message: BaseValidator.messages
-  }
+      currentpage: schema.number(),
+      perpage: schema.number(),
+      pagename: schema.string(),
+    }),
+    message: BaseValidator.messages,
+  };
 
   static addgeofence = {
     schema: schema.create({
       Name: schema.string(),
-      Lat_Long:schema.string(),
-      Location:schema.string(),
-      Radius:schema.string(),
-      OrganizationId:schema.number(),
-      LastModifiedById:schema.number()
-    }), message: BaseValidator.messages
-  }
+      Lat_Long: schema.string(),
+      Location: schema.string(),
+      Radius: schema.string(),
+      OrganizationId: schema.number(),
+      LastModifiedById: schema.number(),
+    }),
+    message: BaseValidator.messages,
+  };
   static addpolygon = {
-    schema:schema.create({
-      Name : schema.string(),
-      Lat_Long : schema.string(),
-      OrganizationId : schema.number(),
-      Location : schema.string(),
-      LastModifiedById : schema.number(),
-      Status : schema.number()
-
-    })
-  }
+    schema: schema.create({
+      Name: schema.string(),
+      Lat_Long: schema.string(),
+      OrganizationId: schema.number(),
+      Location: schema.string(),
+      LastModifiedById: schema.number(),
+      Status: schema.number(),
+    }),
+  };
   static assignGeofence = {
-    schema:schema.create({
-      area_assigned :schema.number(),
-      OrganizationId :schema.number(),
-      Id : schema.number(),
-      adminid : schema.number()
-    })
-  }
-  public messages: CustomMessages = {}
+    schema: schema.create({
+      area_assigned: schema.number(),
+      OrganizationId: schema.number(),
+      Id: schema.number(),
+      adminid: schema.number(),
+    }),
+  };
+  public messages: CustomMessages = {};
+
+  static deleteGeoFence = {
+    schema: schema.create({
+      area_assigned: schema.string.optional(),
+      OrganizationId: schema.string.optional(),
+    }),
+  };
 }

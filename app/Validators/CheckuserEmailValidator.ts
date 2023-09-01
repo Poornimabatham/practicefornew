@@ -7,15 +7,32 @@ export default class CheckUserEmailValidator extends BaseModel {
     super();
   }
 
-  static  CheckUserEmailSchema= {
+  static CheckUserEmailSchema = {
     schema: schema.create({
       email: schema.string(),
     }),
   };
 
-  static  CheckUserPhoneSchema= {
+  static CheckUserPhoneSchema = {
     schema: schema.create({
       phone: schema.string(),
+    }),
+  };
+  static verifyEmailOtpRequestSchema = {
+    schema: schema.create({
+      emailId: schema.string([rules.email()]),
+      otp: schema.number(),
+      orgId: schema.number(),
+    }),
+  };
+
+  static updateEmailOTPRequestSchema = {
+    schema: schema.create({
+      emailId: schema.string([rules.email()]),
+      oldEmail: schema.string([rules.email()]),
+
+      empId: schema.number(),
+      orgId: schema.number(),
     }),
   };
 }
