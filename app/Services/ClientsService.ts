@@ -1,8 +1,9 @@
 import Database from "@ioc:Adonis/Lucid/Database";
 import Helper from "App/Helper/Helper";
+import { format } from "date-fns";
+import moment from "moment-timezone";
 export default class ClientsService {
-
-  constructor() { }
+  constructor() {}
 
   static async ClientData(a) {
     const OrgId: number = a.orgId;
@@ -12,30 +13,72 @@ export default class ClientsService {
     let allClientList: any;
 
     if (adminSts == 1) {
-
-      allClientList = await Database
-        .from('ClientMaster as C')
-        .join('CountryMaster as CM', 'C.Country', '=', 'CM.Id')
-        .select("C.Id", "C.Company", "C.Name", "C.Contact", "C.Email", "C.Address", "C.City", "C.Country", "CM.Name as countryName", "CM.countrycode", "C.Description", "C.Lat_Long", "C.radius", "C.OrganizationId", "C.status", "C.createdBy", "C.ModifiedDate", "C.ModifiedById", "C.Platform ", "C.Lat_Long", "C.radius", Database.rawQuery('(SELECT FirstName FROM EmployeeMaster WHERE Id = (SELECT employeeid from clientlist WHERE clientlist.clientid=C.Id LIMIT 1) LIMIT 1) as EmployeeName'))
+      allClientList = await Database.from("ClientMaster as C")
+        .join("CountryMaster as CM", "C.Country", "=", "CM.Id")
+        .select(
+          "C.Id",
+          "C.Company",
+          "C.Name",
+          "C.Contact",
+          "C.Email",
+          "C.Address",
+          "C.City",
+          "C.Country",
+          "CM.Name as countryName",
+          "CM.countrycode",
+          "C.Description",
+          "C.Lat_Long",
+          "C.radius",
+          "C.OrganizationId",
+          "C.status",
+          "C.createdBy",
+          "C.ModifiedDate",
+          "C.ModifiedById",
+          "C.Platform ",
+          "C.Lat_Long",
+          "C.radius",
+          Database.rawQuery(
+            "(SELECT FirstName FROM EmployeeMaster WHERE Id = (SELECT employeeid from clientlist WHERE clientlist.clientid=C.Id LIMIT 1) LIMIT 1) as EmployeeName"
+          )
+        )
         .where("C.OrganizationId", OrgId)
-        .andWhere(Database.rawQuery(`C.Country=SUBSTRING_INDEX(CM.Id , '+', -1)`))
-        .andWhereIn('C.status', [1, 2, 0])
-
-    }
-    else {
-
-      allClientList = await Database
-        .from('ClientMaster as C')
-        .select("C.Id", "C.Company", "C.Name", "C.Contact", "C.Email", "C.Address", "C.City", "C.Country", "C.Description", "C.Lat_Long", "C.radius", "C.OrganizationId", "C.status", "C.createdBy", "C.ModifiedDate", "C.ModifiedById", "C.Platform ", "C.Lat_Long", "C.radius",)
+        .andWhere(
+          Database.rawQuery(`C.Country=SUBSTRING_INDEX(CM.Id , '+', -1)`)
+        )
+        .andWhereIn("C.status", [1, 2, 0]);
+    } else {
+      allClientList = await Database.from("ClientMaster as C")
+        .select(
+          "C.Id",
+          "C.Company",
+          "C.Name",
+          "C.Contact",
+          "C.Email",
+          "C.Address",
+          "C.City",
+          "C.Country",
+          "C.Description",
+          "C.Lat_Long",
+          "C.radius",
+          "C.OrganizationId",
+          "C.status",
+          "C.createdBy",
+          "C.ModifiedDate",
+          "C.ModifiedById",
+          "C.Platform ",
+          "C.Lat_Long",
+          "C.radius"
+        )
         .where("C.OrganizationId", OrgId)
-        .andWhereIn('C.status', [1, 2, 0])
-        .andWhereNot('Country', 0)
-        .groupBy('C.Id')
-        .havingRaw('(SELECT count(clientlist.id) as ids FROM clientlist WHERE clientlist.clientid = C.Id and clientlist.organizationid=C.OrganizationId)=0')
-
+        .andWhereIn("C.status", [1, 2, 0])
+        .andWhereNot("Country", 0)
+        .groupBy("C.Id")
+        .havingRaw(
+          "(SELECT count(clientlist.id) as ids FROM clientlist WHERE clientlist.clientid = C.Id and clientlist.organizationid=C.OrganizationId)=0"
+        );
     }
 
-    return allClientList
+    return allClientList;
   }
 
   static async addClient(inclient) {
@@ -60,53 +103,47 @@ export default class ClientsService {
     let insertClientList: any;
 
     ////////////validation phone///////////
-    ClientList = await Database
-      .from('ClientMaster as C')
+    ClientList = await Database.from("ClientMaster as C")
       .select("C.Id", "C.Company", "C.Contact", "C.Email")
       .where("C.OrganizationId", orgId)
-      .andWhere("C.Contact", phone)
+      .andWhere("C.Contact", phone);
 
     if (ClientList.length > 0) {
-      sts = 'contactalreadyexists';
+      sts = "contactalreadyexists";
       return sts;
     }
 
-    insertClient = await Database
-      .table('ClientMaster')
-      .returning('id')
-      .insert({
-        Company: compName,
-        Name: name,
-        Contact: phone,
-        Email: email,
-        Address: compAddress,
-        City: city,
-        Country: countryCode,
-        Description: description,
-        Lat_Long: Lat_Long,
-        Radius: radius,
-        OrganizationId: orgId,
-        status: status,
-        createdBy: empId,
-        createdDate: todayDate,
-        ModifiedById: empId,
-        Platform: platform,
-      })
+    insertClient = await Database.table("ClientMaster").returning("id").insert({
+      Company: compName,
+      Name: name,
+      Contact: phone,
+      Email: email,
+      Address: compAddress,
+      City: city,
+      Country: countryCode,
+      Description: description,
+      Lat_Long: Lat_Long,
+      Radius: radius,
+      OrganizationId: orgId,
+      status: status,
+      createdBy: empId,
+      createdDate: todayDate,
+      ModifiedById: empId,
+      Platform: platform,
+    });
 
-    if (insertClient != '') {
-      insertClientList = await Database
-        .table('clientlist')
-        .returning('id')
+    if (insertClient != "") {
+      insertClientList = await Database.table("clientlist")
+        .returning("id")
         .insert({
           employeeid: empId,
           clientid: insertClient,
           organizationid: orgId,
           createddate: todayDate,
           AssignStatus: 1,
-        })
+        });
     }
-    return "Client Succesfully Inserted"
-
+    return "Client Succesfully Inserted";
   }
 
   ///////////////////add client function end //////////////////
@@ -131,30 +168,24 @@ export default class ClientsService {
     let sts: any;
     let affectedRows;
 
-    ClientList = await Database
-      .from('ClientMaster as C')
+    ClientList = await Database.from("ClientMaster as C")
       .select("C.Id", "C.Company", "C.Contact", "C.Email")
       .where("C.OrganizationId", orgid)
       .andWhere("C.Id", clientId);
 
     if (ClientList.length > 0) {
-
       if (ClientList[0].Contact == phone) {
-        sts = 'contactalreadyexists';
+        sts = "contactalreadyexists";
         return sts;
-      }
-      else if (ClientList[0].Company == compName) {
-        sts = 'companynamealreadyexists';
+      } else if (ClientList[0].Company == compName) {
+        sts = "companynamealreadyexists";
         return sts;
-      }
-      else if (ClientList[0].Email == email) {
-        sts = 'emailalreadyexists';
+      } else if (ClientList[0].Email == email) {
+        sts = "emailalreadyexists";
         return sts;
-      }
-      else {
-        affectedRows = await Database
-          .from('ClientMaster as C')
-          .where('id', clientId)
+      } else {
+        affectedRows = await Database.from("ClientMaster as C")
+          .where("id", clientId)
           .andWhere("C.OrganizationId", orgid)
           .update({
             Company: compName,
@@ -168,15 +199,13 @@ export default class ClientsService {
             ModifiedDate: todayDate,
             ModifiedById: empid,
             Platform: platform,
-            Lat_Long: newLatLng
+            Lat_Long: newLatLng,
           });
         return affectedRows;
-
       }
     } else {
       return "Client does not exist on this Id";
     }
-
   }
 
   static async getClientList(clientdata) {
@@ -186,38 +215,96 @@ export default class ClientsService {
     let getClientList: any;
 
     if (startwith != undefined) {
-      getClientList = await Database
-        .from('ClientMaster as C')
-        .innerJoin('clientlist as CL', 'CL.clientid', '=', 'C.Id')
-        .innerJoin('EmployeeMaster as E', 'CL.employeeid', '=', 'E.Id')
-        .select("C.Id", "C.Company", "C.Name", "C.Contact", "C.Email", "C.Address", "C.Description", "C.Lat_Long", "CL.employeeid", "E.area_assigned")
+      getClientList = await Database.from("ClientMaster as C")
+        .innerJoin("clientlist as CL", "CL.clientid", "=", "C.Id")
+        .innerJoin("EmployeeMaster as E", "CL.employeeid", "=", "E.Id")
+        .select(
+          "C.Id",
+          "C.Company",
+          "C.Name",
+          "C.Contact",
+          "C.Email",
+          "C.Address",
+          "C.Description",
+          "C.Lat_Long",
+          "CL.employeeid",
+          "E.area_assigned"
+        )
         .where("C.OrganizationId", orgid)
         .where("CL.employeeid", empid)
-        .andWhereIn('C.status', [1, 2])
-        .orderBy('CL.id', 'desc')
-    }
-
-    else {
-      getClientList = await Database
-        .from('ClientMaster as C')
-        .innerJoin('clientlist as CL', 'CL.clientid', '=', 'C.Id')
-        .innerJoin('EmployeeMaster as E', 'CL.employeeid', '=', 'E.Id')
-        .select("C.Id", "C.Company", "C.Name", "C.Contact", "C.Email", "C.Address", "C.Description", "C.radius", "C.Lat_Long", "CL.employeeid", "E.area_assigned")
-        .select(Database.raw("CONCAT(E.FirstName, ' ', E.LastName) as EmployeeName"))
+        .andWhereIn("C.status", [1, 2])
+        .orderBy("CL.id", "desc");
+    } else {
+      getClientList = await Database.from("ClientMaster as C")
+        .innerJoin("clientlist as CL", "CL.clientid", "=", "C.Id")
+        .innerJoin("EmployeeMaster as E", "CL.employeeid", "=", "E.Id")
+        .select(
+          "C.Id",
+          "C.Company",
+          "C.Name",
+          "C.Contact",
+          "C.Email",
+          "C.Address",
+          "C.Description",
+          "C.radius",
+          "C.Lat_Long",
+          "CL.employeeid",
+          "E.area_assigned"
+        )
+        .select(
+          Database.raw("CONCAT(E.FirstName, ' ', E.LastName) as EmployeeName")
+        )
         .where("C.OrganizationId", orgid)
         .where("CL.employeeid", empid)
-        .andWhereIn('C.status', [1, 2])
-        .andWhereIn('CL.AssignStatus', [0, 1])
-        .orderBy('CL.id', 'desc')
-        .limit(2)
+        .andWhereIn("C.status", [1, 2])
+        .andWhereIn("CL.AssignStatus", [0, 1])
+        .orderBy("CL.id", "desc")
+        .limit(2);
     }
 
     return getClientList;
+  }
+  ////////////// assignMultipleClient ////////////////
 
+  static async assignMultipleClient(getparam) {
+    const zone = await Helper.getTimeZone(getparam.Orgid);
+    const timezone = zone;
+    const date = moment().tz(timezone).toDate();
+    const data = {};
+    var AssignClient = await Database.insertQuery()
+      .table("clientlist")
+      .insert({
+        employeeid: getparam.empid,
+        clientid: getparam.clientid,
+        organizationid: getparam.Orgid,
+        createddate: date,
+      });
+    data["status"] = "false";
+
+    if (AssignClient.length > 0) {
+      const orgid = getparam.Orgid;
+      const uid = getparam.adminid;
+      const module = "Attendance app";
+      const activityBy = 1;
+      const appModule = "Assigned Successfully";
+      const actionperformed = `<b>${getparam.clientname}</b>. shift has been assigned to <b>${getparam.empname}</b> by <b>${getparam.adminname}</b> from <b>${module}</b>`;
+
+      var getresult = await Helper.ActivityMasterInsert(
+        date,
+        orgid,
+        uid,
+        activityBy,
+        appModule,
+        actionperformed,
+        module
+      );
+
+      if (getresult) {
+        data["status"] = "true";
+      } else {
+        data["status"] = "false";
+      }
+    }
+    return data;
   }
 }
-
-
-
-
-

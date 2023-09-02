@@ -124,13 +124,6 @@ export default class getEarlyLeavingsService {
   }
 
   static async EarlyLeaversCsv(getData) {
-    var Begin = (getData.currentPage - 1) * getData.perPage;
-    var limit;
-    if (getData.csv == " ") {
-      limit = Begin;
-    } else {
-      limit;
-    }
 
     var currDate = DateTime.now().setZone(timeZone);
     var getDate = getData.date ? getData.date : currDate;
@@ -206,7 +199,6 @@ export default class getEarlyLeavingsService {
       .where("E.Is_Delete", 0)
       .whereNot("S.shifttype", 3)
       .orderBy("E.FirstName", "asc")
-      .limit(limit);
 
     const adminStatus = await Helper.getAdminStatus(getData.empid);
 

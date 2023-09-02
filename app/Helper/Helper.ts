@@ -5,10 +5,12 @@ import EmployeeMaster from "App/Models/EmployeeMaster";
 import Organization from "App/Models/Organization";
 import ShiftMaster from "App/Models/ShiftMaster";
 import ZoneMaster from "App/Models/ZoneMaster";
+import { DateTime } from "luxon";
 import moment from "moment";
 export default class Helper {
  
   public static encode5t(str: string) {
+    var contactNum = str.toString();
     for (let i = 0; i < 5; i++) {
       str = Buffer.from(str).toString("base64");
       str = str.split("").reverse().join("");
@@ -26,8 +28,8 @@ export default class Helper {
 
   public static async getTimeZone(orgid: any) {
     let TimeZone = "Asia/kolkata";
-    let Name = '' ;
-    const query1:any = await Database.query()
+    let Name = '';
+    const query1: any = await Database.query()
       .from("ZoneMaster")
       .select("Name")
       .where(
@@ -62,7 +64,11 @@ export default class Helper {
     let FirstName = "";
     const query2: any = await Database.query()
       .from("EmployeeMaster as E")
-      .select(Database.raw(`IF(E.lastname != '', CONCAT(E.FirstName, ' ', E.lastname), E.FirstName) as Name`))
+      .select(
+        Database.raw(
+          `IF(E.lastname != '', CONCAT(E.FirstName, ' ', E.lastname), E.FirstName) as Name`
+        )
+      )
       .where("Id", empid);
     if (query2.length > 0) {
       return query2[0].Name;
@@ -328,6 +334,19 @@ export default class Helper {
     }
   }
 
+  public static async getAddon_geoFenceRestrictionByUserId(
+    userId,
+    addon,
+    orgid
+  ) {
+    const result = await Database.from("EmployeeMaster")
+      .where("OrganizationId", orgid)
+      .where("Id", userId)
+      .select(addon as "addon")
+      .first();
+    return result ? result.addon : null;
+  }
+
   public static async getNotificationPermission(
     orgid: number,
     notification: string
@@ -490,11 +509,14 @@ export default class Helper {
   }
 
   public static async getShiftByEmpID(Id: any) {
-    const query: any = await Database.query().from('ShiftMaster').select('Name').where('id', Id);
+    const query: any = await Database.query()
+      .from("ShiftMaster")
+      .select("Name")
+      .where("id", Id);
     query.forEach((row: any) => {
       const Name = row.Name;
       return Name;
-    })
+    });
   }
   public static async myUrlEncode(country_code) {
     const entities = [
@@ -543,7 +565,11 @@ export default class Helper {
 
   public static async getDesignationId(name, orgid) {
     let desi;
-    let designationdata = await Database.query().from('DesignationMaster').select('*').where('Name', name).andWhere('OrganizationId', orgid);
+    let designationdata = await Database.query()
+      .from("DesignationMaster")
+      .select("*")
+      .where("Name", name)
+      .andWhere("OrganizationId", orgid);
     if (designationdata.length > 0) {
       desi = designationdata[0].Id;
       return desi;
@@ -553,7 +579,11 @@ export default class Helper {
   }
 
   public static async getFlexiShift(id) {
-    let query = await Database.query().from('ShiftMaster').select('HoursPerDay').where('Id', id);
+
+    let query = await Database.query()
+      .from("ShiftMaster")
+      .select("HoursPerDay")
+      .where("Id", id);
     let HoursPerDay;
 
     if (query.length > 0) {
@@ -565,57 +595,69 @@ export default class Helper {
   }
 
   public static async getShiftTimes(id) {
-
-    let query = await Database.query().from('ShiftMaster').select('TimeIn', 'TimeOut', 'HoursPerDay').where('Id', id)
+    let query = await Database.query()
+      .from("ShiftMaster")
+      .select("TimeIn", "TimeOut", "HoursPerDay")
+      .where("Id", id);
 
     if (query.length > 0) {
-      if (query[0].TimeIn == '00:00:00' || query[0].TimeIn == "") {
+      if (query[0].TimeIn == "00:00:00" || query[0].TimeIn == "") {
+
         return query[0].HoursPerDay;
       } else {
         return query[0].TimeIn + "-" + query[0].TimeOut;
       }
     }
-
   }
 
-
-
   public static async getOrgName(id: number) {
-    let Name = ''
-    const queryResult = await Database.from("Organization").where("Id", id).select("Name")
+    let Name = "";
+    const queryResult = await Database.from("Organization")
+      .where("Id", id)
+      .select("Name");
     if (queryResult.length > 0) {
       Name = queryResult[0].Name;
-      return Name
+      return Name;
     } else {
-      return Name
+      return Name;
+
     }
   }
 
   public static async getAdminEmail(id) {
     let Email;
-    const query = await Database.from('Organization').where("Id", id).select('Email');
+    const query = await Database.from("Organization")
+      .where("Id", id)
+      .select("Email");
+
     if (query.length > 0) {
       Email = query[0].Email;
       return Email;
     } else {
-      return Email = '';
+      return (Email = "");
     }
   }
 
   public static async getAdminNamebyOrgId(orgid) {
     let Name;
-    const query = await Database.from('admin_login').where('OrganizationId', orgid).select('name')
+
+    const query = await Database.from("admin_login")
+      .where("OrganizationId", orgid)
+      .select("name");
+
     if (query.length > 0) {
       Name = query[0].name;
       return Name;
     } else {
-      return Name
+      return Name;
     }
   }
 
   public static async getEmpEmail(id) {
-
-    const query = await Database.from('EmployeeMaster').where('Id', id).andWhere('Is_Delete', 0).select('CurrentEmailId');
+    const query = await Database.from("EmployeeMaster")
+      .where("Id", id)
+      .andWhere("Is_Delete", 0)
+      .select("CurrentEmailId");
     let Email;
     if (query.length > 0) {
       Email = query[0].CurrentEmailId;
@@ -627,8 +669,10 @@ export default class Helper {
 
   public static async getCountryNameById(id) {
 
-    const query = await Database.from('CountryMaster').select('Name').where('Id', id)
-    let Name = '';
+    const query = await Database.from("CountryMaster")
+      .select("Name")
+      .where("Id", id);
+    let Name = "";
     if (query.length) {
       Name = query[0].Name;
       return Name;
@@ -637,9 +681,115 @@ export default class Helper {
     }
   }
 
- 
 
-  
+  public static async getShiftplannershiftIdByEmpID(EmpId: number, date: string) {
+    let selectQuery = await Database.from('ShiftPlanner').select('shiftid').where('empid', EmpId).where('ShiftDate', date)
+    if (selectQuery.length > 0) {
+      return selectQuery[0].shiftid;
+    }
+    else {
+      return 0;
+    }
 
- 
+  }
+
+  public static async getweeklyoffnew(date: string, shiftid: number, empid: number, orgid: number) {
+
+    var dateTime = DateTime.fromISO(date);
+    var dayOfWeek = dateTime.weekday + 1; // Convert Luxon weekday to 1-7 format
+    var weekOfMonth = Math.ceil(dateTime.day / 7);
+    var week;
+    var selectQuery = await Database.from('ShiftMasterChild').select('WeekOff').where('OrganizationId', orgid).where('Day', dayOfWeek).where('ShiftId', shiftid);
+
+    var flag = false;
+    if (selectQuery.length > 0) {
+      const weekOffString = selectQuery[0].WeekOff;
+      week = weekOffString.split(',');  // Split the comma-separated string into an array
+      flag = true;
+    }
+
+    if (flag && week[weekOfMonth - 1] == 1) {
+      return 'WeekOff';
+    } else {
+      return 'noWeekOff';
+    }
+  }
+
+
+  static async getAreaInfo(Id) {
+    const query = await Database.from("Geo_Settings")
+      .select("Lat_Long", "Radius")
+      .where("Id", Id)
+      .where("Lat_Long", "!=", "")
+      .limit(1)
+      .first();
+    if (query) {
+      const arr: any = {};
+      const arr1 = query.Lat_Long.split(",");
+      arr.lat = arr1[0] ? parseFloat(arr1[0]) : 0.0;
+      arr.long = arr1[1] ? parseFloat(arr1[1]) : 0.0;
+      arr.radius = query.Radius;
+      return arr;
+    }
+    return 0;
+  }
+
+  public static async getSettingByOrgId(id) {
+    const query = await Database.from("Att_OrgSetting")
+      .select("outside_geofence_setting")
+      .where("OrganizationId", id);
+    let sts = "";
+    if (query.length) {
+      sts = query[0].outside_geofence_setting;
+      return sts;
+    } else {
+      return sts;
+    }
+  }
+
+  public static calculateDistance(lat1, lon1, lat2, lon2, unit = 'K') {
+    const theta = lon1 - lon2;
+    let dist = Math.sin(this.deg2rad(lat1)) * Math.sin(this.deg2rad(lat2)) + Math.cos(this.deg2rad(lat1)) * Math.cos(this.deg2rad(lat2)) * Math.cos(this.deg2rad(theta));
+    dist = Math.acos(dist);
+    dist = this.rad2deg(dist);
+    let miles = dist * 60 * 1.1515;
+
+    unit = unit.toUpperCase();
+
+    if (unit === 'K') {
+      return miles * 1.609344;
+    } else if (unit === 'N') {
+      return miles * 0.8684;
+    } else {
+      return miles;
+    }
+  }
+
+  public static deg2rad(deg) {
+    return deg * (Math.PI / 180);
+  }
+
+  public static rad2deg(rad) {
+    return rad * (180 / Math.PI);
+  }
+
+  public static async getAreaIdByUser(id) {
+    const query = await Database.from("EmployeeMaster")
+      .select("area_assigned")
+      .where("Id", id);
+    let sts = "";
+    if (query.length) {
+      sts = query[0].area_assigned;
+      return sts;
+    } else {
+      return sts;
+    }
+  }
+
+  public static async time_to_decimal(time: string) {
+    const timeArr = time.split(':').map(Number);
+    let decTime = timeArr[0] * 60 + timeArr[1] + timeArr[2] / 60;  //converting time in minutes
+    return decTime
+  }
+
 }

@@ -20,7 +20,7 @@ export default class GetplannerWiseSummary {
     var ShiftId;
 
     var AttendanceDate = currentDate.toFormat("yyyy-MM-dd");
-    const fetchdatafromTimeOFFandAttendanceMaster = await Database.from(
+    var fetchdatafromTimeOFFandAttendanceMaster:any = await Database.from(
       "Timeoff as Toff"
     )
       .innerJoin(
@@ -44,13 +44,13 @@ export default class GetplannerWiseSummary {
         "AM.EmployeeId as AMEID",
         Database.raw(
           `(SELECT SEC_TO_TIME(sum(time_to_sec(TIMEDIFF(Timeoff_end, Timeoff_start)))) FROM Timeoff WHERE 
-                Toff.EmployeeId = ${a.userid} AND Toff.ApprovalSts != 2) AS timeoffhours`
+          Toff.TimeofDate = AM.AttendanceDate AND Toff.EmployeeId = ${a.userid} AND Toff.ApprovalSts = 2) AS timeoffhours`
         ),
         "AM.ShiftId",
         "AM.TotalLoggedHours AS thours",
         Database.raw(
           `(SELECT SEC_TO_TIME(sum(time_to_sec(TIMEDIFF(TimeTo, TimeFrom)))) FROM Timeoff WHERE 
-                Toff.EmployeeId = ${a.userid} AND Toff.ApprovalSts != 2) AS bhour`
+                Toff.EmployeeId = ${a.userid} AND  Toff.TimeofDate = AM.AttendanceDate AND Toff.ApprovalSts = 2) AS bhour`
         ),
         Database.raw("SUBSTRING_INDEX(EntryImage, '.com/', -1) AS EntryImage"),
         Database.raw("SUBSTRING_INDEX(ExitImage, '.com/', -1) AS ExitImage"),
@@ -61,18 +61,20 @@ export default class GetplannerWiseSummary {
         "latit_out",
         "longi_out",
         "multitime_sts"
-      )
+      ).where('AM.EmployeeId',a.userid)
+      .andWhereIn("AM.AttendanceStatus", [1,3,5,4,8,10])
       .andWhere("AM.AttendanceDate", AttendanceDate)
-      .andWhereIn("AM.AttendanceStatus", [1, 2, 3]).limit(2)
+      
 
     const result = fetchdatafromTimeOFFandAttendanceMaster;
+   
     let res: any[] = [];
 
     await Promise.all(
       result.map(async (val) => {
         let data: any = {};
 
-        data["AttendanceStatus"]= val.AttendanceStatus;
+        data["AttendanceStatus"] = val.AttendanceStatus;
 
         data["TimeIn"] = val.TimeIn;
         data["TimeOut"] = val.TimeOut;
@@ -294,14 +296,16 @@ export default class GetplannerWiseSummary {
         if (data["timeoutplatform"] == "") {
           data["plateform"] = data["timeoutplatform"];
         }
-        data["AttendanceDate"] = val.AttendanceDate;
+        let date = new Date(val.AttendanceDate);
+        data["AttendanceDate"] = moment(date).format("YYYY/MM/DD");
         data["AttendanceMasterId"] = val.Id;
         data["AttendanceStatus"] = val.AttendanceStatus;
         data["MultipletimeStatus"] = val.multitime_sts;
         if (val.multitime_sts == 1 && shiftType != 3) {
           data["shifttype"] = 1;
         }
-        data['getInterimAttAvailableSts']  = await Helper.getInterimAttAvailableSt(val.Id)
+        data["getInterimAttAvailableSts"] =
+          await Helper.getInterimAttAvailableSt(val.Id);
         res.push(data);
       })
     );
