@@ -10,4 +10,4 @@ Route.get("/getDeptEmp", "DepartmentsController.getDeptEmp").middleware('throttl
 
 
 Route.get('getEmpdataDepartmentWiseCount', "DepartmentsController.getEmpdataDepartmentWiseCount").middleware('throttle:global')
-
+Route.delete("deleteInActiveDepartment","DepartmentsController.deleteInActiveDepartment");

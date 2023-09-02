@@ -31,8 +31,8 @@ export default class Helper {
 
   public static async getTimeZone(orgid: any) {
     let TimeZone = "Asia/kolkata";
-    let Name = '' ;
-    const query1:any = await Database.query()
+    let Name = "";
+    const query1: any = await Database.query()
       .from("ZoneMaster")
       .select("Name")
       .where(
@@ -40,7 +40,7 @@ export default class Helper {
         Database.raw(
           `(select TimeZone from Organization where id =${orgid}  LIMIT 1)`
         )
-      )
+      );
     if (query1.length > 0) {
       return query1[0].Name;
     } else {
@@ -67,7 +67,11 @@ export default class Helper {
     let FirstName = "";
     const query2: any = await Database.query()
       .from("EmployeeMaster as E")
-      .select(Database.raw(`IF(E.lastname != '', CONCAT(E.FirstName, ' ', E.lastname), E.FirstName) as Name`))
+      .select(
+        Database.raw(
+          `IF(E.lastname != '', CONCAT(E.FirstName, ' ', E.lastname), E.FirstName) as Name`
+        )
+      )
       .where("Id", empid);
     if (query2.length > 0) {
       return query2[0].Name;
@@ -495,11 +499,14 @@ export default class Helper {
   }
 
   public static async getShiftByEmpID(Id: any) {
-    const query: any = await Database.query().from('ShiftMaster').select('Name').where('id', Id);
+    const query: any = await Database.query()
+      .from("ShiftMaster")
+      .select("Name")
+      .where("id", Id);
     query.forEach((row: any) => {
       const Name = row.Name;
       return Name;
-    })
+    });
   }
   public static async myUrlEncode(country_code) {
     const entities = [
@@ -548,7 +555,11 @@ export default class Helper {
 
   public static async getDesignationId(name, orgid) {
     let desi;
-    let designationdata = await Database.query().from('DesignationMaster').select('*').where('Name', name).andWhere('OrganizationId', orgid);
+    let designationdata = await Database.query()
+      .from("DesignationMaster")
+      .select("*")
+      .where("Name", name)
+      .andWhere("OrganizationId", orgid);
     if (designationdata.length > 0) {
       desi = designationdata[0].Id;
       return desi;
@@ -558,7 +569,10 @@ export default class Helper {
   }
 
   public static async getFlexiShift(id) {
-    let query = await Database.query().from('ShiftMaster').select('HoursPerDay').where('Id', id);
+    let query = await Database.query()
+      .from("ShiftMaster")
+      .select("HoursPerDay")
+      .where("Id", id);
     let HoursPerDay;
 
     if (query.length > 0) {
@@ -570,57 +584,64 @@ export default class Helper {
   }
 
   public static async getShiftTimes(id) {
-
-    let query = await Database.query().from('ShiftMaster').select('TimeIn', 'TimeOut', 'HoursPerDay').where('Id', id)
+    let query = await Database.query()
+      .from("ShiftMaster")
+      .select("TimeIn", "TimeOut", "HoursPerDay")
+      .where("Id", id);
 
     if (query.length > 0) {
-      if (query[0].TimeIn == '00:00:00' || query[0].TimeIn == "") {
+      if (query[0].TimeIn == "00:00:00" || query[0].TimeIn == "") {
         return query[0].HoursPerDay;
       } else {
         return query[0].TimeIn + "-" + query[0].TimeOut;
       }
     }
-
   }
 
-
-
   public static async getOrgName(id: number) {
-    let Name = ''
-    const queryResult = await Database.from("Organization").where("Id", id).select("Name")
+    let Name = "";
+    const queryResult = await Database.from("Organization")
+      .where("Id", id)
+      .select("Name");
     if (queryResult.length > 0) {
       Name = queryResult[0].Name;
-      return Name
+      return Name;
     } else {
-      return Name
+      return Name;
     }
   }
 
   public static async getAdminEmail(id) {
     let Email;
-    const query = await Database.from('Organization').where("Id", id).select('Email');
+    const query = await Database.from("Organization")
+      .where("Id", id)
+      .select("Email");
     if (query.length > 0) {
       Email = query[0].Email;
       return Email;
     } else {
-      return Email = '';
+      return (Email = "");
     }
   }
 
   public static async getAdminNamebyOrgId(orgid) {
     let Name;
-    const query = await Database.from('admin_login').where('OrganizationId', orgid).select('name')
+    const query = await Database.from("admin_login")
+      .where("OrganizationId", orgid)
+      .select("name");
     if (query.length > 0) {
       Name = query[0].name;
       return Name;
     } else {
-      return Name
+      return Name;
     }
   }
 
   public static async getEmpEmail(id) {
-
-    const query = await Database.from('EmployeeMaster').where('Id', id).andWhere('Is_Delete', 0).select('CurrentEmailId');
+    const query = await Database.from("EmployeeMaster")
+      .where("Id", id)
+      .andWhere("Is_Delete", 0)
+      .select("CurrentEmailId");
     let Email;
     if (query.length > 0) {
       Email = query[0].CurrentEmailId;
@@ -631,9 +652,10 @@ export default class Helper {
   }
 
   public static async getCountryNameById(id) {
-
-    const query = await Database.from('CountryMaster').select('Name').where('Id', id)
-    let Name = '';
+    const query = await Database.from("CountryMaster")
+      .select("Name")
+      .where("Id", id);
+    let Name = "";
     if (query.length) {
       Name = query[0].Name;
       return Name;
@@ -642,7 +664,16 @@ export default class Helper {
     }
   }
 
-  
+  public static async getDeptName(deptId, orgId) {
+    const query = await Database.from("DepartmentMaster")
+      .select("name")
+      .where("id", deptId)
+      .where("OrganizationId", orgId)
+      .first();
 
- 
+    if (query) {
+      return query.name;
+    }
+    return null; // Return null or handle the case when no result is found
+  }
 }
