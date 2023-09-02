@@ -22,7 +22,6 @@ import "../app/Routes/EmployeeRoute";
 import "../app/Routes/SignInRoute";
 import "../app/Routes/DesignationRoute";
 import "../app/Routes/GeofenceRoute";
-import "../app/Routes/GeofenceRoute";
 import "../app/Routes/UserSettingRoute";
 import "../app/Routes/DepartmentRoute";
 import "../app/Routes/GetTokenRoute";
@@ -57,9 +56,12 @@ import "../app/Routes/TempAssignClientRoute"
 import "../app/Routes/Report/GetAttendanceEmployeewise";
 import Redis from '@ioc:Adonis/Addons/Redis';
 import "../app/Routes/getUserMobileRoute";
+
+import "../app/Routes/getProfileImageRoute"
 import "../app/Routes/GetWeekendsRoute";
 import "../app/Routes/GetunderovertimeRoute";
 import "../app/Routes/GeofenceRoute";
+
 
 // Route.get('/', async () => {
 //     return "Working fine!"

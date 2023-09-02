@@ -19,3 +19,4 @@ Route.get("/getTeamPunchInfo","UserSettingsController.getTeamPunchInfo")
 Route.get('/GetQrKioskStatus', 'UserSettingsController.getQrKioskStatus')
 
 Route.get("/getReferDiscountRequest","UserSettingsController.getReferDiscountRequest");
+Route.delete("/DeleteAccount","UserSettingsController.DeleteAccount");

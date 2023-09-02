@@ -1,11 +1,10 @@
 import Database from "@ioc:Adonis/Lucid/Database";
-import helper from '../Helper/Helper'
+import helper from "../Helper/Helper";
 import Helper from "../Helper/Helper";
 import { DateTime } from "luxon";
 import moment from "moment-timezone";
 import databaseConfig from "Config/database";
-
-
+import { runFailedTests } from "@japa/preset-adonis";
 
 export default class Usersettingservice {
   constructor() {}
@@ -907,19 +906,97 @@ export default class Usersettingservice {
 
   static async getReferDiscountRequestService() {
     var result: {} = {};
-    var getReferDiscountQuery =await Database.from("ReferDiscount").select("*")
+    var getReferDiscountQuery = await Database.from("ReferDiscount").select(
+      "*"
+    );
 
-    if (getReferDiscountQuery) {      
+    if (getReferDiscountQuery) {
       getReferDiscountQuery.forEach(function (row) {
-         result["Id"] = row.Id;
-         result["tittle"] = row.tittle;
-         result["discount"] = row.discount;
-       });
+        result["Id"] = row.Id;
+        result["tittle"] = row.tittle;
+        result["discount"] = row.discount;
+      });
     } else {
       result["status"] = 0;
     }
-      return result
+    return result;
   }
 
-  
+  static async DeleteAccount(getparam) {
+    const text_area = getparam.reason;
+    const OrganizationId = getparam.refid;
+    const UserId = getparam.uid;
+    const currentdate = getparam.date;
+
+    var result = {};
+    var Mail = await Database.from("All_mailers")
+      .select("Subject", "Body")
+      .where("Id", 32);
+    var Subject;
+    var mailbody;
+
+    if (Mail) {
+      Subject = Mail[0].Subject;
+      mailbody = Mail[0].Body;
+    }
+    var emp = await Database.from("EmployeeMaster as E")
+      .innerJoin("Organization as O", "E.OrganizationId", "O.Id")
+      .select(
+        Database.raw("CONCAT(E.FirstName,' ',E.LastName) as Name"),
+        "E.PersonalNo",
+        "O.Name as Orgname",
+        "E.CompanyEmail as email",
+        "E.CreatedDate as doc",
+        "E.CurrentCountry as countrycode"
+      )
+      .where("E.Id", UserId)
+      .andWhere("O.Id", OrganizationId);
+    var empmail;
+    var phone;
+    var CreatedDate;
+    var username;
+    var orgname;
+    var country;
+    if (emp) {
+      orgname = emp[0].Orgname;
+      username = emp[0].Name;
+      empmail = Helper.decode5t(emp[0].email);
+      phone = Helper.decode5t(emp[0].PersonalNo);
+      CreatedDate = emp[0].doc;
+      CreatedDate = moment(CreatedDate).format("YYYY-MM-DD");
+      if (CreatedDate == "0000-00-00") {
+        CreatedDate = "N/A";
+      }
+      country = Helper.getCountryNameById(emp[0].countrycode);
+    }
+    var mlbody1 = mailbody.replace("{Company_Name}", orgname);
+    var mlbody2 = mlbody1.replace("{19/08/2022}", currentdate);
+    var mlbody3 = mlbody2.replace("{Contact_Person}", username);
+    var mlbody4 = mlbody3.replace("{adminmail}", empmail);
+    var mlbody5 = mlbody4.replace("{Created_date}", CreatedDate);
+    var mlbody6 = mlbody5.replace("{Country_name}", country);
+    var mlbody7 = mlbody6.replace("{12345}", phone);
+
+    var messages = mlbody7;
+
+    var headers = "MIME-Version: 1.0" + "\r\n";
+    headers = headers + "Content-type:text/html;charset=UTF-8" + "\r\n";
+    headers = headers + "From: <noreply@ubiattendance.com>" + "\r\n";
+    
+    // var respons = sendEmail_new(
+    //   "attendancesupport@ubitechsolutions.com",
+    //   Subject,
+    //   messages,
+    //   headers
+    // );
+
+    // ////// UNCOMPLETE waiting for sendEmail_new() /////
+
+    // if (respons) {
+    //   result["status"] = "true";
+    // } else {
+    //   result["status"] = "false";
+    // }
+    // return result;
+  }
 }
