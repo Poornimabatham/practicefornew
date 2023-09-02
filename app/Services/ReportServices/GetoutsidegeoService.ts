@@ -1,6 +1,5 @@
 import Database from "@ioc:Adonis/Lucid/Database";
 import Helper from "App/Helper/Helper";
-import moment from "moment-timezone";
 import { DateTime } from "luxon";
 export default class GetoutsidegeoService {
   public static async getOutsidegeoService(data: any) {
@@ -87,8 +86,8 @@ export default class GetoutsidegeoService {
       .whereRaw(cond)
       .orderBy("E.FirstName", "asc")
       .orderBy("A.AttendanceDate", "desc")
-      .limit(10)
-      .offset(0);
+      .limit(perPage)
+      .offset(begin);
     let res: any[] = [];
 
     let res1: any[] = [];
@@ -399,26 +398,21 @@ export default class GetoutsidegeoService {
         res1.push(data);
 
         i++;
-          return res1;
+          //return res1;
       });
-   
-    const results = await Promise.all(promises);
-      results.forEach((result) => {
-        console.log(result);
-      });
-   // console.log(res1);
-    for (const index in results) {
+      //return res1;
+    for (const index in res1) {
       if (
         (res1["instatus"] === `Within Geofence ${res1["ti"]}` &&
           res1["to"] === "00:00") ||
         (res1["instatus"] === `Within Geofence ${res1["ti"]}` &&
           res1["outstatus"] === `Within Geofence ${res1["to"]}`)
       ) {
-        delete results[index];
+        delete res1[index];
       }
     }
 
-    return results;
+    return res1;
   }
 
   public static async distance(
