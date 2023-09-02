@@ -82,6 +82,18 @@ export default class ShiftValidator {
     }),
   };
 
+  static addMultiShift={
+    schema :schema.create({
+      refno : schema.number(),
+      date: schema.date.optional({ format: 'yyyy-MM-dd HH:mm:ss' }),
+      status : schema.number(),
+      shiftid : schema.number(),
+      empid : schema.number(),
+      WeekoffStatus : schema.number(),
+      assignedbyid : schema.number()
+    })
+  }
+
   /*
    * Define schema to validate the "shape", "type", "formatting" and "integrity" of data.
    *

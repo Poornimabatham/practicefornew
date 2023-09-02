@@ -1,6 +1,5 @@
 import Database from "@ioc:Adonis/Lucid/Database";
 import Helper from "App/Helper/Helper";
-import moment from "moment-timezone";
 import { DateTime } from "luxon";
 export default class GetoutsidegeoService {
   public static async getOutsidegeoService(data: any) {
