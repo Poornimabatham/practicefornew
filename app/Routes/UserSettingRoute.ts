@@ -1,5 +1,4 @@
 import Route from '@ioc:Adonis/Core/Route'
-import UserSettingsController from 'App/Controllers/Http/UserSettingsController';
 
 Route.get('changepassword','UserSettingsController.UpdatePass')
 Route.get("/Updateprofile",'UserSettingsController.UpdateProfile').middleware('throttle:global')

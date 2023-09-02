@@ -266,9 +266,12 @@ export default class DepartmentService {
     let successMsg = "";
     let weekofflg = false;
     let halfflg = false;
+    let week;
+    let sts = 1;
+    let rtimein ;
+    let rtimeout;
+    let dir;
     
-    
-
     if(datafor == "Yesterday"){
       date = predate;
       res['data_date'] = predate;
@@ -308,20 +311,87 @@ export default class DepartmentService {
       
       status = true;
       successMsg = count +" record found";
-      querydata.forEach(element => {
+      querydata.forEach(async element => {
 
         res['OutPushNotificationStatus'] = element.OutPushNotificationStatus;
         res['InPushNotificationStatus'] = element.InPushNotificationStatus;
         res['empid'] = element.Id;
         let dayOfMonth = defaultZone.day;    
         let weekNumber = Math.ceil(dayOfMonth / 7);
-        
-      
+        let dayofdate = defaultZone.weekday
+        let query = await Database.query().from('ShiftMasterChild').select('WeekOff').where('ShiftId',(Database.raw(`select shift from EmployeeMaster where Id="${empid}"`))).andWhere('Day',dayofdate);
+  
+        week = query[0].WeekOff;
+        let weekarr = week.split('');
+        if(query.length > 0)
+        {
+           if(weekarr[weekNumber-1] == 1){
+               weekofflg = true;
+           }else if(weekarr[weekNumber-1] == 1){
+               halfflg = true;
+           }
+        }
 
- 
-        
+        if(holidaycount >0){
+           sts = 5;
+        }
+        if(halfflg){
+           sts = 4;
+        }
+        if(weekofflg){
+          sts = 3;
+        }
 
+        let querdata = await Database.query().select('*').from('AttendanceMaster').where('EmployeeId',empid).andWhere('AttendanceDate',date).andWhere(Database.raw('TimeOut="00:00:00" or TimeIn=TimeOut'));
+        res['rtimein'] = "00:00:00";
+        res['rtimeout'] = "00:00:00";
+        if(querdata.length >0){
+           rtimein = querdata[0].TimeIn;
+           rtimeout = querdata[0].TimeOut;
+           res['Attid'] = querdata[0].Id;
+           res['device'] = querdata[0].device;
+        }
+        if(rtimein != ''){
+           res['rtimein'] = querydata[0].TimeIn;
+        }
+        if(rtimeout != ''){
+           res['rtimeout'] = querydata[0].TimeOut;
+        }
 
+        res['id'] = element.Id;
+        res['empcode'] = element.EmployeeCode;
+        res['name'] = element.FirstName + element.LastName;
+        res['shifttimein'] = "00:00";
+        res['shifttimeout'] = "00:00";
+        res['overtime'] = "00:00";
+        res['attsts'] = sts;
+        res['todate'] = date;
+        res['shift'] = element.Shift;
+        res['shiftname'] = await Helper.getName('ShiftMaster','Name','Id',element.Shift)
+        res['shifttype'] = await Helper.getName('ShiftMaster','shifttype','Id',element.Shift);
+        res['OutPushNotificationStatus'] = element.OutPushNotificationStatus;
+        res['InPushNotificationStatus'] = element.InPushNotificationStatus;
+
+        if(element.ImageName != ''){
+           dir = orgId + element.ImageName;     
+           res['img'] = 'https://ubitech.ubihrm.com/public/uploads/' + dir;
+        }else{
+           res['img'] = 'http://ubiattendance.ubihrm.com/assets/img/avatar.png';
+        }
+
+        let querydata2 = await Database.query().from('ShiftMaster').select('TimeIn','TimeOut','TimeInBreak','TimeOutBreak',Database.raw(`TIME_FORMAT(TIMEDIFF( TIME_FORMAT(TIMEDIFF(TimeOut, TimeIn),'%H:%i'),TIME_FORMAT(TIMEDIFF(TimeOutBreak, TimeInBreak),'%H:%i')),'%H:%i') as totaltime`)).where('Id',element.shift);
+        if(querydata2.length > 0){
+            res['timein'] = querydata2[0].TimeIn;
+            res['shifttimein'] = querydata2[0].TimeIn;
+            if(halfflg){
+              res['timeout'] = querydata2[0].TimeInBreak;
+              res['shifttimeout'] = querydata2[0].TimeInBreak;
+            }else{
+               res['timeout'] = querydata2[0].TimeOut;
+               res['shifttimeout']= querydata2[0].TimeOut;
+            }
+            res['timein'] ; 
+        }
         
       });
    }
