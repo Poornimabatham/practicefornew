@@ -563,7 +563,7 @@ export default class ShiftsService {
 
       }
     }
-
+  }
   static async  ShiftCheckData(data){
     var Orgid = data.orgid;
     var shiftId = data.id;
