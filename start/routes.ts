@@ -22,7 +22,6 @@ import "../app/Routes/EmployeeRoute";
 import "../app/Routes/SignInRoute";
 import "../app/Routes/DesignationRoute";
 import "../app/Routes/GeofenceRoute";
-import "../app/Routes/GeofenceRoute";
 import "../app/Routes/UserSettingRoute";
 import "../app/Routes/DepartmentRoute";
 import "../app/Routes/GetTokenRoute";
@@ -37,7 +36,6 @@ import "../app/Routes/getOutsidegeoRoute";
 import "../app/Routes/AttendanceRoute";
 import "../app/Routes/ClientsRoute";
 import "../app/Routes/getInfoRoute";
-
 import "../app/Routes/getEmpdataDepartmentWiseNewRoute";
 import "../app/Routes/getCDateAttnDeptWiseRoutes";
 import "../app/Routes/UsershiftplannerRoute";
@@ -47,16 +45,23 @@ import "../app/Routes/MyAddonUserInfoRoute";
 import "../app/Routes/StoreRatingRoute";
 import "../app/Routes/GetLastTimeOutRoute";
 import "../app/Routes/changePasswordOTPRoute";
-import "../app/Routes/SelectCountryCodeRoute"
+import "../app/Routes/SelectCountryCodeRoute";
 import "../app/Routes/ResetPasswordLinkRoute"
 import "../app/Routes/CheckUserEmailRoute"
+import "../app/Routes/getAppDetailRoutes"
 import "../app/Routes/getListofLeaveRoute"
 import "../app/Routes/getInterimAttendancesRoute"
 import "../app/Routes/GetappVersionRoute"
+import "../app/Routes/TempAssignClientRoute"
 import "../app/Routes/Report/GetAttendanceEmployeewise";
-
 import Redis from '@ioc:Adonis/Addons/Redis';
 import "../app/Routes/getUserMobileRoute";
+
+import "../app/Routes/getProfileImageRoute"
+import "../app/Routes/GetWeekendsRoute";
+import "../app/Routes/GetunderovertimeRoute";
+import "../app/Routes/GeofenceRoute";
+
 
 // Route.get('/', async () => {
 //     return "Working fine!"

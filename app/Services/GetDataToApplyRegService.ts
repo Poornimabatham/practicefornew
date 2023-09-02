@@ -1,58 +1,66 @@
 import moment from "moment";
 import Database from "@ioc:Adonis/Lucid/Database";
+
 const { DateTime } = require("luxon");
 
-const format = require("date-fns/format");
-const parseISO = require("date-fns/parseISO");
 export default class GetDataToRegService {
   public static async FetchingdatatoReg(data) {
     var count = 0;
     var status = false;
 
-    const currentMonth = moment().endOf("month").format("YYYY-MM-DD");
+    var currentMonth = data.month;
 
-    if (data.month != "null" || data.month != undefined) {
-      const currentMonth = moment(data.month).format("YYYY-MM-DD");
+    if (data.month != undefined) {
+      var month1 = new Date(data.month);
+      currentMonth = moment(month1).format("yyyy-MM-DD");
+    } else {
+      currentMonth = moment().format("yyyy-MM-DD");
     }
 
-    var MinTimes = "";
-    var MaxDays = 0;
     var Regularizecount = 0;
-    var regularizationsettingsts = 0;
     // $attendancearr=array();
-    const selectRegularizationSettings = await Database.from(
+    const selectRegularizationSettings:any = await Database.from(
       "RegularizationSettings"
     )
-      .select("MaxDays", "MinTimes")
-      .where("OrganizationId", data.orgid)
-      .where("RegularizationSts", 1)
-      .first();
-    const row = selectRegularizationSettings;
-    count = row ? 1 : 0;
-
-    if (count >= 1) {
-      regularizationsettingsts = 1;
-      if (row) {
-        MaxDays = row.MaxDays;
-        MinTimes = row.MinTimes;
-      }
-    }
+    .select('MaxDays', 'MinTimes')
+    .where('OrganizationId', data.orgid)
+    .where('RegularizationSts', 1);
+  
+  const results = await selectRegularizationSettings;
+  
+  const count1 = results.length;
+  
+  let regularizationsettingsts = 0;
+  let MaxDays = 0;
+  let MinTimes = 0;
+  
+  if (count1 >= 1) {
+    regularizationsettingsts = 1;
+    MaxDays = results[0].MaxDays;
+    MinTimes = results[0].MinTimes;
+  }
 
     const regularizeCount: any = await Database.from("AttendanceMaster")
-      .where("OrganizationId", 1074)
-      .whereNot("Is_Delete", 1)
-      .where("EmployeeId", 7294)
+      .where("OrganizationId", data.orgid)
+      .andWhereNot("Is_Delete", 1)
+      .andWhere("EmployeeId", data.uid)
       .whereRaw(`MONTH(AttendanceDate) = MONTH('${currentMonth}')`)
-      .whereNot("AttendanceDate", Database.raw("CURDATE()"))
-      .whereNotIn("RegularizeSts", [0, 1])
-      .count("RegularizeSts as Regularizecount");
+      .andWhere("AttendanceDate", Database.raw("CURDATE()"))
+      .andWhere(
+        Database.raw(` ("RegularizeSts" = 0 OR "RegularizeSts" = 1)
+      `)
+      )
+      .orderBy(" AttendanceDate", "desc")
+    .count("RegularizeSts as Regularizecount");
 
     const affected_rows = regularizeCount.length;
+
     if (affected_rows) {
       Regularizecount = regularizeCount[0].Regularizecount;
     }
 
-    const query = Database.from("AttendanceMaster")
+    // var cd =   moment().format("yyyy-MM-DD");
+    const selectAttendancemasterList = Database.from("AttendanceMaster")
       .select(
         "Id",
         "AttendanceStatus",
@@ -61,66 +69,56 @@ export default class GetDataToRegService {
         "TimeIn",
         "TimeOut"
       )
-      .where("OrganizationId", 10)
-      .whereNot("Is_Delete", 1)
-      .whereIn("device", ["Auto Time Out", "Absentee Cron"])
-      .orWhere((query) => {
-        query
-          .where("device", "Cron")
-          .where("AttendanceStatus", 8)
-          .where("TimeIn", "00:00:00")
-          .where("TimeOut", "00:00:00");
-      })
-      .orWhere((query) => {
-        query.where("device", "Cron").whereIn("AttendanceStatus", [4, 10]);
-      })
-      .andWhere((query) => {
-        query
-          .where("TimeIn", Database.raw("TimeOut"))
-          .orWhere("TimeOut", "00:00:00");
-      })
+      .where("OrganizationId", data.orgid)
+      .andWhereNot("Is_Delete", 1)
+      .andWhere(
+        Database.raw(`((device ='Auto Time Out'  and (TimeIn=TimeOut or TimeOut='00:00:00')) or 
+      (device ='Absentee Cron' and  TimeIn='00:00:00' and TimeOut='00:00:00') or 
+      (device ='Cron' and  TimeIn='00:00:00' and TimeOut='00:00:00' and AttendanceStatus=8) or 
+      (device ='Cron' and  (TimeIn=TimeOut or TimeOut='00:00:00') and AttendanceStatus in (4,10))) `)
+      )
       .andWhere("EmployeeId", data.uid)
       .whereRaw(`MONTH(AttendanceDate) = MONTH('${currentMonth}')`)
-      .whereRaw(`YEAR(AttendanceDate) = YEAR('${currentMonth}')`)
-      .whereNot("AttendanceDate", Database.raw("CURDATE()"))
-      .whereIn("RegularizeSts", [0, 1])
-      .orderBy("AttendanceDate", "desc")
-      .limit(2);
+      .andWhereRaw(`YEAR(AttendanceDate) = YEAR('${currentMonth}')`)
+      .andWhereNot("AttendanceDate", Database.raw("CURDATE()"))
+      .andWhere(
+        Database.raw(` ("RegularizeSts" = 0 OR "RegularizeSts" = 1)
+      `)
+      )
+      .orderBy("AttendanceDate", "desc");
+    const attendanceData = await selectAttendancemasterList;
 
-    const attendanceData = await query;
-    console.log(attendanceData);
     var attendancearr: any = [];
     attendanceData.forEach((row) => {
       const res1 = {};
       res1["id"] = row.Id;
       res1["sts"] = row.AttendanceStatus;
+      let date = new Date(row.AttendanceDate);
+      res1["AttendanceDate"] = moment(date).format("YYYY/MM/DD");
       res1["device"] = row.device;
-      const timeIn =
-        row.TimeIn === "00:00:00"
+      var timeIn =
+        row.TimeIn == "00:00:00"
           ? "00:00"
-          : new Date(`1970-01-01T${row.TimeIn}Z`).toLocaleTimeString("en-US", {
-              hour: "2-digit",
-              minute: "2-digit",
-              hour12: false,
-            });
+          : DateTime.fromSQL(row.TimeIn).toFormat("HH:mm");
+
       res1["timeIn"] = timeIn;
-      const timeOut =
-        row.TimeOut === "00:00:00"
+      var timeOut =
+        row.TimeOut == "00:00:00"
           ? "00:00"
-          : new Date(`1970-01-01T${row.TimeOut}Z`).toISOString().substr(11, 5);
+          : DateTime.fromSQL(row.TimeOut).toFormat("HH:mm");
       res1["timeOut"] = timeOut;
       var date1: any = new Date(row.AttendanceDate);
-      res1["date1"] = date1;
+      // res1["date1"] = moment(date1).format("YYYY/MM/DD");
       var date2: any = new Date();
-      res1["date2"] = date2;
+      // res1["date2"] = moment(date2).format("YYYY/MM/DD")
       const diffInMilliseconds: number = date2 - date1;
 
       // Calculate the difference in days
       const diffInDays = Math.floor(diffInMilliseconds / (1000 * 60 * 60 * 24));
 
-      res1["diffInDays"] = diffInDays;
+      // res1["diffInDays"] = diffInDays;
       if (MaxDays != 0) {
-        if (MaxDays != 0) {
+        if (diffInDays > MaxDays) {
           res1["resultsts"] = 0;
         } else {
           res1["resultsts"] = 1;
@@ -129,7 +127,8 @@ export default class GetDataToRegService {
         res1["resultsts"] = 1;
       }
       if (MinTimes != undefined) {
-        if (Regularizecount < parseInt(MinTimes)) {
+
+        if (Regularizecount < MinTimes) {
           res1["Regularizessts"] = 1;
         } else {
           res1["Regularizessts"] = 0;
@@ -144,10 +143,13 @@ export default class GetDataToRegService {
     var result: any = {};
     status = true;
 
-    const monthDate = parseISO(currentMonth);
+    // return currentMonth
+    const parsedDate = DateTime.fromISO(currentMonth);
+    const formattedDate = parsedDate.toFormat("MMMM yyyy");
 
-    const formattedMonth = format(monthDate, "MMMM yyyy");
-    result["month"] = formattedMonth;
+    result["month"] = formattedDate;
+
+    result["data"] = attendancearr;
     result["Regularizecountdone"] = Regularizecount;
     result["TotalRegularizecount"] = MinTimes;
     result["regularizationsettingsts"] = regularizationsettingsts;
@@ -182,7 +184,7 @@ export default class GetDataToRegService {
       .whereRaw("AttendanceDate != CURDATE()")
       .andWhereNot("RegularizeSts", 0)
       .andWhereNot("RegularizeSts", 1)
-      .orderBy("AttendanceDate", "desc").debug(true).toSQL().toNative()
+      .orderBy("AttendanceDate", "desc");
     const row1 = AttendanceMaster[0];
     const data2 = {
       MinTimes: row1 ? parseInt(row1.MinTimes) : 0,

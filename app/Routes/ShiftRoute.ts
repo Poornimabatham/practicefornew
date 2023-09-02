@@ -15,3 +15,6 @@ Route.put('/saveMultiShifts',"ShiftsController.saveMultiShifts")
 ////////ashish///////////
 Route.put('/SaveMultiShiftsByDepartment',"ShiftsController.AssignShiftsByDepartment")
 
+
+Route.get('/shiftcheck',"ShiftsController.shiftcheck")
+

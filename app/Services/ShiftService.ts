@@ -5,7 +5,7 @@ import moment from "moment-timezone";
 import Helper from "../Helper/Helper";
 // import LogicsOnly from "./getAttendances_service";
 import EmployeeMaster from "App/Models/EmployeeMaster";
-import DepartmentService from "./DepartmentService";
+// import DepartmentService from "./DepartmentService";
 import { DateTime } from "luxon";
 export default class ShiftsService {
   constructor() { }
@@ -563,6 +563,30 @@ export default class ShiftsService {
 
       }
     }
+
+  static async  ShiftCheckData(data){
+    var Orgid = data.orgid;
+    var shiftId = data.id;
+    const selectEmployeeList = await Database.from("EmployeeMaster")
+      .select(Database.raw("COUNT(*) as num"))
+      .where("OrganizationId", Orgid)
+      .andWhere("Shift", shiftId)
+
+    const result = await selectEmployeeList;
+    const selectAttendanceMasterList = await Database.from("AttendanceMaster")
+      .select(Database.raw("COUNT(*) as  nums"))
+      .andWhere("ShiftId", shiftId)
+      .where("OrganizationId", Orgid);
+
+    const result2 = await selectAttendanceMasterList;
+    return {
+      num: result[0].num,
+      attNum: result2[0].nums,
+    };
+
+
+
+
 
 
   }

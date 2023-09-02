@@ -1,5 +1,6 @@
 import Database from "@ioc:Adonis/Lucid/Database";
 import moment from "moment";
+import Helper from "App/Helper/Helper";
 export default class UsershiftplannerService {
   public static async usershiftplanner(getvalue) {
     const userid = getvalue.uid;
@@ -21,7 +22,7 @@ export default class UsershiftplannerService {
         "S.TimeOut",
         "A.disapprove_sts "
       )
-      .where("S.OrganizationId", organizationId)
+      .andWhere("S.OrganizationId", organizationId)
       .where("A.EmployeeId", userid);
 
     const response: any[] = [];
@@ -32,12 +33,12 @@ export default class UsershiftplannerService {
 
       data["AttendanceStatus"] = element.AttendanceStatus;
       data["ShiftType"] = element.shifttype;
-      data["STimeIn"] = element.TimeIn.substr(0, 5);
-      data["STimeOut"] = element.TimeOut.substr(0, 5);
-      data["PunchTimeIn"] = element.PunchTimeIn.substr(0, 5);
-      data["PunchTimeOut"] = element.PunchTimeOut.substr(0, 5);
+      data["TimeIn"] = element.TimeIn;
+      data["TimeOut"] = element.TimeOut;
+      data["PunchTimeIn"] = element.PunchTimeIn;
+      data["PunchTimeOut"] = element.PunchTimeOut;
       data["disapprove"] = element.disapprove_sts;
-      data["Logged"] = element.HoursPerDay.substr(0, 5);
+      data["Logged"] = element.HoursPerDay;
       response.push(data);
     });
     return response;
@@ -54,5 +55,29 @@ export default class UsershiftplannerService {
         DeviceId: Deviceid,
       });
     return updateEmployeeMaster;
+  }
+  public static async getShiftDetailsdata(inputdata) {
+    const userid = inputdata.uid;
+    const refno = inputdata.refno;
+    const attDate = inputdata.attDate;
+    const Date = attDate.toFormat("yyyy-MM-dd");
+
+    const shiftId = await Helper.getassignedShiftTimes(userid, Date);
+    var selectShiftMasterList = await Database.from("ShiftMaster")
+      .select("*")
+      .where("OrganizationId", refno)
+      .andWhere("Id", shiftId);
+      const res:any = [];
+      var result = selectShiftMasterList;
+    result.forEach((row) => {
+      var data = {};
+      data["shiftName"] = row.Name;
+      data["ShiftTimeIn"] = row.TimeIn;
+      data["ShiftTimeOut"] = row.TimeOut;
+      data["shiftType"] = row.shifttype;
+      data["HoursPerDay"] = row.HoursPerDay;
+      res.push(data);
+    });
+    return res;
   }
 }

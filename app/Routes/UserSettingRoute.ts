@@ -1,6 +1,7 @@
 import Route from '@ioc:Adonis/Core/Route'
+import UserSettingsController from 'App/Controllers/Http/UserSettingsController';
 
-
+Route.get('changepassword','UserSettingsController.UpdatePass')
 Route.get("/Updateprofile",'UserSettingsController.UpdateProfile').middleware('throttle:global')
 Route.get("/PunchvisitCsv",'UserSettingsController.getPunchInfoCsv');
 Route.get("/getPunchInfo","UserSettingsController.getPunchInfo");
@@ -14,3 +15,8 @@ Route.get("/Regularizeapprove","UserSettingsController.getRegDetailForApproval")
 Route.get('recoverPinLoginCredential','UserSettingsController.recoverPinLoginCredential')
 Route.put("/UpdateQR",'UserSettingsController.UpdateQrKioskPageReopen')
 Route.post("/demoScheduleRequest","UserSettingsController.demoScheduleRequest")
+Route.get("/getTeamPunchInfo","UserSettingsController.getTeamPunchInfo")
+Route.get('/GetQrKioskStatus', 'UserSettingsController.getQrKioskStatus')
+
+Route.get("/getReferDiscountRequest","UserSettingsController.getReferDiscountRequest");
+Route.delete("/DeleteAccount","UserSettingsController.DeleteAccount");

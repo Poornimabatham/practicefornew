@@ -1,6 +1,6 @@
-import { schema, CustomMessages } from '@ioc:Adonis/Core/Validator'
-import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import BaseValidator from './BaseValidator'
+import { schema, CustomMessages } from "@ioc:Adonis/Core/Validator";
+import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
+import BaseValidator from "./BaseValidator";
 export default class ShiftValidator {
   constructor(protected ctx: HttpContextContract) {
     // super()
@@ -62,11 +62,11 @@ export default class ShiftValidator {
   };
 
   static MultiShift = {
-     schema:schema.create({
-        refno:schema.number(),
-        empid:schema.number()
-     })
-  }
+    schema: schema.create({
+      refno: schema.number(),
+      empid: schema.number(),
+    }),
+  };
   static AssignShiftByDepart = {
     schema: schema.create({
       orgid: schema.number(),
@@ -77,8 +77,8 @@ export default class ShiftValidator {
       WeekoffStatus: schema.number(),
       adminid: schema.number(),
       adminname: schema.string(),
-      departname:schema.string(),
-      shiftname:schema.string()
+      departname: schema.string(),
+      shiftname: schema.string(),
     }),
   };
 
@@ -94,6 +94,12 @@ export default class ShiftValidator {
     })
   }
 
+  static shiftcheck = {
+    schema: schema.create({
+      id: schema.number(),
+      orgid: schema.number(),
+    }),
+  };
   /*
    * Define schema to validate the "shape", "type", "formatting" and "integrity" of data.
    *
