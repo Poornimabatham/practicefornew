@@ -38,117 +38,101 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 exports.__esModule = true;
 var moment_1 = require("moment");
 var Database_1 = require("@ioc:Adonis/Lucid/Database");
+var Helper_1 = require("App/Helper/Helper");
 var DateTime = require("luxon").DateTime;
-var format = require("date-fns/format");
-var parseISO = require("date-fns/parseISO");
 var GetDataToRegService = /** @class */ (function () {
     function GetDataToRegService() {
     }
     GetDataToRegService.FetchingdatatoReg = function (data) {
         return __awaiter(this, void 0, void 0, function () {
-            var count, status, currentMonth, currentMonth_1, MinTimes, MaxDays, Regularizecount, regularizationsettingsts, selectRegularizationSettings, row, regularizeCount, affected_rows, query, attendanceData, attendancearr, result, monthDate, formattedMonth;
+            var count, status, currentMonth, month1, Regularizecount, selectRegularizationSettings, results, count1, regularizationsettingsts, MaxDays, MinTimes, regularizeCount, affected_rows, selectAttendancemasterList, attendanceData, attendancearr, result, parsedDate, formattedDate;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         count = 0;
                         status = false;
-                        currentMonth = moment_1["default"]().endOf("month").format("YYYY-MM-DD");
-                        if (data.month != "null" || data.month != undefined) {
-                            currentMonth_1 = moment_1["default"](data.month).format("YYYY-MM-DD");
+                        currentMonth = data.month;
+                        if (data.month != undefined) {
+                            month1 = new Date(data.month);
+                            currentMonth = moment_1["default"](month1).format("yyyy-MM-DD");
                         }
-                        MinTimes = "";
-                        MaxDays = 0;
+                        else {
+                            currentMonth = moment_1["default"]().format("yyyy-MM-DD");
+                        }
                         Regularizecount = 0;
-                        regularizationsettingsts = 0;
                         return [4 /*yield*/, Database_1["default"].from("RegularizationSettings")
                                 .select("MaxDays", "MinTimes")
                                 .where("OrganizationId", data.orgid)
-                                .where("RegularizationSts", 1)
-                                .first()];
+                                .where("RegularizationSts", 1)];
                     case 1:
                         selectRegularizationSettings = _a.sent();
-                        row = selectRegularizationSettings;
-                        count = row ? 1 : 0;
-                        if (count >= 1) {
+                        return [4 /*yield*/, selectRegularizationSettings];
+                    case 2:
+                        results = _a.sent();
+                        count1 = results.length;
+                        regularizationsettingsts = 0;
+                        MaxDays = 0;
+                        MinTimes = 0;
+                        if (count1 >= 1) {
                             regularizationsettingsts = 1;
-                            if (row) {
-                                MaxDays = row.MaxDays;
-                                MinTimes = row.MinTimes;
-                            }
+                            MaxDays = results[0].MaxDays;
+                            MinTimes = results[0].MinTimes;
                         }
                         return [4 /*yield*/, Database_1["default"].from("AttendanceMaster")
-                                .where("OrganizationId", 1074)
-                                .whereNot("Is_Delete", 1)
-                                .where("EmployeeId", 7294)
-                                .whereRaw("MONTH(AttendanceDate) = MONTH('" + currentMonth + "')")
-                                .whereNot("AttendanceDate", Database_1["default"].raw("CURDATE()"))
-                                .whereNotIn("RegularizeSts", [0, 1])
+                                .where("OrganizationId", data.orgid)
+                                .andWhereNot("Is_Delete", 1)
+                                .andWhere("EmployeeId", data.uid)
+                                .whereRaw("MONTH(AttendanceDate) = MONTH('{currentMonth}')")
+                                .andWhere("AttendanceDate", Database_1["default"].raw("CURDATE()"))
+                                .andWhere(Database_1["default"].raw(" (\"RegularizeSts\" = 0 OR \"RegularizeSts\" = 1)\n      "))
+                                .orderBy(" AttendanceDate", "desc")
                                 .count("RegularizeSts as Regularizecount")];
-                    case 2:
+                    case 3:
                         regularizeCount = _a.sent();
                         affected_rows = regularizeCount.length;
                         if (affected_rows) {
                             Regularizecount = regularizeCount[0].Regularizecount;
                         }
-                        query = Database_1["default"].from("AttendanceMaster")
+                        selectAttendancemasterList = Database_1["default"].from("AttendanceMaster")
                             .select("Id", "AttendanceStatus", "AttendanceDate", "device", "TimeIn", "TimeOut")
-                            .where("OrganizationId", 10)
-                            .whereNot("Is_Delete", 1)
-                            .whereIn("device", ["Auto Time Out", "Absentee Cron"])
-                            .orWhere(function (query) {
-                            query
-                                .where("device", "Cron")
-                                .where("AttendanceStatus", 8)
-                                .where("TimeIn", "00:00:00")
-                                .where("TimeOut", "00:00:00");
-                        })
-                            .orWhere(function (query) {
-                            query.where("device", "Cron").whereIn("AttendanceStatus", [4, 10]);
-                        })
-                            .andWhere(function (query) {
-                            query
-                                .where("TimeIn", Database_1["default"].raw("TimeOut"))
-                                .orWhere("TimeOut", "00:00:00");
-                        })
+                            .where("OrganizationId", data.orgid)
+                            .andWhereNot("Is_Delete", 1)
+                            .andWhere(Database_1["default"].raw("((device ='Auto Time Out'  and (TimeIn=TimeOut or TimeOut='00:00:00')) or \n      (device ='Absentee Cron' and  TimeIn='00:00:00' and TimeOut='00:00:00') or \n      (device ='Cron' and  TimeIn='00:00:00' and TimeOut='00:00:00' and AttendanceStatus=8) or \n      (device ='Cron' and  (TimeIn=TimeOut or TimeOut='00:00:00') and AttendanceStatus in (4,10))) "))
                             .andWhere("EmployeeId", data.uid)
-                            .whereRaw("MONTH(AttendanceDate) = MONTH('" + currentMonth + "')")
-                            .whereRaw("YEAR(AttendanceDate) = YEAR('" + currentMonth + "')")
-                            .whereNot("AttendanceDate", Database_1["default"].raw("CURDATE()"))
-                            .whereIn("RegularizeSts", [0, 1])
-                            .orderBy("AttendanceDate", "desc")
-                            .limit(2);
-                        return [4 /*yield*/, query];
-                    case 3:
+                            .whereRaw("MONTH(AttendanceDate) = MONTH('{currentMonth}')")
+                            .andWhereRaw("YEAR(AttendanceDate) = YEAR('{currentMonth}')")
+                            .andWhereNot("AttendanceDate", Database_1["default"].raw("CURDATE()"))
+                            .andWhere(Database_1["default"].raw(" (\"RegularizeSts\" = 0 OR \"RegularizeSts\" = 1)\n      "))
+                            .orderBy("AttendanceDate", "desc");
+                        return [4 /*yield*/, selectAttendancemasterList];
+                    case 4:
                         attendanceData = _a.sent();
-                        console.log(attendanceData);
                         attendancearr = [];
                         attendanceData.forEach(function (row) {
                             var res1 = {};
                             res1["id"] = row.Id;
                             res1["sts"] = row.AttendanceStatus;
+                            var date = new Date(row.AttendanceDate);
+                            res1["AttendanceDate"] = moment_1["default"](date).format("YYYY/MM/DD");
                             res1["device"] = row.device;
-                            var timeIn = row.TimeIn === "00:00:00"
+                            var timeIn = row.TimeIn == "00:00:00"
                                 ? "00:00"
-                                : new Date("1970-01-01T" + row.TimeIn + "Z").toLocaleTimeString("en-US", {
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                    hour12: false
-                                });
+                                : DateTime.fromSQL(row.TimeIn).toFormat("HH:mm");
                             res1["timeIn"] = timeIn;
-                            var timeOut = row.TimeOut === "00:00:00"
+                            var timeOut = row.TimeOut == "00:00:00"
                                 ? "00:00"
-                                : new Date("1970-01-01T" + row.TimeOut + "Z").toISOString().substr(11, 5);
+                                : DateTime.fromSQL(row.TimeOut).toFormat("HH:mm");
                             res1["timeOut"] = timeOut;
                             var date1 = new Date(row.AttendanceDate);
-                            res1["date1"] = date1;
+                            // res1["date1"] = moment(date1).format("YYYY/MM/DD");
                             var date2 = new Date();
-                            res1["date2"] = date2;
+                            // res1["date2"] = moment(date2).format("YYYY/MM/DD")
                             var diffInMilliseconds = date2 - date1;
                             // Calculate the difference in days
                             var diffInDays = Math.floor(diffInMilliseconds / (1000 * 60 * 60 * 24));
-                            res1["diffInDays"] = diffInDays;
+                            // res1["diffInDays"] = diffInDays;
                             if (MaxDays != 0) {
-                                if (MaxDays != 0) {
+                                if (diffInDays > MaxDays) {
                                     res1["resultsts"] = 0;
                                 }
                                 else {
@@ -159,7 +143,7 @@ var GetDataToRegService = /** @class */ (function () {
                                 res1["resultsts"] = 1;
                             }
                             if (MinTimes != undefined) {
-                                if (Regularizecount < parseInt(MinTimes)) {
+                                if (Regularizecount < MinTimes) {
                                     res1["Regularizessts"] = 1;
                                 }
                                 else {
@@ -173,9 +157,10 @@ var GetDataToRegService = /** @class */ (function () {
                         });
                         result = {};
                         status = true;
-                        monthDate = parseISO(currentMonth);
-                        formattedMonth = format(monthDate, "MMMM yyyy");
-                        result["month"] = formattedMonth;
+                        parsedDate = DateTime.fromISO(currentMonth);
+                        formattedDate = parsedDate.toFormat("MMMM yyyy");
+                        result["month"] = formattedDate;
+                        result["data"] = attendancearr;
                         result["Regularizecountdone"] = Regularizecount;
                         result["TotalRegularizecount"] = MinTimes;
                         result["regularizationsettingsts"] = regularizationsettingsts;
@@ -202,14 +187,15 @@ var GetDataToRegService = /** @class */ (function () {
                             month = moment_1["default"]().format("yyyy-MM-DD");
                         }
                         return [4 /*yield*/, Database_1["default"].from("AttendanceMaster")
-                                .select(Database_1["default"].raw("(SELECT MinTimes FROM RegularizationSettings WHERE OrganizationId = " + orgId + " and RegularizationSts = 1) as MinTimes"), Database_1["default"].raw("count(RegularizeSts) as Regularizecount"))
+                                .select(Database_1["default"].raw("(SELECT MinTimes FROM RegularizationSettings WHERE OrganizationId = {orgId} and RegularizationSts = 1)\n           as MinTimes"), Database_1["default"].raw("count(RegularizeSts) as Regularizecount"))
                                 .where("OrganizationId", orgId)
-                                .whereNot("Is_Delete", 1)
+                                .andWhereNot("Is_Delete", 1)
                                 .where("EmployeeId", id)
                                 .whereRaw("Month(AttendanceDate) = Month(?)", [month])
                                 .whereRaw("Year(AttendanceDate) = Year(?)", [month])
                                 .whereRaw("AttendanceDate != CURDATE()")
-                                .whereNotIn("RegularizeSts", [0, 1])
+                                .andWhereNot("RegularizeSts", 0)
+                                .andWhereNot("RegularizeSts", 1)
                                 .orderBy("AttendanceDate", "desc")];
                     case 1:
                         AttendanceMaster = _a.sent();
@@ -219,6 +205,167 @@ var GetDataToRegService = /** @class */ (function () {
                             Regularizecount: row1 ? parseInt(row1.Regularizecount) : 0
                         };
                         return [2 /*return*/, data2];
+                }
+            });
+        });
+    };
+    GetDataToRegService.OnSendRegularizeRequest = function (data) {
+        return __awaiter(this, void 0, void 0, function () {
+            var date, platform, uid, orgid, remark, Attendance_id, timeIn, timeOut, attendancedate, email, empname, designation, RegularizationAppliedFrom, currentDate, currentMonth, mdate, date2, selectEmployeeList, divhrsts, module, ActivityBy, sql, sql1, result, hrid, sqlemp, senior, updSts, msg, count, result_1, _a;
+            var _this = this;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        date = data.attdate;
+                        platform = data.platform;
+                        uid = data.uid;
+                        orgid = data.orgid;
+                        remark = data.remark;
+                        Attendance_id = data.id;
+                        timeIn = data.timein;
+                        timeOut = data.timeout;
+                        attendancedate = data.attdate;
+                        email = 0;
+                        RegularizationAppliedFrom = data.RegularizationAppliedFrom;
+                        currentDate = DateTime.now();
+                        currentMonth = currentDate.toFormat("yyyy-MM-dd");
+                        mdate = currentDate.toFormat("yyyy-MM-dd HH:mm:ss");
+                        date2 = currentDate.toFormat("yyyy-MM-dd");
+                        return [4 /*yield*/, Database_1["default"].from("EmployeeMaster")
+                                .select("*")
+                                .select(Database_1["default"].raw("(SELECT div_hrsts FROM DivisionMaster WHERE Id = Division) AS divhr"))
+                                .where("Id", uid)
+                                .where("OrganizationId", orgid)];
+                    case 1:
+                        selectEmployeeList = _b.sent();
+                        return [4 /*yield*/, selectEmployeeList];
+                    case 2:
+                        result = _b.sent();
+                        result.forEach(function (row) { return __awaiter(_this, void 0, void 0, function () {
+                            var divid, Empemail;
+                            return __generator(this, function (_a) {
+                                switch (_a.label) {
+                                    case 0:
+                                        designation = row.Designation;
+                                        divid = row.Division;
+                                        divhrsts = row.divhr;
+                                        empname = row.FirstName + row.LastName;
+                                        return [4 /*yield*/, Helper_1["default"].decode5t(row.CompanyEmail)];
+                                    case 1:
+                                        Empemail = _a.sent();
+                                        return [2 /*return*/];
+                                }
+                            });
+                        }); });
+                        if (!(RegularizationAppliedFrom != 2)) return [3 /*break*/, 6];
+                        module = "ubiHRM APP";
+                        ActivityBy = 0;
+                        if (!(divhrsts != 0)) return [3 /*break*/, 3];
+                        hrid = divhrsts;
+                        return [3 /*break*/, 5];
+                    case 3: return [4 /*yield*/, Database_1["default"].from("UserMaster")
+                            .select("EmployeeId")
+                            .where(" OrganizationId", orgid)
+                            .andWhere("HRSts", 1)];
+                    case 4:
+                        sql = _b.sent();
+                        sql.forEach(function (val) {
+                            hrid = val.EmployeeId;
+                        });
+                        _b.label = 5;
+                    case 5: return [3 /*break*/, 10];
+                    case 6:
+                        module = "ubiattendance APP";
+                        ActivityBy = 1;
+                        return [4 /*yield*/, Database_1["default"].from("Organization")
+                                .select("Email")
+                                .where("Id", orgid)];
+                    case 7:
+                        sql = _b.sent();
+                        return [4 /*yield*/, Promise.all(sql.map(function (val) { return __awaiter(_this, void 0, void 0, function () {
+                                var email1;
+                                return __generator(this, function (_a) {
+                                    switch (_a.label) {
+                                        case 0: return [4 /*yield*/, Helper_1["default"].encode5t(val.Email)];
+                                        case 1:
+                                            email1 = _a.sent();
+                                            email = email1;
+                                            return [2 /*return*/];
+                                    }
+                                });
+                            }); }))];
+                    case 8:
+                        _b.sent();
+                        console.log(email);
+                        return [4 /*yield*/, Database_1["default"].from("UserMaster")
+                                .select("EmployeeId ")
+                                .where("OrganizationId", orgid)
+                                .andWhere("Username", email)];
+                    case 9:
+                        sqlemp = _b.sent();
+                        sqlemp.forEach(function (val) {
+                            hrid = val.EmployeeId;
+                        });
+                        senior = hrid;
+                        console.log(hrid);
+                        _b.label = 10;
+                    case 10:
+                        if (!(Attendance_id != undefined && (hrid != 0 || hrid != ''))) return [3 /*break*/, 18];
+                        console.log(Attendance_id, remark, hrid);
+                        return [4 /*yield*/, Database_1["default"].from('AttendanceMaster').where("Id", Attendance_id).update({
+                                RegularizationRemarks: remark,
+                                RegularizeApproverRemarks: '',
+                                RegularizeTimeOut: timeOut,
+                                RegularizeTimeIn: timeIn,
+                                RegularizeSts: 3,
+                                RegularizeRequestDate: date2,
+                                RegularizationAppliedFrom: RegularizationAppliedFrom,
+                                LastModifiedDate: mdate
+                            })];
+                    case 11:
+                        sql1 = _b.sent();
+                        _b.label = 12;
+                    case 12:
+                        _b.trys.push([12, 17, , 18]);
+                        updSts = sql1;
+                        if (!(updSts == 1)) return [3 /*break*/, 16];
+                        console.log("3");
+                        msg = "<b>" + empname + "</b> requested for regularization for the attendance date of <b>" + attendancedate + "</b>";
+                        return [4 /*yield*/, Helper_1["default"].ActivityMasterInsert(date2, orgid, uid, ActivityBy, module, msg, module)];
+                    case 13:
+                        sql = _b.sent();
+                        return [4 /*yield*/, Database_1["default"].from('AttendanceMaster ').select('RegularizeTimeIn', 'TimeIn').where('Id', Attendance_id)];
+                    case 14:
+                        sql1 = _b.sent();
+                        count = sql1.length;
+                        count.foreach(function (val) {
+                            var regularizetimein = val.RegularizeTimeIn;
+                            var orginaltimein = val.TimeIn;
+                        });
+                        console.log('RegularizationAppliedFrom');
+                        if (!(RegularizationAppliedFrom != 2)) return [3 /*break*/, 16];
+                        console.log("e4");
+                        return [4 /*yield*/, Database_1["default"]
+                                .from('ApprovalProcess')
+                                .where('OrganizationId', orgid)
+                                .where(function () {
+                                this.where('Designation', designation).orWhere('Designation', 0);
+                            })
+                                .where(function () {
+                                this.where('ProcessType', 13).orWhere('ProcessType', 0);
+                            })
+                                .orderBy('Designation', 'desc')
+                                .orderBy('ProcessType', 'desc')
+                                .limit(1).toQuery];
+                    case 15:
+                        result_1 = _b.sent();
+                        console.log(result_1);
+                        _b.label = 16;
+                    case 16: return [3 /*break*/, 18];
+                    case 17:
+                        _a = _b.sent();
+                        return [3 /*break*/, 18];
+                    case 18: return [2 /*return*/];
                 }
             });
         });

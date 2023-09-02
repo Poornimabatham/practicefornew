@@ -44,7 +44,7 @@ var getProfileImageService = /** @class */ (function () {
     }
     getProfileImageService.getProfileImage = function (getvalue) {
         return __awaiter(this, void 0, void 0, function () {
-            var Orgid, Empid, selectEmployeemasterlist, res;
+            var Orgid, Empid, selectEmployeemasterlist, res, result;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -57,17 +57,21 @@ var getProfileImageService = /** @class */ (function () {
                     case 1:
                         selectEmployeemasterlist = _a.sent();
                         res = [];
-                        selectEmployeemasterlist.forEach(function (ROW) {
+                        return [4 /*yield*/, selectEmployeemasterlist];
+                    case 2:
+                        result = _a.sent();
+                        result.forEach(function (ROW) {
                             var Data = {};
                             var organizationId = ROW.OrganizationId;
                             var imageName = ROW.ImageName;
-                            var combinedString = "{organizationId}/{imageName}";
+                            var combinedString = organizationId + "/" + imageName;
                             if (ROW.ImageName != "" && combinedString) {
                                 var timestamp = Date.now();
-                                var dir = "{organizationId}/{imageName}";
-                                (Data["profile"] = "uploads/profile/{dir}?r={timestamp}"),
-                                    (Data["profilePath"] = "{imageName}?r={timestamp}"),
-                                    (Data["profileEndPoint"] = "uploads/profile/{organizationId}/");
+                                var url = "https://ubihrmimages.s3.ap-south-1.amazonaws.com";
+                                var dir = organizationId + "/" + imageName;
+                                (Data["profile"] = url + "/" + dir + "?r=" + timestamp),
+                                    (Data["profilePath"] = imageName + "?r=" + timestamp),
+                                    (Data["profileEndPoint"] = url + "/" + organizationId + "/");
                             }
                             else {
                                 Data["profile"] =

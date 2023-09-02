@@ -4,7 +4,6 @@ import AttendanceMaster from "App/Models/AttendanceMaster";
 import EmployeeMaster from "App/Models/EmployeeMaster";
 import { DateTime } from "luxon";
 import moment from "moment";
-import { from } from "./../../contracts/env";
 
 export default class DailyAttendanceService {
   public static async getpresentList(data) {
