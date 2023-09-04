@@ -73,6 +73,7 @@ export default class DepartmentsController {
   public async getDeptEmp({request , response}:HttpContextContract){
      const validata = await request.validate(DepartmentValidator.DeptEmp)
      const res = await DepartmentService.getDeptEmp(validata);
+     response.json(res)
   }
   public async getEmpdataDepartmentWiseCount({ request, response }: HttpContextContract) {
     const requestValidate = await request.validate(

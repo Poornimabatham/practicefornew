@@ -258,6 +258,8 @@ export default class DepartmentService {
     const empid = data.empid;
     const datafor = data.datafor;
     let res:any = {};
+    let response:any = {};
+    let result:any[]=[];
     const zone = await Helper.getTimeZone(orgId);
     const defaultZone = DateTime.now().setZone(zone);  
     let date = defaultZone.toFormat("yyyy-MM-dd");
@@ -271,6 +273,7 @@ export default class DepartmentService {
     let rtimein ;
     let rtimeout;
     let dir;
+    let errorMsg;
     
     if(datafor == "Yesterday"){
       date = predate;
@@ -279,14 +282,13 @@ export default class DepartmentService {
       res['data_date'] = date;     
     }
 
-    
     let holidayquery = await Database.query().from('HolidayMaster').select('Id').where('OrganizationId',orgId).andWhere(Database.raw(`"${date}" between DateFrom and DateTo`))
 
     let holidaycount = holidayquery.length;
 
     let adminstatus = await Helper.getAdminStatus(empid); 
 
-    let query = Database.query().from('EmployeeMaster').select('Id','EmployeeCode','InPushNotificationStatus','OutPushNotificationStatus','FirstName','LastName','Shift','ImageName').where('OrganizationId',orgId).andWhere('Is_Delete',0).andWhere('archive',"!=",0).andWhere('DOL','0000-00-00').andWhere('DOL','>=',date).orderBy('FirstName','asc')
+    let query = Database.query().from('EmployeeMaster').select('Id','EmployeeCode','InPushNotificationStatus','OutPushNotificationStatus','FirstName','LastName','Shift','ImageName').where('OrganizationId',orgId).andWhere('Is_Delete',0).andWhere('archive',"!=",0).andWhere('DOL','0000-00-00').orWhere('DOL','>=',date).orderBy('FirstName','asc')
 
     if(adminstatus == 2)
     {
@@ -304,10 +306,11 @@ export default class DepartmentService {
        query = query.andWhere(Database.raw(`Id not in (select EmployeeId from AttendanceMaster where  AttendanceDate="${date}" and OrganizationId ="${orgId}" and ((TimeIn!='00:00:00' AND TimeOut!='00:00:00') or AttendanceStatus=2))`));
     }
 
-   let querydata = await query
+   let querydata = await query 
  
    let count = querydata.length
-   if(count >= 1){
+   if(count >= 1)
+   {
       
       status = true;
       successMsg = count +" record found";
@@ -319,8 +322,8 @@ export default class DepartmentService {
         let dayOfMonth = defaultZone.day;    
         let weekNumber = Math.ceil(dayOfMonth / 7);
         let dayofdate = defaultZone.weekday
-        let query = await Database.query().from('ShiftMasterChild').select('WeekOff').where('ShiftId',(Database.raw(`select shift from EmployeeMaster where Id="${empid}"`))).andWhere('Day',dayofdate);
-  
+        let query = await Database.query().from('ShiftMasterChild').select('WeekOff').where('ShiftId',(Database.raw(`(select shift from EmployeeMaster where Id="${empid}")`))).andWhere('Day',dayofdate);
+       
         week = query[0].WeekOff;
         let weekarr = week.split('');
         if(query.length > 0)
@@ -331,7 +334,7 @@ export default class DepartmentService {
                halfflg = true;
            }
         }
-
+       
         if(holidaycount >0){
            sts = 5;
         }
@@ -342,10 +345,14 @@ export default class DepartmentService {
           sts = 3;
         }
 
-        let querdata = await Database.query().select('*').from('AttendanceMaster').where('EmployeeId',empid).andWhere('AttendanceDate',date).andWhere(Database.raw('TimeOut="00:00:00" or TimeIn=TimeOut'));
+        let querdata = await Database.query().select('*').from('AttendanceMaster').where('EmployeeId',empid).andWhere('AttendanceDate',date).andWhere(Database.raw('(TimeOut="00:00:00" or TimeIn=TimeOut)'));
+       
+        
         res['rtimein'] = "00:00:00";
         res['rtimeout'] = "00:00:00";
-        if(querdata.length >0){
+       
+        
+        if(querdata.length > 0){
            rtimein = querdata[0].TimeIn;
            rtimeout = querdata[0].TimeOut;
            res['Attid'] = querdata[0].Id;
@@ -371,7 +378,8 @@ export default class DepartmentService {
         res['shifttype'] = await Helper.getName('ShiftMaster','shifttype','Id',element.Shift);
         res['OutPushNotificationStatus'] = element.OutPushNotificationStatus;
         res['InPushNotificationStatus'] = element.InPushNotificationStatus;
-
+        let shiftid = element.Shift;
+   
         if(element.ImageName != ''){
            dir = orgId + element.ImageName;     
            res['img'] = 'https://ubitech.ubihrm.com/public/uploads/' + dir;
@@ -379,7 +387,7 @@ export default class DepartmentService {
            res['img'] = 'http://ubiattendance.ubihrm.com/assets/img/avatar.png';
         }
 
-        let querydata2 = await Database.query().from('ShiftMaster').select('TimeIn','TimeOut','TimeInBreak','TimeOutBreak',Database.raw(`TIME_FORMAT(TIMEDIFF( TIME_FORMAT(TIMEDIFF(TimeOut, TimeIn),'%H:%i'),TIME_FORMAT(TIMEDIFF(TimeOutBreak, TimeInBreak),'%H:%i')),'%H:%i') as totaltime`)).where('Id',element.shift);
+        let querydata2 = await Database.query().from('ShiftMaster').select('TimeIn','TimeOut','TimeInBreak','TimeOutBreak',Database.raw(`TIME_FORMAT(TIMEDIFF( TIME_FORMAT(TIMEDIFF(TimeOut, TimeIn),'%H:%i'),TIME_FORMAT(TIMEDIFF(TimeOutBreak, TimeInBreak),'%H:%i')),'%H:%i') as totaltime`)).where('Id',shiftid);
         if(querydata2.length > 0){
             res['timein'] = querydata2[0].TimeIn;
             res['shifttimein'] = querydata2[0].TimeIn;
@@ -390,11 +398,30 @@ export default class DepartmentService {
                res['timeout'] = querydata2[0].TimeOut;
                res['shifttimeout']= querydata2[0].TimeOut;
             }
-            res['timein'] ; 
-        }
-        
+              res['timein'] = querydata2[0].TimeIn;
+              if(res['timein'] != "00:00:00"){
+                  res['timein'] = res['timein'].toFormat("HH:mm")  
+              }
+         }
+         if(weekofflg || holidaycount > 0){
+              res['timein'] = '00:00';
+              res['timeout'] = '00:00';
+              res['overtime'] = '00:00';
+         }
+            res['mark'] = 0;
+            result.push(res)   
+            console.log(result);
+            
       });
+   }else{
+          status=false;
+          errorMsg = 'error...';
    }
+      response['data'] = result;
+      response['status'] = status;
+      response['successMsg'] = successMsg;
+      response['errorMsg'] = errorMsg;
+      return response;
   }
 
 
