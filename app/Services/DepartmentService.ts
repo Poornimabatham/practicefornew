@@ -257,7 +257,7 @@ export default class DepartmentService {
     const deptid = data.deptid;
     const empid = data.empid;
     const datafor = data.datafor;
-    let res:any = {};
+    let res1:any = {};
     let response:any = {};
     let result:any[]=[];
     const zone = await Helper.getTimeZone(orgId);
@@ -270,16 +270,16 @@ export default class DepartmentService {
     let halfflg = false;
     let week;
     let sts = 1;
-    let rtimein ;
-    let rtimeout;
-    let dir;
+    let rtimein:any = '' ;
+    let rtimeout:any = '';
+    let dir:any;
     let errorMsg;
     
     if(datafor == "Yesterday"){
       date = predate;
-      res['data_date'] = predate;
+      res1['data_date'] = predate;
     }else{
-      res['data_date'] = date;     
+      res1['data_date'] = date;     
     }
 
     let holidayquery = await Database.query().from('HolidayMaster').select('Id').where('OrganizationId',orgId).andWhere(Database.raw(`"${date}" between DateFrom and DateTo`))
@@ -306,16 +306,18 @@ export default class DepartmentService {
        query = query.andWhere(Database.raw(`Id not in (select EmployeeId from AttendanceMaster where  AttendanceDate="${date}" and OrganizationId ="${orgId}" and ((TimeIn!='00:00:00' AND TimeOut!='00:00:00') or AttendanceStatus=2))`));
     }
 
-   let querydata = await query 
+   let querydata = await query
  
    let count = querydata.length
+   
    if(count >= 1)
    {
       
       status = true;
       successMsg = count +" record found";
-      querydata.forEach(async element => {
-
+      await Promise.all(
+      querydata.map(async (element) => {
+        let res:any = {}
         res['OutPushNotificationStatus'] = element.OutPushNotificationStatus;
         res['InPushNotificationStatus'] = element.InPushNotificationStatus;
         res['empid'] = element.Id;
@@ -325,6 +327,7 @@ export default class DepartmentService {
         let query = await Database.query().from('ShiftMasterChild').select('WeekOff').where('ShiftId',(Database.raw(`(select shift from EmployeeMaster where Id="${empid}")`))).andWhere('Day',dayofdate);
        
         week = query[0].WeekOff;
+       
         let weekarr = week.split('');
         if(query.length > 0)
         {
@@ -347,24 +350,22 @@ export default class DepartmentService {
 
         let querdata = await Database.query().select('*').from('AttendanceMaster').where('EmployeeId',empid).andWhere('AttendanceDate',date).andWhere(Database.raw('(TimeOut="00:00:00" or TimeIn=TimeOut)'));
        
-        
         res['rtimein'] = "00:00:00";
         res['rtimeout'] = "00:00:00";
-       
-        
         if(querdata.length > 0){
            rtimein = querdata[0].TimeIn;
            rtimeout = querdata[0].TimeOut;
            res['Attid'] = querdata[0].Id;
            res['device'] = querdata[0].device;
         }
-        if(rtimein != ''){
+       
+        if(rtimein != ""){ 
            res['rtimein'] = querydata[0].TimeIn;
         }
-        if(rtimeout != ''){
+        if(rtimeout != ""){
            res['rtimeout'] = querydata[0].TimeOut;
         }
-
+        
         res['id'] = element.Id;
         res['empcode'] = element.EmployeeCode;
         res['name'] = element.FirstName + element.LastName;
@@ -400,7 +401,7 @@ export default class DepartmentService {
             }
               res['timein'] = querydata2[0].TimeIn;
               if(res['timein'] != "00:00:00"){
-                  res['timein'] = res['timein'].toFormat("HH:mm")  
+                  res['timein'] = res['timein']
               }
          }
          if(weekofflg || holidaycount > 0){
@@ -409,14 +410,14 @@ export default class DepartmentService {
               res['overtime'] = '00:00';
          }
             res['mark'] = 0;
-            result.push(res)   
-            console.log(result);
-            
-      });
+            result.push(res)         
+      })
+      )
    }else{
           status=false;
           errorMsg = 'error...';
    }
+
       response['data'] = result;
       response['status'] = status;
       response['successMsg'] = successMsg;
