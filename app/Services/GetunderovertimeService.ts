@@ -28,6 +28,7 @@ export default class getunderovertimeService {
         let s12HalfDay: number = 0;
         var data: {} = {};
 
+
         if (shiftType == 3) {  //shifttype ==3
             var selectQuery = await Database.from('AttendanceMaster as A')
                 .select(Database.raw('SUM(TIME_TO_SEC(CASE WHEN (SELECT shifttype FROM ShiftMaster WHERE Id=A.ShiftId) IN (3) THEN TIMEDIFF(IFNULL((SELECT SEC_TO_TIME(SUM(TIME_TO_SEC(LoggedHours))) FROM InterimAttendances WHERE AttendanceMasterId=A.Id), "00:00:00"), S.HoursPerDay) END)) as shifttype3overunder'))
@@ -37,6 +38,9 @@ export default class getunderovertimeService {
                 .whereBetween('A.AttendanceDate', [startDate, endDate])
                 .whereNotIn('A.AttendanceStatus', [3, 4, 5])
                 .whereRaw('A.TimeIn!="00:00:00"')
+            //     .toQuery()
+            // console.log(selectQuery);
+            // return
 
             if (selectQuery.length > 0) {
                 shifttype3overunder = selectQuery[0].shifttype3overunder;
@@ -98,8 +102,9 @@ export default class getunderovertimeService {
         }
         //  calculate total(overtime or undertime) for shifttype 1 AND 2 with multiple time status
         else if ((shiftType == 1 || shiftType == 2) && multiShiftSts == 1) {
+
             var selectoverundermultistsQuery = await Database.from('AttendanceMaster as A').select(
-                Database.raw(` SUM(TIME_TO_SEC((CASE WHEN ((S.shifttype=1 OR S.shifttype=2) AND A.multitime_sts=1) THEN TIMEDIFF(IFNULL((SELECT Sec_to_time(SUM(Time_to_sec(LoggedHours))) from InterimAttendances where AttendanceMasterId=A.Id),'00:00:00'),((CASE WHEN (S.shifttype=2 AND A.timeoutdate=A.timeindate) THEN TIMEDIFF(CONCAT(DATE_ADD(A.AttendanceDate, INTERVAL 1 DAY),' ',S.TimeOut),CONCAT(A.AttendanceDate,' ',S.TimeIn)) ELSE TIMEDIFF(CONCAT(A.timeoutdate,' ',S.TimeOut),CONCAT(A.AttendanceDate,' ',S.TimeIn)) END))) END))) as shift12overunderwith_multitimests`)
+                Database.raw(`SUM(TIME_TO_SEC((CASE WHEN ((S.shifttype=1 OR S.shifttype=2) AND A.multitime_sts=1) THEN TIMEDIFF(IFNULL((SELECT Sec_to_time(SUM(Time_to_sec(LoggedHours))) from InterimAttendances where AttendanceMasterId=A.Id),'00:00:00'),((CASE WHEN (S.shifttype=2 AND A.timeoutdate=A.timeindate) THEN TIMEDIFF(CONCAT(DATE_ADD(A.AttendanceDate, INTERVAL 1 DAY),' ',S.TimeOut),CONCAT(A.AttendanceDate,' ',S.TimeIn)) ELSE TIMEDIFF(CONCAT(A.timeoutdate,' ',S.TimeOut),CONCAT(A.AttendanceDate,' ',S.TimeIn)) END))) END))) as shift12overunderwith_multitimests`)
             )
                 .innerJoin('ShiftMaster as S', 'A.ShiftId', 'S.Id')
                 .where('A.EmployeeId', EmpId)
@@ -109,6 +114,9 @@ export default class getunderovertimeService {
                 .whereRaw('S.shifttype!=3')
                 .whereRaw('A.TimeIn!="00:00:00"')
                 .whereRaw('A.TimeOut!="00:00:00"')
+                .toQuery()
+            console.log(selectoverundermultistsQuery);
+            return selectoverundermultistsQuery
 
             if (selectoverundermultistsQuery.length > 0) {
                 st12overunderwithmultists = selectoverundermultistsQuery[0].shift12overunderwith_multitimests;
@@ -194,6 +202,7 @@ export default class getunderovertimeService {
 
         //  calculate total (overtime or undertime) for only shifttype 1 and 2 without multipletime_sts
         else if ((shiftType == 1 || shiftType == 2) && multiShiftSts == 0) {
+
             var selects12totalloggedQuery = await Database.from('AttendanceMaster as A').select(
                 Database.raw(`SUM(TIME_TO_SEC(CASE WHEN (S.shifttype=2 AND A.timeoutdate=A.timeindate) THEN SUBTIME(TIMEDIFF(CONCAT(A.timeoutdate,' ',A.TimeOut),CONCAT(A.AttendanceDate,' ',A.TimeIn)),TIMEDIFF(CONCAT(DATE_ADD(A.AttendanceDate, INTERVAL 1 DAY),' ',S.TimeOut),CONCAT(A.AttendanceDate,' ',S.TimeIn))) ELSE SUBTIME(TIMEDIFF(CONCAT(A.timeoutdate,' ',A.TimeOut),CONCAT(A.AttendanceDate,' ',A.TimeIn)),TIMEDIFF(CONCAT(A.timeoutdate,' ',S.TimeOut),CONCAT(A.AttendanceDate,' ',S.TimeIn))) END)) as st12underoverwithoutmulti_sts`)
             )
@@ -207,6 +216,10 @@ export default class getunderovertimeService {
                 .whereRaw('S.shifttype!=3')
                 .whereRaw('A.multitime_sts!=1')
 
+            //     .toQuery()
+            // console.log(selects12totalloggedQuery);
+
+            return selects12totalloggedQuery
             if (selects12totalloggedQuery.length > 0) {
                 st12underoverwithoutmulti_sts = selects12totalloggedQuery[0].st12underoverwithoutmulti_sts;
 
@@ -291,7 +304,7 @@ export default class getunderovertimeService {
 
         }
 
-        totalLoggedHours = (shifttype3overunder + st12overunderwithmultists + st12underoverwithoutmulti_sts + s3HolydayAndWeekOff + shift12holydaysandweekoffs_msts + s12HolydayAndWeekOff + s12HalfDay + s3HalfDay) - totalTimeOff
+        totalLoggedHours = (shifttype3overunder + st12overunderwithmultists + st12underoverwithoutmulti_sts + s3HolydayAndWeekOff + shift12holydaysandweekoffs_msts + s12HolydayAndWeekOff + s12HalfDay + s3HalfDay) - (totalTimeOff)
 
         const resultQuery = await Database.rawQuery(`SELECT (SEC_TO_TIME(${totalLoggedHours})) as UOtime`);
 
@@ -311,7 +324,7 @@ export default class getunderovertimeService {
                 data['Sign'] = 'zero';
             }
         })
-        return data;
+        // return data;
 
     }
 }
