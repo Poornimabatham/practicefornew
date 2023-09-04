@@ -676,4 +676,17 @@ export default class Helper {
     }
     return null; // Return null or handle the case when no result is found
   }
+
+  public static async getDesigName(desigId, orgId) {    
+    const query = await Database.from("DesignationMaster")
+      .select("Name")
+      .where("Id", desigId)
+      .where("OrganizationId", orgId)
+      .first();
+
+    if (query) {      
+      return query.Name;
+    }    
+    return null; // Return null or handle the case when no result is found
+  }
 }

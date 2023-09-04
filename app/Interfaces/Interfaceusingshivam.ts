@@ -19,27 +19,28 @@
     EntryImage: string;
   }
 
-  interface getdataforPresenteesInterface{
-    latit_in : string;
-    longi_in : string;
-    latit_out : string;
-    longi_out : string;
-    Id:number;
-    name:string;
-    TotalLoggedHours : number;
-    AttendanceStatus:number;
+  interface getdataforPresenteesInterface {
+    latit_in: string;
+    longi_in: string;
+    latit_out: string;
+    longi_out: string;
+    Id: number;
+    name: string;
+    Dept_id: number;
+    TotalLoggedHours: number;
+    AttendanceStatus: number;
     ShiftId: number;
-    multitime_sts : number;
+    multitime_sts: number;
     OrganizationId: number;
     AttendanceDate: string;
     getInterimAttAvailableSts: boolean;
-    TimeIn:string;
-    checkInLoc:string;
+    TimeIn: string;
+    checkInLoc: string;
     shiftType: number;
-    EntryImage:string;
-    ExitImage:string;
+    EntryImage: string;
+    ExitImage: string;
     status: string;
-    TimeOut:string;
+    TimeOut: string;
   }
 
   interface getdataforAbsenteesInterface{

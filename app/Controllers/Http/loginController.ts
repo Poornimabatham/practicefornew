@@ -36,7 +36,14 @@ export default class LoginController {
      const res      = await loginService.newregister_orgTemp(validata)
      response.json(res)
 
-   }
+  }
+  private data = []
+  public async Loginverifymail({ request, response }: HttpContextContract) {
+    const valdata = await request.validate(loginValidator.Loginverifymail)
+    this.data["email"] = valdata.email ? valdata.email : "0";
+    this.data["org_id"] = valdata.org_id ? valdata.org_id : "0";
+    const servicerep = await loginService.Loginverifymail(this.data);
+  }
 }
 
  
