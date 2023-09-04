@@ -1101,7 +1101,7 @@ export default class DailyAttendanceService {
                     TimeOutDate: TimeOutDate,
                     disapprove_datetime: disapprove_datetime,
                     //disapp_sts: disappstatus,
-                    disapprovereason:disattreason,
+                    disapprovereason: disattreason,
                     disapp_reason: GeofenceIn,
                     disapp_remark: remarkfordisapprove,
                   }); ////ashish endd////////
@@ -1245,7 +1245,7 @@ export default class DailyAttendanceService {
             try {
               let areaId = GeofenceInAreaId;
               let areaIdOut = GeofenceOutAreaId;
-              console.log("shakir+AttendanceMasterId"+ AttendanceMasterId);
+              console.log("shakir+AttendanceMasterId" + AttendanceMasterId);
 
               if (AttendanceMasterId == 0) {
                 if (GeofenceIn == "Outside Geofence") {
@@ -1306,8 +1306,8 @@ export default class DailyAttendanceService {
                   outside_geofence_setting = await Helper.getSettingByOrgId(
                     OrganizationId
                   ); //disapprove_setting on h
-                  console.log("shakir+areaId12"+ areaId12);
-                  console.log("shakir+outside_geofence_setting"+ outside_geofence_setting);
+                  console.log("shakir+areaId12" + areaId12);
+                  console.log("shakir+outside_geofence_setting" + outside_geofence_setting);
                 }
                 Geofencests = addonGeoFenceStst;
                 if (
@@ -1420,11 +1420,11 @@ export default class DailyAttendanceService {
                     TimeOutStampServer: TimeOutStampServer,
                     areaIdTimeOut: areaIdOut,
                     //disapp_sts: disappstatus,
-                    disapprovereason:disattreason,
+                    disapprovereason: disattreason,
                     ZoneId: Zone_id,
                   });
                 AttendanceMasterId = InsertAttendanceTimeiN[0];
-              console.log("shakir+AFETR INSERT AttendanceMasterId"+ AttendanceMasterId);
+                console.log("shakir+AFETR INSERT AttendanceMasterId" + AttendanceMasterId);
 
                 if((areaId12 != 0)&&(Geofencests == 1)&&(outside_geofence_setting == "1") && ((GeofenceIn=="Outside Geofence" && GeofenceOut!="Outside Geofence") || (GeofenceIn=="Outside Geofence" && GeofenceOut=="Outside Geofence") || (GeofenceIn!="Outside Geofence" && GeofenceOut=="Outside Geofence")))
                   {  
@@ -1553,7 +1553,7 @@ export default class DailyAttendanceService {
                     });
 
                   let InsertAttendanceTimeInOut = await query;
-                  console.log("////////////////"+InsertAttendanceTimeInOut)
+                  console.log("////////////////" + InsertAttendanceTimeInOut)
                   interimAttendanceIds = InsertAttendanceTimeInOut[0];
                 }
               }
@@ -1707,7 +1707,7 @@ export default class DailyAttendanceService {
               };
               k++;
               //console.log(statusArray);
-            } catch (error) {}
+            } catch (error) { }
           }
           //******************************End second case****************************//
           //******************************start third case****************************//
@@ -1891,7 +1891,7 @@ export default class DailyAttendanceService {
                 console.log("calculatedOvertime" + calculatedOvertime);
               }
             }
-             
+
 
 
             if (
@@ -1937,7 +1937,7 @@ export default class DailyAttendanceService {
                 }
               }
 
-              if ( GeofenceOut == "Outside Geofence" ) {
+              if (GeofenceOut == "Outside Geofence") {
                 attendance_sts = 2;
                 disappstatus = 2; //pending disaaprove
                 disattreason = "Outside Geofence";
@@ -2076,15 +2076,17 @@ export default class DailyAttendanceService {
               AttendanceMasterId: AttendanceMasterId,
             };
 
-            k++;      
+            k++;
           }
           //******************************End third case****************************//
         }
-     // }));
+        // }));
       }
-    //}
-  }));
+      //}
+    }));
 
     return statusArray;
   }
+
+
 }
