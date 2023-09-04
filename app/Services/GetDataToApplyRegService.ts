@@ -1,7 +1,6 @@
 import moment from "moment";
 import Database from "@ioc:Adonis/Lucid/Database";
 import Helper from "App/Helper/Helper";
-import commands from "commands";
 const { DateTime } = require("luxon");
 
 export default class GetDataToRegService {
@@ -45,7 +44,7 @@ export default class GetDataToRegService {
       .where("OrganizationId", data.orgid)
       .andWhereNot("Is_Delete", 1)
       .andWhere("EmployeeId", data.uid)
-      .whereRaw(`MONTH(AttendanceDate) = MONTH('{currentMonth}')`)
+      .whereRaw(`MONTH(AttendanceDate) = MONTH('${currentMonth}')`)
       .andWhere("AttendanceDate", Database.raw("CURDATE()"))
       .andWhere(
         Database.raw(` ("RegularizeSts" = 0 OR "RegularizeSts" = 1)
@@ -53,7 +52,8 @@ export default class GetDataToRegService {
       )
       .orderBy(" AttendanceDate", "desc")
 
-      .count("RegularizeSts as Regularizecount");
+      .count("RegularizeSts as Regularizecount")
+      
 
     const affected_rows = regularizeCount.length;
 
@@ -79,14 +79,14 @@ export default class GetDataToRegService {
       (device ='Cron' and  (TimeIn=TimeOut or TimeOut='00:00:00') and AttendanceStatus in (4,10))) `)
       )
       .andWhere("EmployeeId", data.uid)
-      .whereRaw(`MONTH(AttendanceDate) = MONTH('{currentMonth}')`)
-      .andWhereRaw(`YEAR(AttendanceDate) = YEAR('{currentMonth}')`)
+      .whereRaw(`MONTH(AttendanceDate) = MONTH('${currentMonth}')`)
+      .andWhereRaw(`YEAR(AttendanceDate) = YEAR('${currentMonth}')`)
       .andWhereNot("AttendanceDate", Database.raw("CURDATE()"))
       .andWhere(
         Database.raw(` ("RegularizeSts" = 0 OR "RegularizeSts" = 1)
       `)
       )
-      .orderBy("AttendanceDate", "desc");
+      .orderBy("AttendanceDate", "desc")
     const attendanceData = await selectAttendancemasterList;
 
     var attendancearr: any = [];
