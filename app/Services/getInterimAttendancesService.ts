@@ -61,6 +61,7 @@ export default class GetInterimAttendancesService {
       .where("AttendanceMasterId", attendanceMasterId)
       .orderBy("id", "desc");
 
+      
     const response: any[] = [];
 
     const Output = await selectInterimAttenceslist;

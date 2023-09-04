@@ -28,7 +28,7 @@ export default class GetDataToRegValidator extends BaseValidator {
       timein: schema.string(),
       timeout: schema.string(),
       remark: schema.string(),
-      platform: schema.string(),
+      platform: schema.string.optional(),
       RegularizationAppliedFrom: schema.string(),
       uid: schema.number(),
       orgid: schema.number(),

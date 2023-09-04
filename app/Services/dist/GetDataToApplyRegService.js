@@ -35,6 +35,13 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __spreadArrays = (this && this.__spreadArrays) || function () {
+    for (var s = 0, i = 0, il = arguments.length; i < il; i++) s += arguments[i].length;
+    for (var r = Array(s), k = 0, i = 0; i < il; i++)
+        for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)
+            r[k] = a[j];
+    return r;
+};
 exports.__esModule = true;
 var moment_1 = require("moment");
 var Database_1 = require("@ioc:Adonis/Lucid/Database");
@@ -187,15 +194,14 @@ var GetDataToRegService = /** @class */ (function () {
                             month = moment_1["default"]().format("yyyy-MM-DD");
                         }
                         return [4 /*yield*/, Database_1["default"].from("AttendanceMaster")
-                                .select(Database_1["default"].raw("(SELECT MinTimes FROM RegularizationSettings WHERE OrganizationId = {orgId} and RegularizationSts = 1)\n           as MinTimes"), Database_1["default"].raw("count(RegularizeSts) as Regularizecount"))
+                                .select(Database_1["default"].raw("(SELECT MinTimes FROM RegularizationSettings WHERE OrganizationId = " + orgId + " and RegularizationSts = 1)\n           as MinTimes"), Database_1["default"].raw("count(RegularizeSts) as Regularizecount"))
                                 .where("OrganizationId", orgId)
                                 .andWhereNot("Is_Delete", 1)
-                                .where("EmployeeId", id)
+                                .andWhere("EmployeeId", id)
                                 .whereRaw("Month(AttendanceDate) = Month(?)", [month])
                                 .whereRaw("Year(AttendanceDate) = Year(?)", [month])
                                 .whereRaw("AttendanceDate != CURDATE()")
-                                .andWhereNot("RegularizeSts", 0)
-                                .andWhereNot("RegularizeSts", 1)
+                                .andWhere(Database_1["default"].raw(" (\"RegularizeSts\" != 0 AND \"RegularizeSts\" != 1)\n      "))
                                 .orderBy("AttendanceDate", "desc")];
                     case 1:
                         AttendanceMaster = _a.sent();
@@ -211,7 +217,7 @@ var GetDataToRegService = /** @class */ (function () {
     };
     GetDataToRegService.OnSendRegularizeRequest = function (data) {
         return __awaiter(this, void 0, void 0, function () {
-            var date, platform, uid, orgid, remark, Attendance_id, timeIn, timeOut, attendancedate, email, empname, designation, RegularizationAppliedFrom, currentDate, currentMonth, mdate, date2, selectEmployeeList, divhrsts, module, ActivityBy, sql, sql1, result, hrid, sqlemp, senior, updSts, msg, count, result_1, _a;
+            var date, platform, uid, orgid, remark, Attendance_id, timeIn, timeOut, attendancedate, email, empname, designation, senior, Empemail, status, seniorname, Hrname, Hremail, msg, regularizetimein, timeincondition, orginaltimein, errorMsg, data2, RegularizationAppliedFrom, currentDate, currentMonth, mdate, date2, selectEmployeeList, divhrsts, module, ActivityBy, sql, sql1, result, hrid, sqlemp, updSts, count, sql4, query4, senior2, temp, filteredTemp, finalTemp, i, sqlapproveremp, seniornameArray, HrnameArray, HremailArray, _i, sqlapproveremp_1, rapproveremp, title, remarkcondition, _a;
             var _this = this;
             return __generator(this, function (_b) {
                 switch (_b.label) {
@@ -226,6 +232,7 @@ var GetDataToRegService = /** @class */ (function () {
                         timeOut = data.timeout;
                         attendancedate = data.attdate;
                         email = 0;
+                        data2 = {};
                         RegularizationAppliedFrom = data.RegularizationAppliedFrom;
                         currentDate = DateTime.now();
                         currentMonth = currentDate.toFormat("yyyy-MM-dd");
@@ -296,7 +303,6 @@ var GetDataToRegService = /** @class */ (function () {
                             }); }))];
                     case 8:
                         _b.sent();
-                        console.log(email);
                         return [4 /*yield*/, Database_1["default"].from("UserMaster")
                                 .select("EmployeeId ")
                                 .where("OrganizationId", orgid)
@@ -307,14 +313,14 @@ var GetDataToRegService = /** @class */ (function () {
                             hrid = val.EmployeeId;
                         });
                         senior = hrid;
-                        console.log(hrid);
                         _b.label = 10;
                     case 10:
-                        if (!(Attendance_id != undefined && (hrid != 0 || hrid != ''))) return [3 /*break*/, 18];
-                        console.log(Attendance_id, remark, hrid);
-                        return [4 /*yield*/, Database_1["default"].from('AttendanceMaster').where("Id", Attendance_id).update({
+                        if (!(Attendance_id != undefined && (hrid != 0 || hrid != ""))) return [3 /*break*/, 32];
+                        return [4 /*yield*/, Database_1["default"].from("AttendanceMaster")
+                                .where("Id", Attendance_id)
+                                .update({
                                 RegularizationRemarks: remark,
-                                RegularizeApproverRemarks: '',
+                                RegularizeApproverRemarks: "",
                                 RegularizeTimeOut: timeOut,
                                 RegularizeTimeIn: timeIn,
                                 RegularizeSts: 3,
@@ -326,46 +332,155 @@ var GetDataToRegService = /** @class */ (function () {
                         sql1 = _b.sent();
                         _b.label = 12;
                     case 12:
-                        _b.trys.push([12, 17, , 18]);
+                        _b.trys.push([12, 30, , 31]);
                         updSts = sql1;
-                        if (!(updSts == 1)) return [3 /*break*/, 16];
-                        console.log("3");
+                        if (!(updSts == 1)) return [3 /*break*/, 28];
                         msg = "<b>" + empname + "</b> requested for regularization for the attendance date of <b>" + attendancedate + "</b>";
                         return [4 /*yield*/, Helper_1["default"].ActivityMasterInsert(date2, orgid, uid, ActivityBy, module, msg, module)];
                     case 13:
                         sql = _b.sent();
-                        return [4 /*yield*/, Database_1["default"].from('AttendanceMaster ').select('RegularizeTimeIn', 'TimeIn').where('Id', Attendance_id)];
+                        return [4 /*yield*/, Database_1["default"].from("AttendanceMaster ")
+                                .select("RegularizeTimeIn", "TimeIn")
+                                .where("Id", Attendance_id)];
                     case 14:
                         sql1 = _b.sent();
                         count = sql1.length;
-                        count.foreach(function (val) {
-                            var regularizetimein = val.RegularizeTimeIn;
-                            var orginaltimein = val.TimeIn;
+                        sql1.forEach(function (val) {
+                            regularizetimein = val.RegularizeTimeIn;
+                            orginaltimein = val.TimeIn;
                         });
-                        console.log('RegularizationAppliedFrom');
-                        if (!(RegularizationAppliedFrom != 2)) return [3 /*break*/, 16];
-                        console.log("e4");
-                        return [4 /*yield*/, Database_1["default"]
-                                .from('ApprovalProcess')
-                                .where('OrganizationId', orgid)
-                                .where(function () {
-                                this.where('Designation', designation).orWhere('Designation', 0);
-                            })
-                                .where(function () {
-                                this.where('ProcessType', 13).orWhere('ProcessType', 0);
-                            })
-                                .orderBy('Designation', 'desc')
-                                .orderBy('ProcessType', 'desc')
-                                .limit(1).toQuery];
+                        if (!(RegularizationAppliedFrom != 2)) return [3 /*break*/, 18];
+                        return [4 /*yield*/, Database_1["default"].from("ApprovalProcess")
+                                .where("OrganizationId", orgid)
+                                .where(Database_1["default"].raw("(Designation = " + designation + " OR Designation = 0)"))
+                                .andWhere(Database_1["default"].raw("(ProcessType = 13 OR ProcessType = 0)"))
+                                .orderBy("Designation", "desc")
+                                .orderBy("ProcessType", "desc")];
                     case 15:
-                        result_1 = _b.sent();
-                        console.log(result_1);
-                        _b.label = 16;
-                    case 16: return [3 /*break*/, 18];
-                    case 17:
-                        _a = _b.sent();
+                        sql4 = _b.sent();
+                        query4 = sql4.length;
+                        if (!(query4 > 0)) return [3 /*break*/, 17];
+                        return [4 /*yield*/, Helper_1["default"].getApprovalLevelEmp(uid, orgid, 13)];
+                    case 16:
+                        senior = _b.sent();
                         return [3 /*break*/, 18];
-                    case 18: return [2 /*return*/];
+                    case 17:
+                        senior = hrid;
+                        _b.label = 18;
+                    case 18:
+                        if (!(senior != 0)) return [3 /*break*/, 27];
+                        senior2 = "" + senior;
+                        temp = Array.from(senior2);
+                        filteredTemp = temp.filter(function (item) { return item; });
+                        finalTemp = __spreadArrays(filteredTemp);
+                        i = 0;
+                        _b.label = 19;
+                    case 19:
+                        if (!(i < temp.length)) return [3 /*break*/, 27];
+                        if (!(temp[i] != "0")) return [3 /*break*/, 26];
+                        return [4 /*yield*/, Database_1["default"].insertQuery()
+                                .table("RegularizationApproval")
+                                .insert({
+                                attendanceId: Attendance_id,
+                                ApproverId: temp[i],
+                                ApproverSts: 3,
+                                CreatedDate: mdate,
+                                OrganizationId: orgid,
+                                RegularizationAppliedFrom: RegularizationAppliedFrom
+                            })];
+                    case 20:
+                        sql = _b.sent();
+                        return [4 /*yield*/, Database_1["default"].from("EmployeeMaster")
+                                .select("Id", "FirstName", "LastName", "CompanyEmail")
+                                .where("OrganizationId", orgid)
+                                .andWhere("Id", 4120)];
+                    case 21:
+                        sqlapproveremp = _b.sent();
+                        seniornameArray = [];
+                        HrnameArray = [];
+                        HremailArray = [];
+                        _i = 0, sqlapproveremp_1 = sqlapproveremp;
+                        _b.label = 22;
+                    case 22:
+                        if (!(_i < sqlapproveremp_1.length)) return [3 /*break*/, 25];
+                        rapproveremp = sqlapproveremp_1[_i];
+                        seniorname = rapproveremp.FirstName + " " + rapproveremp.LastName;
+                        Hrname = seniorname;
+                        return [4 /*yield*/, Helper_1["default"].decode5t(rapproveremp.CompanyEmail)];
+                    case 23:
+                        Hremail = _b.sent();
+                        seniornameArray.push(seniorname);
+                        HrnameArray.push(Hrname);
+                        HremailArray.push(Hremail);
+                        _b.label = 24;
+                    case 24:
+                        _i++;
+                        return [3 /*break*/, 22];
+                    case 25:
+                        if (i == 0) {
+                            title = "Request for Regularization Approval";
+                            if (regularizetimein == orginaltimein) {
+                                timeincondition = "";
+                            }
+                            else {
+                                timeincondition = "\"The requested timein is: " + timeIn + "<br>\";";
+                            }
+                            remarkcondition = "<br><br>";
+                            // if (remark != "") {
+                            //   remarkcondition = `Remarks: ${remark}<br><br><br>`;
+                            //   var buttoncondition;
+                            // if (RegularizationAppliedFrom != 2) {
+                            //   buttoncondition =
+                            //     "<a href='$approvelink' style='text-decoration:none;padding: 10px 15px; background: #ffffff; color:green; -webkit-border-radius: 4px; -moz-border-radius: 4px; border-radius: 4px; border: solid 1px green; text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.4); -webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 1px 1px rgba(0, 0, 0, 0.2); -moz-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 1px 1px rgba(0, 0, 0, 0.2); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 1px 1px rgba(0, 0, 0, 0.2)' >Approve</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href='$rejectlink' style='text-decoration:none;padding: 10px 15px; background: #ffffff; color: brown;-webkit-border-radius: 4px; -moz-border-radius: 4px; border-radius: 4px; border: solid 1px brown; text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.4); -webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 1px 1px rgba(0, 0, 0, 0.2); -moz-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 1px 1px rgba(0, 0, 0, 0.2); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 1px 1px rgba(0, 0, 0, 0.2)' >Reject</a>";
+                            // }
+                            // msg = `Dear $Hrname,<br><br>This is to inform you that, $empname has requested regularization for the $attendancedate. Kindly approve the request.<br>${timeincondition} The requested timeout is: $timeout<br><br><br>
+                            //  ${remarkcondition}${buttoncondition}`;
+                            // //  if(Hremail!=undefined){
+                            //  }
+                            // const title1 =
+                            //   "Acknowledgement of Regularization request sent";
+                            // const msg1 = `Dear $empname,<br><br>This is to inform you that your regularization request has been sent for approval.<br><br><br>Thanks & Regards<br>`;
+                            // if (Empemail != "") {
+                            //   /* $sts1=sendEmail_new($Empemail, $title1, $msg1, "");
+                            //   Trace($msg1."<br>mailsts ".$sts1." empemail ".$Empemail ); */
+                            // }
+                            // }
+                        }
+                        _b.label = 26;
+                    case 26:
+                        i++;
+                        return [3 /*break*/, 19];
+                    case 27:
+                        status = "true";
+                        errorMsg = "Regularization request submitted successfully";
+                        data2["status"] = status;
+                        data2["msg"] = errorMsg;
+                        return [3 /*break*/, 29];
+                    case 28:
+                        status = "false";
+                        errorMsg = "There is some problem while requesting regularization";
+                        data2["status"] = status;
+                        data2["msg"] = errorMsg;
+                        _b.label = 29;
+                    case 29: return [3 /*break*/, 31];
+                    case 30:
+                        _a = _b.sent();
+                        return [3 /*break*/, 31];
+                    case 31: return [3 /*break*/, 33];
+                    case 32:
+                        status = "false";
+                        errorMsg = "No approver found";
+                        data2["status"] = status;
+                        data2["msg"] = errorMsg;
+                        _b.label = 33;
+                    case 33:
+                        if (platform == undefined) {
+                            return [2 /*return*/, status];
+                        }
+                        else {
+                            return [2 /*return*/, data2];
+                        }
+                        return [2 /*return*/];
                 }
             });
         });

@@ -42,7 +42,7 @@ var GetDataToRegValidator = /** @class */ (function (_super) {
             timein: Validator_1.schema.string(),
             timeout: Validator_1.schema.string(),
             remark: Validator_1.schema.string(),
-            platform: Validator_1.schema.string(),
+            platform: Validator_1.schema.string.optional(),
             RegularizationAppliedFrom: Validator_1.schema.string(),
             uid: Validator_1.schema.number(),
             orgid: Validator_1.schema.number(),

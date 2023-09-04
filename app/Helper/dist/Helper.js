@@ -76,7 +76,7 @@ var Helper = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         TimeZone = "Asia/kolkata";
-                        Name = '';
+                        Name = "";
                         return [4 /*yield*/, Database_1["default"].query()
                                 .from("ZoneMaster")
                                 .select("Name")
@@ -937,7 +937,10 @@ var Helper = /** @class */ (function () {
             var selectQuery;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, Database_1["default"].from('ShiftPlanner').select('shiftid').where('empid', EmpId).where('ShiftDate', date)];
+                    case 0: return [4 /*yield*/, Database_1["default"].from("ShiftPlanner")
+                            .select("shiftid")
+                            .where("empid", EmpId)
+                            .where("ShiftDate", date)];
                     case 1:
                         selectQuery = _a.sent();
                         if (selectQuery.length > 0) {
@@ -960,20 +963,24 @@ var Helper = /** @class */ (function () {
                         dateTime = luxon_1.DateTime.fromISO(date);
                         dayOfWeek = dateTime.weekday + 1;
                         weekOfMonth = Math.ceil(dateTime.day / 7);
-                        return [4 /*yield*/, Database_1["default"].from('ShiftMasterChild').select('WeekOff').where('OrganizationId', orgid).where('Day', dayOfWeek).where('ShiftId', shiftid)];
+                        return [4 /*yield*/, Database_1["default"].from("ShiftMasterChild")
+                                .select("WeekOff")
+                                .where("OrganizationId", orgid)
+                                .where("Day", dayOfWeek)
+                                .where("ShiftId", shiftid)];
                     case 1:
                         selectQuery = _a.sent();
                         flag = false;
                         if (selectQuery.length > 0) {
                             weekOffString = selectQuery[0].WeekOff;
-                            week = weekOffString.split(','); // Split the comma-separated string into an array
+                            week = weekOffString.split(","); // Split the comma-separated string into an array
                             flag = true;
                         }
                         if (flag && week[weekOfMonth - 1] == 1) {
-                            return [2 /*return*/, 'WeekOff'];
+                            return [2 /*return*/, "WeekOff"];
                         }
                         else {
-                            return [2 /*return*/, 'noWeekOff'];
+                            return [2 /*return*/, "noWeekOff"];
                         }
                         return [2 /*return*/];
                 }
@@ -1030,17 +1037,20 @@ var Helper = /** @class */ (function () {
         });
     };
     Helper.calculateDistance = function (lat1, lon1, lat2, lon2, unit) {
-        if (unit === void 0) { unit = 'K'; }
+        if (unit === void 0) { unit = "K"; }
         var theta = lon1 - lon2;
-        var dist = Math.sin(this.deg2rad(lat1)) * Math.sin(this.deg2rad(lat2)) + Math.cos(this.deg2rad(lat1)) * Math.cos(this.deg2rad(lat2)) * Math.cos(this.deg2rad(theta));
+        var dist = Math.sin(this.deg2rad(lat1)) * Math.sin(this.deg2rad(lat2)) +
+            Math.cos(this.deg2rad(lat1)) *
+                Math.cos(this.deg2rad(lat2)) *
+                Math.cos(this.deg2rad(theta));
         dist = Math.acos(dist);
         dist = this.rad2deg(dist);
         var miles = dist * 60 * 1.1515;
         unit = unit.toUpperCase();
-        if (unit === 'K') {
+        if (unit === "K") {
             return miles * 1.609344;
         }
-        else if (unit === 'N') {
+        else if (unit === "N") {
             return miles * 0.8684;
         }
         else {
@@ -1072,6 +1082,93 @@ var Helper = /** @class */ (function () {
                             return [2 /*return*/, sts];
                         }
                         return [2 /*return*/];
+                }
+            });
+        });
+    };
+    Helper.getApprovalLevelEmp = function (empid, orgid, processtype) {
+        return __awaiter(this, void 0, void 0, function () {
+            var Id, seniorid, designation, rule, sts, sql, row_1, affected_rows, reportingto, sql_1;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        Id = "0";
+                        designation = 0;
+                        if (!(empid != 0 && empid != undefined)) return [3 /*break*/, 6];
+                        return [4 /*yield*/, Database_1["default"].from("EmployeeMaster")
+                                .select("ReportingTo", "Designation")
+                                .where("OrganizationId", orgid)
+                                .andWhere("Id", empid)];
+                    case 1:
+                        sql = _a.sent();
+                        sql.forEach(function (val) {
+                            seniorid = val.ReportingTo;
+                            designation = val.Designation;
+                        });
+                        if (!(seniorid != 0 && designation != 0)) return [3 /*break*/, 6];
+                        return [4 /*yield*/, Database_1["default"].from("ApprovalProcess")
+                                .select(" RuleCriteria", "Designation", "HrStatus")
+                                .where(" OrganizationId", orgid)
+                                .andWhere(" Designation ", designation)
+                                .andWhere("ProcessType ", processtype)];
+                    case 2:
+                        sql = _a.sent();
+                        return [4 /*yield*/, sql];
+                    case 3:
+                        row_1 = _a.sent();
+                        affected_rows = sql.length;
+                        if (!(affected_rows > 0)) return [3 /*break*/, 6];
+                        if (row_1) {
+                            rule = row_1[0].RuleCriteria;
+                            sts = row_1[0].HrStatus;
+                        }
+                        return [4 /*yield*/, Helper.getSeniorId(empid, orgid)];
+                    case 4:
+                        reportingto = _a.sent();
+                        return [4 /*yield*/, Database_1["default"].from("EmployeeMaster")
+                                .select("Id", "Designation")
+                                .where("OrganizationId", orgid)
+                                .andWhere("DOL", "0000-00-00")
+                                .andWhereIn("Designation", rule)
+                                .andWhere("Id", reportingto)
+                                .orderByRaw(Database_1["default"].raw("FIELD(Designation, " + rule + ")"))];
+                    case 5:
+                        sql_1 = _a.sent();
+                        sql_1.forEach(function (val) {
+                            if (seniorid == undefined) {
+                                seniorid == val.Id;
+                            }
+                            else {
+                                seniorid += "," + row_1.Id;
+                            }
+                        });
+                        _a.label = 6;
+                    case 6: return [2 /*return*/, seniorid];
+                }
+            });
+        });
+    };
+    Helper.getSeniorId = function (empid, organization) {
+        return __awaiter(this, void 0, void 0, function () {
+            var id, parentId, query1;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        id = "0";
+                        parentId = empid;
+                        if (!(parentId != 0 && parentId != undefined)) return [3 /*break*/, 2];
+                        return [4 /*yield*/, Database_1["default"].from("EmployeeMaster")
+                                .select("ReportingTo")
+                                .where("OrganizationId", organization)
+                                .andWhere("Id", parentId)
+                                .andWhere("DOL", "0000-00-00")];
+                    case 1:
+                        query1 = _a.sent();
+                        query1.forEach(function (val) {
+                            id = val.ReportingTo;
+                        });
+                        _a.label = 2;
+                    case 2: return [2 /*return*/, id];
                 }
             });
         });

@@ -132,7 +132,7 @@ var getProfileImageService = /** @class */ (function () {
     };
     getProfileImageService.generateNumericOTP = function (data) {
         return __awaiter(this, void 0, void 0, function () {
-            var EmailId, Empid, Orgid, EncodeEmailForCheck, data2, resresultOTP, nameQuery, fName, lName, name, Count, n, generator, result, i, randomIndex, message, headers, subject, mailresponse, selectEmailOtp_Auth, affected_rows, updateEmaiOTPEmail, insertEmailOtp_Authentication;
+            var EmailId, Empid, Orgid, EncodeEmailForCheck, data2, resresultOTP, nameQuery, fName, lName, name, Count, n, generator, result, i, randomIndex, mailresponse, selectEmailOtp_Auth, affected_rows, updateEmaiOTPEmail, insertEmailOtp_Authentication;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -160,16 +160,13 @@ var getProfileImageService = /** @class */ (function () {
                         else {
                             name = fName + lName;
                         }
-                        n = 10;
+                        n = 6;
                         generator = "1357902468";
                         result = "";
                         for (i = 1; i <= n; i++) {
                             randomIndex = Math.floor(Math.random() * generator.length);
                             result += generator.charAt(randomIndex);
                         }
-                        message = "<html>\n    <head>\n        <meta http-equiv=Content-Type content=\"text/html; charset=windows-1252\">\n        <meta name=Generator content=\"Microsoft Word 12 (filtered)\">\n        <style>\n            div.ex1\n            {\n                width: 600px;\n                margin: auto;\n                border: 2px solid #73AD21;\n                padding : 20px;\n            }\n        </style>  \n    </head>  \n   \n    <body lang=EN-US link=blue vlink=purple>    \n        <div class=\"ex1\">\n        <h1 style = text-align:center>ubiAttendance: Verify your Email</h1>\n        <div class=\"col-sm-6\"><a href=\"\">\n        <img src=\"'.URL1.'assets/img/ubiattendance_logo_rectangle.png\" class=\"img-fluid w-75 w-60 text-center\" style=\"width:30%!important; margin-left: 35%;\"></a>\n    </div>\n        <p style=\"text-align: left; color : #000000\" class=\"paragraph-text\"> <b> Hi '." + name + ".',</b>\n         <p>Please enter the Verification Code below to verify your Email ID. The code is only valid for 10 minutes.</p>\n         <p style=\"color: #06D0A8; font-size: 24px; font-family: monospace;\">'." + result + ".'</p>\n         <p> Please don't share your verification Code with anyone.</p>\n        <p style=\"color:#FFA319; font-weight: bold; font-size: 16px;\">Cheers,<br/>\n        ubiAttendance Team</p>\n        </p>\n</div>  \n                    </body>  \n                    </html>";
-                        headers = "";
-                        subject = "ubiAttendance- Email verification";
                         mailresponse = null;
                         if (!(mailresponse == null)) return [3 /*break*/, 7];
                         return [4 /*yield*/, Database_1["default"].from("EmailOtp_Authentication")
@@ -201,7 +198,7 @@ var getProfileImageService = /** @class */ (function () {
                         Count = insertEmailOtp_Authentication.length;
                         _a.label = 6;
                     case 6:
-                        if (Count) {
+                        if (Count > 0) {
                             resresultOTP["resultOTP"] = 1;
                             data2.push(resresultOTP);
                         }
