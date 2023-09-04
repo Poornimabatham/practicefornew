@@ -49,6 +49,9 @@ Server.middleware.registerNamed({
   inject:() =>import('App/Middleware/Authentication')
 })
 
+
+
+
 // Server.middleware.register([
 //   () => import('@ioc:Adonis/Core/BodyParser'),
 //   () => import('App/Middleware/Login')

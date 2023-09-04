@@ -11,6 +11,9 @@
 
 import { Limiter } from '@adonisjs/limiter/build/services'
 
-export const { httpLimiters } = Limiter.define('global', () => {
+
+export const { httpLimiters } = Limiter.define('global',() => {
   return Limiter.allowRequests(10).every('1 min')
 })
+
+

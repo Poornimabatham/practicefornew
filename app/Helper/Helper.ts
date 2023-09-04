@@ -8,12 +8,7 @@ import ZoneMaster from "App/Models/ZoneMaster";
 import { DateTime } from "luxon";
 import moment from "moment";
 export default class Helper {
-  static weekOfMonth(date: string) {
-    throw new Error("Method not implemented.");
-  }
-  static encrypt(arg0: string) {
-    throw new Error("Method not implemented.");
-  }
+ 
   public static encode5t(str: string) {
     var contactNum = str.toString();
     for (let i = 0; i < 5; i++) {
