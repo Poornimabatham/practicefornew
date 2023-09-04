@@ -97,7 +97,6 @@ var CheckUserEmailService = /** @class */ (function () {
                         checkquery_num_row = selectUserMasterList;
                         if (!(checkquery_num_row.length > 0 || Organization_num_rows.length > 0)) return [3 /*break*/, 7];
                         if (!(checkquery_num_row.length > 0)) return [3 /*break*/, 6];
-                        console.log("op");
                         result["name"] = checkquery_num_row[0].Name;
                         _a = result;
                         _b = "password";
@@ -114,7 +113,6 @@ var CheckUserEmailService = /** @class */ (function () {
                         _e.label = 6;
                     case 6:
                         if (Organization_num_rows.length > 0) {
-                            console.log("o");
                             result["orgName"] = Organization_num_rows[0].Name;
                             result["orgId"] = Organization_num_rows[0].Id;
                         }

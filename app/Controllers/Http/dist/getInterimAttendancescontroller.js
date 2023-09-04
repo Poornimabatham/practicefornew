@@ -36,62 +36,26 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-var GetDataToApplyRegService_1 = require("App/Services/GetDataToApplyRegService");
-var GetDataToApplyValidator_1 = require("App/Validators/GetDataToApplyValidator");
-var GetDataToApplyRegController = /** @class */ (function () {
-    function GetDataToApplyRegController() {
+var getInterimAttendancesService_1 = require("App/Services/getInterimAttendancesService");
+var GetInterimAttendancesValidator_1 = require("App/Validators/GetInterimAttendancesValidator");
+var getInterimAttendancesController = /** @class */ (function () {
+    function getInterimAttendancesController() {
     }
-    GetDataToApplyRegController.prototype.FetchDataToApplyReg = function (_a) {
+    getInterimAttendancesController.prototype.getInterimAttendancesdata = function (_a) {
         var request = _a.request, response = _a.response;
         return __awaiter(this, void 0, void 0, function () {
-            var ValidationInputDetails, Output;
+            var InputValidation, ServiceData;
             return __generator(this, function (_b) {
                 switch (_b.label) {
-                    case 0: return [4 /*yield*/, request.validate(GetDataToApplyValidator_1["default"].GetDataTOapplyRegschema)];
+                    case 0: return [4 /*yield*/, request.validate(GetInterimAttendancesValidator_1["default"].getInterimAttendancesschema)];
                     case 1:
-                        ValidationInputDetails = _b.sent();
-                        return [4 /*yield*/, GetDataToApplyRegService_1["default"].FetchingdatatoReg(ValidationInputDetails)];
-                    case 2:
-                        Output = _b.sent();
-                        return [2 /*return*/, response.json(Output)];
+                        InputValidation = _b.sent();
+                        ServiceData = getInterimAttendancesService_1["default"].getInterimAttendances(InputValidation);
+                        return [2 /*return*/, ServiceData];
                 }
             });
         });
     };
-    GetDataToApplyRegController.prototype.getRegularizationCount = function (_a) {
-        var request = _a.request, response = _a.response;
-        return __awaiter(this, void 0, void 0, function () {
-            var ValidationInputDetails, Output;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
-                    case 0: return [4 /*yield*/, request.validate(GetDataToApplyValidator_1["default"].GetDataTOCountRegschema)];
-                    case 1:
-                        ValidationInputDetails = _b.sent();
-                        return [4 /*yield*/, GetDataToApplyRegService_1["default"].FetchRegularizationCount(ValidationInputDetails)];
-                    case 2:
-                        Output = _b.sent();
-                        return [2 /*return*/, response.json(Output)];
-                }
-            });
-        });
-    };
-    GetDataToApplyRegController.prototype.OnSendRegularizeRequest = function (_a) {
-        var request = _a.request, response = _a.response;
-        return __awaiter(this, void 0, void 0, function () {
-            var ValidationInputDetails, Output;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
-                    case 0: return [4 /*yield*/, request.validate(GetDataToApplyValidator_1["default"].OnSendRegularizeRequestschema)];
-                    case 1:
-                        ValidationInputDetails = _b.sent();
-                        return [4 /*yield*/, GetDataToApplyRegService_1["default"].OnSendRegularizeRequest(ValidationInputDetails)];
-                    case 2:
-                        Output = _b.sent();
-                        return [2 /*return*/, response.json(Output)];
-                }
-            });
-        });
-    };
-    return GetDataToApplyRegController;
+    return getInterimAttendancesController;
 }());
-exports["default"] = GetDataToApplyRegController;
+exports["default"] = getInterimAttendancesController;
