@@ -21,7 +21,6 @@ export default class GeofencesController {
   public async addpolygon({ request, response }: HttpContextContract) {
     const req = await request.validate(GeofenceValidator.addpolygon);
     const result = await getgeofenceservice.addpolygon(req);
-    console.log(result);
     return response.json(result);
   }
   public async assignGeoFenceEmployee({
