@@ -8,7 +8,7 @@ import EmployeeMaster from "App/Models/EmployeeMaster";
 // import DepartmentService from "./DepartmentService";
 import { DateTime } from "luxon";
 export default class ShiftsService {
-  constructor() {}
+  constructor() { }
 
   static async getShiftData(a) {
     //  const currentpage:number = a.currentpage;
@@ -295,7 +295,7 @@ export default class ShiftsService {
       .where("Id", get.empid)
       .andWhere("OrganizationId", get.Orgid)
       .update("Shift", get.shiftid);
-    
+
     if (updateShiftset.length > 0) {
       const zone = await helper.getTimeZone(get.Orgid);
       const timezone = zone;
@@ -327,196 +327,243 @@ export default class ShiftsService {
     }
   }
 
-  static async deleteInActivateShift(data) { 
+  static async deleteInActivateShift(data) {
     const orgid = data.orgId;
     const Id = data.id;
     const empId = data.empId;
-    const result= {};
-    let ShiftName :any = await Helper.getShiftName(Id,orgid);
-    
-    const Deleteshiftdata:any= await Database.from('ShiftMaster').select('*').where('OrganizationId', orgid).andWhere('Id', Id).andWhere('archive', '0').delete(); 
-      
-    if(Deleteshiftdata == 1)
-    {
-        const query = await Database.from('ShiftMasterChild').where('OrganizationId',orgid).andWhere('ShiftId',Id).delete();
-        if(query){ 
-          let date = moment().format("YY-MM-DD");
-          let appModule = "Delete Shift";
-          let  module = "Attendance App";
-          let activityBy = 1;
-          let actionperformed = `<b> ${ShiftName}</b>.Shift has been deleted successfully`;
-          let res = await Helper.ActivityMasterInsert(date,orgid,empId,activityBy,appModule,actionperformed,module)
-          result['status'] = true;
-        }else{
-          result['status'] = false;
-        }
+    const result = {};
+    let ShiftName: any = await Helper.getShiftName(Id, orgid);
 
-    }else{
+    const Deleteshiftdata: any = await Database.from('ShiftMaster').select('*').where('OrganizationId', orgid).andWhere('Id', Id).andWhere('archive', '0').delete();
+
+    if (Deleteshiftdata == 1) {
+      const query = await Database.from('ShiftMasterChild').where('OrganizationId', orgid).andWhere('ShiftId', Id).delete();
+      if (query) {
+        let date = moment().format("YY-MM-DD");
+        let appModule = "Delete Shift";
+        let module = "Attendance App";
+        let activityBy = 1;
+        let actionperformed = `<b> ${ShiftName}</b>.Shift has been deleted successfully`;
+        let res = await Helper.ActivityMasterInsert(date, orgid, empId, activityBy, appModule, actionperformed, module)
+        result['status'] = true;
+      } else {
         result['status'] = false;
+      }
+
+    } else {
+      result['status'] = false;
     }
 
-     return result;
- }
+    return result;
+  }
 
 
-  static async getMultiShiftsList(data){
+  static async getMultiShiftsList(data) {
 
-   const  orgid = data.refno;
-   const emplid = data.empid;
-   const res:any[]= [];
-   let shiftid;
+    const orgid = data.refno;
+    const emplid = data.empid;
+    const res: any[] = [];
+    let shiftid;
 
-   const shiftdata = await Database.query().from('ShiftPlanner as S').select('*').innerJoin('ShiftMaster as SM','S.shiftid','SM.Id').where('empid',emplid).andWhere('orgid',orgid)
-  
-   
-   if(shiftdata.length > 0)
-   {
-        
-        shiftdata.forEach(async(element) => {
-          let result:any = {};
-          result['shiftdate'] = moment(element.ShiftDate).format('YY-MM-DD');
-          shiftid = element.shiftid;
-          result['shiftid'] = shiftid;
-          result['weekoffStatus']=element.weekoffStatus;            
-          // result['shiftTiming']= await Helper.getShiftType(shiftid) == '3' ? await Helper.getFlexiShift(shiftid) : await Helper.getShiftTimes(shiftid);
-          result['shiftype'] =element.shifttype;
-          if(result['shiftype'] == "3"){
-             result['shiftTiming'] = element.HoursPerDay
-          }else{
-            result['shiftTiming'] = element.TimeIn + "-" + element.TimeOut
-          }
-          result['HoursPerDay']=element.HoursPerDay
-          res.push(result);            
-        })
-        return res;
-     }else{
-        return false
-     }
-  } 
+    const shiftdata = await Database.query().from('ShiftPlanner as S').select('*').innerJoin('ShiftMaster as SM', 'S.shiftid', 'SM.Id').where('empid', emplid).andWhere('orgid', orgid)
 
- public static async AssignShiftByDepart(reqdata){
-    const date = moment(reqdata['date']).format('YYYY-MM-DD'); 
+
+    if (shiftdata.length > 0) {
+
+      shiftdata.forEach(async (element) => {
+        let result: any = {};
+        result['shiftdate'] = moment(element.ShiftDate).format('YY-MM-DD');
+        shiftid = element.shiftid;
+        result['shiftid'] = shiftid;
+        result['weekoffStatus'] = element.weekoffStatus;
+        // result['shiftTiming']= await Helper.getShiftType(shiftid) == '3' ? await Helper.getFlexiShift(shiftid) : await Helper.getShiftTimes(shiftid);
+        result['shiftype'] = element.shifttype;
+        if (result['shiftype'] == "3") {
+          result['shiftTiming'] = element.HoursPerDay
+        } else {
+          result['shiftTiming'] = element.TimeIn + "-" + element.TimeOut
+        }
+        result['HoursPerDay'] = element.HoursPerDay
+        res.push(result);
+      })
+      return res;
+    } else {
+      return false
+    }
+  }
+
+  public static async AssignShiftByDepart(reqdata) {
+    const date = moment(reqdata['date']).format('YYYY-MM-DD');
     const zone = await Helper.getTimeZone(reqdata['Orgid']);
     const defaultZone = DateTime.now().setZone(zone);
     let currentDate = defaultZone.toFormat("yyyy-MM-dd HH:mm:ss");
-    const data={};
-    data['status']='false';
-    const EmpdataDepartmentwise = await Database.query().select('E.Id').from('EmployeeMaster as E').innerJoin('DepartmentMaster as D','D.Id','E.Department').where('E.OrganizationId',reqdata['Orgid']).andWhere('E.archive',1).andWhere('E.Is_Delete',0).andWhere('E.Department',reqdata['departid']);
+    const data = {};
+    data['status'] = 'false';
+    const EmpdataDepartmentwise = await Database.query().select('E.Id').from('EmployeeMaster as E').innerJoin('DepartmentMaster as D', 'D.Id', 'E.Department').where('E.OrganizationId', reqdata['Orgid']).andWhere('E.archive', 1).andWhere('E.Is_Delete', 0).andWhere('E.Department', reqdata['departid']);
     await EmpdataDepartmentwise.forEach(async row => {
-        const Empid =row.Id;
-        if(reqdata['status'] == 1 ){
+      const Empid = row.Id;
+      if (reqdata['status'] == 1) {
 
-          const assignshiftDataEmp = await Database.query().select('*').from('ShiftPlanner').where('ShiftDate',date).andWhere('empid',Empid)
-          if(assignshiftDataEmp.length > 0){
+        const assignshiftDataEmp = await Database.query().select('*').from('ShiftPlanner').where('ShiftDate', date).andWhere('empid', Empid)
+        if (assignshiftDataEmp.length > 0) {
 
-            const updatedata:any = await Database.query().from("ShiftPlanner").where("empid",Empid)
-                  .andWhere("ShiftDate",date)
-                  .update({ShiftDate:date,assignmentStatus:2,weekoffStatus:reqdata['WeekoffStatus'],shiftid:reqdata['shiftid'],AssignedById:reqdata['adminid'],LastModifiedDate:currentDate,AddedFrom:0});
-                  if(updatedata > 0){
-                    data['status']='Shift is inserted and updated'; //shift was already assigned on this date now its updated with status 2
+          const updatedata: any = await Database.query().from("ShiftPlanner").where("empid", Empid)
+            .andWhere("ShiftDate", date)
+            .update({ ShiftDate: date, assignmentStatus: 2, weekoffStatus: reqdata['WeekoffStatus'], shiftid: reqdata['shiftid'], AssignedById: reqdata['adminid'], LastModifiedDate: currentDate, AddedFrom: 0 });
+          if (updatedata > 0) {
+            data['status'] = 'Shift is inserted and updated'; //shift was already assigned on this date now its updated with status 2
 
-                  }      
-          }else{
-            const Insertdata:any = await Database.table("ShiftPlanner")
-                                                  .insert({
-                                                          ShiftDate: date,
-                                                          assignmentStatus:reqdata['status'],
-                                                          weekoffStatus: reqdata['WeekoffStatus'],
-                                                          shiftid:reqdata['shiftid'],
-                                                          empid:Empid,
-                                                          orgid:reqdata['Orgid'],
-                                                          extra:0,
-                                                          AddedFrom:0,
-                                                          AssignedById:reqdata['adminid'],
-                                                          LastModifiedDate:currentDate
-                                                      }).returning('Id');
-            
-            if(Insertdata>0){
-              data['status']='Shift is inserted';
-            }                                          
           }
+        } else {
+          const Insertdata: any = await Database.table("ShiftPlanner")
+            .insert({
+              ShiftDate: date,
+              assignmentStatus: reqdata['status'],
+              weekoffStatus: reqdata['WeekoffStatus'],
+              shiftid: reqdata['shiftid'],
+              empid: Empid,
+              orgid: reqdata['Orgid'],
+              extra: 0,
+              AddedFrom: 0,
+              AssignedById: reqdata['adminid'],
+              LastModifiedDate: currentDate
+            }).returning('Id');
 
-        }
-         // This Condition is worked for when the shift assign status is 2
-        if(reqdata['status'] == 2 ){
-          const updatedata:any = await Database.query().from("ShiftPlanner").where("empid",Empid)
-          .andWhere("ShiftDate",date)
-          .update({ShiftDate:date,assignmentStatus:reqdata['status'],weekoffStatus:reqdata['WeekoffStatus'],shiftid:reqdata['shiftid'],AssignedById:reqdata['adminid'],LastModifiedDate:currentDate});
-          if(updatedata > 0){
-            data['status']='Shift is updated';
-          }
-
-        }
-        // This Condition is worked for when the shift assign status is 0
-        if(reqdata['status'] == 0 ){
-          const assignshiftDataEmp = await Database.query().select('*').from('ShiftPlanner').where('ShiftDate',date).andWhere('empid',Empid).andWhere('shiftid',reqdata['shiftid']);
-         
-
-          if(assignshiftDataEmp.length > 0){ 
-
-            await Database.query().delete().from('ShiftPlanner').where('ShiftDate', date).andWhere('empid',Empid)
-            data['status']='Shift is deleted';
+          if (Insertdata > 0) {
+            data['status'] = 'Shift is inserted';
           }
         }
+
+      }
+      // This Condition is worked for when the shift assign status is 2
+      if (reqdata['status'] == 2) {
+        const updatedata: any = await Database.query().from("ShiftPlanner").where("empid", Empid)
+          .andWhere("ShiftDate", date)
+          .update({ ShiftDate: date, assignmentStatus: reqdata['status'], weekoffStatus: reqdata['WeekoffStatus'], shiftid: reqdata['shiftid'], AssignedById: reqdata['adminid'], LastModifiedDate: currentDate });
+        if (updatedata > 0) {
+          data['status'] = 'Shift is updated';
+        }
+
+      }
+      // This Condition is worked for when the shift assign status is 0
+      if (reqdata['status'] == 0) {
+        const assignshiftDataEmp = await Database.query().select('*').from('ShiftPlanner').where('ShiftDate', date).andWhere('empid', Empid).andWhere('shiftid', reqdata['shiftid']);
+
+
+        if (assignshiftDataEmp.length > 0) {
+
+          await Database.query().delete().from('ShiftPlanner').where('ShiftDate', date).andWhere('empid', Empid)
+          data['status'] = 'Shift is deleted';
+        }
+      }
     });
 
-    if(reqdata['status'] == 1 ){
+    if (reqdata['status'] == 1) {
 
-      const ShiftPlannerByDepartment = await Database.query().select('*').from('ShiftPlannerByDepartment').where('ShiftDate',date).andWhere('DepartId',reqdata['departid'])
-      
-      if(ShiftPlannerByDepartment.length > 0){
+      const ShiftPlannerByDepartment = await Database.query().select('*').from('ShiftPlannerByDepartment').where('ShiftDate', date).andWhere('DepartId', reqdata['departid'])
 
-        await Database.query().from("ShiftPlannerByDepartment").where("DepartId",reqdata['departid']).andWhere("ShiftDate",date)
-        .update({ShiftDate:date,assignmentStatus:2,weekoffStatus:reqdata['WeekoffStatus'],shiftid:reqdata['shiftid'],AssignedById:reqdata['adminid'],LastModifiedDate:currentDate}); 
-      }else{
-     
-        const ShiftPlannerByDepartment   = await Database.table("ShiftPlannerByDepartment")
-                                              .insert({
-                                                ShiftDate: date,
-                                                AssignmentStatus:reqdata['status'],
-                                                WeekOffStatus: reqdata['WeekoffStatus'],
-                                                ShiftId:reqdata['shiftid'],
-                                                DepartId:reqdata['departid'],
-                                                OrgId:reqdata['Orgid'],
-                                                Extra:0,
-                                                AssignedById:reqdata['adminid'],
-                                                LastModifiedDate:currentDate
-                                                  });
-            
-                                                                                    
+      if (ShiftPlannerByDepartment.length > 0) {
+
+        await Database.query().from("ShiftPlannerByDepartment").where("DepartId", reqdata['departid']).andWhere("ShiftDate", date)
+          .update({ ShiftDate: date, assignmentStatus: 2, weekoffStatus: reqdata['WeekoffStatus'], shiftid: reqdata['shiftid'], AssignedById: reqdata['adminid'], LastModifiedDate: currentDate });
+      } else {
+
+        const ShiftPlannerByDepartment = await Database.table("ShiftPlannerByDepartment")
+          .insert({
+            ShiftDate: date,
+            AssignmentStatus: reqdata['status'],
+            WeekOffStatus: reqdata['WeekoffStatus'],
+            ShiftId: reqdata['shiftid'],
+            DepartId: reqdata['departid'],
+            OrgId: reqdata['Orgid'],
+            Extra: 0,
+            AssignedById: reqdata['adminid'],
+            LastModifiedDate: currentDate
+          });
+
+
       }
     }
-    if(reqdata['status'] == 2 ){
+    if (reqdata['status'] == 2) {
       await Database.query().from("ShiftPlannerByDepartment")
-        .where("DepartId",reqdata['departid']).andWhere("ShiftDate",date)
-          .update({ShiftDate:date,AssignmentStatus:reqdata['status'],WeekOffStatus:reqdata['WeekoffStatus'],ShiftId:reqdata['shiftid'],AssignedById:reqdata['adminid'],LastModifiedDate:currentDate});     
+        .where("DepartId", reqdata['departid']).andWhere("ShiftDate", date)
+        .update({ ShiftDate: date, AssignmentStatus: reqdata['status'], WeekOffStatus: reqdata['WeekoffStatus'], ShiftId: reqdata['shiftid'], AssignedById: reqdata['adminid'], LastModifiedDate: currentDate });
     }
-    if(reqdata['status'] == 0 ){
+    if (reqdata['status'] == 0) {
 
-      await Database.query().delete().from('ShiftPlannerByDepartment').where('ShiftDate', date).andWhere('DepartId',reqdata['departid']); 
+      await Database.query().delete().from('ShiftPlannerByDepartment').where('ShiftDate', date).andWhere('DepartId', reqdata['departid']);
     }
 
-    if(data['status'] !='false'){
-      const module:string =  "Attendance App";
-            const actionperformed:string = "<b>" + reqdata['shiftname'] + "</b> has been assigned for  <b>"+reqdata['departname']+"'S"+" </b> by <b>" + reqdata['adminname'] + "</b> from<b> Attendance App  </b>";
-            const activityby:any = '1';
-            const appmodule:string= "ShiftPlanner";
-            const InsertActivity = await Database.table("ActivityHistoryMaster")
-                        .insert({
-                                LastModifiedDate: currentDate,
-                                LastModifiedById:reqdata['adminid'],
-                                Module: module,
-                                ActionPerformed:actionperformed,
-                                OrganizationId:reqdata['Orgid'],
-                                ActivityBy:activityby,
-                                adminid:reqdata['adminid'],
-                                AppModule:appmodule
-                            });
+    if (data['status'] != 'false') {
+      const module: string = "Attendance App";
+      const actionperformed: string = "<b>" + reqdata['shiftname'] + "</b> has been assigned for  <b>" + reqdata['departname'] + "'S" + " </b> by <b>" + reqdata['adminname'] + "</b> from<b> Attendance App  </b>";
+      const activityby: any = '1';
+      const appmodule: string = "ShiftPlanner";
+      const InsertActivity = await Database.table("ActivityHistoryMaster")
+        .insert({
+          LastModifiedDate: currentDate,
+          LastModifiedById: reqdata['adminid'],
+          Module: module,
+          ActionPerformed: actionperformed,
+          OrganizationId: reqdata['Orgid'],
+          ActivityBy: activityby,
+          adminid: reqdata['adminid'],
+          AppModule: appmodule
+        });
     }
     return data;
   }
 
+  // ================saveMultiShifts===========
+  public static async addMultiShift(data: any) {
+    const orgid = data.refno ? data.refno : 0;
+    const date1 = data.date ? data.date : 0;
+    const status = data.status ? data.status : '0000-00-00';
+    const shiftid = data.shiftid ? data.shiftid : 0;
+    const empid = data.empid ? data.empid : 0;
+    const WeekoffStatus = data.WeekoffStatus ? data.WeekoffStatus : 0;
+    const assignedbyid = data.assignedbyid ? data.assignedbyid : 0;
+    let oldShiftId = 0;
+    const zone = await Helper.getTimeZone(orgid);
+    const defaultZone = DateTime.now().setZone(zone);
+    const todaydate = date1 ? date1.toFormat('yyyy-MM-dd') : DateTime.now();
+    const newch = DateTime.now().toFormat("yyyy-MM-dd HH:ii");
+    if (status == '1') {
+      const query = await Database.query().from('ShiftPlanner').select('*').where('ShiftDate', shiftid).andWhere('empid', empid);
+      if (query.length > 0) {
+        const query1 = await Database.query().from('ShiftPlanner').select('shiftid').where('ShiftDate', todaydate).andWhere('empid', empid);
+        if (query1.length > 0) {
+          oldShiftId = query1[0].shiftid;
+        }
+        const query3 : any = await Database.query().from('ShiftPlanner').select('ShiftDate', 'assignmentStatus', "weekoffStatus", "shiftid", "AssignedById").where('ShiftDate', todaydate).andWhere('empid', empid).update({
+          'ShiftDate': todaydate,
+          'assignmentStatus': 2,
+          "weekoffStatus": WeekoffStatus,
+          "shiftid": shiftid,
+          "AssignedById": assignedbyid
+        });
+        const query4 :any = await Database
+          .table('ActivityHistoryMaster')
+          .returning('id')
+          .insert({
+            'LastModifiedDate': newch,
+            'LastModifiedById': 0,
+            'Module': 'Shift Planner',
+            "ActionPerformed": Database.raw(`Concat("<b>",(SELECT FirstName from EmployeeMaster where Id=empid),"</b>","shift has been changed from","<b>",(select Name from ShiftMaster where Id=${oldShiftId},'</b>',' to ','<b>',(select Name from ShiftMaster where Id=${shiftid}),'</b>',' for ','<b>',DATE_FORMAT('$td','%d %M, %Y'),'</b>',' from<b> Attendance App</b>'`),
+            "OrganizationId": orgid ,
+            "ActivityBy": 1 ,
+            "adminid":assignedbyid ,
+            "ActivityOn":empid ,
+            "AppModule": 'Shift Planner',
+          })
+          const data1 ={};
+          data1['status']='Shift is inserted and updated'; //shift was already assigned on this date now its updated with status 2
+          return data;
+      }else{
 
+      }
+    }
+  }
   static async  ShiftCheckData(data){
     var Orgid = data.orgid;
     var shiftId = data.id;

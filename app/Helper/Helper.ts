@@ -791,6 +791,7 @@ export default class Helper {
     }
   }
 
+
   public static async time_to_decimal(time: string) {
     const timeArr = time.split(':').map(Number);
     let decTime = timeArr[0] * 60 + timeArr[1] + timeArr[2] / 60;  //converting time in minutes

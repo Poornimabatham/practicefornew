@@ -2083,4 +2083,6 @@ export default class DailyAttendanceService {
 
     return statusArray;
   }
+
+
 }

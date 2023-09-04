@@ -92,6 +92,10 @@ export default class ShiftsController {
     
   }
 
-
+  // =======================saveMultiShifts================
+  public async saveMultiShifts({request,response}: HttpContextContract){
+    const req = await request.validate(ShiftValidator.addMultiShift);
+    const res = await ShiftsService.addMultiShift(req)
+  }
 
 }

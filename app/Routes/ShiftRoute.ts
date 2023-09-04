@@ -11,7 +11,7 @@ Route.post("/deleteInActivateShift", "ShiftsController.destroy")
 Route.patch("/assignShift","ShiftsController.assignShift")  
 Route.get('/Multishift',"ShiftsController.getMultiShiftsList")                                                                                                                                                             
 
-
+Route.put('/saveMultiShifts',"ShiftsController.saveMultiShifts")
 ////////ashish///////////
 Route.put('/SaveMultiShiftsByDepartment',"ShiftsController.AssignShiftsByDepartment")
 
