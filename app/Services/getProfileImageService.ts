@@ -6,25 +6,29 @@ export default class getProfileImageService {
     var Orgid = getvalue.orgId;
     var Empid = getvalue.empId;
 
-    const selectEmployeemasterlist = await Database.from("EmployeeMaster")
+    const selectEmployeemasterlist: any = await Database.from("EmployeeMaster")
       .select("ImageName", "OrganizationId")
       .where("id", Empid)
       .andWhere("OrganizationId", Orgid);
 
     var res: any = [];
-    selectEmployeemasterlist.forEach((ROW) => {
+    const result = await selectEmployeemasterlist;
+
+    result.forEach((ROW) => {
       let Data: any = {};
       const organizationId = ROW.OrganizationId;
+
       const imageName = ROW.ImageName;
-      const combinedString = `{organizationId}/{imageName}`;
+      const combinedString = `${organizationId}/${imageName}`;
+
       if (ROW.ImageName != "" && combinedString) {
         const timestamp = Date.now();
+        const url = "https://ubihrmimages.s3.ap-south-1.amazonaws.com";
+        const dir = `${organizationId}/${imageName}`;
 
-        const dir = `{organizationId}/{imageName}`;
-
-        (Data["profile"] = `uploads/profile/{dir}?r={timestamp}`),
-          (Data["profilePath"] = `{imageName}?r={timestamp}`),
-          (Data["profileEndPoint"] = `uploads/profile/{organizationId}/`);
+        (Data["profile"] = `${url}/${dir}?r=${timestamp}`),
+          (Data["profilePath"] = `${imageName}?r=${timestamp}`),
+          (Data["profileEndPoint"] = `${url}/${organizationId}/`);
       } else {
         Data["profile"] =
           "http://ubiattendance.ubihrm.com/assets/img/avatar.png";
@@ -88,9 +92,8 @@ export default class getProfileImageService {
     nameQuery.forEach((row) => {
       fName = row.FirstName;
       lName = row.LastName;
-
     });
-  
+
     if (lName == "" || lName == "") {
       name = fName;
     } else {
@@ -98,9 +101,9 @@ export default class getProfileImageService {
     }
 
     var Count;
-    const n = 10; // Change this to your desired length
+    const n = 6; // Change this to your desired length
     const generator = "1357902468";
- 
+
     let result = "";
 
     for (let i = 1; i <= n; i++) {
@@ -160,4 +163,14 @@ export default class getProfileImageService {
     }
     return data2;
   }
+  
+
+
+
+
+
+
+
+
+
 }
