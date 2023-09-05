@@ -63,6 +63,11 @@ import "../app/Routes/GetunderovertimeRoute";
 import "../app/Routes/GeofenceRoute";
 
 
+import Route from '@ioc:Adonis/Core/Route'
+
+Route.get('/sendMail', 'MailersController.SendMail')
+
+
 // Route.get('/', async () => {
 //     return "Working fine!"
 // })
