@@ -28,7 +28,7 @@ export default class Helper {
 
   public static async getTimeZone(orgid: any) {
     let TimeZone = "Asia/kolkata";
-    let Name = '';
+    let Name = "";
     const query1: any = await Database.query()
       .from("ZoneMaster")
       .select("Name")
@@ -37,7 +37,7 @@ export default class Helper {
         Database.raw(
           `(select TimeZone from Organization where id =${orgid}  LIMIT 1)`
         )
-      )
+      );
     if (query1.length > 0) {
       return query1[0].Name;
     } else {
@@ -579,7 +579,6 @@ export default class Helper {
   }
 
   public static async getFlexiShift(id) {
-
     let query = await Database.query()
       .from("ShiftMaster")
       .select("HoursPerDay")
@@ -602,7 +601,6 @@ export default class Helper {
 
     if (query.length > 0) {
       if (query[0].TimeIn == "00:00:00" || query[0].TimeIn == "") {
-
         return query[0].HoursPerDay;
       } else {
         return query[0].TimeIn + "-" + query[0].TimeOut;
@@ -620,7 +618,6 @@ export default class Helper {
       return Name;
     } else {
       return Name;
-
     }
   }
 
@@ -668,7 +665,6 @@ export default class Helper {
   }
 
   public static async getCountryNameById(id) {
-
     const query = await Database.from("CountryMaster")
       .select("Name")
       .where("Id", id);
@@ -681,40 +677,50 @@ export default class Helper {
     }
   }
 
-
-  public static async getShiftplannershiftIdByEmpID(EmpId: number, date: string) {
-    let selectQuery = await Database.from('ShiftPlanner').select('shiftid').where('empid', EmpId).where('ShiftDate', date)
+  public static async getShiftplannershiftIdByEmpID(
+    EmpId: number,
+    date: string
+  ) {
+    let selectQuery = await Database.from("ShiftPlanner")
+      .select("shiftid")
+      .where("empid", EmpId)
+      .where("ShiftDate", date);
     if (selectQuery.length > 0) {
       return selectQuery[0].shiftid;
-    }
-    else {
+    } else {
       return 0;
     }
-
   }
 
-  public static async getweeklyoffnew(date: string, shiftid: number, empid: number, orgid: number) {
-
+  public static async getweeklyoffnew(
+    date: string,
+    shiftid: number,
+    empid: number,
+    orgid: number
+  ) {
     var dateTime = DateTime.fromISO(date);
     var dayOfWeek = dateTime.weekday + 1; // Convert Luxon weekday to 1-7 format
     var weekOfMonth = Math.ceil(dateTime.day / 7);
     var week;
-    var selectQuery = await Database.from('ShiftMasterChild').select('WeekOff').where('OrganizationId', orgid).where('Day', dayOfWeek).where('ShiftId', shiftid);
+    var selectQuery = await Database.from("ShiftMasterChild")
+      .select("WeekOff")
+      .where("OrganizationId", orgid)
+      .where("Day", dayOfWeek)
+      .where("ShiftId", shiftid);
 
     var flag = false;
     if (selectQuery.length > 0) {
       const weekOffString = selectQuery[0].WeekOff;
-      week = weekOffString.split(',');  // Split the comma-separated string into an array
+      week = weekOffString.split(","); // Split the comma-separated string into an array
       flag = true;
     }
 
     if (flag && week[weekOfMonth - 1] == 1) {
-      return 'WeekOff';
+      return "WeekOff";
     } else {
-      return 'noWeekOff';
+      return "noWeekOff";
     }
   }
-
 
   static async getAreaInfo(Id) {
     const query = await Database.from("Geo_Settings")
@@ -747,18 +753,22 @@ export default class Helper {
     }
   }
 
-  public static calculateDistance(lat1, lon1, lat2, lon2, unit = 'K') {
+  public static calculateDistance(lat1, lon1, lat2, lon2, unit = "K") {
     const theta = lon1 - lon2;
-    let dist = Math.sin(this.deg2rad(lat1)) * Math.sin(this.deg2rad(lat2)) + Math.cos(this.deg2rad(lat1)) * Math.cos(this.deg2rad(lat2)) * Math.cos(this.deg2rad(theta));
+    let dist =
+      Math.sin(this.deg2rad(lat1)) * Math.sin(this.deg2rad(lat2)) +
+      Math.cos(this.deg2rad(lat1)) *
+        Math.cos(this.deg2rad(lat2)) *
+        Math.cos(this.deg2rad(theta));
     dist = Math.acos(dist);
     dist = this.rad2deg(dist);
     let miles = dist * 60 * 1.1515;
 
     unit = unit.toUpperCase();
 
-    if (unit === 'K') {
+    if (unit === "K") {
       return miles * 1.609344;
-    } else if (unit === 'N') {
+    } else if (unit === "N") {
       return miles * 0.8684;
     } else {
       return miles;
@@ -786,6 +796,83 @@ export default class Helper {
     }
   }
 
+  public static async getApprovalLevelEmp(empid, orgid, processtype) {
+    var Id = "0";
+    var seniorid;
+    var designation = 0;
+
+    var rule;
+    var sts;
+    var sql;
+    if (empid != 0 && empid != undefined) {
+     
+      sql = await Database.from("EmployeeMaster")
+        .select("ReportingTo", "Designation")
+        .where("OrganizationId", orgid)
+        .andWhere("Id", empid);
+      
+      sql.forEach(function (val) {
+        seniorid = val.ReportingTo;
+        designation = val.Designation;
+      });
+     
+      if (seniorid != 0 && designation != 0) {
+       
+        sql = await Database.from("ApprovalProcess")
+          .select(" RuleCriteria", "Designation", "HrStatus")
+          .where(" OrganizationId", orgid)
+          .andWhere(" Designation ", designation)
+          .andWhere("ProcessType ", processtype);
+        const row = await sql;
+    
+        const affected_rows = sql.length;
+
+        if (affected_rows> 0) {
+         
+          if (row) {
+            rule = row[0].RuleCriteria;
+            sts = row[0].HrStatus;
+           
+          }
+
+          var reportingto = await Helper.getSeniorId(empid, orgid);
+          const sql = await Database.from("EmployeeMaster")
+            .select("Id", "Designation")
+            .where("OrganizationId", orgid)
+            .andWhere("DOL", "0000-00-00")
+            .andWhereIn("Designation", rule)
+            .andWhere("Id", reportingto)
+            .orderByRaw(Database.raw(`FIELD(Designation, ${rule})`));
+
+          sql.forEach((val) => {
+            if (seniorid == undefined) {
+              seniorid == val.Id;
+            } else {
+              seniorid += "," + row.Id;
+            }
+          });
+        }
+      }
+    }
+    return seniorid
+  }
+
+  static async getSeniorId(empid, organization) {
+    var id = "0";
+    var parentId = empid;
+    if (parentId != 0 && parentId != undefined) {
+      const query1 = await Database.from("EmployeeMaster")
+        .select("ReportingTo")
+        .where("OrganizationId", organization)
+        .andWhere("Id", parentId)
+        .andWhere("DOL", "0000-00-00");
+
+      query1.forEach((val) => {
+        id = val.ReportingTo;
+      });
+    }
+    return id;
+  }
 
   public static async time_to_decimal(time: string) {
     const timeArr = time.split(':').map(Number);

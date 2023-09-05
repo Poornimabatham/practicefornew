@@ -36,30 +36,26 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-var Database_1 = require("@ioc:Adonis/Lucid/Database");
-var Helper_1 = require("App/Helper/Helper");
-var SelectCountryCodeService = /** @class */ (function () {
-    function SelectCountryCodeService() {
+var getInterimAttendancesService_1 = require("App/Services/getInterimAttendancesService");
+var GetInterimAttendancesValidator_1 = require("App/Validators/GetInterimAttendancesValidator");
+var getInterimAttendancesController = /** @class */ (function () {
+    function getInterimAttendancesController() {
     }
-    SelectCountryCodeService.CountryCode = function (data) {
+    getInterimAttendancesController.prototype.getInterimAttendancesdata = function (_a) {
+        var request = _a.request, response = _a.response;
         return __awaiter(this, void 0, void 0, function () {
-            var country_code, countryname, country_code1, selectcheckCountryCode;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        country_code = data.countrycode;
-                        countryname = data.countryname;
-                        return [4 /*yield*/, Helper_1["default"].myUrlEncode(country_code)];
+            var InputValidation, ServiceData;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0: return [4 /*yield*/, request.validate(GetInterimAttendancesValidator_1["default"].getInterimAttendancesschema)];
                     case 1:
-                        country_code1 = _a.sent();
-                        return [2 /*return*/, country_code1];
-                    case 2:
-                        selectcheckCountryCode = _a.sent();
-                        return [2 /*return*/, selectcheckCountryCode];
+                        InputValidation = _b.sent();
+                        ServiceData = getInterimAttendancesService_1["default"].getInterimAttendances(InputValidation);
+                        return [2 /*return*/, ServiceData];
                 }
             });
         });
     };
-    return SelectCountryCodeService;
+    return getInterimAttendancesController;
 }());
-exports["default"] = SelectCountryCodeService;
+exports["default"] = getInterimAttendancesController;
