@@ -72,7 +72,7 @@ export default class DepartmentValidator extends BaseValidator {
       orgId: schema.number(),
       empId: schema.number.optional(),
       date: schema.date(),
-    }),
+    }),  
   };
 
   static deleteInActiveDepartment = {

@@ -27,7 +27,7 @@ export default class DesignationsController {
 
     const b = await DesignationService.updateDesignation(a);
 
-    return response.json(b);
+    return response.json(b);   
   }
 
   public async assignDesignation({request,response}: HttpContextContract) {

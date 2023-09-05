@@ -312,7 +312,7 @@ export default class loginService {
         dept_array
       );
 
-      let shift_array: any = {};
+      let shift_array: any = {};   
 
       shift_array = [
         {

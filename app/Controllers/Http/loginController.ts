@@ -43,7 +43,7 @@ export default class LoginController {
     this.data["email"] = valdata.email ? valdata.email : "0";
     this.data["org_id"] = valdata.org_id ? valdata.org_id : "0";
     const servicerep = await loginService.Loginverifymail(this.data);
-    return response.json(servicerep)
+    return response.json(servicerep)  
   }
 }
 

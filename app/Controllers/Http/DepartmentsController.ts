@@ -89,7 +89,7 @@ export default class Departmentscontroller {
     this.data["empId"] = valdata.empId ? valdata.empId : 0;
     this.data["Id"] = valdata.empId ? valdata.Id : 0;
     const serviceresp = await DepartmentService.deleteInActiveDept(this.data);
-    return response.json(serviceresp);
+    return response.json(serviceresp);    
 }
 
 }

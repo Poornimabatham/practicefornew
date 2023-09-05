@@ -685,7 +685,7 @@ export default class Helper {
       return query.name;
     }
     return null; // Return null or handle the case when no result is found
-  }
+  }  
 
   public static async getDesigName(desigId, orgId) {    
     const query = await Database.from("DesignationMaster")

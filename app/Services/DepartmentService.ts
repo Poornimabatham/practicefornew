@@ -525,7 +525,7 @@ export default class DepartmentService {
             `(Select count(Id) from EmployeeMaster where OrganizationId = ${orgId} AND Is_Delete=0 and archive = 1 AND ( ID NOT IN (SELECT EmployeeId from AttendanceMaster  where OrganizationId = ${orgId} AND AttendanceStatus in (1,4,8) AND AttendanceDate = '${todayDate}')AND  Shift NOT IN (Select id from ShiftMaster where OrganizationId = ${orgId} AND TimeIn > '${currenttime}')) ) as absent`
           )
         )
-        .where("OrganizationId", orgId)
+        .where("OrganizationId", orgId)  
         .count("Id as departments");
 
       if (selectCountQuery.length > 0) {
