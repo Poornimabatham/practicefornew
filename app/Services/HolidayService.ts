@@ -5,9 +5,9 @@ import Helper from "App/Helper/Helper";
 export default class HolidayService {
   static async Holidayfetch(OrgId) { 
 
-  const currentPage = 2;
-  const perPage = 10;
-  const begin = (currentPage - 1) * perPage;
+  // const currentPage = 2;
+  // const perPage = 10;
+  // const begin = (currentPage - 1) * perPage;
   const CurrYear = moment().format("yyyy")
   const currentYear = new Date().getFullYear();
   const nextYear = currentYear + 1;   // Calculate the next year
@@ -26,51 +26,54 @@ export default class HolidayService {
   .whereBetween("DateFrom",[startfiscalyear,endfiscalyear])
   .whereBetween("DateTo",[startfiscalyear,endfiscalyear])
   .orderBy("fromDate", "asc")
-  .limit(begin)
+  // .limit(begin)
   
-  interface DefineTypes{
-   Id:number,
-   Name:string,
-   Description:string,
-   OrgnisationId:number,
-   fromDate:String,
-   DiffDate:Date,
-   DateTo:String,
+  interface DefineTypes {
+    Id: string;
+    Name: string;
+    Description: string;
+    OrgnizationId: string;
+    fromDate: String;
+    fromDateFormat: string;
+    DiffDate: string;
+    DateTo: String;
+    DateToFormat: string
   }
   const res : DefineTypes[]=[];
 
   const FetchData = await FetchHolidays
-  FetchData.forEach(function (val){
+  FetchData.forEach(function (val){ 
  
-  const FromDate:string =  (moment(val.DateFrom).format("YYYY/MM/DD"))
-  const DateTo:String= moment(val.DateTo).format("YYYY/MM/DD")
+  const FromDate: string = (moment(val.DateFrom).format("YYYY/MM/DD"))
+  const fromDateFormat: string = moment(val.DateFrom).format("YYYY-MM-DD");
+  const DateTo: string = moment(val.DateTo).format("YYYY/MM/DD");
+  const DateToFormat: string = moment(val.DateTo).format("YYYY-MM-DD");
 
-  const CheckData:DefineTypes = {
-    Id:val.Id,
-    Name:val.Name,
-    Description:val.Description,
-    OrgnisationId:val.OrganizationId,
-    fromDate:FromDate,
-    DiffDate:val.DiffDate,
-    DateTo:DateTo
-  }
+  const CheckData: DefineTypes = {
+    Id: val.Id.toString(),
+    Name: val.Name,
+    Description: val.Description,
+    OrgnizationId: val.OrganizationId.toString(),
+    fromDate: FromDate,
+    fromDateFormat: fromDateFormat,
+    DiffDate: val.DiffDate.toString(),
+    DateTo: DateTo,
+    DateToFormat: DateToFormat,
+  };
    res.push(CheckData);
   });
    return res;
   }
-
-static async InsertHoliday(get){
-
-const datefrom = new Date(get.DateFrom); 
+///////// addHoliday ////////
+static async InsertHoliday(get) {
+const datefrom = new Date(get.from); 
 const dateString = datefrom.toLocaleDateString('en-US'); // Change 'en-US' to your preferred locale
 const DateFrom = moment(dateString, 'MM/DD/YYYY').format('YYYY/MM/DD');
-const dateto = new Date(get.DateTo); 
+const dateto = new Date(get.to); 
 const dateString2 = dateto.toLocaleDateString('en-US'); 
 const DateTo = moment(dateString2, 'MM/DD/YYYY').format('YYYY/MM/DD');
-
 const CurrDate = moment().format("YYYY/MM/DD")
-
-const result = {status:" "};
+const result = {};
 const existingHoliday = await Database.query()
   .from('HolidayMaster')
   .select( Database.raw(
@@ -81,11 +84,11 @@ const existingHoliday = await Database.query()
   ))
   .whereBetween('DateFrom', [DateFrom,DateTo])
   .andWhereBetween('DateTo',[DateFrom,DateTo])
-  .andWhere('OrganizationId', get.OrganizationId)
+  .andWhere('OrganizationId', get.org_id)
   .first()
 
 if (existingHoliday){
-  result.status = '2'  // Holiday already exists in database
+  result["status"] = '2'  // Holiday already exists in database
   return(result)
 }
 
@@ -110,25 +113,35 @@ if(DateFrom == CurrDate || DateFrom > CurrDate && DateFrom < endfiscalyear ){
   return "You cant add holiday with past date";
  }
 
-var InsertHolidays = await Database
-.insertQuery() // 👈 gives an instance of insert query builder.
-.table('HolidayMaster')
-.insert({Name:get.Name, Description:get.Description, OrganizationId:get.OrganizationId,CreatedById:get.EmpId,
-  CreatedDate:CurrDate, DivisionId:0, LastModifiedDate:CurrDate,DateFrom:dateF,DateTo:dateT , LastModifiedById:get.EmpId,FiscalId:1})
+var InsertHolidays = await Database.insertQuery() // 👈 gives an instance of insert query builder.
+  .table("HolidayMaster")
+  .insert({
+    Name: get.name,
+    Description: get.description,
+    OrganizationId: get.org_id,
+    CreatedById: get.empid,
+    CreatedDate: CurrDate,
+    DivisionId: 0,
+    LastModifiedDate: CurrDate,
+    DateFrom: dateF,
+    DateTo: dateT,
+    LastModifiedById: get.empid,
+    FiscalId: 1,
+  });
 
   if(InsertHolidays.length > 0){
                
-    const zone = await Helper.getTimeZone(get.OrganizationId);
+    const zone = await Helper.getTimeZone(get.org_id);
     const timezone = zone;
     const date = moment().tz(timezone).toDate();
     
-    const uid = get.EmpId;  
-    const EmpName = await Helper.getempnameById(get.EmpId);
+    const uid = get.empid;  
+    const EmpName = await Helper.getempnameById(get.empid);
   
     const module = 'Attendance app';
     const activityBy = 1
     const appModule = 'Holiday';
-    const actionperformed = `<b>${get.Name}</b>holiday has been created by<b>${EmpName}</b>from Attendance App`;
+    const actionperformed = `<b>${get.name}</b>holiday has been created by<b>${EmpName}</b>from Attendance App`;
       
     await Database.insertQuery()
       .table('ActivityHistoryMaster')
@@ -137,13 +150,13 @@ var InsertHolidays = await Database
         LastModifiedById: uid,
         module: module,
         ActionPerformed: actionperformed,
-        OrganizationId: get.OrganizationId,
+        OrganizationId: get.org_id,
         activityBy: activityBy,
         adminid: uid,
         appmodule: appModule,
       });
     
-    return 'Activity history inserted successfully';
+    return'Activity history inserted successfully';
 }else{
    return'Error inserting activity history';
   }

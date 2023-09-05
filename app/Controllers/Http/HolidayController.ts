@@ -6,17 +6,17 @@ import Database from '@ioc:Adonis/Lucid/Database';
 export default class HolidayController {
 
   public async FetchHoliday({ request, response }: HttpContextContract) {
-
     const ReqData: any = await request.validate(HolidayValidate.HolidayFetch)
     const result = await HolidayService.Holidayfetch(ReqData)
-
-    return response.json(result)
+    let JsonDATA = JSON.stringify(result);
+    return response.json(JsonDATA);
   }
 
   public async InsertHoliday({ request, response }: HttpContextContract) {
 
     const ReqData = await request.validate(HolidayValidate.HolidayInsert)
-    const result = await HolidayService.InsertHoliday(ReqData)
+
+    const result = await HolidayService.InsertHoliday(ReqData);
     
     return response.json(result);
   }
