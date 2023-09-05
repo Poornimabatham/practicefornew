@@ -4,9 +4,9 @@ import { DateTime } from "luxon";
 export default class getunderovertimeService {
     public static async getunderovertime(getdata) {
 
-        const OrgId = getdata.OrgId;
-        const EmpId = getdata.EmpId;
-        const logMonth = getdata.logMonth;
+        const OrgId = getdata.orgid;
+        const EmpId = getdata.empid;
+        const logMonth = getdata.logmonth;
         const dateTime = DateTime.fromFormat(logMonth, 'MMM dd yyyy');
         const unixTimestamp = Math.floor(dateTime.toMillis() / 1000);
         const dateTime1 = DateTime.fromMillis(unixTimestamp * 1000);
@@ -27,7 +27,6 @@ export default class getunderovertimeService {
         let s12HolydayAndWeekOff: number = 0;
         let s12HalfDay: number = 0;
         var data: {} = {};
-
 
 
         if (shiftType == 3) {  //shifttype ==3
@@ -114,9 +113,6 @@ export default class getunderovertimeService {
                 .whereRaw('S.shifttype!=3')
                 .whereRaw('A.TimeIn!="00:00:00"')
                 .whereRaw('A.TimeOut!="00:00:00"')
-                .toQuery()
-            console.log(selectoverundermultistsQuery);
-            return selectoverundermultistsQuery
 
             if (selectoverundermultistsQuery.length > 0) {
                 st12overunderwithmultists = selectoverundermultistsQuery[0].shift12overunderwith_multitimests;
@@ -217,10 +213,6 @@ export default class getunderovertimeService {
                 .whereRaw('S.shifttype!=3')
                 .whereRaw('A.multitime_sts!=1')
 
-            //     .toQuery()
-            // console.log(selects12totalloggedQuery);
-
-            // return selects12totalloggedQuery
             if (selects12totalloggedQuery.length > 0) {
                 st12underoverwithoutmulti_sts = selects12totalloggedQuery[0].st12underoverwithoutmulti_sts;
 
@@ -325,7 +317,7 @@ export default class getunderovertimeService {
                 data['Sign'] = 'zero';
             }
         })
-        // return data;
+        return data;
 
     }
 }
