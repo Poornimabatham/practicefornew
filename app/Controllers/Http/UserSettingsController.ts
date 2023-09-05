@@ -141,4 +141,9 @@ export default class UserSettingsController {
     const serviceRes = await UserSettingService.DeleteAccount(this.data);
     return response.json(serviceRes);
   }
+
+  public async getSetKioskPin(){
+     
+     
+  }
 }
