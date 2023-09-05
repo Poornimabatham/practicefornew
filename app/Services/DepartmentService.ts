@@ -6,41 +6,54 @@ import EmployeeMaster from "App/Models/EmployeeMaster";
 
 export default class DepartmentService {
   public static async getdepartment(data) {
+
+    var orgid = data.orgid;
+    var empid = data.empid;
+    var archive = data.status;
+    var deptId = await Helper.getDepartmentIdByEmpID(empid);
+    var adminStatus = await Helper.getAdminStatus(empid);
+    var condition;
     interface department {
       Id: number;
       Name: string;
-      OrganizationId: number;
       archive: number;
     }
 
-    var begin = (data.currentpage - 1) * data.perpage;
-    var limit;
-    var offset;
-
-    if (data.currentdate != 0 && data.pagename == "DepartmentList") {
-      limit = data.perpage;
-      offset = begin;
+    if (archive == null || archive || undefined) {
+      if (adminStatus == 2) {
+        condition = `Id=${deptId}`;
+      }
     }
-
-    const departmentList = await Database.from("DepartmentMaster")
+    else {
+      if (adminStatus == 2) {
+        condition = `Id=${deptId} AND archive=${archive}`;
+      }
+      else {
+        condition = `archive =${archive}`;
+      }
+    }
+    var departmentListQuery
+    departmentListQuery = Database.from("DepartmentMaster")
       .select(
         "Id",
         Database.raw(
           `if(LENGTH("Name") > 30, concat(SUBSTR("Name", 1, 30), '....'), Name) as Name ,'archive'`
         )
       )
-      .where("OrganizationId", data.OrganizationId)
+      .where("OrganizationId", orgid)
       .orderBy("Name")
-      .limit(limit)
-      .offset(offset);
+
+    if (condition != undefined || condition != null) {
+      departmentListQuery.whereRaw(condition);
+    }
+    var departmentListQueryResult = await departmentListQuery
 
     var result: department[] = []; //declared result as an empty array with type department
 
-    departmentList.forEach((row) => {
+    departmentListQueryResult.forEach((row) => {
       const data: department = {
         Id: row.Id,
         Name: row.Name,
-        OrganizationId: row.OrganizationId,
         archive: row.archive,
       };
       result.push(data);
@@ -251,17 +264,17 @@ export default class DepartmentService {
     };
   }
 
-  public static async getDeptEmp(data){
+  public static async getDeptEmp(data) {
 
     const orgId = data.orgid;
     const deptid = data.deptid;
     const empid = data.empid;
     const datafor = data.datafor;
-    let res1:any = {};
-    let response:any = {};
-    let result:any[]=[];
+    let res1: any = {};
+    let response: any = {};
+    let result: any[] = [];
     const zone = await Helper.getTimeZone(orgId);
-    const defaultZone = DateTime.now().setZone(zone);  
+    const defaultZone = DateTime.now().setZone(zone);
     let date = defaultZone.toFormat("yyyy-MM-dd");
     let predate = defaultZone.minus({ days: 1 }).toFormat("yyyy-MM-dd");
     let status = false
@@ -270,159 +283,154 @@ export default class DepartmentService {
     let halfflg = false;
     let week;
     let sts = 1;
-    let rtimein:any = '' ;
-    let rtimeout:any = '';
-    let dir:any;
+    let rtimein: any = '';
+    let rtimeout: any = '';
+    let dir: any;
     let errorMsg;
-    
-    if(datafor == "Yesterday"){
+
+    if (datafor == "Yesterday") {
       date = predate;
       res1['data_date'] = predate;
-    }else{
-      res1['data_date'] = date;     
+    } else {
+      res1['data_date'] = date;
     }
 
-    let holidayquery = await Database.query().from('HolidayMaster').select('Id').where('OrganizationId',orgId).andWhere(Database.raw(`"${date}" between DateFrom and DateTo`))
+    let holidayquery = await Database.query().from('HolidayMaster').select('Id').where('OrganizationId', orgId).andWhere(Database.raw(`"${date}" between DateFrom and DateTo`))
 
     let holidaycount = holidayquery.length;
 
-    let adminstatus = await Helper.getAdminStatus(empid); 
+    let adminstatus = await Helper.getAdminStatus(empid);
 
-    let query = Database.query().from('EmployeeMaster').select('Id','EmployeeCode','InPushNotificationStatus','OutPushNotificationStatus','FirstName','LastName','Shift','ImageName').where('OrganizationId',orgId).andWhere('Is_Delete',0).andWhere('archive',"!=",0).andWhere('DOL','0000-00-00').orWhere('DOL','>=',date).orderBy('FirstName','asc')
+    let query = Database.query().from('EmployeeMaster').select('Id', 'EmployeeCode', 'InPushNotificationStatus', 'OutPushNotificationStatus', 'FirstName', 'LastName', 'Shift', 'ImageName').where('OrganizationId', orgId).andWhere('Is_Delete', 0).andWhere('archive', "!=", 0).andWhere('DOL', '0000-00-00').orWhere('DOL', '>=', date).orderBy('FirstName', 'asc')
 
-    if(adminstatus == 2)
-    {
-       var dptid = await Helper.getDepartmentIdByEmpID(empid);
-       query = query.andWhere("Department",dptid)
+    if (adminstatus == 2) {
+      var dptid = await Helper.getDepartmentIdByEmpID(empid);
+      query = query.andWhere("Department", dptid)
     }
-    if(datafor=='')
-    {
-       query = query.andWhere(Database.raw(`Id not in (select EmployeeId from AttendanceMaster where AttendanceDate="${date}" and OrganizationId = "${orgId}")`));
+    if (datafor == '') {
+      query = query.andWhere(Database.raw(`Id not in (select EmployeeId from AttendanceMaster where AttendanceDate="${date}" and OrganizationId = "${orgId}")`));
     }
-    if(datafor=='Yesterday')
-    {
-       query = query.andWhere(Database.raw(`Id in (select EmployeeId from AttendanceMaster where  AttendanceDate="${date}" and OrganizationId ="${orgId}" and ((TimeIn!='00:00:00' AND TimeOut !='00:00:00' and device ='Auto Time Out' AND Timein = Timeout )))`));
-    }else{
-       query = query.andWhere(Database.raw(`Id not in (select EmployeeId from AttendanceMaster where  AttendanceDate="${date}" and OrganizationId ="${orgId}" and ((TimeIn!='00:00:00' AND TimeOut!='00:00:00') or AttendanceStatus=2))`));
+    if (datafor == 'Yesterday') {
+      query = query.andWhere(Database.raw(`Id in (select EmployeeId from AttendanceMaster where  AttendanceDate="${date}" and OrganizationId ="${orgId}" and ((TimeIn!='00:00:00' AND TimeOut !='00:00:00' and device ='Auto Time Out' AND Timein = Timeout )))`));
+    } else {
+      query = query.andWhere(Database.raw(`Id not in (select EmployeeId from AttendanceMaster where  AttendanceDate="${date}" and OrganizationId ="${orgId}" and ((TimeIn!='00:00:00' AND TimeOut!='00:00:00') or AttendanceStatus=2))`));
     }
 
-   let querydata = await query
- 
-   let count = querydata.length
-   
-   if(count >= 1)
-   {
-      
+    let querydata = await query
+
+    let count = querydata.length
+
+    if (count >= 1) {
+
       status = true;
-      successMsg = count +" record found";
+      successMsg = count + " record found";
       await Promise.all(
-      querydata.map(async (element) => {
-        let res:any = {}
-        res['OutPushNotificationStatus'] = element.OutPushNotificationStatus;
-        res['InPushNotificationStatus'] = element.InPushNotificationStatus;
-        res['empid'] = element.Id;
-        let dayOfMonth = defaultZone.day;    
-        let weekNumber = Math.ceil(dayOfMonth / 7);
-        let dayofdate = defaultZone.weekday
-        let query = await Database.query().from('ShiftMasterChild').select('WeekOff').where('ShiftId',(Database.raw(`(select shift from EmployeeMaster where Id="${empid}")`))).andWhere('Day',dayofdate);
-       
-        week = query[0].WeekOff;
-       
-        let weekarr = week.split('');
-        if(query.length > 0)
-        {
-           if(weekarr[weekNumber-1] == 1){
-               weekofflg = true;
-           }else if(weekarr[weekNumber-1] == 1){
-               halfflg = true;
-           }
-        }
-       
-        if(holidaycount >0){
-           sts = 5;
-        }
-        if(halfflg){
-           sts = 4;
-        }
-        if(weekofflg){
-          sts = 3;
-        }
+        querydata.map(async (element) => {
+          let res: any = {}
+          res['OutPushNotificationStatus'] = element.OutPushNotificationStatus;
+          res['InPushNotificationStatus'] = element.InPushNotificationStatus;
+          res['empid'] = element.Id;
+          let dayOfMonth = defaultZone.day;
+          let weekNumber = Math.ceil(dayOfMonth / 7);
+          let dayofdate = defaultZone.weekday
+          let query = await Database.query().from('ShiftMasterChild').select('WeekOff').where('ShiftId', (Database.raw(`(select shift from EmployeeMaster where Id="${empid}")`))).andWhere('Day', dayofdate);
 
-        let querdata = await Database.query().select('*').from('AttendanceMaster').where('EmployeeId',empid).andWhere('AttendanceDate',date).andWhere(Database.raw('(TimeOut="00:00:00" or TimeIn=TimeOut)'));
-       
-        res['rtimein'] = "00:00:00";
-        res['rtimeout'] = "00:00:00";
-        if(querdata.length > 0){
-           rtimein = querdata[0].TimeIn;
-           rtimeout = querdata[0].TimeOut;
-           res['Attid'] = querdata[0].Id;
-           res['device'] = querdata[0].device;
-        }
-       
-        if(rtimein != ""){ 
-           res['rtimein'] = querydata[0].TimeIn;
-        }
-        if(rtimeout != ""){
-           res['rtimeout'] = querydata[0].TimeOut;
-        }
-        
-        res['id'] = element.Id;
-        res['empcode'] = element.EmployeeCode;
-        res['name'] = element.FirstName + element.LastName;
-        res['shifttimein'] = "00:00";
-        res['shifttimeout'] = "00:00";
-        res['overtime'] = "00:00";
-        res['attsts'] = sts;
-        res['todate'] = date;
-        res['shift'] = element.Shift;
-        res['shiftname'] = await Helper.getName('ShiftMaster','Name','Id',element.Shift)
-        res['shifttype'] = await Helper.getName('ShiftMaster','shifttype','Id',element.Shift);
-        res['OutPushNotificationStatus'] = element.OutPushNotificationStatus;
-        res['InPushNotificationStatus'] = element.InPushNotificationStatus;
-        let shiftid = element.Shift;
-   
-        if(element.ImageName != ''){
-           dir = orgId + element.ImageName;     
-           res['img'] = 'https://ubitech.ubihrm.com/public/uploads/' + dir;
-        }else{
-           res['img'] = 'http://ubiattendance.ubihrm.com/assets/img/avatar.png';
-        }
+          week = query[0].WeekOff;
 
-        let querydata2 = await Database.query().from('ShiftMaster').select('TimeIn','TimeOut','TimeInBreak','TimeOutBreak',Database.raw(`TIME_FORMAT(TIMEDIFF( TIME_FORMAT(TIMEDIFF(TimeOut, TimeIn),'%H:%i'),TIME_FORMAT(TIMEDIFF(TimeOutBreak, TimeInBreak),'%H:%i')),'%H:%i') as totaltime`)).where('Id',shiftid);
-        if(querydata2.length > 0){
+          let weekarr = week.split('');
+          if (query.length > 0) {
+            if (weekarr[weekNumber - 1] == 1) {
+              weekofflg = true;
+            } else if (weekarr[weekNumber - 1] == 1) {
+              halfflg = true;
+            }
+          }
+
+          if (holidaycount > 0) {
+            sts = 5;
+          }
+          if (halfflg) {
+            sts = 4;
+          }
+          if (weekofflg) {
+            sts = 3;
+          }
+
+          let querdata = await Database.query().select('*').from('AttendanceMaster').where('EmployeeId', empid).andWhere('AttendanceDate', date).andWhere(Database.raw('(TimeOut="00:00:00" or TimeIn=TimeOut)'));
+
+          res['rtimein'] = "00:00:00";
+          res['rtimeout'] = "00:00:00";
+          if (querdata.length > 0) {
+            rtimein = querdata[0].TimeIn;
+            rtimeout = querdata[0].TimeOut;
+            res['Attid'] = querdata[0].Id;
+            res['device'] = querdata[0].device;
+          }
+
+          if (rtimein != "") {
+            res['rtimein'] = querydata[0].TimeIn;
+          }
+          if (rtimeout != "") {
+            res['rtimeout'] = querydata[0].TimeOut;
+          }
+
+          res['id'] = element.Id;
+          res['empcode'] = element.EmployeeCode;
+          res['name'] = element.FirstName + element.LastName;
+          res['shifttimein'] = "00:00";
+          res['shifttimeout'] = "00:00";
+          res['overtime'] = "00:00";
+          res['attsts'] = sts;
+          res['todate'] = date;
+          res['shift'] = element.Shift;
+          res['shiftname'] = await Helper.getName('ShiftMaster', 'Name', 'Id', element.Shift)
+          res['shifttype'] = await Helper.getName('ShiftMaster', 'shifttype', 'Id', element.Shift);
+          res['OutPushNotificationStatus'] = element.OutPushNotificationStatus;
+          res['InPushNotificationStatus'] = element.InPushNotificationStatus;
+          let shiftid = element.Shift;
+
+          if (element.ImageName != '') {
+            dir = orgId + element.ImageName;
+            res['img'] = 'https://ubitech.ubihrm.com/public/uploads/' + dir;
+          } else {
+            res['img'] = 'http://ubiattendance.ubihrm.com/assets/img/avatar.png';
+          }
+
+          let querydata2 = await Database.query().from('ShiftMaster').select('TimeIn', 'TimeOut', 'TimeInBreak', 'TimeOutBreak', Database.raw(`TIME_FORMAT(TIMEDIFF( TIME_FORMAT(TIMEDIFF(TimeOut, TimeIn),'%H:%i'),TIME_FORMAT(TIMEDIFF(TimeOutBreak, TimeInBreak),'%H:%i')),'%H:%i') as totaltime`)).where('Id', shiftid);
+          if (querydata2.length > 0) {
             res['timein'] = querydata2[0].TimeIn;
             res['shifttimein'] = querydata2[0].TimeIn;
-            if(halfflg){
+            if (halfflg) {
               res['timeout'] = querydata2[0].TimeInBreak;
               res['shifttimeout'] = querydata2[0].TimeInBreak;
-            }else{
-               res['timeout'] = querydata2[0].TimeOut;
-               res['shifttimeout']= querydata2[0].TimeOut;
+            } else {
+              res['timeout'] = querydata2[0].TimeOut;
+              res['shifttimeout'] = querydata2[0].TimeOut;
             }
-              res['timein'] = querydata2[0].TimeIn;
-              if(res['timein'] != "00:00:00"){
-                  res['timein'] = res['timein']
-              }
-         }
-         if(weekofflg || holidaycount > 0){
-              res['timein'] = '00:00';
-              res['timeout'] = '00:00';
-              res['overtime'] = '00:00';
-         }
-            res['mark'] = 0;
-            result.push(res)         
-      })
+            res['timein'] = querydata2[0].TimeIn;
+            if (res['timein'] != "00:00:00") {
+              res['timein'] = res['timein']
+            }
+          }
+          if (weekofflg || holidaycount > 0) {
+            res['timein'] = '00:00';
+            res['timeout'] = '00:00';
+            res['overtime'] = '00:00';
+          }
+          res['mark'] = 0;
+          result.push(res)
+        })
       )
-   }else{
-          status=false;
-          errorMsg = 'error...';
-   }
+    } else {
+      status = false;
+      errorMsg = 'error...';
+    }
 
-      response['data'] = result;
-      response['status'] = status;
-      response['successMsg'] = successMsg;
-      response['errorMsg'] = errorMsg;
-      return response;
+    response['data'] = result;
+    response['status'] = status;
+    response['successMsg'] = successMsg;
+    response['errorMsg'] = errorMsg;
+    return response;
   }
 
 
