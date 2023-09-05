@@ -13,10 +13,10 @@ export default class DailyAttendanceService {
     var designationCondition;
     var departmentCondition;
     var AttendanceDate;
+    offset = begin;
 
     if (data.currentPage != undefined && data.csv == undefined) {
       limit = data.perPage;
-      offset = begin;
     } else {
       limit = "";
       offset = "";
