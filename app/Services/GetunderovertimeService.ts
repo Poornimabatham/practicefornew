@@ -31,7 +31,7 @@ export default class getunderovertimeService {
 
 
         if (shiftType == 3) {  //shifttype ==3
-            
+
             var selectQuery = await Database.from('AttendanceMaster as A')
                 .select(Database.raw('SUM(TIME_TO_SEC(CASE WHEN (SELECT shifttype FROM ShiftMaster WHERE Id=A.ShiftId) IN (3) THEN TIMEDIFF(IFNULL((SELECT SEC_TO_TIME(SUM(TIME_TO_SEC(LoggedHours))) FROM InterimAttendances WHERE AttendanceMasterId=A.Id), "00:00:00"), S.HoursPerDay) END)) as shifttype3overunder'))
                 .innerJoin('ShiftMaster as S', 'A.ShiftId', 'S.Id')
