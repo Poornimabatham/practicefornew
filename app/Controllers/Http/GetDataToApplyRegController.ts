@@ -25,4 +25,20 @@ export default class GetDataToApplyRegController {
     );
     return response.json(Output);
   }
+
+
+
+
+  public async OnSendRegularizeRequest({
+    request,
+    response,
+  }: HttpContextContract) {
+    const ValidationInputDetails = await request.validate(
+      GetDataToRegValidator.OnSendRegularizeRequestschema
+    );
+    const Output = await GetDataToRegService.OnSendRegularizeRequest(
+      ValidationInputDetails
+    );
+    return response.json(Output);
+  }
 }

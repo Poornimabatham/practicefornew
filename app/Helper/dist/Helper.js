@@ -43,11 +43,19 @@ var EmployeeMaster_1 = require("App/Models/EmployeeMaster");
 var Organization_1 = require("App/Models/Organization");
 var ShiftMaster_1 = require("App/Models/ShiftMaster");
 var ZoneMaster_1 = require("App/Models/ZoneMaster");
+var luxon_1 = require("luxon");
 var moment_1 = require("moment");
 var Helper = /** @class */ (function () {
     function Helper() {
     }
+    Helper.weekOfMonth = function (date) {
+        throw new Error("Method not implemented.");
+    };
+    Helper.encrypt = function (arg0) {
+        throw new Error("Method not implemented.");
+    };
     Helper.encode5t = function (str) {
+        var contactNum = str.toString();
         for (var i = 0; i < 5; i++) {
             str = Buffer.from(str).toString("base64");
             str = str.split("").reverse().join("");
@@ -63,19 +71,20 @@ var Helper = /** @class */ (function () {
     };
     Helper.getTimeZone = function (orgid) {
         return __awaiter(this, void 0, void 0, function () {
-            var TimeZone, query1;
+            var TimeZone, Name, query1;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         TimeZone = "Asia/kolkata";
+                        Name = "";
                         return [4 /*yield*/, Database_1["default"].query()
                                 .from("ZoneMaster")
-                                .select("name")
+                                .select("Name")
                                 .where("Id", Database_1["default"].raw("(select TimeZone from Organization where id =" + orgid + "  LIMIT 1)"))];
                     case 1:
                         query1 = _a.sent();
                         if (query1.length > 0) {
-                            return [2 /*return*/, query1[0].name];
+                            return [2 /*return*/, query1[0].Name];
                         }
                         else {
                             return [2 /*return*/, TimeZone];
@@ -113,15 +122,15 @@ var Helper = /** @class */ (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        FirstName = '';
+                        FirstName = "";
                         return [4 /*yield*/, Database_1["default"].query()
-                                .from("EmployeeMaster")
-                                .select("FirstName")
+                                .from("EmployeeMaster as E")
+                                .select(Database_1["default"].raw("IF(E.lastname != '', CONCAT(E.FirstName, ' ', E.lastname), E.FirstName) as Name"))
                                 .where("Id", empid)];
                     case 1:
                         query2 = _a.sent();
-                        if (query2 > 0) {
-                            return [2 /*return*/, query2[0].FirstName];
+                        if (query2.length > 0) {
+                            return [2 /*return*/, query2[0].Name];
                         }
                         else {
                             return [2 /*return*/, FirstName];
@@ -354,13 +363,10 @@ var Helper = /** @class */ (function () {
             var ShiftName, getshiftname;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0:
-                        console.log(Id);
-                        console.log(orgid);
-                        return [4 /*yield*/, Database_1["default"].from("ShiftMaster")
-                                .select("Name")
-                                .where("Id", Id)
-                                .andWhere("OrganizationId", orgid)];
+                    case 0: return [4 /*yield*/, Database_1["default"].from("ShiftMaster")
+                            .select("Name")
+                            .where("Id", Id)
+                            .andWhere("OrganizationId", orgid)];
                     case 1:
                         getshiftname = _a.sent();
                         if (getshiftname.length > 0) {
@@ -400,7 +406,10 @@ var Helper = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         name = "";
-                        return [4 /*yield*/, Database_1["default"].query().from(tablename).select(getcol).where(wherecol, id)];
+                        return [4 /*yield*/, Database_1["default"].query()
+                                .from(tablename)
+                                .select(getcol)
+                                .where(wherecol, id)];
                     case 1:
                         query = _a.sent();
                         count = query.length;
@@ -424,7 +433,6 @@ var Helper = /** @class */ (function () {
                         return [4 /*yield*/, ShiftMaster_1["default"].find(shiftId)];
                     case 1:
                         allDataOfShiftMaster = _a.sent();
-                        // console.log(allDataOfShiftMaster?.toSQL().toNative());
                         if (allDataOfShiftMaster) {
                             return [2 /*return*/, allDataOfShiftMaster
                                     ? allDataOfShiftMaster.shifttype
@@ -482,6 +490,23 @@ var Helper = /** @class */ (function () {
                             return [2 /*return*/, 0];
                         }
                         return [2 /*return*/];
+                }
+            });
+        });
+    };
+    Helper.getAddon_geoFenceRestrictionByUserId = function (userId, addon, orgid) {
+        return __awaiter(this, void 0, void 0, function () {
+            var result;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, Database_1["default"].from("EmployeeMaster")
+                            .where("OrganizationId", orgid)
+                            .where("Id", userId)
+                            .select(addon)
+                            .first()];
+                    case 1:
+                        result = _a.sent();
+                        return [2 /*return*/, result ? result.addon : null];
                 }
             });
         });
@@ -575,9 +600,7 @@ var Helper = /** @class */ (function () {
         });
     };
     Helper.ActivityMasterInsert = function (date, orgid, uid, activityBy, appModule, actionperformed, module) {
-        var InsertActivityHistoryMaster = Database_1["default"]
-            .table("ActivityHistoryMaster")
-            .insert({
+        var InsertActivityHistoryMaster = Database_1["default"].table("ActivityHistoryMaster").insert({
             LastModifiedDate: date,
             LastModifiedById: uid,
             module: module,
@@ -646,7 +669,7 @@ var Helper = /** @class */ (function () {
                         getshiftid = _a.sent();
                         if (getshiftid.length > 0) {
                             shift = getshiftid[0].Id;
-                            console.log(getshiftid);
+                            return [2 /*return*/, shift];
                         }
                         else {
                             return [2 /*return*/, shift];
@@ -656,32 +679,513 @@ var Helper = /** @class */ (function () {
             });
         });
     };
-    Helper.myUrlEncode = function (string) {
+    Helper.getShiftByEmpID = function (Id) {
         return __awaiter(this, void 0, void 0, function () {
-            var entities, replacements, result, i, regex;
+            var query;
             return __generator(this, function (_a) {
-                entities = ['%21', '%2A', '%27', '%28', '%29', '%3B', '%3A', '%40', '%26', '%3D', '%2B', '%24', '%2C', '%2F', '%3F', '%25', '%23', '%5B', '%5D'];
-                replacements = ['!', '*', "'", "(", ")", ";", ":", "@", "&", "=", "+", "$", ",", "/", "?", "%", "#", "[", "]"];
-                result = string;
-                for (i = 0; i < entities.length; i++) {
-                    regex = new RegExp(entities[i], 'g');
-                    result = result.replace(regex, replacements[i]);
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, Database_1["default"].query()
+                            .from("ShiftMaster")
+                            .select("Name")
+                            .where("id", Id)];
+                    case 1:
+                        query = _a.sent();
+                        query.forEach(function (row) {
+                            var Name = row.Name;
+                            return Name;
+                        });
+                        return [2 /*return*/];
                 }
-                console.log(result);
+            });
+        });
+    };
+    Helper.myUrlEncode = function (country_code) {
+        return __awaiter(this, void 0, void 0, function () {
+            var entities, replacements, encodedString, i, entity, replacement;
+            return __generator(this, function (_a) {
+                entities = [
+                    "%20",
+                    "%2B",
+                    "%24",
+                    "%2C",
+                    "%2F",
+                    "%3F",
+                    "%25",
+                    "%23",
+                    "%5B",
+                    "%5D",
+                ];
+                replacements = [
+                    "+",
+                    "!",
+                    "*",
+                    "'",
+                    "(",
+                    ")",
+                    ";",
+                    ":",
+                    "@",
+                    "&",
+                    "=",
+                    "$",
+                    ",",
+                    "/",
+                    "?",
+                    "%",
+                    "#",
+                    "[",
+                    "]",
+                ];
+                encodedString = encodeURIComponent(country_code);
+                for (i = 0; i < entities.length; i++) {
+                    entity = entities[i];
+                    replacement = replacements[i];
+                    encodedString = encodedString.split(entity).join(replacement);
+                    return [2 /*return*/, encodedString];
+                }
                 return [2 /*return*/];
             });
         });
     };
+    Helper.getDesignationId = function (name, orgid) {
+        return __awaiter(this, void 0, void 0, function () {
+            var desi, designationdata;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, Database_1["default"].query()
+                            .from("DesignationMaster")
+                            .select("*")
+                            .where("Name", name)
+                            .andWhere("OrganizationId", orgid)];
+                    case 1:
+                        designationdata = _a.sent();
+                        if (designationdata.length > 0) {
+                            desi = designationdata[0].Id;
+                            return [2 /*return*/, desi];
+                        }
+                        else {
+                            return [2 /*return*/, desi];
+                        }
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    Helper.getFlexiShift = function (id) {
+        return __awaiter(this, void 0, void 0, function () {
+            var query, HoursPerDay;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, Database_1["default"].query()
+                            .from("ShiftMaster")
+                            .select("HoursPerDay")
+                            .where("Id", id)];
+                    case 1:
+                        query = _a.sent();
+                        if (query.length > 0) {
+                            HoursPerDay = query[0].HoursPerDay;
+                            return [2 /*return*/, HoursPerDay];
+                        }
+                        else {
+                            return [2 /*return*/, HoursPerDay];
+                        }
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    Helper.getShiftTimes = function (id) {
+        return __awaiter(this, void 0, void 0, function () {
+            var query;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, Database_1["default"].query()
+                            .from("ShiftMaster")
+                            .select("TimeIn", "TimeOut", "HoursPerDay")
+                            .where("Id", id)];
+                    case 1:
+                        query = _a.sent();
+                        if (query.length > 0) {
+                            if (query[0].TimeIn == "00:00:00" || query[0].TimeIn == "") {
+                                return [2 /*return*/, query[0].HoursPerDay];
+                            }
+                            else {
+                                return [2 /*return*/, query[0].TimeIn + "-" + query[0].TimeOut];
+                            }
+                        }
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    Helper.getOrgName = function (id) {
+        return __awaiter(this, void 0, void 0, function () {
+            var Name, queryResult;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        Name = "";
+                        return [4 /*yield*/, Database_1["default"].from("Organization")
+                                .where("Id", id)
+                                .select("Name")];
+                    case 1:
+                        queryResult = _a.sent();
+                        if (queryResult.length > 0) {
+                            Name = queryResult[0].Name;
+                            return [2 /*return*/, Name];
+                        }
+                        else {
+                            return [2 /*return*/, Name];
+                        }
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    Helper.getAdminEmail = function (id) {
+        return __awaiter(this, void 0, void 0, function () {
+            var Email, query;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, Database_1["default"].from("Organization")
+                            .where("Id", id)
+                            .select("Email")];
+                    case 1:
+                        query = _a.sent();
+                        if (query.length > 0) {
+                            Email = query[0].Email;
+                            return [2 /*return*/, Email];
+                        }
+                        else {
+                            return [2 /*return*/, (Email = "")];
+                        }
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    Helper.getAdminNamebyOrgId = function (orgid) {
+        return __awaiter(this, void 0, void 0, function () {
+            var Name, query;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, Database_1["default"].from("admin_login")
+                            .where("OrganizationId", orgid)
+                            .select("name")];
+                    case 1:
+                        query = _a.sent();
+                        if (query.length > 0) {
+                            Name = query[0].name;
+                            return [2 /*return*/, Name];
+                        }
+                        else {
+                            return [2 /*return*/, Name];
+                        }
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    Helper.getEmpEmail = function (id) {
+        return __awaiter(this, void 0, void 0, function () {
+            var query, Email;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, Database_1["default"].from("EmployeeMaster")
+                            .where("Id", id)
+                            .andWhere("Is_Delete", 0)
+                            .select("CurrentEmailId")];
+                    case 1:
+                        query = _a.sent();
+                        if (query.length > 0) {
+                            Email = query[0].CurrentEmailId;
+                            return [2 /*return*/, Email];
+                        }
+                        else {
+                            return [2 /*return*/, Email];
+                        }
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    Helper.getCountryNameById = function (id) {
+        return __awaiter(this, void 0, void 0, function () {
+            var query, Name;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, Database_1["default"].from("CountryMaster")
+                            .select("Name")
+                            .where("Id", id)];
+                    case 1:
+                        query = _a.sent();
+                        Name = "";
+                        if (query.length) {
+                            Name = query[0].Name;
+                            return [2 /*return*/, Name];
+                        }
+                        else {
+                            return [2 /*return*/, Name];
+                        }
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    Helper.getShiftplannershiftIdByEmpID = function (EmpId, date) {
+        return __awaiter(this, void 0, void 0, function () {
+            var selectQuery;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, Database_1["default"].from("ShiftPlanner")
+                            .select("shiftid")
+                            .where("empid", EmpId)
+                            .where("ShiftDate", date)];
+                    case 1:
+                        selectQuery = _a.sent();
+                        if (selectQuery.length > 0) {
+                            return [2 /*return*/, selectQuery[0].shiftid];
+                        }
+                        else {
+                            return [2 /*return*/, 0];
+                        }
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    Helper.getweeklyoffnew = function (date, shiftid, empid, orgid) {
+        return __awaiter(this, void 0, void 0, function () {
+            var dateTime, dayOfWeek, weekOfMonth, week, selectQuery, flag, weekOffString;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        dateTime = luxon_1.DateTime.fromISO(date);
+                        dayOfWeek = dateTime.weekday + 1;
+                        weekOfMonth = Math.ceil(dateTime.day / 7);
+                        return [4 /*yield*/, Database_1["default"].from("ShiftMasterChild")
+                                .select("WeekOff")
+                                .where("OrganizationId", orgid)
+                                .where("Day", dayOfWeek)
+                                .where("ShiftId", shiftid)];
+                    case 1:
+                        selectQuery = _a.sent();
+                        flag = false;
+                        if (selectQuery.length > 0) {
+                            weekOffString = selectQuery[0].WeekOff;
+                            week = weekOffString.split(","); // Split the comma-separated string into an array
+                            flag = true;
+                        }
+                        if (flag && week[weekOfMonth - 1] == 1) {
+                            return [2 /*return*/, "WeekOff"];
+                        }
+                        else {
+                            return [2 /*return*/, "noWeekOff"];
+                        }
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    Helper.getAreaInfo = function (Id) {
+        return __awaiter(this, void 0, void 0, function () {
+            var query, arr, arr1;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, Database_1["default"].from("Geo_Settings")
+                            .select("Lat_Long", "Radius")
+                            .where("Id", Id)
+                            .where("Lat_Long", "!=", "")
+                            .limit(1)
+                            .first()];
+                    case 1:
+                        query = _a.sent();
+                        if (query) {
+                            arr = {};
+                            arr1 = query.Lat_Long.split(",");
+                            arr.lat = arr1[0] ? parseFloat(arr1[0]) : 0.0;
+                            arr.long = arr1[1] ? parseFloat(arr1[1]) : 0.0;
+                            arr.radius = query.Radius;
+                            return [2 /*return*/, arr];
+                        }
+                        return [2 /*return*/, 0];
+                }
+            });
+        });
+    };
+    Helper.getSettingByOrgId = function (id) {
+        return __awaiter(this, void 0, void 0, function () {
+            var query, sts;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, Database_1["default"].from("Att_OrgSetting")
+                            .select("outside_geofence_setting")
+                            .where("OrganizationId", id)];
+                    case 1:
+                        query = _a.sent();
+                        sts = "";
+                        if (query.length) {
+                            sts = query[0].outside_geofence_setting;
+                            return [2 /*return*/, sts];
+                        }
+                        else {
+                            return [2 /*return*/, sts];
+                        }
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    Helper.calculateDistance = function (lat1, lon1, lat2, lon2, unit) {
+        if (unit === void 0) { unit = "K"; }
+        var theta = lon1 - lon2;
+        var dist = Math.sin(this.deg2rad(lat1)) * Math.sin(this.deg2rad(lat2)) +
+            Math.cos(this.deg2rad(lat1)) *
+                Math.cos(this.deg2rad(lat2)) *
+                Math.cos(this.deg2rad(theta));
+        dist = Math.acos(dist);
+        dist = this.rad2deg(dist);
+        var miles = dist * 60 * 1.1515;
+        unit = unit.toUpperCase();
+        if (unit === "K") {
+            return miles * 1.609344;
+        }
+        else if (unit === "N") {
+            return miles * 0.8684;
+        }
+        else {
+            return miles;
+        }
+    };
+    Helper.deg2rad = function (deg) {
+        return deg * (Math.PI / 180);
+    };
+    Helper.rad2deg = function (rad) {
+        return rad * (180 / Math.PI);
+    };
+    Helper.getAreaIdByUser = function (id) {
+        return __awaiter(this, void 0, void 0, function () {
+            var query, sts;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, Database_1["default"].from("EmployeeMaster")
+                            .select("area_assigned")
+                            .where("Id", id)];
+                    case 1:
+                        query = _a.sent();
+                        sts = "";
+                        if (query.length) {
+                            sts = query[0].area_assigned;
+                            return [2 /*return*/, sts];
+                        }
+                        else {
+                            return [2 /*return*/, sts];
+                        }
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    Helper.getApprovalLevelEmp = function (empid, orgid, processtype) {
+        return __awaiter(this, void 0, void 0, function () {
+            var Id, seniorid, designation, rule, sts, sql, row_1, affected_rows, reportingto, sql_1;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        Id = "0";
+                        designation = 0;
+                        if (!(empid != 0 && empid != undefined)) return [3 /*break*/, 6];
+                        return [4 /*yield*/, Database_1["default"].from("EmployeeMaster")
+                                .select("ReportingTo", "Designation")
+                                .where("OrganizationId", orgid)
+                                .andWhere("Id", empid)];
+                    case 1:
+                        sql = _a.sent();
+                        sql.forEach(function (val) {
+                            seniorid = val.ReportingTo;
+                            designation = val.Designation;
+                        });
+                        if (!(seniorid != 0 && designation != 0)) return [3 /*break*/, 6];
+                        return [4 /*yield*/, Database_1["default"].from("ApprovalProcess")
+                                .select(" RuleCriteria", "Designation", "HrStatus")
+                                .where(" OrganizationId", orgid)
+                                .andWhere(" Designation ", designation)
+                                .andWhere("ProcessType ", processtype)];
+                    case 2:
+                        sql = _a.sent();
+                        return [4 /*yield*/, sql];
+                    case 3:
+                        row_1 = _a.sent();
+                        affected_rows = sql.length;
+                        if (!(affected_rows > 0)) return [3 /*break*/, 6];
+                        if (row_1) {
+                            rule = row_1[0].RuleCriteria;
+                            sts = row_1[0].HrStatus;
+                        }
+                        return [4 /*yield*/, Helper.getSeniorId(empid, orgid)];
+                    case 4:
+                        reportingto = _a.sent();
+                        return [4 /*yield*/, Database_1["default"].from("EmployeeMaster")
+                                .select("Id", "Designation")
+                                .where("OrganizationId", orgid)
+                                .andWhere("DOL", "0000-00-00")
+                                .andWhereIn("Designation", rule)
+                                .andWhere("Id", reportingto)
+                                .orderByRaw(Database_1["default"].raw("FIELD(Designation, " + rule + ")"))];
+                    case 5:
+                        sql_1 = _a.sent();
+                        sql_1.forEach(function (val) {
+                            if (seniorid == undefined) {
+                                seniorid == val.Id;
+                            }
+                            else {
+                                seniorid += "," + row_1.Id;
+                            }
+                        });
+                        _a.label = 6;
+                    case 6: return [2 /*return*/, seniorid];
+                }
+            });
+        });
+    };
+    Helper.getSeniorId = function (empid, organization) {
+        return __awaiter(this, void 0, void 0, function () {
+            var id, parentId, query1;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        id = "0";
+                        parentId = empid;
+                        if (!(parentId != 0 && parentId != undefined)) return [3 /*break*/, 2];
+                        return [4 /*yield*/, Database_1["default"].from("EmployeeMaster")
+                                .select("ReportingTo")
+                                .where("OrganizationId", organization)
+                                .andWhere("Id", parentId)
+                                .andWhere("DOL", "0000-00-00")];
+                    case 1:
+                        query1 = _a.sent();
+                        query1.forEach(function (val) {
+                            id = val.ReportingTo;
+                        });
+                        _a.label = 2;
+                    case 2: return [2 /*return*/, id];
+                }
+            });
+        });
+    };
     Helper.calculateOvertime = function (startTime, endTime) {
-        var _a = startTime.split(':').map(Number), startHours = _a[0], startMinutes = _a[1], startSeconds = _a[2];
-        var _b = endTime.split(':').map(Number), endHours = _b[0], endMinutes = _b[1], endSeconds = _b[2];
+        var _a = startTime
+            .split(":")
+            .map(Number), startHours = _a[0], startMinutes = _a[1], startSeconds = _a[2];
+        var _b = endTime.split(":").map(Number), endHours = _b[0], endMinutes = _b[1], endSeconds = _b[2];
         var totalStartSeconds = startHours * 3600 + startMinutes * 60 + startSeconds;
         var totalEndSeconds = endHours * 3600 + endMinutes * 60 + endSeconds;
         var timeDiffInSeconds = totalEndSeconds - totalStartSeconds;
-        // if (timeDiffInSeconds < 0) { 
+        // if (timeDiffInSeconds < 0) {
         //   timeDiffInSeconds += 24 * 3600; // Assuming time is within 24 hours range
         // }
-        var hours = Math.floor(Math.abs(timeDiffInSeconds) / 3600) * (timeDiffInSeconds < 0 ? 1 : 1);
+        var hours = Math.floor(Math.abs(timeDiffInSeconds) / 3600) *
+            (timeDiffInSeconds < 0 ? 1 : 1);
         var remainingSeconds = Math.abs(timeDiffInSeconds) % 3600;
         var minutes = Math.floor(remainingSeconds / 60) * (timeDiffInSeconds < 0 ? 1 : 1);
         var seconds = Math.floor(remainingSeconds % 60) * (timeDiffInSeconds < 0 ? 1 : 1);

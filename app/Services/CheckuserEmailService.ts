@@ -48,7 +48,7 @@ export default class CheckUserEmailService {
     var checkquery_num_row = selectUserMasterList;
     if (checkquery_num_row.length > 0 || Organization_num_rows.length > 0) {
       if (checkquery_num_row.length > 0) {
-        console.log("op");
+      
         result["name"] = checkquery_num_row[0].Name;
         result["password"] = await Helper.decode5t(
           checkquery_num_row[0].Password
@@ -59,7 +59,7 @@ export default class CheckUserEmailService {
       }
 
       if (Organization_num_rows.length > 0) {
-        console.log("o");
+      
         result["orgName"] = Organization_num_rows[0].Name;
         result["orgId"] = Organization_num_rows[0].Id;
       }
