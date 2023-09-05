@@ -518,7 +518,7 @@ export default class ShiftsService {
   public static async addMultiShift(data: any) {
     const orgid = data.refno ? data.refno : 0;
     const date1 = data.date ? data.date : 0;
-    const status = data.status ? data.status : '0000-00-00';
+    const status = data.status ? data.status : 0;
     const shiftid = data.shiftid ? data.shiftid : 0;
     const empid = data.empid ? data.empid : 0;
     const WeekoffStatus = data.WeekoffStatus ? data.WeekoffStatus : 0;
@@ -528,12 +528,17 @@ export default class ShiftsService {
     const defaultZone = DateTime.now().setZone(zone);
     const todaydate = date1 ? date1.toFormat('yyyy-MM-dd') : DateTime.now();
     const newch = DateTime.now().toFormat("yyyy-MM-dd HH:ii");
+    let NewShiftName =  await Helper.getShiftName(shiftid , orgid);
+    let oldShiftName = '';
+    const empname = await Helper.getEmpName(empid)
+    const data1 ={};
     if (status == '1') {
-      const query = await Database.query().from('ShiftPlanner').select('*').where('ShiftDate', shiftid).andWhere('empid', empid);
+      const query = await Database.query().from('ShiftPlanner').select('*').where('ShiftDate', todaydate).andWhere('empid', empid);
       if (query.length > 0) {
         const query1 = await Database.query().from('ShiftPlanner').select('shiftid').where('ShiftDate', todaydate).andWhere('empid', empid);
         if (query1.length > 0) {
           oldShiftId = query1[0].shiftid;
+          oldShiftName = await Helper.getShiftName(oldShiftId , orgid);
         }
         const query3 : any = await Database.query().from('ShiftPlanner').select('ShiftDate', 'assignmentStatus', "weekoffStatus", "shiftid", "AssignedById").where('ShiftDate', todaydate).andWhere('empid', empid).update({
           'ShiftDate': todaydate,
@@ -542,26 +547,123 @@ export default class ShiftsService {
           "shiftid": shiftid,
           "AssignedById": assignedbyid
         });
-        const query4 :any = await Database
-          .table('ActivityHistoryMaster')
-          .returning('id')
-          .insert({
-            'LastModifiedDate': newch,
-            'LastModifiedById': 0,
-            'Module': 'Shift Planner',
-            "ActionPerformed": Database.raw(`Concat("<b>",(SELECT FirstName from EmployeeMaster where Id=empid),"</b>","shift has been changed from","<b>",(select Name from ShiftMaster where Id=${oldShiftId},'</b>',' to ','<b>',(select Name from ShiftMaster where Id=${shiftid}),'</b>',' for ','<b>',DATE_FORMAT('$td','%d %M, %Y'),'</b>',' from<b> Attendance App</b>'`),
-            "OrganizationId": orgid ,
-            "ActivityBy": 1 ,
-            "adminid":assignedbyid ,
-            "ActivityOn":empid ,
-            "AppModule": 'Shift Planner',
-          })
-          const data1 ={};
-          data1['status']='Shift is inserted and updated'; //shift was already assigned on this date now its updated with status 2
-          return data;
+        const activityBy = '1'
+        const module = 'Attendance app'
+        const appModule =  'Shift Planner'
+        const actionperformed = '<b> '+`${empname}`+'<b>'+' shift has been changed from <b> ' +`${oldShiftName}`+' to '+`${NewShiftName}`+'<b> for '+`${newch}`+ ' from Attendance App' 
+       const activity =  await Helper.ActivityMasterInsert(
+        newch,
+          orgid,
+          assignedbyid,
+          activityBy,
+          appModule,
+          actionperformed,
+          module
+        ) 
+        
+          if(query3 > 0){
+            data1['status']='Shift is inserted and updated';
+            return data1;
+          }else{
+            data1['status']='error occurs';
+            return data1;
+          }
       }else{
-
+        const query21:any = await Database.table('ShiftPlanner').returning('id').insert({
+          "ShiftDate": `${todaydate}`,
+           "assignmentStatus": status,
+           "weekoffStatus" : WeekoffStatus,
+            "shiftid" :shiftid ,
+             "empid" :empid ,
+              "orgid" : orgid, 
+              "extra" : 0,
+              "AssignedById" : assignedbyid
+        });
+        const activityBy = '1'
+        const module = 'Attendance app'
+        const appModule =  'Shift Planner'
+        const actionperformed = '<b> '+`${NewShiftName}`+'<b>'+' Shift has been assigned to <b> ' +`${empname}`+'<b> for '+`${newch}`+ ' from Attendance App' 
+       const activity =  await Helper.ActivityMasterInsert(
+        newch,
+          orgid,
+          assignedbyid,
+          activityBy,
+          appModule,
+          actionperformed,
+          module
+        ) 
+        
+        if(query21 > 0){
+          data1['status']='Shift is inserted';
+          return data1;
+        }else{
+          data1['status']='error occurs';
+          return data1;
+        }
+       
       }
+    }
+    if(status == '2'){ //update
+      const query12= await Database.query().from(`ShiftPlanner`).select("shiftid").where('ShiftDate',todaydate).andWhere('empid',empid)
+      if(query12.length > 0){
+        const oldShiftId = query12[0].shiftid;
+       oldShiftName =  await Helper.getShiftName(oldShiftId , orgid)
+      }
+     
+      const query21:any = await Database.query().from(`ShiftPlanner`).where("ShiftDate",todaydate).andWhere('empid',empid).update({'ShiftDate':todaydate,
+      'assignmentStatus':status,
+      'weekoffStatus':WeekoffStatus,
+      'shiftid':shiftid,
+      'AssignedById' :assignedbyid 
+      });
+      const activityBy = '1'
+        const module = 'Attendance app'
+        const appModule =  'Shift Planner'
+        const actionperformed = '<b> '+`${empname}`+'<b>'+' shift has been changed from to <b> ' +`${oldShiftName}`+'<b> to ' +`${NewShiftName}`+' for '+`${newch}`+ ' from Attendance App' 
+      const activity =  await Helper.ActivityMasterInsert(
+        newch,
+          orgid,
+          assignedbyid,
+          activityBy,
+          appModule,
+          actionperformed,
+          module
+        ) 
+        if(query21 > 0){
+          data1['status']='Shift is updated';
+          return data1;
+        }else{
+          data1['status']='error occurs';
+          return data1;
+        }
+        
+  
+    }
+   
+    if(status == 0){
+        const query21:any = await Database.query().from('ShiftPlanner').where('ShiftDate',todaydate).andWhere('empid',empid).delete();
+        const activityBy = '1'
+        const module = 'Attendance app'
+        const appModule =  'Shift Planner'
+        const adminName = await Helper.getempnameById(empid)
+        const actionperformed = '<b> '+`${NewShiftName}`+'<b>'+' shift has been unassigned for  <b> ' +`${empname}`+'<b> By ' +`${adminName}`+' for '+`${newch}`+ ' from Attendance App' 
+        const activity =  await Helper.ActivityMasterInsert(
+        newch,
+          orgid,
+          assignedbyid,
+          activityBy,
+          appModule,
+          actionperformed,
+          module
+        ) 
+        if(query21 > 0){
+          data1['status']='Shift is deleted';
+          return data1;
+        }else{
+          data1['status']='error occurs';
+          return data1;
+        }
+        
     }
   }
   static async  ShiftCheckData(data){
@@ -583,12 +685,6 @@ export default class ShiftsService {
       num: result[0].num,
       attNum: result2[0].nums,
     };
-
-
-
-
-
-
   }
 
 }
