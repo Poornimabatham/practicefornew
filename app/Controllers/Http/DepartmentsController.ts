@@ -1,7 +1,7 @@
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import DepartmentValidator from "App/Validators/DepartmentValidator";
 import DepartmentService from "App/Services/DepartmentService";
-export default class Departmentscontroller {
+export default class DepartmentsController {
   private data = [];
   public async getdepartment({ request, response }: HttpContextContract) {
 
@@ -83,13 +83,5 @@ export default class Departmentscontroller {
 
     return response.json(service);
   }
-  public async deleteInActiveDepartment({ request, response }: HttpContextContract) {
-    const valdata = await request.validate(DepartmentValidator.deleteInActiveDepartment);
-    this.data["orgId"] = valdata.orgId ? valdata.orgId : 0;
-    this.data["empId"] = valdata.empId ? valdata.empId : 0;
-    this.data["Id"] = valdata.empId ? valdata.Id : 0;
-    const serviceresp = await DepartmentService.deleteInActiveDept(this.data);
-    return response.json(serviceresp);
-}
 
 }
