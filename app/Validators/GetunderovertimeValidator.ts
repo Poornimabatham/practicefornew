@@ -26,9 +26,9 @@ export default class GetunderovertimeValidator {
    */
   static getUnderOvertime = {
     schema: schema.create({
-      OrgId: schema.number(),
-      EmpId: schema.number(),
-      logMonth: schema.string()
+      orgid: schema.number(),
+      empid: schema.number(),
+      logmonth: schema.string()
     }), message: BaseValidator.messages
   }
 
