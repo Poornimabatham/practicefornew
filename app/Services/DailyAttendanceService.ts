@@ -23,7 +23,6 @@ export default class DailyAttendanceService {
     }
 
     var adminStatus = await Helper.getAdminStatus(data.EmployeeId);
-
     var departmentId = await Helper.getDepartmentIdByEmpID(data.EmployeeId);
 
     if (data.dataFor == "present") {
