@@ -140,4 +140,11 @@ export default class UserSettingValidator {
       date: schema.date.optional({ format: "yyyy-MM-dd" }),
     }),
   };
+
+  static getsetkiospin = {
+     schema:schema.create({
+      empId:schema.string(),
+      orgId:schema.string()
+     })
+  }
 }
