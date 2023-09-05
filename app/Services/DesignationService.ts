@@ -246,7 +246,7 @@ export default class DesignationService {
     }
   }
 
-  // GetDesignationStatus
+    // GetDesignationStatus
 
   public static async DesignationStatus(get) {
     var Orgid = get.orgid;
@@ -255,7 +255,7 @@ export default class DesignationService {
     const selectEmployeeList = await Database.from("EmployeeMaster")
       .select(Database.raw("COUNT(*) as num"))
       .where("OrganizationId", Orgid)
-      .andWhere(" Designation", DesigId);
+      .andWhere(" Designation", DesigId)
 
     const result = await selectEmployeeList;
     const selectAttendanceMasterList = await Database.from("AttendanceMaster")
@@ -268,51 +268,5 @@ export default class DesignationService {
       num: result[0].num,
       attNum: result2[0].totemp,
     };
-  }
-
-  ///////////// deleteInActiveDesignation ////////
-  public static async deleteInActiveDesig(getparam) {
-    let desigInactiveid = getparam.Id;
-    let Adminid = getparam.empId;
-    let orgid = getparam.orgId;
-    var data = {};
-    var DesigName = await Helper.getDesigName(desigInactiveid, orgid);
-    var query = await Database.from("DesignationMaster")
-      .where("OrganizationId", orgid)
-      .andWhere("Id", desigInactiveid)
-      .andWhere("archive", 0)
-      .delete();
-    if (query) {
-      data["status"] = "true"; //Department  Delete successfully
-      const zone = await Helper.getTimeZone(getparam.orgId);
-      const timezone = zone;
-      const date = moment().tz(timezone).toDate();
-      const empName = await Helper.getempnameById(Adminid);
-
-      const orgid = getparam.orgId;
-      const uid = Adminid;
-      const module = "Attendance app";
-      const activityBy = 1;
-      const appModule = "Delete Designation";
-      const actionperformed = `<b>${DesigName}</b>. designation has been deleted by <b>${empName}</b> from <b>${module}</b>`;
-
-      var getresult = await Helper.ActivityMasterInsert(
-        date,
-        orgid,
-        uid,
-        activityBy,
-        appModule,
-        actionperformed,
-        module
-      );
-      if (getresult) {
-        data["status"] = "Successfully Inserted in ActivityMasterInsert";
-      } else {
-        data["status"] = "Error inserting ActivityMasterInsert";
-      }
-    } else {
-      data["status"] = "false"; //Department Delete Unsuccessfull
-    }
-    return data;
   }
 }
