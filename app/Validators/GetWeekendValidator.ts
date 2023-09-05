@@ -1,11 +1,8 @@
 import { schema, CustomMessages } from '@ioc:Adonis/Core/Validator'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import BaseValidator from './BaseValidator'
-
-export default class AttendanceValidator extends BaseValidator{
-  constructor(protected ctx: HttpContextContract) {
-    super()
-  }
+export default class GetWeekendValidator {
+  constructor(protected ctx: HttpContextContract) { }
 
   /*
    * Define schema to validate the "shape", "type", "formatting" and "integrity" of data.
@@ -26,20 +23,15 @@ export default class AttendanceValidator extends BaseValidator{
    *     ])
    *    ```
    */
-  public schema = schema.create({})
-  public static presentemplist = {
+  static GetWeekends = {
     schema: schema.create({
-      emp: schema.number(),
-      refno: schema.number(),
-      datafor:schema.string(),
-      currentPage: schema.number.optional(), 
-      perPage: schema.number.optional(),
-      csv: schema.string.optional()
-      
-    })
-    , message: BaseValidator.messages
+      OrgId: schema.number([
+      ]),
+      EmpId: schema.number([
+      ])
+    }), message: BaseValidator.messages
   }
- 
+
   /**
    * Custom messages for validation failures. You can make use of dot notation `(.)`
    * for targeting nested fields and array expressions `(*)` for targeting all

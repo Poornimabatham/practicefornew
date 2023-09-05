@@ -1,5 +1,6 @@
  import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import DailyAttendanceService from 'App/Services/DailyAttendanceService';
+import AttendanceValidator from 'App/Validators/AttendanceValidator';
 
 export default class AttendancesController {
 
@@ -13,4 +14,6 @@ export default class AttendancesController {
         console.log("controller")
         return response.json(jsonData);
     }
+
+  
 }

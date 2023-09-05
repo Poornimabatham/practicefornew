@@ -1,8 +1,9 @@
 import Database from "@ioc:Adonis/Lucid/Database";
 import Helper from "App/Helper/Helper";
 import { DateTime } from 'luxon'
+
 export default class getgeofenceservice {
-  public static async getgeofence(data) {
+  public static async getgeofence(data: any) {
     let location: string;
     var begin: number = (data.currentpage - 1) * data.perpage;
 
@@ -95,15 +96,12 @@ export default class getgeofenceservice {
     const Status = data.Status; // if geo-fence added radius v/s it will be 1 else polgyon v/s will by 2
     const latilongi = JSON.parse(lat_long);
     let lastInsertedId: number = 0;
-    let affected: number = 0;
+    let affected: number = 0
     let result1 = {};
-    const row = await Database.query()
-      .from("Geo_Settings")
-      .select("*")
-      .where("Name", Name)
-      .andWhere("OrganizationId", OrganizationId);
+    const row = await Database.query().from('Geo_Settings').select('*').where('Name', Name).andWhere("OrganizationId", OrganizationId);
     if (row.length > 0) {
-      result1["status"] = "duplicate";
+
+      result1['status'] = "duplicate";
     } else {
       let i = 0;
       await Promise.all(
@@ -324,7 +322,7 @@ export default class getgeofenceservice {
       } else {
         result["status"] = "Attendance Punch";
       }
-      
+
     } else {
       result["status"] = "Assign To Employee";
     }

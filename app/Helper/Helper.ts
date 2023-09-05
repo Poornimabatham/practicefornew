@@ -5,15 +5,12 @@ import EmployeeMaster from "App/Models/EmployeeMaster";
 import Organization from "App/Models/Organization";
 import ShiftMaster from "App/Models/ShiftMaster";
 import ZoneMaster from "App/Models/ZoneMaster";
+import { DateTime } from "luxon";
 import moment from "moment";
 export default class Helper {
-  static weekOfMonth(date: string) {
-    throw new Error("Method not implemented.");
-  }
-  static encrypt(arg0: string) {
-    throw new Error("Method not implemented.");
-  }
+ 
   public static encode5t(str: string) {
+    var contactNum = str.toString();
     for (let i = 0; i < 5; i++) {
       str = Buffer.from(str).toString("base64");
       str = str.split("").reverse().join("");
@@ -335,6 +332,19 @@ export default class Helper {
     } else {
       return 0;
     }
+  }
+
+  public static async getAddon_geoFenceRestrictionByUserId(
+    userId,
+    addon,
+    orgid
+  ) {
+    const result = await Database.from("EmployeeMaster")
+      .where("OrganizationId", orgid)
+      .where("Id", userId)
+      .select(addon as "addon")
+      .first();
+    return result ? result.addon : null;
   }
 
   public static async getNotificationPermission(
@@ -689,4 +699,209 @@ export default class Helper {
     }    
     return null; // Return null or handle the case when no result is found
   }
+
+  public static async getShiftplannershiftIdByEmpID(
+    EmpId: number,
+    date: string
+  ) {
+    let selectQuery = await Database.from("ShiftPlanner")
+      .select("shiftid")
+      .where("empid", EmpId)
+      .where("ShiftDate", date);
+    if (selectQuery.length > 0) {
+      return selectQuery[0].shiftid;
+    } else {
+      return 0;
+    }
+  }
+
+  public static async getweeklyoffnew(
+    date: string,
+    shiftid: number,
+    empid: number,
+    orgid: number
+  ) {
+    var dateTime = DateTime.fromISO(date);
+    var dayOfWeek = dateTime.weekday + 1; // Convert Luxon weekday to 1-7 format
+    var weekOfMonth = Math.ceil(dateTime.day / 7);
+    var week;
+    var selectQuery = await Database.from("ShiftMasterChild")
+      .select("WeekOff")
+      .where("OrganizationId", orgid)
+      .where("Day", dayOfWeek)
+      .where("ShiftId", shiftid);
+
+    var flag = false;
+    if (selectQuery.length > 0) {
+      const weekOffString = selectQuery[0].WeekOff;
+      week = weekOffString.split(","); // Split the comma-separated string into an array
+      flag = true;
+    }
+
+    if (flag && week[weekOfMonth - 1] == 1) {
+      return "WeekOff";
+    } else {
+      return "noWeekOff";
+    }
+  }
+
+  static async getAreaInfo(Id) {
+    const query = await Database.from("Geo_Settings")
+      .select("Lat_Long", "Radius")
+      .where("Id", Id)
+      .where("Lat_Long", "!=", "")
+      .limit(1)
+      .first();
+    if (query) {
+      const arr: any = {};
+      const arr1 = query.Lat_Long.split(",");
+      arr.lat = arr1[0] ? parseFloat(arr1[0]) : 0.0;
+      arr.long = arr1[1] ? parseFloat(arr1[1]) : 0.0;
+      arr.radius = query.Radius;
+      return arr;
+    }
+    return 0;
+  }
+
+  public static async getSettingByOrgId(id) {
+    const query = await Database.from("Att_OrgSetting")
+      .select("outside_geofence_setting")
+      .where("OrganizationId", id);
+    let sts = "";
+    if (query.length) {
+      sts = query[0].outside_geofence_setting;
+      return sts;
+    } else {
+      return sts;
+    }
+  }
+
+  public static calculateDistance(lat1, lon1, lat2, lon2, unit = "K") {
+    const theta = lon1 - lon2;
+    let dist =
+      Math.sin(this.deg2rad(lat1)) * Math.sin(this.deg2rad(lat2)) +
+      Math.cos(this.deg2rad(lat1)) *
+        Math.cos(this.deg2rad(lat2)) *
+        Math.cos(this.deg2rad(theta));
+    dist = Math.acos(dist);
+    dist = this.rad2deg(dist);
+    let miles = dist * 60 * 1.1515;
+
+    unit = unit.toUpperCase();
+
+    if (unit === "K") {
+      return miles * 1.609344;
+    } else if (unit === "N") {
+      return miles * 0.8684;
+    } else {
+      return miles;
+    }
+  }
+
+  public static deg2rad(deg) {
+    return deg * (Math.PI / 180);
+  }
+
+  public static rad2deg(rad) {
+    return rad * (180 / Math.PI);
+  }
+
+  public static async getAreaIdByUser(id) {
+    const query = await Database.from("EmployeeMaster")
+      .select("area_assigned")
+      .where("Id", id);
+    let sts = "";
+    if (query.length) {
+      sts = query[0].area_assigned;
+      return sts;
+    } else {
+      return sts;
+    }
+  }
+
+  public static async getApprovalLevelEmp(empid, orgid, processtype) {
+    var Id = "0";
+    var seniorid;
+    var designation = 0;
+
+    var rule;
+    var sts;
+    var sql;
+    if (empid != 0 && empid != undefined) {
+     
+      sql = await Database.from("EmployeeMaster")
+        .select("ReportingTo", "Designation")
+        .where("OrganizationId", orgid)
+        .andWhere("Id", empid);
+      
+      sql.forEach(function (val) {
+        seniorid = val.ReportingTo;
+        designation = val.Designation;
+      });
+     
+      if (seniorid != 0 && designation != 0) {
+       
+        sql = await Database.from("ApprovalProcess")
+          .select(" RuleCriteria", "Designation", "HrStatus")
+          .where(" OrganizationId", orgid)
+          .andWhere(" Designation ", designation)
+          .andWhere("ProcessType ", processtype);
+        const row = await sql;
+    
+        const affected_rows = sql.length;
+
+        if (affected_rows> 0) {
+         
+          if (row) {
+            rule = row[0].RuleCriteria;
+            sts = row[0].HrStatus;
+           
+          }
+
+          var reportingto = await Helper.getSeniorId(empid, orgid);
+          const sql = await Database.from("EmployeeMaster")
+            .select("Id", "Designation")
+            .where("OrganizationId", orgid)
+            .andWhere("DOL", "0000-00-00")
+            .andWhereIn("Designation", rule)
+            .andWhere("Id", reportingto)
+            .orderByRaw(Database.raw(`FIELD(Designation, ${rule})`));
+
+          sql.forEach((val) => {
+            if (seniorid == undefined) {
+              seniorid == val.Id;
+            } else {
+              seniorid += "," + row.Id;
+            }
+          });
+        }
+      }
+    }
+    return seniorid
+  }
+
+  static async getSeniorId(empid, organization) {
+    var id = "0";
+    var parentId = empid;
+    if (parentId != 0 && parentId != undefined) {
+      const query1 = await Database.from("EmployeeMaster")
+        .select("ReportingTo")
+        .where("OrganizationId", organization)
+        .andWhere("Id", parentId)
+        .andWhere("DOL", "0000-00-00");
+
+      query1.forEach((val) => {
+        id = val.ReportingTo;
+      });
+    }
+    return id;
+  }
+
+  public static async time_to_decimal(time: string) {
+    const timeArr = time.split(':').map(Number);
+    let decTime = timeArr[0] * 60 + timeArr[1] + timeArr[2] / 60;  //converting time in minutes
+    return decTime
+  }
+
+
 }

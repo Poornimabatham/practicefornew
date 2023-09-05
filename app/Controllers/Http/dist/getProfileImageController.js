@@ -36,62 +36,62 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-var GetDataToApplyRegService_1 = require("App/Services/GetDataToApplyRegService");
-var GetDataToApplyValidator_1 = require("App/Validators/GetDataToApplyValidator");
-var GetDataToApplyRegController = /** @class */ (function () {
-    function GetDataToApplyRegController() {
+var getProfileImageValidator_1 = require("App/Validators/getProfileImageValidator");
+var getProfileImageService_1 = require("App/Services/getProfileImageService");
+var getProfileImageController = /** @class */ (function () {
+    function getProfileImageController() {
     }
-    GetDataToApplyRegController.prototype.FetchDataToApplyReg = function (_a) {
+    getProfileImageController.prototype.getProfileImage = function (_a) {
         var request = _a.request, response = _a.response;
         return __awaiter(this, void 0, void 0, function () {
-            var ValidationInputDetails, Output;
+            var InputValidation, output;
             return __generator(this, function (_b) {
                 switch (_b.label) {
-                    case 0: return [4 /*yield*/, request.validate(GetDataToApplyValidator_1["default"].GetDataTOapplyRegschema)];
+                    case 0: return [4 /*yield*/, request.validate(getProfileImageValidator_1["default"].getProfileImageServicesschema)];
                     case 1:
-                        ValidationInputDetails = _b.sent();
-                        return [4 /*yield*/, GetDataToApplyRegService_1["default"].FetchingdatatoReg(ValidationInputDetails)];
+                        InputValidation = _b.sent();
+                        return [4 /*yield*/, getProfileImageService_1["default"].getProfileImage(InputValidation)];
                     case 2:
-                        Output = _b.sent();
-                        return [2 /*return*/, response.json(Output)];
+                        output = _b.sent();
+                        return [2 /*return*/, response.json(output)];
                 }
             });
         });
     };
-    GetDataToApplyRegController.prototype.getRegularizationCount = function (_a) {
+    getProfileImageController.prototype.sendBrodCastNotificationFromService = function (_a) {
         var request = _a.request, response = _a.response;
         return __awaiter(this, void 0, void 0, function () {
-            var ValidationInputDetails, Output;
+            var InputValidation, output;
             return __generator(this, function (_b) {
                 switch (_b.label) {
-                    case 0: return [4 /*yield*/, request.validate(GetDataToApplyValidator_1["default"].GetDataTOCountRegschema)];
+                    case 0: return [4 /*yield*/, request.validate(getProfileImageValidator_1["default"].sendBrodCastNotificationFromService)];
                     case 1:
-                        ValidationInputDetails = _b.sent();
-                        return [4 /*yield*/, GetDataToApplyRegService_1["default"].FetchRegularizationCount(ValidationInputDetails)];
+                        InputValidation = _b.sent();
+                        return [4 /*yield*/, getProfileImageService_1["default"].sendBrodCastNotificationFromService(InputValidation)];
                     case 2:
-                        Output = _b.sent();
-                        return [2 /*return*/, response.json(Output)];
+                        output = _b.sent();
+                        return [2 /*return*/, response.json(output)];
                 }
             });
         });
     };
-    GetDataToApplyRegController.prototype.OnSendRegularizeRequest = function (_a) {
+    getProfileImageController.prototype.generateNumericOTP = function (_a) {
         var request = _a.request, response = _a.response;
         return __awaiter(this, void 0, void 0, function () {
-            var ValidationInputDetails, Output;
+            var InputValidation, output;
             return __generator(this, function (_b) {
                 switch (_b.label) {
-                    case 0: return [4 /*yield*/, request.validate(GetDataToApplyValidator_1["default"].OnSendRegularizeRequestschema)];
+                    case 0: return [4 /*yield*/, request.validate(getProfileImageValidator_1["default"].generateNumericOTPschema)];
                     case 1:
-                        ValidationInputDetails = _b.sent();
-                        return [4 /*yield*/, GetDataToApplyRegService_1["default"].OnSendRegularizeRequest(ValidationInputDetails)];
+                        InputValidation = _b.sent();
+                        return [4 /*yield*/, getProfileImageService_1["default"].generateNumericOTP(InputValidation)];
                     case 2:
-                        Output = _b.sent();
-                        return [2 /*return*/, response.json(Output)];
+                        output = _b.sent();
+                        return [2 /*return*/, response.json(output)];
                 }
             });
         });
     };
-    return GetDataToApplyRegController;
+    return getProfileImageController;
 }());
-exports["default"] = GetDataToApplyRegController;
+exports["default"] = getProfileImageController;

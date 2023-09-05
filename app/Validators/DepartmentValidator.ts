@@ -9,10 +9,9 @@ export default class DepartmentValidator extends BaseValidator {
 
   static getDepartment = {
     schema: schema.create({
-      OrganizationId: schema.number(),
-      currentpage: schema.number(),
-      perpage: schema.number(),
-      pagename: schema.string(),
+      orgid: schema.number(),
+      empid: schema.number(),
+      status:schema.number()
     }),
     message: BaseValidator.messages,
   };
@@ -63,9 +62,11 @@ export default class DepartmentValidator extends BaseValidator {
       orgid: schema.number(),
       deptid: schema.number.optional(),
       empid: schema.number(),
+
       datafor: schema.string(),
     }),
   };
+
   static getEmpdataDepartmentWiseCount = {
     schema: schema.create({
       orgId: schema.number(),
@@ -79,6 +80,7 @@ export default class DepartmentValidator extends BaseValidator {
       orgId: schema.number.optional(),
       empId: schema.number.optional(),
       Id: schema.number.optional(),
+      date: schema.date()
     }),
   };
 }

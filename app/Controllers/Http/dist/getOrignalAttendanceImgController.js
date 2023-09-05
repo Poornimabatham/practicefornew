@@ -36,30 +36,28 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-var Database_1 = require("@ioc:Adonis/Lucid/Database");
-var Helper_1 = require("App/Helper/Helper");
-var SelectCountryCodeService = /** @class */ (function () {
-    function SelectCountryCodeService() {
+var getOrignalAttendanceImgValidator_1 = require("App/Validators/getOrignalAttendanceImgValidator");
+var getOrignalAttendanceImgService_1 = require("App/Services/getOrignalAttendanceImgService");
+var getOrignalAttendanceImgController = /** @class */ (function () {
+    function getOrignalAttendanceImgController() {
     }
-    SelectCountryCodeService.CountryCode = function (data) {
+    getOrignalAttendanceImgController.prototype.getOrignalAttendanceImg = function (_a) {
+        var request = _a.request, response = _a.response;
         return __awaiter(this, void 0, void 0, function () {
-            var country_code, countryname, country_code1, selectcheckCountryCode;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        country_code = data.countrycode;
-                        countryname = data.countryname;
-                        return [4 /*yield*/, Helper_1["default"].myUrlEncode(country_code)];
+            var InputValidation, output;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0: return [4 /*yield*/, request.validate(getOrignalAttendanceImgValidator_1["default"].getOrignalAttendanceImgsschema)];
                     case 1:
-                        country_code1 = _a.sent();
-                        return [2 /*return*/, country_code1];
+                        InputValidation = _b.sent();
+                        return [4 /*yield*/, getOrignalAttendanceImgService_1["default"].getOrignalAttendanceImg(InputValidation)];
                     case 2:
-                        selectcheckCountryCode = _a.sent();
-                        return [2 /*return*/, selectcheckCountryCode];
+                        output = _b.sent();
+                        return [2 /*return*/, response.json(output)];
                 }
             });
         });
     };
-    return SelectCountryCodeService;
+    return getOrignalAttendanceImgController;
 }());
-exports["default"] = SelectCountryCodeService;
+exports["default"] = getOrignalAttendanceImgController;

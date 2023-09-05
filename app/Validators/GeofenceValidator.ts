@@ -3,14 +3,14 @@ import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import BaseValidator from './BaseValidator'
 
 export default class GeofenceValidator {
-  constructor(protected ctx: HttpContextContract) {}
+  constructor(protected ctx: HttpContextContract) { }
 
   static getgeofence = {
     schema: schema.create({
       OrganizationId: schema.number(),
-      currentpage: schema.number(),
-      perpage: schema.number(),
-      pagename: schema.string(),
+      currentpage: schema.number.optional(),
+      perpage: schema.number.optional(),
+      pagename: schema.string.optional(),
     }),
     message: BaseValidator.messages,
   };
