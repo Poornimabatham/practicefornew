@@ -42,7 +42,7 @@ export default class HolidayService {
   const res : DefineTypes[]=[];
 
   const FetchData = await FetchHolidays
-  FetchData.forEach(function (val){
+  FetchData.forEach(function (val){ 
  
   const FromDate: string = (moment(val.DateFrom).format("YYYY/MM/DD"))
   const fromDateFormat: string = moment(val.DateFrom).format("YYYY-MM-DD");
@@ -56,9 +56,7 @@ export default class HolidayService {
     OrgnizationId: val.OrganizationId.toString(),
     fromDate: FromDate,
     fromDateFormat: fromDateFormat,
-    DiffDate: val.DiffDate.toString(
-      
-    ),
+    DiffDate: val.DiffDate.toString(),
     DateTo: DateTo,
     DateToFormat: DateToFormat,
   };

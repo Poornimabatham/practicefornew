@@ -40,8 +40,8 @@ export default class loginValidator extends BaseValidator {
 
   static Loginverifymail = {
     schema: schema.create({
-      email: schema.number.optional(),
-      org_id: schema.number.optional(),
+      email: schema.string.optional(),
+      org_id: schema.string.optional(),
     }),
   };
 }
