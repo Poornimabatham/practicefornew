@@ -8,7 +8,7 @@ import ZoneMaster from "App/Models/ZoneMaster";
 import { DateTime } from "luxon";
 import moment from "moment";
 export default class Helper {
- 
+
   public static encode5t(str: string) {
     var contactNum = str.toString();
     for (let i = 0; i < 5; i++) {
@@ -688,18 +688,18 @@ export default class Helper {
       return query.name;
     }
     return null; // Return null or handle the case when no result is found
-  }  
+  }
 
-  public static async getDesigName(desigId, orgId) {    
+  public static async getDesigName(desigId, orgId) {
     const query = await Database.from("DesignationMaster")
       .select("Name")
       .where("Id", desigId)
       .where("OrganizationId", orgId)
       .first();
 
-    if (query) {      
+    if (query) {
       return query.Name;
-    }    
+    }
     return null; // Return null or handle the case when no result is found
   }
 
@@ -725,7 +725,32 @@ export default class Helper {
     orgid: number
   ) {
     var dateTime = DateTime.fromISO(date);
-    var dayOfWeek = dateTime.weekday ; // Convert Luxon weekday to 1-7 format
+    var dayOfWeek = dateTime.weekday; // Convert Luxon weekday to 1-7 format
+
+    switch (dayOfWeek) {
+      case 1:
+        dayOfWeek = 2;
+        break;
+      case 2:
+        dayOfWeek = 3;
+        break;
+      case 3:
+        dayOfWeek = 4;
+        break;
+      case 4:
+        dayOfWeek = 5;
+        break;
+      case 5:
+        dayOfWeek = 6;
+        break;
+      case 6:
+        dayOfWeek = 7;
+        break;
+      case 7:
+        dayOfWeek = 1;
+
+    }
+
     var weekOfMonth = Math.ceil(dateTime.day / 7);
     var week;
     var selectQuery = await Database.from("ShiftMasterChild")
@@ -784,8 +809,8 @@ export default class Helper {
     let dist =
       Math.sin(this.deg2rad(lat1)) * Math.sin(this.deg2rad(lat2)) +
       Math.cos(this.deg2rad(lat1)) *
-        Math.cos(this.deg2rad(lat2)) *
-        Math.cos(this.deg2rad(theta));
+      Math.cos(this.deg2rad(lat2)) *
+      Math.cos(this.deg2rad(theta));
     dist = Math.acos(dist);
     dist = this.rad2deg(dist);
     let miles = dist * 60 * 1.1515;
@@ -831,34 +856,34 @@ export default class Helper {
     var sts;
     var sql;
     if (empid != 0 && empid != undefined) {
-     
+
       sql = await Database.from("EmployeeMaster")
         .select("ReportingTo", "Designation")
         .where("OrganizationId", orgid)
         .andWhere("Id", empid);
-      
+
       sql.forEach(function (val) {
         seniorid = val.ReportingTo;
         designation = val.Designation;
       });
-     
+
       if (seniorid != 0 && designation != 0) {
-       
+
         sql = await Database.from("ApprovalProcess")
           .select(" RuleCriteria", "Designation", "HrStatus")
           .where(" OrganizationId", orgid)
           .andWhere(" Designation ", designation)
           .andWhere("ProcessType ", processtype);
         const row = await sql;
-    
+
         const affected_rows = sql.length;
 
-        if (affected_rows> 0) {
-         
+        if (affected_rows > 0) {
+
           if (row) {
             rule = row[0].RuleCriteria;
             sts = row[0].HrStatus;
-           
+
           }
 
           var reportingto = await Helper.getSeniorId(empid, orgid);
