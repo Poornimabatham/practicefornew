@@ -957,7 +957,8 @@ export default class Usersettingservice {
     var username;
     var orgname;
     var country;
-    if (emp) {
+    
+    if (emp) {      
       orgname = emp[0].Orgname;
       username = emp[0].Name;
       empmail = Helper.decode5t(emp[0].email);
@@ -968,6 +969,9 @@ export default class Usersettingservice {
         CreatedDate = "N/A";
       }
       country = Helper.getCountryNameById(emp[0].countrycode);
+    }
+    else {
+      result["response"] = 0; // No user Found
     }
     var mlbody1 = mailbody.replace("{Company_Name}", orgname);
     var mlbody2 = mlbody1.replace("{19/08/2022}", currentdate);
@@ -982,24 +986,20 @@ export default class Usersettingservice {
     var headers = "MIME-Version: 1.0" + "\r\n";
     headers = headers + "Content-type:text/html;charset=UTF-8" + "\r\n";
     headers = headers + "From: <noreply@ubiattendance.com>" + "\r\n";
-    
-    // var getrespons = sendEmail_new(
-    //   "attendancesupport@ubitechsolutions.com",
-    //   Subject,
-    //   messages,
-    //   headers 
-    // );
 
-    // ////// UNCOMPLETE waiting for sendEmail_new() /////
+    var getrespons = await Helper.sendEmail(
+      "meghwalshivam18@gmail.com",
+      Subject,
+      messages,
+      headers
+    );
 
-    // if (getrespons) {
-      
-    //   result["status"] = "true";
-    // } else {
-    //   result["status"] = "false";
-    // }
+    if (getrespons!=undefined) {
+      result["status"] = "true";    //Mail send succesfully
+    } else {
+      result["status"] = "false";    
+    }
     return result;
-
   }
    
   static async getSetKioskPin(data)

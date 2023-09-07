@@ -32,7 +32,8 @@
       "@adonisjs/lucid",
       "@adonisjs/limiter",
       "@adonisjs/redis",
-      "@adonisjs/auth"
+      "@adonisjs/auth",
+      "@adonisjs/mail"
     ]
   }
 }
