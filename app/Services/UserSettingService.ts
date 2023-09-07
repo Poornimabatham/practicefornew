@@ -983,7 +983,7 @@ export default class Usersettingservice {
     headers = headers + "Content-type:text/html;charset=UTF-8" + "\r\n";
     headers = headers + "From: <noreply@ubiattendance.com>" + "\r\n";
     
-    // var respons = sendEmail_new(
+    // var getrespons = sendEmail_new(
     //   "attendancesupport@ubitechsolutions.com",
     //   Subject,
     //   messages,
@@ -992,16 +992,16 @@ export default class Usersettingservice {
 
     // ////// UNCOMPLETE waiting for sendEmail_new() /////
 
-    // if (respons) {
+    // if (getrespons) {
+      
     //   result["status"] = "true";
     // } else {
     //   result["status"] = "false";
     // }
-    // return result;
+    return result;
 
   }
    
-
   static async getSetKioskPin(data)
   {
      
