@@ -312,7 +312,7 @@ export default class loginService {
         dept_array
       );
 
-      let shift_array: any = {};   
+      let shift_array: any = {};
 
       shift_array = [
         {
@@ -597,31 +597,31 @@ export default class loginService {
         });
       }
       result["sts"] = true;
-    } else {
-      result["sts"] = 0;
-    }
 
-    return result;
+      return result;
+    }
   }
+
   /////////////  Loginverifymail  ///////////
 
   static async Loginverifymail(getparam) {
-    const emailNew = getparam.email;     
+    const emailNew = getparam.email;
 
     var selectquery = await Database.from("Organization as O")
       .innerJoin("admin_login as A", "A.OrganizationId", "O.Id")
       .innerJoin("licence_ubiattendance as lic", "O.Id", "lic.OrganizationId")
-      .select("A.name",
+      .select(
+        "A.name",
         "O.email",
         "A.OrganizationId",
         "O.mail_varified",
         Database.raw("DATEDIFF(lic.end_date, lic.start_date) as trialdays")
       )
       .where("O.Id", getparam.org_id)
-      .andWhere("O.mail_varified", 0)
-    
-     const response = {};
-    if (selectquery.length > 0) {  
+      .andWhere("O.mail_varified", 0);
+
+    const response = {};
+    if (selectquery.length > 0) {
       response["response"] = 0;
     }
     interface Forselectquery {
@@ -629,108 +629,108 @@ export default class loginService {
       email: string;
       trialdays: string;
     }
-    const getresp = await selectquery
+    const getresp = await selectquery;
     await Promise.all(
-    getresp.map(async (val) => {
-      const showdata: Forselectquery = {
-        contact_person_name: val.name,
-        email: val.email,
-        trialdays: val.trialdays,
-      };
-      if (showdata.email != emailNew) {
-        var email = emailNew;
-        let encodeemail = await Helper.encode5t(email);
-        var COUNTER = 0;
-        var orgCount;
-        orgCount = await Database.from("Organization")
-          .select("*")
-          .where("Email", email);
-        COUNTER = orgCount.length;
+      getresp.map(async (val) => {
+        const showdata: Forselectquery = {
+          contact_person_name: val.name,
+          email: val.email,
+          trialdays: val.trialdays,
+        };
+        if (showdata.email != emailNew) {
+          var email = emailNew;
+          let encodeemail = await Helper.encode5t(email);
+          var COUNTER = 0;
+          var orgCount;
+          orgCount = await Database.from("Organization")
+            .select("*")
+            .where("Email", email);
+          COUNTER = orgCount.length;
 
-        orgCount = await Database.from("admin_login")
-          .where("username", email)
-          .andWhere("email", email);
-        COUNTER += orgCount.length;
+          orgCount = await Database.from("admin_login")
+            .where("username", email)
+            .andWhere("email", email);
+          COUNTER += orgCount.length;
 
-        orgCount = await Database.from("UserMaster")
-          .select("*")
-          .where("Username", encodeemail);
-        COUNTER += orgCount.length;
+          orgCount = await Database.from("UserMaster")
+            .select("*")
+            .where("Username", encodeemail);
+          COUNTER += orgCount.length;
 
-        if (COUNTER > 0) {
-          response["response"] = 2; // Already exist
-        } else {
-          var upquery = await Database.from("Organization as o")
-            .innerJoin("admin_login as a", "o.Id", "a.OrganizationId")
-            .innerJoin("EmployeeMaster as e", "o.Id", "e.OrganizationId")
-            .innerJoin("UserMaster as u", "o.Id", "u.OrganizationId")
-            .where("o.Id", getparam.org_id)
-            .update({
-              "o.Email": email,
-              "a.email": email,
-              "a.username": email,
-              "e.CurrentEmailId": encodeemail,
-              "u.Username": encodeemail,
-            });
+          if (COUNTER > 0) {
+            response["response"] = 2; // Already exist
+          } else {
+            var upquery = await Database.from("Organization as o")
+              .innerJoin("admin_login as a", "o.Id", "a.OrganizationId")
+              .innerJoin("EmployeeMaster as e", "o.Id", "e.OrganizationId")
+              .innerJoin("UserMaster as u", "o.Id", "u.OrganizationId")
+              .where("o.Id", getparam.org_id)
+              .update({
+                "o.Email": email,
+                "a.email": email,
+                "a.username": email,
+                "e.CurrentEmailId": encodeemail,
+                "u.Username": encodeemail,
+              });
 
-          if (upquery) {
-            response["response"] = 1; //updated Successfully
+            if (upquery) {
+              response["response"] = 1; //updated Successfully
+            }
           }
+        } else {
+          showdata.email == email;
         }
-      } else {
-        showdata.email == email;
-      }
-      var subject;
-      var mailbody;
-      var getmail = await Database.from("All_mailers")
-        .select("Subject", "Body")
-        .where("Id", 2);
-      if (getmail.length > 0) {
-        subject = getmail[0].Subject;
-        mailbody = getmail[0].Body;
-      }
+        var subject;
+        var mailbody;
+        var getmail = await Database.from("All_mailers")
+          .select("Subject", "Body")
+          .where("Id", 2);
+        if (getmail.length > 0) {
+          subject = getmail[0].Subject;
+          mailbody = getmail[0].Body;
+        }
 
-      const orgIdEncrypted = await Helper.encode5t(getparam.org_id);
+        const orgIdEncrypted = await Helper.encode5t(getparam.org_id);
 
-      const verify1 = `<a href="https://ubiattendance.ubihrm.com/index.php/services/activateOrg?iuser=${orgIdEncrypted}" style="font-family: georgia, Arial, sans-serif; font-size: 15px; text-align: justify; color: rgb(255, 255, 255); text-decoration: none; background-color: rgb(37, 182, 153); border-color: rgb(248, 249, 250); padding: 15px; font-weight: 700 !important">Verify your Account</a>`;
+        const verify1 = `<a href="https://ubiattendance.ubihrm.com/index.php/services/activateOrg?iuser=${orgIdEncrypted}" style="font-family: georgia, Arial, sans-serif; font-size: 15px; text-align: justify; color: rgb(255, 255, 255); text-decoration: none; background-color: rgb(37, 182, 153); border-color: rgb(248, 249, 250); padding: 15px; font-weight: 700 !important">Verify your Account</a>`;
 
-      const verify2 = `<a style="color: #ff7d33;" href="https://ubiattendance.ubihrm.com/index.php/services/activateOrg?iuser=${orgIdEncrypted}">Verify your Account</a>`;
+        const verify2 = `<a style="color: #ff7d33;" href="https://ubiattendance.ubihrm.com/index.php/services/activateOrg?iuser=${orgIdEncrypted}">Verify your Account</a>`;
 
-      const verify3 = `<a href="https://www.ubiattendance.com/contact-us">Contact us</a>`;
+        const verify3 = `<a href="https://www.ubiattendance.com/contact-us">Contact us</a>`;
 
-      const mlbody = mailbody;
+        const mlbody = mailbody;
 
-      var mlbody1 = mlbody.replace("{Compancontact_person_namey_Name}",showdata.contact_person_name);
-      var mlbody2 = mlbody1.replace("{Verify_your_Account}", verify1);
-      var mlbody3 = mlbody2.replace("{Verify_your_Account}", verify2);
-      var mlbody4 = mlbody3.replace('Contact us', verify3);
+        var mlbody1 = mlbody.replace(
+          "{Compancontact_person_namey_Name}",
+          showdata.contact_person_name
+        );
+        var mlbody2 = mlbody1.replace("{Verify_your_Account}", verify1);
+        var mlbody3 = mlbody2.replace("{Verify_your_Account}", verify2);
+        var mlbody4 = mlbody3.replace("Contact us", verify3);
 
-      var messages = mlbody4;
+        var messages = mlbody4;
 
-      var headers = "MIME-Version: 1.0" + "\r\n";
-      headers = headers + "Content-type:text/html;charset=UTF-8" + "\r\n";
-      headers = headers + "From: <noreply@ubiattendance.com>" + "\r\n";
+        var headers = "MIME-Version: 1.0" + "\r\n";
+        headers = headers + "Content-type:text/html;charset=UTF-8" + "\r\n";
+        headers = headers + "From: <noreply@ubiattendance.com>" + "\r\n";
 
-      // var respons = sendEmail_new(
-      //   email,
-      //   subject,
-      //   messages,
-      //   headers
-      // );
+        // var respons = sendEmail_new(
+        //   email,
+        //   subject,
+        //   messages,
+        //   headers
+        // );
 
-      // ////// UNCOMPLETE waiting for sendEmail_new() /////
+        // ////// UNCOMPLETE waiting for sendEmail_new() /////
 
-      // if (respons) {
-      //   result["status"] = "true";
-      // } else {
-      //   result["status"] = "false";
-      // }
-      // return result;
-    })
-   )
+        // if (respons) {
+        //   result["status"] = "true";
+        // } else {
+        //   result["status"] = "false";
+        // }
+        // return result;
+      })
+    );
     return response;
-  }  
-  
+  }
 }
-
-

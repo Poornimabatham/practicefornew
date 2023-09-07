@@ -13,4 +13,11 @@ export default class StoreRatingValidator {
      
    })
  }
+
+ static getSelectedEmployeeShiftScehma={
+  schema:schema.create({
+    empid:schema.number(),
+    orgid:schema.number(),
+  })
+ }
 }

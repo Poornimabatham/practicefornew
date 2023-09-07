@@ -29,6 +29,13 @@ var Plannervalidator = /** @class */ (function (_super) {
             attDen: Validator_1.schema.date({ format: "yyyy-MM-dd" })
         })
     };
+    Plannervalidator.getRegSummarychema = {
+        schema: Validator_1.schema.create({
+            orgid: Validator_1.schema.number(),
+            uid: Validator_1.schema.number(),
+            month: Validator_1.schema.date.optional({ format: "yyyy-MM-dd" })
+        })
+    };
     return Plannervalidator;
 }(BaseValidator_1["default"]));
 exports["default"] = Plannervalidator;

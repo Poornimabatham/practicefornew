@@ -1,4 +1,3 @@
-import { Request } from "@adonisjs/core/build/standalone";
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import DesignationService from "App/Services/DesignationService";
 import DesignationValidator from "App/Validators/DesignationValidator";
@@ -67,4 +66,5 @@ export default class DesignationsController {
     const ServiceResp = await DesignationService.deleteInActiveDesig(this.data);
     return response.json(ServiceResp);  
   }
+
 }

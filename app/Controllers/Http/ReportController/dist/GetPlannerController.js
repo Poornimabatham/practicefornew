@@ -36,45 +36,45 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-var StoreRatingService_1 = require("App/Services/StoreRatingService");
-var StoreRatingValidatore_1 = require("App/Validators/StoreRatingValidatore");
-var StoreRatingController = /** @class */ (function () {
-    function StoreRatingController() {
+var GetplannerWiseService_1 = require("App/Services/ReportServices/GetplannerWiseService");
+var PlannerValidator_1 = require("App/Validators/ReportValidator/PlannerValidator");
+var GetPlannerController = /** @class */ (function () {
+    function GetPlannerController() {
     }
-    StoreRatingController.prototype.StoreRatings = function (_a) {
-        var request = _a.request;
-        return __awaiter(this, void 0, void 0, function () {
-            var Validationinput, Output;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
-                    case 0: return [4 /*yield*/, request.validate(StoreRatingValidatore_1["default"].StoreRatingsScehma)];
-                    case 1:
-                        Validationinput = _b.sent();
-                        return [4 /*yield*/, StoreRatingService_1["default"].StoreRatings(Validationinput)];
-                    case 2:
-                        Output = _b.sent();
-                        return [2 /*return*/, Output];
-                }
-            });
-        });
-    };
-    StoreRatingController.prototype.getSelectedEmployeeShift = function (_a) {
+    GetPlannerController.prototype.getplannerwisesummary = function (_a) {
         var request = _a.request, response = _a.response;
         return __awaiter(this, void 0, void 0, function () {
-            var Validationinput, Output;
+            var a, b;
             return __generator(this, function (_b) {
                 switch (_b.label) {
-                    case 0: return [4 /*yield*/, request.validate(StoreRatingValidatore_1["default"].getSelectedEmployeeShiftScehma)];
+                    case 0: return [4 /*yield*/, request.validate(PlannerValidator_1["default"].FetchPlannerchema)];
                     case 1:
-                        Validationinput = _b.sent();
-                        return [4 /*yield*/, StoreRatingService_1["default"].getSelectedEmployeeShift(Validationinput)];
+                        a = _b.sent();
+                        return [4 /*yield*/, GetplannerWiseService_1["default"].Getlannerwisesummary(a)];
                     case 2:
-                        Output = _b.sent();
-                        return [2 /*return*/, Output];
+                        b = _b.sent();
+                        return [2 /*return*/, response.json(b)];
                 }
             });
         });
     };
-    return StoreRatingController;
+    GetPlannerController.prototype.getRegSummary = function (_a) {
+        var request = _a.request, response = _a.response;
+        return __awaiter(this, void 0, void 0, function () {
+            var a, b;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0: return [4 /*yield*/, request.validate(PlannerValidator_1["default"].getRegSummarychema)];
+                    case 1:
+                        a = _b.sent();
+                        return [4 /*yield*/, GetplannerWiseService_1["default"].getRegSummary(a)];
+                    case 2:
+                        b = _b.sent();
+                        return [2 /*return*/, response.json(b)];
+                }
+            });
+        });
+    };
+    return GetPlannerController;
 }());
-exports["default"] = StoreRatingController;
+exports["default"] = GetPlannerController;

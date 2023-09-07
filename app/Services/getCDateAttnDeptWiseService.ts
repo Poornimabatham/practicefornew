@@ -93,7 +93,6 @@ export default class getCDateAttnDeptWiseService {
             longi_out: val.longi_out,
             Id: val.Id,
             name: val.name,
-            Dept_id:val.Dept_id,
             TotalLoggedHours: val.TotalLoggedHours,
             AttendanceStatus: val.AttendanceStatus,
             ShiftId: val.ShiftId,
@@ -383,6 +382,7 @@ AM.shiftId), 1, 5)`
         var shiftType = getdataforearlyleavings[0].shifttype;
 
         if (shiftType == 2) {
+
           const nextdate = moment(date, "YYYY-MM-DD")
             .add(1, "days")
             .format("YYYY-MM-DD");
@@ -399,7 +399,7 @@ AM.shiftId), 1, 5)`
               0,
               5
             )}`;
-
+           
             data2["shift"] = shift;
 
             const getdatafromAttendanceMaster = await Database.from(
@@ -427,7 +427,7 @@ AM.shiftId), 1, 5)`
                 "ShiftId",
                 "TotalLoggedHours",
                 "AttendanceDate",
-                "AttendanceStatus"
+               "AttendanceStatus"
               )
               .where("EmployeeId", data2["Id"])
               .andWhere(" OrganizationId", getData.orgid)
@@ -456,10 +456,9 @@ AM.shiftId), 1, 5)`
 
               const Interval = endDateTime.diff(startDateTime, [
                 "hours",
-                "minutes",
-              ]);
+                "minutes"]);
 
-              const earlyby = Interval.toFormat("hh:mm");
+              const earlyby =  Interval.toFormat("hh:mm")
 
               data["earlyby"] = earlyby;
               data["EntryImage"] = row333[0].EntryImage;
@@ -483,6 +482,7 @@ AM.shiftId), 1, 5)`
       }
     }
   }
+
   //////////// getCDateAttnDeptWise_getxCsv ////////////
   static async getCDateAttnDeptWiseCsv(getData) {
 
@@ -575,7 +575,6 @@ AM.shiftId), 1, 5)`
               longi_out: val.longi_out,
               Id: val.Id,
               name: val.name,
-              Dept_id: val.Dept_id,
               TotalLoggedHours: val.TotalLoggedHours,
               AttendanceStatus: val.AttendanceStatus,
               ShiftId: val.ShiftId,
@@ -964,4 +963,5 @@ AM.shiftId), 1, 5)`
       }
 
   }
+
 }
