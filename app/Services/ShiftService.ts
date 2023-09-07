@@ -772,7 +772,10 @@ export default class ShiftsService {
         )
         if(status == 1){
           const query1 :any = await Database.query().from('ShiftPlannerByDesignation').select('*').where('ShiftDate',formateddate).andWhere('DesgId',desgid);
-          if(query1.length == 0){
+          console.log(query1);
+          console.log(query1.length);
+          
+          if(query1.length > 0){
             const querysp:any = await Database.query().from('ShiftPlannerByDesignation').where('ShiftDate',formateddate).andWhere('DesgId',desgid).update({
               "ShiftDate" : formateddate,
               "assignmentStatus" : 2,
@@ -792,6 +795,8 @@ export default class ShiftsService {
                 "Extra" : 0 ,
                 "AssignedById" : assignedbyid
             })
+            console.log('inserted');
+            
           }
         }
         if(status == 2)
@@ -806,7 +811,13 @@ export default class ShiftsService {
         }
         if(status == 0)
         {
-          const querydsp = await Database.query().from('ShiftPlannerByDesignation').where('ShiftDate',formateddate).andWhere("DesgId",desgid).delete();               
+          const querydsp:any = await Database.query().from('ShiftPlannerByDesignation').where('ShiftDate',formateddate).andWhere("DesgId",desgid).delete(); 
+          console.log(querydsp);
+           
+               if(querydsp > 0){
+                console.log("deleted");
+                
+               }        
         }
         return data1;
       }
