@@ -6,23 +6,18 @@ export default class GetWeekendsService {
         const OrgId = getWeekendsData.OrgId;
         const EmpId = getWeekendsData.EmpId;
         const currentDate = DateTime.local();
-        const startDate = currentDate.toFormat('yyyy-MM-dd');
+        const startDate = currentDate.toFormat('yyyy-MM-dd'); 
         var endDate = currentDate.plus({ months: 6 }).toFormat('yyyy-MM-dd');
         var startDateISO = DateTime.fromISO(startDate);  //converting to datetime object
         var endDateISO = DateTime.fromISO(endDate);      //converting to datetime object
         var dateDiffInSeconds = Math.abs(endDateISO.diff(startDateISO).as('seconds'));
         var dateDiffInDays = Math.floor(dateDiffInSeconds / (60 * 60 * 24));
-        var result: {} = {};
-        var data: {} = {};
+        var response:any [] = []
         var ShiftId: number;
 
-
         for (let i = 0; i < (dateDiffInDays + 1); i++) {
-
-
+            var result: {} = {};
             var newDate = startDateISO.plus({ days: i }).toFormat('yyyy-MM-dd');
-            // console.log(newDate);
-
             var ShiftEId = await Helper.getShiftIdByEmpID(EmpId);
             const ShiftPlannerId = await Helper.getShiftplannershiftIdByEmpID(EmpId, newDate);
             if (ShiftPlannerId != '' || ShiftPlannerId != 0) {
@@ -31,24 +26,17 @@ export default class GetWeekendsService {
             else {
                 ShiftId = ShiftEId;
             }
-
-
-            data['date'] = startDateISO.plus({ days: i }).toFormat('yyyy-MM-dd');
-            data['shiftid'] = ShiftId;
-            data['weekoff'] = await Helper.getweeklyoffnew(newDate, ShiftId, EmpId, OrgId);
-            // return data['weekoff']
-            // console.log(data['date']);
-            // console.log(data['shiftid']);
-            // console.log( data['weekoff'] );
-            // return
-
-
-            if (data['weekoff'] == 'WeekOff') {
-                result['id'] = data['shiftid'];
-                result['title'] = data['weekoff'];
-                result['start'] = data['date'];
+            let date = startDateISO.plus({ days: i }).toFormat('yyyy-MM-dd');  
+            let shiftid = ShiftId;
+            let weekoff = await Helper.getweeklyoffnew(newDate, ShiftId, EmpId, OrgId);
+          
+            if (weekoff == 'WeekOff') {
+                result['id'] = shiftid;
+                result['title'] = weekoff;
+                result['start'] = date;
+                response.push(result);
             }
         }
-        return result;
+        return response;
     }
 }
