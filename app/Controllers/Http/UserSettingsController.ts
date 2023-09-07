@@ -139,7 +139,7 @@ export default class UserSettingsController {
     this.data["uid"] = reqData.uid ? reqData.uid : 0;
     this.data["date"] = reqData.date ? reqData.date : 0;
     const serviceRes = await UserSettingService.DeleteAccount(this.data);
-    return response.json(serviceRes);
+    return response.json(serviceRes);  
   }
 
   public async getSetKioskPin({request,response}:HttpContextContract){

@@ -21,19 +21,26 @@ export default class loginValidator  extends BaseValidator{
   }
 
   static singupvalidator = {
-     schema:schema.create({
-      username:schema.string(),
-      companyName:schema.string(),
-      useremail:schema.string(),
-      userpassword:schema.string(),
-      countrycode:schema.number(),
-      countrycodeid:schema.number(),
-      phoneno:schema.number(),
-      appleAuthId:schema.number.optional(),
-      platform:schema.string(),
-      app:schema.string(),
-      skipOTP:schema.string(),
-      emailVerification:schema.string.optional() 
-     })
-  }
+    schema: schema.create({
+      username: schema.string(),
+      companyName: schema.string(),
+      useremail: schema.string(),
+      userpassword: schema.string(),
+      countrycode: schema.number(),
+      countrycodeid: schema.number(),
+      phoneno: schema.number(),
+      appleAuthId: schema.number.optional(),
+      platform: schema.string(),
+      app: schema.string(),
+      skipOTP: schema.string(),
+      emailVerification: schema.string.optional(),
+    }),
+  };
+
+  static Loginverifymail = {
+    schema: schema.create({
+      email: schema.string.optional(),
+      org_id: schema.string.optional(),  
+    }),
+  };
 }

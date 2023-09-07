@@ -48,14 +48,26 @@ export default class UsershiftplannerService {
     var Empid = inputdata.empid;
     var Deviceid = inputdata.deviceid;
     var Devicename = inputdata.devicename;
-    const updateEmployeeMaster = await Database.from("EmployeeMaster")
+    const data2: any[] = [];
+
+    const resresultOTP = {};
+    const updateEmployeeMaster:any = await Database.from("EmployeeMaster")
       .where("Id", Empid)
       .update({
         DeviceName: Devicename,
         DeviceId: Deviceid,
-      });
-    return updateEmployeeMaster;
+      })
+      
+    if (updateEmployeeMaster>0) {
+      resresultOTP["status"] = "Device saved successfully";
+      data2.push(resresultOTP);
+    } else {
+      resresultOTP["status"] = "Unable to save device";
+      data2.push(resresultOTP);
+    }
+    return data2
   }
+
   public static async getShiftDetailsdata(inputdata) {
     const userid = inputdata.uid;
     const refno = inputdata.refno;
@@ -67,8 +79,8 @@ export default class UsershiftplannerService {
       .select("*")
       .where("OrganizationId", refno)
       .andWhere("Id", shiftId);
-      const res:any = [];
-      var result = selectShiftMasterList;
+    const res: any = [];
+    var result = selectShiftMasterList;
     result.forEach((row) => {
       var data = {};
       data["shiftName"] = row.Name;
