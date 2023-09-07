@@ -677,6 +677,32 @@ export default class Helper {
     }
   }
 
+  public static async getDeptName(deptId, orgId) {
+    const query = await Database.from("DepartmentMaster")
+      .select("name")
+      .where("id", deptId)
+      .where("OrganizationId", orgId)
+      .first();
+
+    if (query) {
+      return query.name;
+    }
+    return null; // Return null or handle the case when no result is found
+  }  
+
+  public static async getDesigName(desigId, orgId) {    
+    const query = await Database.from("DesignationMaster")
+      .select("Name")
+      .where("Id", desigId)
+      .where("OrganizationId", orgId)
+      .first();
+
+    if (query) {      
+      return query.Name;
+    }    
+    return null; // Return null or handle the case when no result is found
+  }
+
   public static async getShiftplannershiftIdByEmpID(
     EmpId: number,
     date: string
@@ -699,7 +725,7 @@ export default class Helper {
     orgid: number
   ) {
     var dateTime = DateTime.fromISO(date);
-    var dayOfWeek = dateTime.weekday + 1; // Convert Luxon weekday to 1-7 format
+    var dayOfWeek = dateTime.weekday ; // Convert Luxon weekday to 1-7 format
     var weekOfMonth = Math.ceil(dateTime.day / 7);
     var week;
     var selectQuery = await Database.from("ShiftMasterChild")

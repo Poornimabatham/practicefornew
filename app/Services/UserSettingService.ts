@@ -983,20 +983,45 @@ export default class Usersettingservice {
     headers = headers + "Content-type:text/html;charset=UTF-8" + "\r\n";
     headers = headers + "From: <noreply@ubiattendance.com>" + "\r\n";
     
-    // var respons = sendEmail_new(
+    // var getrespons = sendEmail_new(
     //   "attendancesupport@ubitechsolutions.com",
     //   Subject,
     //   messages,
-    //   headers
+    //   headers 
     // );
 
     // ////// UNCOMPLETE waiting for sendEmail_new() /////
 
-    // if (respons) {
+    // if (getrespons) {
+      
     //   result["status"] = "true";
     // } else {
     //   result["status"] = "false";
     // }
-    // return result;
+    return result;
+
   }
+   
+  static async getSetKioskPin(data)
+  {
+     
+    const orgId = data.orgId;
+    const Emplid = data.empId;
+    const result = {};
+
+    const query = await Database.query().from('UserMaster').select('kioskPin').where('EmployeeId',Emplid).andWhere('OrganizationId',orgId);
+
+    if(query.length > 0)
+    {
+       result['kioskPin'] = query[0].kioskPin;
+       if(result['kioskPin']=="")
+       {
+         result['cuperButton'] = 0;
+       }else{
+         result['cuperButton'] = 1;
+       }
+    }
+    return result
+  }
+
 }
