@@ -2083,5 +2083,217 @@ export default class DailyAttendanceService {
     return statusArray;
   }
 
+  public static async AttendanceAct(data :any){
+    const uid  = data.uid ? data.uid : 0;
+    const orgid  = data.refno ? data.refno : 0;
+    const zone = await Helper.getTimeZone(orgid);
+    const defaultZone = DateTime.now().setZone(zone);
+    const date :string =DateTime.now().toFormat("yyyy-MM-dd HH:ii");
+    const Yesterday = DateTime.now().minus({ days: 1 }).toFormat("yyyy-MM-dd HH:ii");
+    const ShiftId = await Helper.getShiftIdByEmpID(uid);
+    const stype = await Helper.getShiftType(ShiftId);
+    let arr : any = {};
+    arr['act']  = "TimeIn";
+    const MultipletimeStatus = await Helper.getshiftmultipletime_sts(uid,date,ShiftId);
+    if(stype == 3 || (stype== 1 && MultipletimeStatus == 1))
+    {
+      const query :any  = await Database.query().from('AttendanceMaster').select('id as aid','TimeOut').where('employeeid',uid).andWhere('AttendanceDate',date)
+      if(query.length > 0){
+        const aid = query[0].aid;
+        const tout = query[0].Timeout;
+        const query2 = await Database.query().from('InterimAttendances').select('TimeOut','TimeIn').where('AttendanceMasterId',aid).orderBy("id", "desc").limit(1);
+        const count2 = query2.length;
+        if(count2 > 0){
+          const lastTimeOut = query2[0].TimeOut;
+          if(lastTimeOut == query2[0].TimeIn){
+            arr['act']='TimeOut';    
+          }else{
+            arr['act']='TimeIn';    
+          } 
+        }
+        else{
+          arr['act']='TimeIn';
+        }
+        if(tout=='00:00:00'){
+          arr['act']='TimeOut';
+        }  
+      }
+      else{
+        arr['act']='TimeIn'; 
+      }   
+    }  
+    else{
+      if (stype == 1){
+        //// if shift is end whthin same date
+        const autotimeout_permission = await Helper.getAddonPermission(orgid,'Addon_AutoTimeOut')
+        if(autotimeout_permission == 0) // This orgainzation have a auto timeout
+        { 
+          const query3:any = await Database.query().from('AttendanceMaster').select('TimeIn','TimeOut').where('employeeid',uid).andWhere('AttendanceDate',date);
+          const count3 = query3.length;
+          if(count3 > 0){
+            arr['act'] = 'TimeOut';
+            if (query3[0].TimeIn == '00:00:00'){
+              arr['act'] = 'TimeIn';  
+            }  
+            if (query3[0].TimeIn  != '00:00:00' && query3[0].TimeOut  != '00:00:00'){
+              arr['act'] = 'Imposed'; //successfully marked
+            }
+              
+          }
+          else{
+            arr['act'] = 'TimeIn';  
+          } 
+        } else{
+          const query4 : any= await Database.query().from('AttendanceMaster').select('TimeIn','TimeOut','AttendanceDate').whereBetween("AttendanceDate",[Yesterday,date]).orderBy('AttendanceDate','desc').limit(1).offset(1);			
+          const count4 = query4.length;
+          if(count4 > 0){
+            arr['act'] = 'TimeOut';
+            if(query4[0].TimeIn == '00:00:00'){
+              arr['act'] = 'TimeIn';
+            }
+            if (query4[0].TimeIn != '00:00:00' && query4[0].TimeOut != '00:00:00')
+              arr['act'] = 'Imposed';   
+          }	else{
+            const query5 :any = await Database.query().from('AttendanceMaster').select('TimeIn','TimeOut').where('employeeid',uid).andWhere('AttendanceDate',date);
+            const count5 = query5.length;
+            if(count5 > 0){
+              arr['act'] = 'TimeOut';
+                ////////for week off ///////////
+              if (query5[0].TimeIn == '00:00:00')
+                arr['act'] = 'TimeIn';
+              
+              if (query5[0].TimeOut != '00:00:00')
+                arr['act'] = 'Imposed';
+            }else
+            arr['act'] = 'TimeIn';
+          }		
+        }  
+        //single day shift end   
+      }else{
+        /////// if shift is start and end in two diff dates
+        const time =DateTime.now().toFormat('HH:ii:ss');
+        const shifttimes = await Helper.getShiftTimes(ShiftId);
 
+
+        const ShiftTime = shifttimes.split("-");
+        const startShiftTime = ShiftTime[0].trim();
+        const endShiftTime = ShiftTime[1].trim();
+        if(MultipletimeStatus == 0){
+          const query6 :any = await Database.query().from('AttendanceMaster').select('TimeIn','TimeOut','AttendanceDate').where('employeeid',uid).andWhere('TimeIn','!=','00:00:00').andWhere('TimeOut','00:00:00').andWhere(Database.raw(`AttendanceDate >= DATE_SUB('${date}', INTERVAL 1 DAY) or AttendanceDate = '${date}'`)).orderBy("Id","desc").limit(1);
+          const count6 = query6.length;
+          if(count6 > 0){
+            if(query6[0].AttendanceDate != date){
+              // yes att
+              if(time >= startShiftTime){
+                arr['act']='TimeIn';
+                 ////////for week off ///////////
+                if (query6[0].TimeIn == '00:00:00')
+                  arr['act'] = 'TimeIn';
+                 ////////for week off ///////////
+              }else{
+                arr['act']='TimeOut';
+                ////////for week off ///////////
+                if (query6[0].TimeIn == '00:00:00')
+                  arr['act'] = 'TimeIn';
+                ////////for week off ///////////
+              }
+            }else{
+              // today att
+              arr['act']='TimeOut';
+              ////////for week off ///////////
+              if (query6[0].TimeIn == '00:00:00')
+                arr['act'] = 'TimeIn';
+            }
+            if(query6[0].TimeOut!='00:00:00')
+              arr['act']='Imposed';
+          }else{
+            const query7: any = await Database.query().from('AttendanceMaster').select('id as aid','TimeIn','TimeOut').where('employeeid',uid).andWhere('AttendanceDate',date);
+            const count7 = query7.length;
+            if(count7 > 0){
+              arr['act']='TimeOut';
+              ////////for week off ///////////
+              if (query7[0].TimeIn == '00:00:00')
+                arr['act'] = 'TimeIn';
+              ////////for week off ///////////
+              //$data['aid']=$row1->aid;
+              if(query7[0].TimeOut!='00:00:00')
+                arr['act']='Imposed';
+            }else{
+              arr['act']='TimeIn';
+              if(time <= endShiftTime){
+                const query8 = await Database.query().from('AttendanceMaster').select('id as aid','TimeIn','TimeOut').where('employeeid',uid).andWhere(Database.raw(`AttendanceDate = DATE_SUB('${date}', INTERVAL 1 DAY)`));
+                const count8 = query8.length;
+                if(count8 > 0){
+                  if(query8[0].TimeOut != '00:00:00'){
+                    arr['act']='Imposed';
+                  }
+                }
+              }
+            }
+          }
+        }else{
+          const query9 = await Database.query().from('AttendanceMaster').select('Id as aid','TimeIn','TimeOut','AttendanceDate').where('employeeid',uid).andWhere('TimeIn' ,'!=','00:00:00').andWhere(Database.raw(`AttendanceDate >=DATE_SUB('${date}', INTERVAL 1 DAY) or AttendanceDate ='${date}'`)).orderBy('Id','desc').limit(1);
+          const count9 = query9.length;
+          if(count9 > 0){
+            const aid = query9[0].aid
+            if(query9[0].AttendanceDate != date){
+              // yes att
+              if(time >= startShiftTime){
+                arr['act'] = 'TimeIn';
+              }else{
+                const sqlmaxid : any  = await Database.query().from('InterimAttendances').select('TimeIn','TimeOut').where('AttendanceMasterId',aid).orderBy('id','desc').limit(1).offset(0);
+                const countmax = sqlmaxid.length;
+                if(countmax > 0){
+                  const IntTimeIn = sqlmaxid[0].TimeIn;
+                  const IntTimeOut = sqlmaxid[0].TimeOut;
+                  if( IntTimeIn == IntTimeOut)
+                  {
+                    arr['act']='TimeOut';   
+                  }
+                  else
+                  {
+                    arr['act']='TimeIn';
+                  }
+                }
+                else{
+                  arr['act'] = 'TimeIn';
+                }
+                ////////for week off ///////////
+                if(sqlmaxid[0].TimeIn == '00:00:00')
+                  arr['act'] = 'TimeIn';
+                  ////////for week off ///////////
+              }
+            }else{
+              // today att
+              const maxid = await Database.query().from('InterimAttendances').select('TimeIn','TimeOut').where('AttendanceMasterId',aid).orderBy('id','desc').limit(1).offset(0); 
+              const countmaxid = maxid.length;
+              if(countmaxid > 0){
+                const IntTimeIn = maxid[0].TimeIn;
+                const IntTimeOut = maxid[0].TimeOut;
+                if(IntTimeIn == IntTimeOut)
+                {
+                  arr['act']='TimeOut';   
+                }
+                else
+                {
+                  arr['act']='TimeIn';
+                }
+              }else{
+                arr['act'] = 'TimeIn';
+              }
+               ////////for week off ///////////
+               if (maxid[0].TimeIn == '00:00:00')
+                  arr['act'] = 'TimeIn';
+               ////////for week off ///////////
+            }
+          }else{
+            const maxid1 =await Database.query().from('InterimAttendances').select('TimeIn','TimeOut').where('AttendanceMasterId',aid) 
+            //$sqlmaxid= "SELECT TimeIn,TimeOut FROM InterimAttendances WHERE AttendanceMasterId='".$row1->aid."' order by id DESC limit 0,1;";
+                                    
+          }
+        }
+      }
+    }            
+    return data;
+  }
 }
