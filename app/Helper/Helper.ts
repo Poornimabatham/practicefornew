@@ -725,7 +725,7 @@ export default class Helper {
     orgid: number
   ) {
     var dateTime = DateTime.fromISO(date);
-    var dayOfWeek = dateTime.weekday + 1; // Convert Luxon weekday to 1-7 format
+    var dayOfWeek = dateTime.weekday ; // Convert Luxon weekday to 1-7 format
     var weekOfMonth = Math.ceil(dateTime.day / 7);
     var week;
     var selectQuery = await Database.from("ShiftMasterChild")
