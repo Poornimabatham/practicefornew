@@ -987,7 +987,7 @@ export default class Usersettingservice {
     //   "attendancesupport@ubitechsolutions.com",
     //   Subject,
     //   messages,
-    //   headers
+    //   headers 
     // );
 
     // ////// UNCOMPLETE waiting for sendEmail_new() /////
@@ -998,5 +998,5 @@ export default class Usersettingservice {
     //   result["status"] = "false";
     // }
     // return result;
-  }
+  }  
 }
