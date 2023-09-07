@@ -155,7 +155,7 @@ var ResetPasswordLinkService = /** @class */ (function () {
     };
     ResetPasswordLinkService.MoveEmpDataInExistingOrg = function (data) {
         return __awaiter(this, void 0, void 0, function () {
-            var Empid, NewOrg, OldOrg, Status, Contact, Admin_Name, AdminEmail, FirstName, EmployeeName, eid, EmpSts, COUNT, dept, desg, shift, CountFlag, deleteQuery, UpdateQuery, body, body1, subject, message_body, result, selectUsermasterlist, updateQuery, updateQuery2, updateQuery3, updateQuery4, selectMail, rows, updatePreventSignup, selectMail, rows;
+            var Empid, NewOrg, OldOrg, Status, Contact, Admin_Name, AdminEmail, FirstName, EmployeeName, eid, EmpSts, COUNT, dept, desg, shift, CountFlag, deleteQuery, UpdateQuery, body, body1, subject, message_body, result, selectUsermasterlist, updateQuery, updateQuery2, updateQuery3, updateQuery4, selectMail, rows, headers, updatePreventSignup, selectMail, rows, headers;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -174,7 +174,7 @@ var ResetPasswordLinkService = /** @class */ (function () {
                         EmployeeName = FirstName + Contact;
                         CountFlag = 0;
                         result = {};
-                        if (!(Status == 1)) return [3 /*break*/, 26];
+                        if (!(Status == 1)) return [3 /*break*/, 27];
                         return [4 /*yield*/, Database_1["default"].from("UserMaster")
                                 .select("*")
                                 .where("OrganizationId", NewOrg)];
@@ -294,7 +294,7 @@ var ResetPasswordLinkService = /** @class */ (function () {
                         _a.label = 23;
                     case 23:
                         result["status"] = 1;
-                        if (!(result["status"] == 1)) return [3 /*break*/, 25];
+                        if (!(result["status"] == 1)) return [3 /*break*/, 26];
                         return [4 /*yield*/, Database_1["default"].from("All_mailers")
                                 .select(" Body", "Subject")
                                 .where("Id", 39)];
@@ -306,24 +306,36 @@ var ResetPasswordLinkService = /** @class */ (function () {
                             subject = rows[0].Subject;
                         }
                         body1 = body.replace("{Admin Name}", Admin_Name);
-                        message_body = body1.replace("{Employee name(Number)}", EmployeeName);
-                        _a.label = 25;
-                    case 25: return [3 /*break*/, 29];
-                    case 26: return [4 /*yield*/, Database_1["default"].from("PreventSignup")
+                        message_body = body1.replace("{Employee Name}", EmployeeName);
+                        headers = "MIME-Version: 1.0" + "\r\n";
+                        headers = headers + "Content-type:text/html;charset=UTF-8" + "\r\n";
+                        headers = headers + "From: <noreply@ubiattendance.com>" + "\r\n";
+                        // console.log(AdminEmail)
+                        // AdminEmail = "pbatham21@gmail.com";       ////for testing
+                        // console.log(AdminEmail);
+                        return [4 /*yield*/, Helper_1["default"].sendEmail(AdminEmail, subject, message_body, headers)];
+                    case 25:
+                        // console.log(AdminEmail)
+                        // AdminEmail = "pbatham21@gmail.com";       ////for testing
+                        // console.log(AdminEmail);
+                        _a.sent();
+                        _a.label = 26;
+                    case 26: return [3 /*break*/, 31];
+                    case 27: return [4 /*yield*/, Database_1["default"].from("PreventSignup")
                             .where("Status", 0)
                             .andWhere("EmployeeId", Empid)
                             .andWhere("OrganizationId", NewOrg)
                             .update({
                             Status: 2
                         })];
-                    case 27:
+                    case 28:
                         updatePreventSignup = _a.sent();
                         result["status"] = 0;
-                        if (!(result["status"] == 0)) return [3 /*break*/, 29];
+                        if (!(result["status"] == 0)) return [3 /*break*/, 31];
                         return [4 /*yield*/, Database_1["default"].from("All_mailers")
                                 .select(" Body", "Subject")
                                 .where("Id", 39)];
-                    case 28:
+                    case 29:
                         selectMail = _a.sent();
                         rows = selectMail;
                         if (rows) {
@@ -331,9 +343,19 @@ var ResetPasswordLinkService = /** @class */ (function () {
                             subject = rows[0].Subject;
                         }
                         body1 = body.replace("{Admin Name}", Admin_Name);
-                        message_body = body1.replace("{Employee name(Number)}", EmployeeName);
-                        _a.label = 29;
-                    case 29: return [2 /*return*/, result];
+                        message_body = body1.replace("{Employee Name}", EmployeeName);
+                        headers = "MIME-Version: 1.0" + "\r\n";
+                        headers = headers + "Content-type:text/html;charset=UTF-8" + "\r\n";
+                        headers = headers + "From: <noreply@ubiattendance.com>" + "\r\n";
+                        // AdminEmail = "pbatham21@gmail.com";       ////for testing
+                        // console.log(AdminEmail);
+                        return [4 /*yield*/, Helper_1["default"].sendEmail(AdminEmail, subject, message_body, headers)];
+                    case 30:
+                        // AdminEmail = "pbatham21@gmail.com";       ////for testing
+                        // console.log(AdminEmail);
+                        _a.sent();
+                        _a.label = 31;
+                    case 31: return [2 /*return*/, result];
                 }
             });
         });

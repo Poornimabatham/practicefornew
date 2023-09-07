@@ -258,9 +258,16 @@ export default class ResetPasswordLinkService {
         }
 
         body1 = body.replace("{Admin Name}", Admin_Name);
-        message_body = body1.replace("{Employee name(Number)}", EmployeeName);
+        message_body = body1.replace("{Employee Name}", EmployeeName);
+        var headers = "MIME-Version: 1.0" + "\r\n";
+        headers = headers + "Content-type:text/html;charset=UTF-8" + "\r\n";
+        headers = headers + "From: <noreply@ubiattendance.com>" + "\r\n";
 
-        // sendEmail_new1(AdminEmail, subject,message_body);
+        // console.log(AdminEmail)
+        // AdminEmail = "pbatham21@gmail.com";       ////for testing
+        // console.log(AdminEmail);
+
+        await Helper.sendEmail(AdminEmail, subject, message_body, headers);
       }
     } else {
       const updatePreventSignup = await Database.from("PreventSignup")
@@ -281,9 +288,15 @@ export default class ResetPasswordLinkService {
           subject = rows[0].Subject;
         }
         body1 = body.replace("{Admin Name}", Admin_Name);
-        message_body = body1.replace("{Employee name(Number)}", EmployeeName);
+        message_body = body1.replace("{Employee Name}", EmployeeName);
+        var headers = "MIME-Version: 1.0" + "\r\n";
+        headers = headers + "Content-type:text/html;charset=UTF-8" + "\r\n";
+        headers = headers + "From: <noreply@ubiattendance.com>" + "\r\n";
 
-        // sendEmail_new1(AdminEmail, subject,message_body);
+        // AdminEmail = "pbatham21@gmail.com";       ////for testing
+        // console.log(AdminEmail);
+
+        await Helper.sendEmail(AdminEmail, subject, message_body, headers);
       }
     }
     return result;

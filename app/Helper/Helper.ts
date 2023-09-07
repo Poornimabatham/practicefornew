@@ -958,6 +958,7 @@ export default class Helper {
       return desg;
     }
 
+  }
   public static async sendEmail(email, subject, messages, headers) {
     // Create an SES client
     const getmail = await Mail.use("smtp").send(
