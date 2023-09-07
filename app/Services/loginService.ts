@@ -606,13 +606,12 @@ export default class loginService {
   /////////////  Loginverifymail  ///////////
 
   static async Loginverifymail(getparam) {
-    const emailNew = getparam.email;
+    const emailNew = getparam.email;     
 
     var selectquery = await Database.from("Organization as O")
       .innerJoin("admin_login as A", "A.OrganizationId", "O.Id")
       .innerJoin("licence_ubiattendance as lic", "O.Id", "lic.OrganizationId")
-      .select(
-        "A.name",
+      .select("A.name",
         "O.email",
         "A.OrganizationId",
         "O.mail_varified",

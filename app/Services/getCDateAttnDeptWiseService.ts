@@ -503,7 +503,7 @@ AM.shiftId), 1, 5)`
       var getDate = getData.date ? getData.date : currentDate;
       var formattedDate1 = getDate.toFormat("yyyy-MM-dd");
       var dateTimeUTC = DateTime.fromISO(formattedDate1, {
-        zone: "Pacific/Pago_Pago",
+        zone: "Pacific/Pago_Pago",  
       });
       var dateTimeInTimeZone = dateTimeUTC.setZone(timeZone);
       var date = dateTimeInTimeZone.toFormat("yyyy-MM-dd");
@@ -515,8 +515,8 @@ AM.shiftId), 1, 5)`
 
       if (getData.dept !== 0) {
         dept_cond = `  Dept_id=${getData.dept}`;
-        dept_cond1 = `  Department=${getData.dept}`;
-      }
+        dept_cond1 = `  Department=${getData.dept}`;  
+      } 
 
       if (getData.datafor == "present") {
         const getdataforPresentees = Database.query()
