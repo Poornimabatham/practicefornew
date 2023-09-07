@@ -171,7 +171,7 @@ export default class GetapprovalRegularService {
                   const updateRegularizationApproval: any = await Database.from(
                     "RegularizationApproval"
                   )
-                    .where(" attendanceId", data.attendance_id)
+                    .where("attendance_id  ", data.attendance_id)
                     .andWhere("ApproverId", data.uid)
                     .andWhere("OrganizationId", data.orgid)
                     .andWhere("ApproverSts", 3)
@@ -199,7 +199,7 @@ export default class GetapprovalRegularService {
                       "RegularizationApproval"
                     )
                       .select("ApproverId")
-                      .where(" attendanceId", data.attendance_id)
+                      .where("attendance_id  ", data.attendance_id)
                       .andWhere("ApproverId", data.uid)
                       .andWhere("OrganizationId", data.orgid)
                       .andWhere("ApproverSts", 3)
@@ -257,7 +257,7 @@ export default class GetapprovalRegularService {
                         const updateAttendanceMaster = await Database.from(
                           "AttendanceMaster"
                         )
-                          .where("Id", data.attendanceId)
+                          .where("Id", data.attendance_id)
                           .where("RegularizeSts", 3)
                           .update({
                             TimeOut: newtimeout,
@@ -328,10 +328,11 @@ export default class GetapprovalRegularService {
          ".${data.comment}`;
                   }
                 } else {
+                  console.log("es", data.attendance_id,data.uid, data.orgid)
                   const updateRegularizationApproval = await Database.from(
                     "RegularizationApproval"
                   )
-                    .where("attendanceId", data.attendanceId)
+                    .where("attendanceId", data.attendance_id)
                     .where("ApproverId", data.uid)
                     .where("OrganizationId", data.orgid)
                     .where("ApproverSts", 3)
