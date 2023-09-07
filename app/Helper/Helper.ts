@@ -9,7 +9,6 @@ import ZoneMaster from "App/Models/ZoneMaster";
 import { DateTime } from "luxon";
 import moment from "moment";
 export default class Helper {
-
   public static encode5t(str: string) {
     var contactNum = str.toString();
     for (let i = 0; i < 5; i++) {
@@ -878,7 +877,6 @@ export default class Helper {
         const affected_rows = sql.length;
 
         if (affected_rows > 0) {
-
           if (row) {
             rule = row[0].RuleCriteria;
             sts = row[0].HrStatus;
@@ -929,6 +927,37 @@ export default class Helper {
     return decTime;
   }
 
+  public static async getTrialDept(orgid) {
+    var Orgid = orgid;
+    var dept = 0;
+
+    const result = await Database.from("DepartmentMaster")
+      .select(Database.raw("min(Id) as deptid"))
+      .where("Name", "like", `%trial%`)
+      .andWhere("OrganizationId", Orgid);
+    if (result) {
+      dept = result[0].deptid;
+      return dept;
+    } else {
+      return dept;
+    }
+  }
+  public static async getTrialDesg(org_id) {
+    var Orgid = org_id;
+    var desg = 0;
+
+    const result: any = await Database.from("DesignationMaster")
+      .select(Database.raw("min(Id) as desgid"))
+      .where("Name", "like", `%trial%`)
+      .andWhere("OrganizationId", Orgid);
+
+    if (result) {
+      desg = result[0].desgid;
+      return desg;
+    } else {
+      return desg;
+    }
+
   public static async sendEmail(email, subject, messages, headers) {
     // Create an SES client
     const getmail = await Mail.use("smtp").send(
@@ -949,4 +978,20 @@ export default class Helper {
     return getmail;
   }
 
+  public static async getTrialShift(org_id) {
+    var Orgid = org_id;
+    var shiftid = 0;
+
+    const result: any = await Database.from("ShiftMaster")
+      .select(Database.raw("min(Id) as  shiftid "))
+      .where("Name", "like", `%trial%`)
+      .andWhere("OrganizationId", Orgid);
+
+    if (result) {
+      shiftid = result[0].shiftid;
+      return shiftid;
+    } else {
+      return shiftid;
+    }
+  }
 }

@@ -120,4 +120,172 @@ export default class ResetPasswordLinkService {
     }
     return status;
   }
+
+  public static async MoveEmpDataInExistingOrg(data) {
+    const Empid = data.uid;
+    const NewOrg = data.orgid;
+    const OldOrg = data.OldOrgId;
+    const Status = data.status;
+    const Contact = data.usercontact;
+
+    var Admin_Name = await Helper.getAdminNamebyOrgId(OldOrg);
+    var AdminEmail = data.Email;
+    const FirstName = await Helper.getEmpName(Empid);
+    var EmployeeName = FirstName + Contact;
+
+    var eid;
+    var EmpSts;
+    var COUNT;
+    var dept;
+    var desg;
+    var shift;
+    var CountFlag = 0;
+    var deleteQuery;
+    var UpdateQuery;
+    var body;
+
+    var body1;
+    var subject;
+    var message_body;
+    const result: {} = {};
+
+    if (Status == 1) {
+      const selectUsermasterlist = await Database.from("UserMaster")
+        .select("*")
+        .where("OrganizationId", NewOrg);
+      COUNT = selectUsermasterlist.length;
+      if (selectUsermasterlist) {
+        eid = selectUsermasterlist[0].Id;
+        EmpSts = selectUsermasterlist[0].appSuperviserSts;
+        dept = await Helper.getTrialDept(OldOrg);
+        desg = await Helper.getTrialDesg(OldOrg);
+        shift = await Helper.getTrialShift(OldOrg);
+
+        if (COUNT == 1 && EmpSts == 1) {
+          const updateQuery: any = await Database.from("EmployeeMaster ")
+            .where("OrganizationId", NewOrg)
+            .andWhere("Id", Empid)
+            .update({
+              Department: dept,
+              Designation: desg,
+              Shift: shift,
+            });
+          CountFlag = CountFlag + updateQuery;
+
+          const updateQuery2: any = await Database.from("UserMaster")
+            .where("OrganizationId", NewOrg)
+            .andWhere("EmployeeId", Empid)
+            .update({
+              OrganizationId: OldOrg,
+            });
+          CountFlag = CountFlag + updateQuery2;
+
+          const updateQuery3: any = await Database.from("AttendanceMaster")
+            .where("OrganizationId", NewOrg)
+            .andWhere("EmployeeId", Empid)
+            .update({
+              OrganizationId: OldOrg,
+              ShiftId: shift,
+              Dept_id: dept,
+              Desg_id: desg,
+            });
+          CountFlag = CountFlag + updateQuery3;
+
+          const updateQuery4: any = await Database.from("InterimAttendances")
+            .where("OrganizationId", NewOrg)
+            .andWhere("EmployeeId", Empid)
+            .update({
+              OrganizationId: OldOrg,
+            });
+          CountFlag = CountFlag + updateQuery4;
+
+          if (CountFlag > 0) {
+            deleteQuery = await Database.from("ShiftMaster")
+              .where("OrganizationId", NewOrg)
+              .delete();
+            deleteQuery = await Database.from("ShiftMasterChild")
+              .where("OrganizationId", NewOrg)
+              .delete();
+
+            deleteQuery = await Database.from("DepartmentMaster")
+              .where(" OrganizationId", NewOrg)
+              .delete();
+            deleteQuery = await Database.from("DesignationMaster")
+              .where("OrganizationId", NewOrg)
+              .delete();
+            deleteQuery = await Database.from("licence_ubiattendance")
+              .where("OrganizationIdd", NewOrg)
+              .delete();
+            deleteQuery = await Database.from("Organization")
+              .where("Id", NewOrg)
+              .delete();
+          }
+        } else {
+          UpdateQuery = await Database.from("EmployeeMaster")
+            .where("OrganizationId", NewOrg)
+            .andWhere("Id", Empid)
+            .update({
+              Department: dept,
+              Designation: desg,
+              Shift: shift,
+              OrganizationId: OldOrg,
+            });
+          UpdateQuery = await Database.from("UserMaster")
+            .where("OrganizationId", NewOrg)
+            .andWhere("Id", Empid)
+            .update({
+              OrganizationId: OldOrg,
+            });
+        }
+        UpdateQuery = await Database.from("PreventSignup")
+          .where("Status", 0)
+          .andWhere("EmployeeId ", Empid)
+          .andWhere("OrganizationId", NewOrg)
+          .update({
+            Status: 1,
+          });
+      }
+
+      result["status"] = 1;
+      if (result["status"] == 1) {
+        const selectMail = await Database.from("All_mailers")
+          .select(" Body", "Subject")
+          .where("Id", 39);
+        var rows = selectMail;
+        if (rows) {
+          body = rows[0].Body;
+          subject = rows[0].Subject;
+        }
+
+        body1 = body.replace("{Admin Name}", Admin_Name);
+        message_body = body1.replace("{Employee name(Number)}", EmployeeName);
+
+        // sendEmail_new1(AdminEmail, subject,message_body);
+      }
+    } else {
+      const updatePreventSignup = await Database.from("PreventSignup")
+        .where("Status", 0)
+        .andWhere("EmployeeId", Empid)
+        .andWhere("OrganizationId", NewOrg)
+        .update({
+          Status: 2,
+        });
+      result["status"] = 0;
+      if (result["status"] == 0) {
+        const selectMail = await Database.from("All_mailers")
+          .select(" Body", "Subject")
+          .where("Id", 39);
+        var rows = selectMail;
+        if (rows) {
+          body = rows[0].Body;
+          subject = rows[0].Subject;
+        }
+        body1 = body.replace("{Admin Name}", Admin_Name);
+        message_body = body1.replace("{Employee name(Number)}", EmployeeName);
+
+        // sendEmail_new1(AdminEmail, subject,message_body);
+      }
+    }
+    return result;
+  }
 }

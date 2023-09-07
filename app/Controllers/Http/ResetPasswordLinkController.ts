@@ -17,4 +17,11 @@ export default class ResetPasswordLinkController {
     const Output = await ResetPasswordLinkService.getAllowAttToUserData(Validationinput);
     return Output;
   }
+  public async MoveEmpDataInExistingOrg({request,response}:HttpContextContract){
+    const Validationinput = await request.validate(
+      ResetPasswordLinkValidator.MoveEmpDataInExistingOrgschema
+     );
+     const Output = await ResetPasswordLinkService.MoveEmpDataInExistingOrg(Validationinput);
+     return Output;
+  }
 }
