@@ -48,12 +48,6 @@ var moment_1 = require("moment");
 var Helper = /** @class */ (function () {
     function Helper() {
     }
-    Helper.weekOfMonth = function (date) {
-        throw new Error("Method not implemented.");
-    };
-    Helper.encrypt = function (arg0) {
-        throw new Error("Method not implemented.");
-    };
     Helper.encode5t = function (str) {
         var contactNum = str.toString();
         for (var i = 0; i < 5; i++) {
@@ -932,6 +926,46 @@ var Helper = /** @class */ (function () {
             });
         });
     };
+    Helper.getDeptName = function (deptId, orgId) {
+        return __awaiter(this, void 0, void 0, function () {
+            var query;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, Database_1["default"].from("DepartmentMaster")
+                            .select("name")
+                            .where("id", deptId)
+                            .where("OrganizationId", orgId)
+                            .first()];
+                    case 1:
+                        query = _a.sent();
+                        if (query) {
+                            return [2 /*return*/, query.name];
+                        }
+                        return [2 /*return*/, null]; // Return null or handle the case when no result is found
+                }
+            });
+        });
+    };
+    Helper.getDesigName = function (desigId, orgId) {
+        return __awaiter(this, void 0, void 0, function () {
+            var query;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, Database_1["default"].from("DesignationMaster")
+                            .select("Name")
+                            .where("Id", desigId)
+                            .where("OrganizationId", orgId)
+                            .first()];
+                    case 1:
+                        query = _a.sent();
+                        if (query) {
+                            return [2 /*return*/, query.Name];
+                        }
+                        return [2 /*return*/, null]; // Return null or handle the case when no result is found
+                }
+            });
+        });
+    };
     Helper.getShiftplannershiftIdByEmpID = function (EmpId, date) {
         return __awaiter(this, void 0, void 0, function () {
             var selectQuery;
@@ -1169,6 +1203,94 @@ var Helper = /** @class */ (function () {
                         });
                         _a.label = 2;
                     case 2: return [2 /*return*/, id];
+                }
+            });
+        });
+    };
+    Helper.time_to_decimal = function (time) {
+        return __awaiter(this, void 0, void 0, function () {
+            var timeArr, decTime;
+            return __generator(this, function (_a) {
+                timeArr = time.split(":").map(Number);
+                decTime = timeArr[0] * 60 + timeArr[1] + timeArr[2] / 60;
+                return [2 /*return*/, decTime];
+            });
+        });
+    };
+    Helper.getTrialDept = function (orgid) {
+        return __awaiter(this, void 0, void 0, function () {
+            var Orgid, dept, result;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        Orgid = orgid;
+                        dept = 0;
+                        return [4 /*yield*/, Database_1["default"].from("DepartmentMaster")
+                                .select(Database_1["default"].raw("min(Id) as deptid"))
+                                .where("Name", "like", "%trial%")
+                                .andWhere("OrganizationId", Orgid)];
+                    case 1:
+                        result = _a.sent();
+                        if (result) {
+                            dept = result[0].deptid;
+                            return [2 /*return*/, dept];
+                        }
+                        else {
+                            return [2 /*return*/, dept];
+                        }
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    Helper.getTrialDesg = function (org_id) {
+        return __awaiter(this, void 0, void 0, function () {
+            var Orgid, desg, result;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        Orgid = org_id;
+                        desg = 0;
+                        return [4 /*yield*/, Database_1["default"].from("DesignationMaster")
+                                .select(Database_1["default"].raw("min(Id) as desgid"))
+                                .where("Name", "like", "%trial%")
+                                .andWhere("OrganizationId", Orgid)];
+                    case 1:
+                        result = _a.sent();
+                        if (result) {
+                            desg = result[0].desgid;
+                            return [2 /*return*/, desg];
+                        }
+                        else {
+                            return [2 /*return*/, desg];
+                        }
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    Helper.getTrialShift = function (org_id) {
+        return __awaiter(this, void 0, void 0, function () {
+            var Orgid, shiftid, result;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        Orgid = org_id;
+                        shiftid = 0;
+                        return [4 /*yield*/, Database_1["default"].from("ShiftMaster")
+                                .select(Database_1["default"].raw("min(Id) as  shiftid "))
+                                .where("Name", "like", "%trial%")
+                                .andWhere("OrganizationId", Orgid)];
+                    case 1:
+                        result = _a.sent();
+                        if (result) {
+                            shiftid = result[0].shiftid;
+                            return [2 /*return*/, shiftid];
+                        }
+                        else {
+                            return [2 /*return*/, shiftid];
+                        }
+                        return [2 /*return*/];
                 }
             });
         });
