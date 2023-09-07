@@ -100,6 +100,18 @@ export default class ShiftValidator {
       orgid: schema.number(),
     }),
   };
+  static AssignShiftsByDesignation = {
+    schema: schema.create({
+      orgid: schema.number(),
+      date: schema.date.optional({ format: 'yyyy-MM-dd HH:mm:ss' }),
+      status: schema.number.optional(),
+      shiftid: schema.number(),
+      desgid: schema.number(),
+      WeekoffStatus: schema.number(),
+      assignedbyid: schema.number(),
+    }),
+    message: BaseValidator.messages,
+  };
   /*
    * Define schema to validate the "shape", "type", "formatting" and "integrity" of data.
    *
