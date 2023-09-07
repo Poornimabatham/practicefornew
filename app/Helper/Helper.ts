@@ -626,6 +626,7 @@ export default class Helper {
     const query = await Database.from("Organization")
       .where("Id", id)
       .select("Email");
+
     if (query.length > 0) {
       Email = query[0].Email;
       return Email;
@@ -636,9 +637,11 @@ export default class Helper {
 
   public static async getAdminNamebyOrgId(orgid) {
     let Name;
+
     const query = await Database.from("admin_login")
       .where("OrganizationId", orgid)
       .select("name");
+
     if (query.length > 0) {
       Name = query[0].name;
       return Name;
@@ -902,6 +905,5 @@ export default class Helper {
     let decTime = timeArr[0] * 60 + timeArr[1] + timeArr[2] / 60;  //converting time in minutes
     return decTime
   }
-
 
 }

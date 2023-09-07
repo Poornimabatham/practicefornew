@@ -246,7 +246,7 @@ export default class DesignationService {
     }
   }
 
-  // GetDesignationStatus
+    // GetDesignationStatus
 
   public static async DesignationStatus(get) {
     var Orgid = get.orgid;
@@ -255,7 +255,7 @@ export default class DesignationService {
     const selectEmployeeList = await Database.from("EmployeeMaster")
       .select(Database.raw("COUNT(*) as num"))
       .where("OrganizationId", Orgid)
-      .andWhere(" Designation", DesigId);
+      .andWhere(" Designation", DesigId)
 
     const result = await selectEmployeeList;
     const selectAttendanceMasterList = await Database.from("AttendanceMaster")
@@ -314,4 +314,5 @@ export default class DesignationService {
     }
     return data;
   }
+
 }
