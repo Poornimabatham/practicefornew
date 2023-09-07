@@ -729,9 +729,8 @@ export default class loginService {
     })
    )
     return response;
-  }
+  }  
   
-
-  }
+}
 
 

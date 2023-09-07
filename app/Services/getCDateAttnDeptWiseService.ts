@@ -842,8 +842,8 @@ AM.shiftId), 1, 5)`
             "E.LastName",
             "S.shifttype",
             "S.TimeIn",
-            "S.TimeOut"
-          )
+            "S.TimeOut"  
+          )  
           .from("EmployeeMaster as E")
           .innerJoin("AttendanceMaster as A", "A.EmployeeId", "E.Id")
           .innerJoin("ShiftMaster as S", "A.ShiftId", "S.Id")

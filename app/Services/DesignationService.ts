@@ -290,7 +290,7 @@ export default class DesignationService {
 
       const orgid = getparam.orgId;
       const uid = Adminid;
-      const module = "Attendance app";
+      const module = "Attendance app";  
       const activityBy = 1;
       const appModule = "Delete Designation";
       const actionperformed = `<b>${DesigName}</b>. designation has been deleted by <b>${empName}</b> from <b>${module}</b>`;
