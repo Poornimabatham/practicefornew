@@ -620,7 +620,7 @@ export default class Usersettingservice {
           if (regsts == 3) {
             res["regularizeSts"] = "pending";
             let pstatus = 0;
-            let approverid = row.ApproverId;
+             let approverid = row.ApproverId;    
 
             if (approverid != 0) {
               pstatus = approverid;
@@ -630,16 +630,23 @@ export default class Usersettingservice {
             }
 
             if (pstatus == 0) {
-              const qur = await Database.query()
+              const qur1 = await Database.query()
                 .from("RegularizationApproval")
                 .select("ApproverId")
                 .where("attendanceId", attid)
                 .andWhere("ApproverSts", regsts)
                 .andWhere("approverregularsts", 0)
-                .orderBy("Id", "asc")
-                .limit(1);
-              pstatus = qur[0].ApproverId;
+                // .orderBy("Id", "asc")
+                .limit(1)
+                if(qur1.length > 0 ){
+                  pstatus = qur1[0].ApproverId ? qur1[0].ApproverId:0;
+                  
+                }
+            
+             
             }
+             
+        
 
             const Name = await Helper.getEmpName(pstatus);
 
