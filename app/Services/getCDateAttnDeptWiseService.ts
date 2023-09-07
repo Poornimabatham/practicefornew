@@ -575,7 +575,6 @@ AM.shiftId), 1, 5)`
               longi_out: val.longi_out,
               Id: val.Id,
               name: val.name,
-              Dept_id: val.Dept_id,
               TotalLoggedHours: val.TotalLoggedHours,
               AttendanceStatus: val.AttendanceStatus,
               ShiftId: val.ShiftId,

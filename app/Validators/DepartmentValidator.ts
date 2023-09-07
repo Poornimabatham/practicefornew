@@ -78,7 +78,6 @@ export default class DepartmentValidator extends BaseValidator {
       orgId: schema.number.optional(),
       empId: schema.number.optional(),
       Id: schema.number.optional(),
-      date: schema.date()
     }),
   };
 }
