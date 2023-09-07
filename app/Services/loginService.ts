@@ -649,10 +649,10 @@ export default class loginService {
       )
       .where("O.Id", getparam.org_id)
       .andWhere("O.mail_varified", 0);
-
-    const response = {};
-    if (selectquery.length > 0) {
-      response["response"] = 0;
+    
+    var response = {};
+    if (selectquery.length == 0) {
+      response["response"] = 0; ///User Not exist on given org_id
     }
     interface Forselectquery {
       contact_person_name: string;
@@ -667,9 +667,14 @@ export default class loginService {
           email: val.email,
           trialdays: val.trialdays,
         };
-        if (showdata.email != emailNew) {
-          var email = emailNew;
-          let encodeemail = await Helper.encode5t(email);
+
+        var oldmail = showdata.email;
+        var email;
+        if (oldmail != emailNew) {
+          console.log("HAAA");
+          
+          email = emailNew;          
+          let encodeemail = await Helper.encode5t(email);          
           var COUNTER = 0;
           var orgCount;
           orgCount = await Database.from("Organization")
@@ -687,10 +692,12 @@ export default class loginService {
             .where("Username", encodeemail);
           COUNTER += orgCount.length;
 
-          if (COUNTER > 0) {
-            response["response"] = 2; // Already exist
-          } else {
-            var upquery = await Database.from("Organization as o")
+          if (COUNTER > 0) {            
+            response["response"] = 1; // Already exist
+          } else {   
+          console.log(email);
+          
+            const updateQuery = await Database .from("Organization as o")
               .innerJoin("admin_login as a", "o.Id", "a.OrganizationId")
               .innerJoin("EmployeeMaster as e", "o.Id", "e.OrganizationId")
               .innerJoin("UserMaster as u", "o.Id", "u.OrganizationId")
@@ -703,12 +710,12 @@ export default class loginService {
                 "u.Username": encodeemail,
               });
 
-            if (upquery) {
-              response["response"] = 1; //updated Successfully
+            if (updateQuery) {
+              response["response"] = 2; //updated Successfully
             }
           }
         } else {
-          showdata.email == email;
+          email = oldmail;
         }
         var subject;
         var mailbody;
@@ -731,11 +738,11 @@ export default class loginService {
         const mlbody = mailbody;
 
         var mlbody1 = mlbody.replace(
-          "{Compancontact_person_namey_Name}",
+          "{contact_person_name}",
           showdata.contact_person_name
         );
         var mlbody2 = mlbody1.replace("{Verify_your_Account}", verify1);
-        var mlbody3 = mlbody2.replace("{Verify_your_Account}", verify2);
+        var mlbody3 = mlbody2.replace("{Verify your Account}", verify2);
         var mlbody4 = mlbody3.replace("Contact us", verify3);
 
         var messages = mlbody4;
@@ -744,21 +751,21 @@ export default class loginService {
         headers = headers + "Content-type:text/html;charset=UTF-8" + "\r\n";
         headers = headers + "From: <noreply@ubiattendance.com>" + "\r\n";
 
-        // var respons = sendEmail_new(
-        //   email,
-        //   subject,
-        //   messages,
-        //   headers
-        // );
+        console.log(email);
+        email = "meghwalshivam18@gmail.com";
+        console.log(email);
+        let getrespons = await Helper.sendEmail(
+          email,
+          subject,
+          messages,
+          headers
+        );
 
-        // ////// UNCOMPLETE waiting for sendEmail_new() /////
-
-        // if (respons) {
-        //   result["status"] = "true";
-        // } else {
-        //   result["status"] = "false";
-        // }
-        // return result;
+        if (getrespons !=undefined) {
+          response["status"] = "true"; //Mail send succesfully
+        } else {
+          response["status"] = "false"; ////Mail send Unsuccesfully
+        }
       })
     );
     return response;

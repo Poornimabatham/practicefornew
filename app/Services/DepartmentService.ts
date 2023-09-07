@@ -536,8 +536,8 @@ export default class DepartmentService {
       .andWhere("Id", deptInactiveid)
       .andWhere("archive", 0)
       .delete();
-
-    if (query) {
+    
+    if (query) {      
       data["status"] = "true"; //Department  Delete successfully
       const zone = await Helper.getTimeZone(getparam.orgId);
       const timezone = zone;
@@ -566,6 +566,8 @@ export default class DepartmentService {
         data["status"] = "Error inserting ActivityMasterInsert";
 
       }
+    } else {
+      data["status"] = "false"; //Department  Delete Unsuccessfully
     }
     return data;
   }

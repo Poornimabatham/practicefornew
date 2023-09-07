@@ -30,6 +30,6 @@ export default class GetCDateAttnDeptWiseValidator extends BaseModel {
       perPage: schema.number.optional(),
       datafor: schema.string.optional(),
       date: schema.date.optional({ format: "yyyy-MM-dd" }),
-    }),
+    }),  
   };
 }

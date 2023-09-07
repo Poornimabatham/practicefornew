@@ -37,6 +37,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 exports.__esModule = true;
 var jwt = require("jsonwebtoken");
+var Mail_1 = require("@ioc:Adonis/Addons/Mail");
 var Database_1 = require("@ioc:Adonis/Lucid/Database");
 var AttendanceMaster_1 = require("App/Models/AttendanceMaster");
 var EmployeeMaster_1 = require("App/Models/EmployeeMaster");
@@ -48,12 +49,6 @@ var moment_1 = require("moment");
 var Helper = /** @class */ (function () {
     function Helper() {
     }
-    Helper.weekOfMonth = function (date) {
-        throw new Error("Method not implemented.");
-    };
-    Helper.encrypt = function (arg0) {
-        throw new Error("Method not implemented.");
-    };
     Helper.encode5t = function (str) {
         var contactNum = str.toString();
         for (var i = 0; i < 5; i++) {
@@ -932,6 +927,46 @@ var Helper = /** @class */ (function () {
             });
         });
     };
+    Helper.getDeptName = function (deptId, orgId) {
+        return __awaiter(this, void 0, void 0, function () {
+            var query;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, Database_1["default"].from("DepartmentMaster")
+                            .select("name")
+                            .where("id", deptId)
+                            .where("OrganizationId", orgId)
+                            .first()];
+                    case 1:
+                        query = _a.sent();
+                        if (query) {
+                            return [2 /*return*/, query.name];
+                        }
+                        return [2 /*return*/, null]; // Return null or handle the case when no result is found
+                }
+            });
+        });
+    };
+    Helper.getDesigName = function (desigId, orgId) {
+        return __awaiter(this, void 0, void 0, function () {
+            var query;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, Database_1["default"].from("DesignationMaster")
+                            .select("Name")
+                            .where("Id", desigId)
+                            .where("OrganizationId", orgId)
+                            .first()];
+                    case 1:
+                        query = _a.sent();
+                        if (query) {
+                            return [2 /*return*/, query.Name];
+                        }
+                        return [2 /*return*/, null]; // Return null or handle the case when no result is found
+                }
+            });
+        });
+    };
     Helper.getShiftplannershiftIdByEmpID = function (EmpId, date) {
         return __awaiter(this, void 0, void 0, function () {
             var selectQuery;
@@ -961,7 +996,29 @@ var Helper = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         dateTime = luxon_1.DateTime.fromISO(date);
-                        dayOfWeek = dateTime.weekday + 1;
+                        dayOfWeek = dateTime.weekday;
+                        switch (dayOfWeek) {
+                            case 1:
+                                dayOfWeek = 2;
+                                break;
+                            case 2:
+                                dayOfWeek = 3;
+                                break;
+                            case 3:
+                                dayOfWeek = 4;
+                                break;
+                            case 4:
+                                dayOfWeek = 5;
+                                break;
+                            case 5:
+                                dayOfWeek = 6;
+                                break;
+                            case 6:
+                                dayOfWeek = 7;
+                                break;
+                            case 7:
+                                dayOfWeek = 1;
+                        }
                         weekOfMonth = Math.ceil(dateTime.day / 7);
                         return [4 /*yield*/, Database_1["default"].from("ShiftMasterChild")
                                 .select("WeekOff")
@@ -1169,6 +1226,118 @@ var Helper = /** @class */ (function () {
                         });
                         _a.label = 2;
                     case 2: return [2 /*return*/, id];
+                }
+            });
+        });
+    };
+    Helper.time_to_decimal = function (time) {
+        return __awaiter(this, void 0, void 0, function () {
+            var timeArr, decTime;
+            return __generator(this, function (_a) {
+                timeArr = time.split(":").map(Number);
+                decTime = timeArr[0] * 60 + timeArr[1] + timeArr[2] / 60;
+                return [2 /*return*/, decTime];
+            });
+        });
+    };
+    Helper.getTrialDept = function (orgid) {
+        return __awaiter(this, void 0, void 0, function () {
+            var Orgid, dept, result;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        Orgid = orgid;
+                        dept = 0;
+                        return [4 /*yield*/, Database_1["default"].from("DepartmentMaster")
+                                .select(Database_1["default"].raw("min(Id) as deptid"))
+                                .where("Name", "like", "%trial%")
+                                .andWhere("OrganizationId", Orgid)];
+                    case 1:
+                        result = _a.sent();
+                        if (result) {
+                            dept = result[0].deptid;
+                            return [2 /*return*/, dept];
+                        }
+                        else {
+                            return [2 /*return*/, dept];
+                        }
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    Helper.getTrialDesg = function (org_id) {
+        return __awaiter(this, void 0, void 0, function () {
+            var Orgid, desg, result;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        Orgid = org_id;
+                        desg = 0;
+                        return [4 /*yield*/, Database_1["default"].from("DesignationMaster")
+                                .select(Database_1["default"].raw("min(Id) as desgid"))
+                                .where("Name", "like", "%trial%")
+                                .andWhere("OrganizationId", Orgid)];
+                    case 1:
+                        result = _a.sent();
+                        if (result) {
+                            desg = result[0].desgid;
+                            return [2 /*return*/, desg];
+                        }
+                        else {
+                            return [2 /*return*/, desg];
+                        }
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    Helper.sendEmail = function (email, subject, messages, headers) {
+        return __awaiter(this, void 0, void 0, function () {
+            var getmail;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, Mail_1["default"].use("smtp").send(function (message) {
+                            message
+                                .from("noreply@ubiattendance.com", "shakir")
+                                .to(email)
+                                .subject(subject)
+                                .header(headers, headers)
+                                .html("" + messages);
+                            //message.textView('emails/welcome.plain', {})
+                            //.htmlView('emails/welcome', { fullName: 'Virk' })
+                        }, {
+                            oTags: ["signup"]
+                        })];
+                    case 1:
+                        getmail = _a.sent();
+                        return [2 /*return*/, getmail];
+                }
+            });
+        });
+    };
+    Helper.getTrialShift = function (org_id) {
+        return __awaiter(this, void 0, void 0, function () {
+            var Orgid, shiftid, result;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        Orgid = org_id;
+                        shiftid = 0;
+                        return [4 /*yield*/, Database_1["default"].from("ShiftMaster")
+                                .select(Database_1["default"].raw("min(Id) as  shiftid "))
+                                .where("Name", "like", "%trial%")
+                                .andWhere("OrganizationId", Orgid)];
+                    case 1:
+                        result = _a.sent();
+                        if (result) {
+                            shiftid = result[0].shiftid;
+                            return [2 /*return*/, shiftid];
+                        }
+                        else {
+                            return [2 /*return*/, shiftid];
+                        }
+                        return [2 /*return*/];
                 }
             });
         });
