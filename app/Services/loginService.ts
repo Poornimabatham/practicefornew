@@ -78,8 +78,8 @@ export default class loginService {
     const countrycodeid = data.countrycodeid;
     const phoneno = data.phoneno;
     const appleAuthId = data.appleAuthId;
-    const platform = data.platform;
-    const app = data.app;
+    let platform = data.platform;
+    let app = data.app;
     const skipOTP = data.skipOTP;
     const emailVerification = data.emailVerification;
 
@@ -88,7 +88,7 @@ export default class loginService {
     const orgid = 0;
     const result: any = {};
     const email = await Helper.encode5t(useremail);
-    const phone = await Helper.encode5t(phoneno);
+    const phone = 0//await Helper.encode5t(phoneno);
     const Password = await Helper.encode5t(userpassword);
     const res: any = {};
     let id = 0;
@@ -243,6 +243,36 @@ export default class loginService {
         fiscal_end: "31 March",
       });
     if (UpdateOrg) {
+       platform = app = "ubiAttendance" ? "ubiAttendance" : "ubiSales";
+       let Body;
+       let Subject;
+       let logo;
+       let msessage;
+       let headers ='From: <noreply@ubiattendance.com>';
+
+       let mailquery = await Database.query().from('All_mailers').select('Subject','Body').where('Id',4);
+        
+       if(mailquery){
+
+        Body = mailquery[0].Body;
+        Subject = mailquery[0].Subject; 
+       }
+
+       if(platform == "ubiSales")
+       {
+         logo = "https://ubiattendance.ubiattendance.xyz/assets/images/ubisales.png";
+       }else{
+        logo = "https://ubiattendance.ubiattendance.xyz/assets/images/ubi-Atttendance-Logo_d0bec719579677da36f94f7d3caa2d07";
+       } 
+        
+        let body1 = Body.replace("{logo}",logo)
+        let body2 = body1.replace("{appname}",platform);
+        let body3 = body2.replace("{employee_number}", phoneno);
+        let body4 = body3.replace("{employee_password}",userpassword);
+         
+          
+       
+       
       // Email functionality
 
       const insert_adminlogin = await Database.table("admin_login").insert({
