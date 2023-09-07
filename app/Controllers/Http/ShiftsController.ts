@@ -98,5 +98,10 @@ export default class ShiftsController {
     const res = await ShiftsService.addMultiShift(req)
     return response.json(res)
   }
-
+   // =======================AssignShiftsByDesignation================
+  public async AssignShiftsByDesignation({request,response}: HttpContextContract){
+    const req = await request.validate(ShiftValidator.AssignShiftsByDesignation);
+    const res = await ShiftsService.AssignShiftsByDesignation(req)
+    return response.json({"test":res})
+  }
 }

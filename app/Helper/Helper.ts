@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+import Mail from "@ioc:Adonis/Addons/Mail";
 import Database from "@ioc:Adonis/Lucid/Database";
 import AttendanceMaster from "App/Models/AttendanceMaster";
 import EmployeeMaster from "App/Models/EmployeeMaster";
@@ -724,7 +725,32 @@ export default class Helper {
     orgid: number
   ) {
     var dateTime = DateTime.fromISO(date);
-    var dayOfWeek = dateTime.weekday + 1; // Convert Luxon weekday to 1-7 format
+    var dayOfWeek = dateTime.weekday; // Convert Luxon weekday to 1-7 format
+
+    switch (dayOfWeek) {
+      case 1:
+        dayOfWeek = 2;
+        break;
+      case 2:
+        dayOfWeek = 3;
+        break;
+      case 3:
+        dayOfWeek = 4;
+        break;
+      case 4:
+        dayOfWeek = 5;
+        break;
+      case 5:
+        dayOfWeek = 6;
+        break;
+      case 6:
+        dayOfWeek = 7;
+        break;
+      case 7:
+        dayOfWeek = 1;
+
+    }
+
     var weekOfMonth = Math.ceil(dateTime.day / 7);
     var week;
     var selectQuery = await Database.from("ShiftMasterChild")
@@ -783,8 +809,8 @@ export default class Helper {
     let dist =
       Math.sin(this.deg2rad(lat1)) * Math.sin(this.deg2rad(lat2)) +
       Math.cos(this.deg2rad(lat1)) *
-        Math.cos(this.deg2rad(lat2)) *
-        Math.cos(this.deg2rad(theta));
+      Math.cos(this.deg2rad(lat2)) *
+      Math.cos(this.deg2rad(theta));
     dist = Math.acos(dist);
     dist = this.rad2deg(dist);
     let miles = dist * 60 * 1.1515;
@@ -900,6 +926,7 @@ export default class Helper {
     let decTime = timeArr[0] * 60 + timeArr[1] + timeArr[2] / 60; //converting time in minutes
     return decTime;
   }
+
   public static async getTrialDept(orgid) {
     var Orgid = orgid;
     var dept = 0;
@@ -930,6 +957,25 @@ export default class Helper {
     } else {
       return desg;
     }
+
+  public static async sendEmail(email, subject, messages, headers) {
+    // Create an SES client
+    const getmail = await Mail.use("smtp").send(
+      (message) => {
+        message
+          .from("noreply@ubiattendance.com", "shakir")
+          .to(email)
+          .subject(subject)
+          .header(headers,headers)
+          .html(`${messages}`);
+        //message.textView('emails/welcome.plain', {})
+        //.htmlView('emails/welcome', { fullName: 'Virk' })
+      },
+      {
+       oTags: ["signup"],
+      }
+    );
+    return getmail;
   }
 
   public static async getTrialShift(org_id) {

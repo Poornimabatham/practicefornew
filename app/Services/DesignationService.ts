@@ -282,7 +282,7 @@ export default class DesignationService {
       .andWhere("Id", desigInactiveid)
       .andWhere("archive", 0).delete();
     if (query) {
-      data["status"] = "true"; //Department  Delete successfully
+      data["status"] = "true"; //Designation  Delete successfully
       const zone = await Helper.getTimeZone(getparam.orgId);
       const timezone = zone;
       const date = moment().tz(timezone).toDate();
@@ -290,7 +290,7 @@ export default class DesignationService {
 
       const orgid = getparam.orgId;
       const uid = Adminid;
-      const module = "Attendance app";
+      const module = "Attendance app";  
       const activityBy = 1;
       const appModule = "Delete Designation";
       const actionperformed = `<b>${DesigName}</b>. designation has been deleted by <b>${empName}</b> from <b>${module}</b>`;
@@ -310,7 +310,7 @@ export default class DesignationService {
         data["status"] = "Error inserting ActivityMasterInsert";
       }
     } else {
-      data["status"] = "false"; //Department Delete Unsuccessfull   
+      data["status"] = "false"; //Designation Delete Unsuccessfull
     }
     return data;
   }
