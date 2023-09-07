@@ -226,7 +226,7 @@ export default class GetDataToRegService {
     const RegularizationAppliedFrom = data.RegularizationAppliedFrom;
 
     const currentDate = DateTime.now();
-    const currentMonth = currentDate.toFormat("yyyy-MM-dd");
+    // const currentMonth = currentDate.toFormat("yyyy-MM-dd");
 
     const mdate = currentDate.toFormat("yyyy-MM-dd HH:mm:ss");
 
@@ -245,8 +245,8 @@ export default class GetDataToRegService {
     let divhrsts;
     let module;
     let ActivityBy;
-    let sql;
-    let sql1;
+    let  fetchQueryList;
+    let fetchQueryList3;
     const result = await selectEmployeeList;
     result.forEach(async (row) => {
       designation = row.Designation;
@@ -263,42 +263,42 @@ export default class GetDataToRegService {
       if (divhrsts != 0) {
         var hrid = divhrsts;
       } else {
-        sql = await Database.from("UserMaster")
+        fetchQueryList = await Database.from("UserMaster")
           .select("EmployeeId")
           .where(" OrganizationId", orgid)
           .andWhere("HRSts", 1);
 
-        sql.forEach((val) => {
+          fetchQueryList.forEach((val) => {
           hrid = val.EmployeeId;
         });
       }
     } else {
       module = "ubiattendance APP";
       ActivityBy = 1;
-      sql = await Database.from("Organization")
+      fetchQueryList = await Database.from("Organization")
         .select("Email")
         .where("Id", orgid);
 
       await Promise.all(
-        sql.map(async (val) => {
+        fetchQueryList.map(async (val) => {
           const email1: any = await Helper.encode5t(val.Email);
           email = email1;
         })
       );
 
-      var sqlemp = await Database.from("UserMaster")
+      var fetchQueryList2 = await Database.from("UserMaster")
         .select("EmployeeId ")
         .where("OrganizationId", orgid)
         .andWhere("Username", email);
 
-      sqlemp.forEach((val) => {
+        fetchQueryList2.forEach((val) => {
         hrid = val.EmployeeId;
       });
       senior = hrid;
     }
 
     if (Attendance_id != undefined && (hrid != 0 || hrid != "")) {
-      sql1 = await Database.from("AttendanceMaster")
+      fetchQueryList3 = await Database.from("AttendanceMaster")
         .where("Id", Attendance_id)
         .update({
           RegularizationRemarks: remark,
@@ -311,10 +311,10 @@ export default class GetDataToRegService {
           LastModifiedDate: mdate,
         });
       try {
-        var updSts: any = sql1;
+        var updSts: any =  fetchQueryList3;
         if (updSts == 1) {
           msg = `<b>${empname}</b> requested for regularization for the attendance date of <b>${attendancedate}</b>`;
-          sql = await Helper.ActivityMasterInsert(
+          fetchQueryList3 = await Helper.ActivityMasterInsert(
             date2,
             orgid,
             uid,
@@ -323,19 +323,19 @@ export default class GetDataToRegService {
             msg,
             module
           );
-          sql1 = await Database.from("AttendanceMaster ")
+          fetchQueryList3 = await Database.from("AttendanceMaster ")
             .select("RegularizeTimeIn", "TimeIn")
             .where("Id", Attendance_id);
 
-          const count = sql1.length;
+          const count =  fetchQueryList3.length;
 
-          sql1.forEach((val) => {
+          fetchQueryList3.forEach((val) => {
             regularizetimein = val.RegularizeTimeIn;
             orginaltimein = val.TimeIn;
           });
 
           if (RegularizationAppliedFrom != 2) {
-            const sql4 = await Database.from("ApprovalProcess")
+            const  fetchQueryList4 = await Database.from("ApprovalProcess")
               .where("OrganizationId", orgid)
               .where(
                 Database.raw(
@@ -346,7 +346,7 @@ export default class GetDataToRegService {
 
               .orderBy("Designation", "desc")
               .orderBy("ProcessType", "desc");
-            const query4 = sql4.length;
+            const query4 =  fetchQueryList4.length;
 
             if (query4 > 0) {
               senior = await Helper.getApprovalLevelEmp(uid, orgid, 13);
@@ -365,7 +365,7 @@ export default class GetDataToRegService {
 
             for (let i = 0; i < temp.length; i++) {
               if (temp[i] != "0") {
-                sql = await Database.insertQuery()
+                fetchQueryList = await Database.insertQuery()
                   .table("RegularizationApproval")
                   .insert({
                     attendanceId: Attendance_id,
