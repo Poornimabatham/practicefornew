@@ -37,6 +37,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 exports.__esModule = true;
 var jwt = require("jsonwebtoken");
+var Mail_1 = require("@ioc:Adonis/Addons/Mail");
 var Database_1 = require("@ioc:Adonis/Lucid/Database");
 var AttendanceMaster_1 = require("App/Models/AttendanceMaster");
 var EmployeeMaster_1 = require("App/Models/EmployeeMaster");
@@ -995,7 +996,29 @@ var Helper = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         dateTime = luxon_1.DateTime.fromISO(date);
-                        dayOfWeek = dateTime.weekday + 1;
+                        dayOfWeek = dateTime.weekday;
+                        switch (dayOfWeek) {
+                            case 1:
+                                dayOfWeek = 2;
+                                break;
+                            case 2:
+                                dayOfWeek = 3;
+                                break;
+                            case 3:
+                                dayOfWeek = 4;
+                                break;
+                            case 4:
+                                dayOfWeek = 5;
+                                break;
+                            case 5:
+                                dayOfWeek = 6;
+                                break;
+                            case 6:
+                                dayOfWeek = 7;
+                                break;
+                            case 7:
+                                dayOfWeek = 1;
+                        }
                         weekOfMonth = Math.ceil(dateTime.day / 7);
                         return [4 /*yield*/, Database_1["default"].from("ShiftMasterChild")
                                 .select("WeekOff")
@@ -1265,6 +1288,30 @@ var Helper = /** @class */ (function () {
                             return [2 /*return*/, desg];
                         }
                         return [2 /*return*/];
+                }
+            });
+        });
+    };
+    Helper.sendEmail = function (email, subject, messages, headers) {
+        return __awaiter(this, void 0, void 0, function () {
+            var getmail;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, Mail_1["default"].use("smtp").send(function (message) {
+                            message
+                                .from("noreply@ubiattendance.com", "shakir")
+                                .to(email)
+                                .subject(subject)
+                                .header(headers, headers)
+                                .html("" + messages);
+                            //message.textView('emails/welcome.plain', {})
+                            //.htmlView('emails/welcome', { fullName: 'Virk' })
+                        }, {
+                            oTags: ["signup"]
+                        })];
+                    case 1:
+                        getmail = _a.sent();
+                        return [2 /*return*/, getmail];
                 }
             });
         });
