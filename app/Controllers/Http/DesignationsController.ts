@@ -57,4 +57,14 @@ export default class DesignationsController {
 
     return response.json(b);
   }
+
+  public async deleteInActiveDesignation({ request, response}:HttpContextContract) {
+  const valdata = await request.validate(DesignationValidator.deleteInActiveDesignationVal);
+        this.data["orgId"] = valdata.orgId ? valdata.orgId : 0;
+        this.data["empId"] = valdata.empId ? valdata.empId : 0;
+        this.data["Id"] = valdata.empId ? valdata.Id : 0;      
+    const ServiceResp = await DesignationService.deleteInActiveDesig(this.data);
+    return response.json(ServiceResp);
+  }
+
 }

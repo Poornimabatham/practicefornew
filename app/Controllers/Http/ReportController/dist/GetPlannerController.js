@@ -38,10 +38,10 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 exports.__esModule = true;
 var GetplannerWiseService_1 = require("App/Services/ReportServices/GetplannerWiseService");
 var PlannerValidator_1 = require("App/Validators/ReportValidator/PlannerValidator");
-var GetplannerController = /** @class */ (function () {
-    function GetplannerController() {
+var GetPlannerController = /** @class */ (function () {
+    function GetPlannerController() {
     }
-    GetplannerController.prototype.getplannerwisesummary = function (_a) {
+    GetPlannerController.prototype.getplannerwisesummary = function (_a) {
         var request = _a.request, response = _a.response;
         return __awaiter(this, void 0, void 0, function () {
             var a, b;
@@ -58,7 +58,7 @@ var GetplannerController = /** @class */ (function () {
             });
         });
     };
-    GetplannerController.prototype.getRegSummary = function (_a) {
+    GetPlannerController.prototype.getRegSummary = function (_a) {
         var request = _a.request, response = _a.response;
         return __awaiter(this, void 0, void 0, function () {
             var a, b;
@@ -75,6 +75,6 @@ var GetplannerController = /** @class */ (function () {
             });
         });
     };
-    return GetplannerController;
+    return GetPlannerController;
 }());
-exports["default"] = GetplannerController;
+exports["default"] = GetPlannerController;
