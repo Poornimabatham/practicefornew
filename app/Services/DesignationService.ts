@@ -227,7 +227,7 @@ export default class DesignationService {
       const appModule = "Update Successfully";
       const actionperformed = `<b>${get.designame}</b>. Designation has been assigned to <b>${get.empname}</b> by <b>${get.adminname}</b> from <b>${module}</b>`;
 
-      var getresult = await Helper.ActivityMasterInsert(
+      var getresult = await Helper.ActivityMasterInsert(  
         date,
         orgid,
         uid,

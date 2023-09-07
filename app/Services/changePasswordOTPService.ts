@@ -3,9 +3,9 @@ import Helper from "App/Helper/Helper";
 import { DateTime } from "luxon";
 export default class changePasswordOTPService {
   public static async changePasswordOTP(data) {
-    var email = data.email;
-    var phone = data.phone;
-    var result: [] = [];
+    var email = data.emailotp;
+    var phone = data.phoneotp;
+    var result: {} = {};
 
     if (phone != undefined) {
       var phoneEncode = await Helper.encode5t(phone);
@@ -29,6 +29,7 @@ export default class changePasswordOTPService {
         result["status"] = "5";
       }
     }
+    return result
   }
 
   public static async newchangepass(data) {

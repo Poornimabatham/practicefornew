@@ -14,8 +14,9 @@ export default class GetAttendanceEmployeewisesController {
            this.data['empid']=validation.emp;
            this.data['datafor']=validation.datafor.toLowerCase();
            this.data['currentPage']=validation.currentPage?validation.currentPage:0;
-           this.data['perpage']=validation.perPage?validation.perPage:10;
-         
+           this.data['perpage']= validation.perPage?validation.perPage:10;
+           this.data['csv'] = validation.csv ? validation.csv:'No_Csv';
+         //console.log(this.data);
             if(this.data['datafor']=='present'){
                 const result = await GetAttendanceEmployeewiseService.prototype.getPresentList(this.data);
                 if(result == 0){

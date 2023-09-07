@@ -7,4 +7,9 @@ export default class GetplannerController {
     const b = await GetplannerWiseSummary.Getlannerwisesummary(a);
     return response.json(b);
   }
+  public async getRegSummary({request,response}:HttpContextContract){
+    const a = await request.validate(Plannervalidator.getRegSummarychema);
+    const b = await GetplannerWiseSummary.getRegSummary(a);
+    return response.json(b);
+  }
 }
