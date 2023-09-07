@@ -476,6 +476,28 @@ export default class loginService {
       }
       result['sts'] = true;
 
+    return result;
+  }
+  /////////////  Loginverifymail  ///////////
+
+  static async Loginverifymail(getparam) {
+    const emailNew = getparam.email;     
+
+    var selectquery = await Database.from("Organization as O")
+      .innerJoin("admin_login as A", "A.OrganizationId", "O.Id")
+      .innerJoin("licence_ubiattendance as lic", "O.Id", "lic.OrganizationId")
+      .select("A.name",
+        "O.email",
+        "A.OrganizationId",
+        "O.mail_varified",
+        Database.raw("DATEDIFF(lic.end_date, lic.start_date) as trialdays")
+      )
+      .where("O.Id", getparam.org_id)
+      .andWhere("O.mail_varified", 0)
+    
+     const response = {};
+    if (selectquery.length > 0) {  
+      response["response"] = 0;
     }else{
       result['sts'] = 0;
     }
