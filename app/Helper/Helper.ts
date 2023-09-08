@@ -1179,14 +1179,7 @@ export default class Helper {
     }
     return seniorid;
   }
-
-  public static async getshiftmultipletime_sts(uid,todayDate,shiftid) 
-  {
-     
-  }
-  
-
-  public static async dateFormate(date)
+ public static async dateFormate(date)
   {
       const year = date.getFullYear();
       const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
