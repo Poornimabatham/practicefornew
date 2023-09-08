@@ -114,11 +114,7 @@ export default class loginService {
 
     const query2 = await Database.query()
       .from("Organization")
-      .where("PhoneNumber", `${phoneno}`); 
-      console.log(query2.length);
-      console.log('mini');
-      
-      
+      .where("PhoneNumber", `${phoneno}`);   
     if (query2.length > 0) {
       res["status"] = "false2";
       return res;
@@ -147,9 +143,7 @@ export default class loginService {
       .from("Organization")
       .where("PhoneNumber", `${phoneno}`)
       .andWhereNot("cleaned_up", 1)
-      .andWhereNot("delete_sts", "1");
-      console.log(query5.length);
-      
+      .andWhereNot("delete_sts", "1"); 
     if (query5.length > 0) {
       res["status"] = "false2";
       return res;
@@ -187,8 +181,7 @@ export default class loginService {
           otp='00000';
         }else{
             let tempotp = 0;//rand(pow(10, $digits-1), pow(10, $digits)-1);
-            otp  = otp.tempotp;
-            
+            otp  = otp.tempotp;        
         }
           
         let updatequery = await Database.query().from('Organization').where('id',id).update({OTP:otp})
@@ -220,7 +213,6 @@ export default class loginService {
 
        if(app == "ubiSales")
        {
-
         logo="<img src='https://ubiattendance.ubiattendance.xyz/assets/images/ubisales.png' style='width: 200px;' <p style='text-align: center; line-height:1; ><br></p><p class='MsoNormal' style='text-align: center; margin-bottom: 0.0001pt; line-height: 1;'><b><span style='font-size: 24px; font-family: &quot;Times New Roman&quot'>"
        }else{
         logo="<img src='https://ubiattendance.ubiattendance.xyz/assets/images/ubi-Atttendance-Logo_d0bec719579677da36f94f7d3caa2d07.png' style='width: 200px;' <p style='text-align: center; line-height:1; ><br></p><p class='MsoNormal' style='text-align: center; margin-bottom: 0.0001pt; line-height: 1;'><b><span style='font-size: 24px; font-family: &quot;Times New Roman&quot'>"
@@ -239,7 +231,7 @@ export default class loginService {
         await Helper.sendEmail(useremail,Subject,msessage,headers);
 
     }
-    
+
     const FetchZone = await Database.query()
       .from("ZoneMaster")
       .select("*")
