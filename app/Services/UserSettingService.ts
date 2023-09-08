@@ -924,12 +924,13 @@ export default class Usersettingservice {
   }
 
   static async DeleteAccount(getparam) {
-    const text_area = getparam.reason;
+    // const text_area = getparam.reason
     const OrganizationId = getparam.refid;
     const UserId = getparam.uid;
     const currentdate = getparam.date;
 
     var result = {};
+
     var Mail = await Database.from("All_mailers")
       .select("Subject", "Body")
       .where("Id", 32);
@@ -956,7 +957,7 @@ export default class Usersettingservice {
     var phone;
     var CreatedDate;
     var username;
-    var orgname='ASI';
+    var orgname;
     var country;
     
     if (emp) {      

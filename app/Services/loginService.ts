@@ -640,9 +640,7 @@ export default class loginService {
 
         var oldmail = showdata.email;
         var email;
-        if (oldmail != emailNew) {
-          console.log("HAAA");
-          
+        if (oldmail != emailNew) {          
           email = emailNew;          
           let encodeemail = await Helper.encode5t(email);          
           var COUNTER = 0;
@@ -665,7 +663,6 @@ export default class loginService {
           if (COUNTER > 0) {            
             response["response"] = 1; // Already exist
           } else {   
-          console.log(email);
           
             const updateQuery = await Database .from("Organization as o")
               .innerJoin("admin_login as a", "o.Id", "a.OrganizationId")
@@ -721,9 +718,10 @@ export default class loginService {
         headers = headers + "Content-type:text/html;charset=UTF-8" + "\r\n";
         headers = headers + "From: <noreply@ubiattendance.com>" + "\r\n";
 
-        console.log(email);
-        email = "meghwalshivam18@gmail.com";
-        console.log(email);
+        // console.log(email);
+        // email = "meghwalshivam18@gmail.com";    // for testing
+        // console.log(email); 
+
         let getrespons = await Helper.sendEmail(
           email,
           subject,
@@ -734,7 +732,7 @@ export default class loginService {
         if (getrespons !=undefined) {
           response["status"] = "true"; //Mail send succesfully
         } else {
-          response["status"] = "false"; ////Mail send Unsuccesfully
+          response["status"] = "false"; ////Mail send Unsuccesfull
         }
       })
     );
