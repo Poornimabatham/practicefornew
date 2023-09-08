@@ -334,20 +334,18 @@ var GetapprovalRegularService = /** @class */ (function () {
                                             emailmsg = "Dear " + empname + ",<br><br> This is to inform you that your regularization request has been rejected.<br>Remarks : \n         \"." + data.comment;
                                             _a.label = 26;
                                         case 26: return [3 /*break*/, 31];
-                                        case 27:
-                                            console.log("es", data.attendance_id, data.uid, data.orgid);
-                                            return [4 /*yield*/, Database_1["default"].from("RegularizationApproval")
-                                                    .where("attendanceId", data.attendance_id)
-                                                    .where("ApproverId", data.uid)
-                                                    .where("OrganizationId", data.orgid)
-                                                    .where("ApproverSts", 3)
-                                                    .where("ApprovalDate", "0000-00-00 00:00:00")
-                                                    .update({
-                                                    ApproverSts: data.approverResult,
-                                                    ApprovalDate: mdate,
-                                                    ApproverComment: data.comment,
-                                                    approverregularsts: 1
-                                                })];
+                                        case 27: return [4 /*yield*/, Database_1["default"].from("RegularizationApproval")
+                                                .where("attendanceId", data.attendance_id)
+                                                .where("ApproverId", data.uid)
+                                                .where("OrganizationId", data.orgid)
+                                                .where("ApproverSts", 3)
+                                                .where("ApprovalDate", "0000-00-00 00:00:00")
+                                                .update({
+                                                ApproverSts: data.approverResult,
+                                                ApprovalDate: mdate,
+                                                ApproverComment: data.comment,
+                                                approverregularsts: 1
+                                            })];
                                         case 28:
                                             updateRegularizationApproval = _a.sent();
                                             count11 = updateRegularizationApproval.length;

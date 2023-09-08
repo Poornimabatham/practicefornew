@@ -211,7 +211,9 @@ export default class DailyAttendanceService {
               `SELECT Id FROM EmployeeMaster WHERE OrganizationId= ${orgId} AND Is_Delete = 0`
             )
           )
-          .orderBy("name", "asc");
+          .orderBy("name", "asc")
+          .limit(limit)
+          .offset(offset);
 
         if (departmentCondition != undefined) {
           absentCountQuery = absentCountQuery.whereRaw(departmentCondition);
@@ -393,9 +395,9 @@ export default class DailyAttendanceService {
         AttendanceDate = currDate;
       }
 
-      var LateComingsQuery = Database.from("EmployeeMaster as E")
+      var LateComingsQuery = Database.from("AttendanceMaster as A")
         .select(
-          Database.raw(`CONCAT(FirstName,' ',LastName) as name`),
+          Database.raw(`CONCAT(FirstName,' ',LastName)  as name`),
           Database.raw(`SUBSTR(TimeIn,1,5) as 'TimeIn'`),
           Database.raw(`SUBSTR(TimeOut, 1, 5) as 'TimeOut'`),
           Database.raw(`'Present' as status`),
@@ -414,11 +416,14 @@ export default class DailyAttendanceService {
           "ShiftId",
           "TotalLoggedHours"
         )
-        .where("E.Id", data.EmployeeId)
-        .innerJoin("AttendanceMaster as A", "A.EmployeeId", "E.Id")
+
+        .innerJoin("EmployeeMaster as E", "A.EmployeeId", "E.Id")
         .whereRaw(
-          `SUBSTRING((TimeIn), 1, 5) > SUBSTRING((SELECT (CASE WHEN (TimeInGrace) != '00:00:00' THEN (TimeInGrace) ELSE (TimeIn) END) FROM ShiftMaster WHERE ShiftMaster.Id = A.ShiftId), 1, 5) AND AttendanceDate="${AttendanceDate}" AND A.OrganizationId=${data.OrganizationId} AND AttendanceStatus IN (1,4,8) AND '3' NOT IN (Select shifttype from ShiftMaster where Id=ShiftId) order by name `
-        );
+          `SUBSTRING((TimeIn), 1, 5) > SUBSTRING((SELECT (CASE WHEN (TimeInGrace) != '00:00:00' THEN (TimeInGrace) ELSE (TimeIn) END) FROM ShiftMaster WHERE ShiftMaster.Id = A.ShiftId), 1, 5) AND AttendanceDate="${AttendanceDate}" AND A.OrganizationId=${data.OrganizationId} AND AttendanceStatus IN (1,4,8) AND '3' NOT IN (Select shifttype from ShiftMaster where Id=ShiftId)  `
+        )
+        .orderBy('name', 'asc')
+        .limit(limit)
+      // .offset(offset)
 
       if (data.DesignationId != 0 && data.DesignationId != undefined) {
         designationCondition = ` Desg_id= ${data.DesignationId}`; // From AttendanceMaster
@@ -427,8 +432,6 @@ export default class DailyAttendanceService {
       if (DepartmentCondition != undefined) {
         LateComingsQuery = LateComingsQuery.whereRaw(DepartmentCondition);
       }
-
-      var LateComingsQueryResult = await LateComingsQuery;
 
       interface LateComingsList {
         name: string;
@@ -449,6 +452,7 @@ export default class DailyAttendanceService {
       }
 
       var LateComingsData: LateComingsList[] = [];
+      var LateComingsQueryResult = await LateComingsQuery;
 
       if (LateComingsQueryResult.length > 0) {
         await Promise.all(
@@ -477,7 +481,8 @@ export default class DailyAttendanceService {
             LateComingsData.push(lateComingsList);
           })
         );
-      } else {
+      }
+      else {
         LateComingsData.push();
       }
       data["latecomings"] = LateComingsData;
@@ -560,7 +565,7 @@ export default class DailyAttendanceService {
         .whereRaw("S.shifttype!=3")
         .orderBy("E.FirstName", "asc")
         .limit(limit)
-        .offset(offset);
+        .offset(offset)
 
       if (data.DesignationId != 0 && data.DesignationId != undefined) {
         designationCondition = `Desg_id= ${data.DesignationId}`; // From AttendanceMaster

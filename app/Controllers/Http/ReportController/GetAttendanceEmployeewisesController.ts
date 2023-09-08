@@ -9,7 +9,7 @@ export default class GetAttendanceEmployeewisesController {
     public async getPresentList({ request, response }: HttpContextContract) {
         try{
             
-            const validation = await request.validate(AttendanceValidator.presentemplist)
+           const validation = await request.validate(AttendanceValidator.presentemplist)
            this.data['Orgid']=validation.refno;
            this.data['empid']=validation.emp;
            this.data['datafor']=validation.datafor.toLowerCase();
