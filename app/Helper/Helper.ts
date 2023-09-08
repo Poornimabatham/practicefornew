@@ -1024,7 +1024,6 @@ export default class Helper {
         break;
       case 7:
         dayOfWeek = 1;
-
     }
 
     var weekOfMonth = Math.ceil(dateTime.day / 7);
@@ -1085,8 +1084,8 @@ export default class Helper {
     let dist =
       Math.sin(this.deg2rad(lat1)) * Math.sin(this.deg2rad(lat2)) +
       Math.cos(this.deg2rad(lat1)) *
-      Math.cos(this.deg2rad(lat2)) *
-      Math.cos(this.deg2rad(theta));
+        Math.cos(this.deg2rad(lat2)) *
+        Math.cos(this.deg2rad(theta));
     dist = Math.acos(dist);
     dist = this.rad2deg(dist);
     let miles = dist * 60 * 1.1515;
@@ -1259,7 +1258,6 @@ export default class Helper {
     } else {
       return desg;
     }
-
   }
   public static async sendEmail(email, subject, messages, headers) {
     // Create an SES client
@@ -1271,13 +1269,13 @@ export default class Helper {
           .from("noreply@ubiattendance.com", "shakir")
           .to(email)
           .subject(subject)
-          .header(headers,headers)
+          .header(headers, headers)
           .html(`${messages}`);
         //message.textView('emails/welcome.plain', {})
         //.htmlView('emails/welcome', { fullName: 'Virk' })
       },
       {
-       oTags: ["signup"],
+        oTags: ["signup"],
       }
     );
     return getmail;
@@ -1297,6 +1295,75 @@ export default class Helper {
       return shiftid;
     } else {
       return shiftid;
+    }
+  }
+  public static async getDepartment(id) {
+    let Name = "";
+
+    const selectDepartmentId = await Database.from("DepartmentMaster")
+      .select("name")
+      .where("id", id);
+    if (selectDepartmentId.length > 0) {
+      Name = selectDepartmentId[0].name;
+      return Name;
+    } else {
+      return Name;
+    }
+  }
+  public static async getDesignation(id) {
+    let Name = "";
+
+    const selectDesignationMasterId = await Database.from("DesignationMaster")
+      .select("name")
+      .where("id", id);
+    if (selectDesignationMasterId.length > 0) {
+      Name = selectDesignationMasterId[0].name;
+      return Name;
+    } else {
+      return Name;
+    }
+  }
+
+  public static async getDeviceVerification_settingsts(orgid) {
+    let data = 0;
+
+    const selectDeviceVerification_settings = await Database.from(
+      "Organization"
+    )
+      .select("deviceverification_setting")
+      .where("id", orgid);
+
+    if (selectDeviceVerification_settings.length > 0) {
+      data = selectDeviceVerification_settings[0].deviceverification_setting;
+      return data;
+    } else {
+      return data;
+    }
+  }
+  public static async gettimezonebyid(zoneid) {
+    var zone = "Asia/Kolkata";
+    const query = await Database.from("ZoneMaster")
+      .select("Name")
+      .where("Id", zoneid);
+    if (query.length > 0) {
+      return query[0].Name;
+    } else {
+      return zone;
+    }
+  }
+
+  public static async getDeptNamem(deptId, orgId) {
+    let Name = "";
+    const query = await Database.from("DepartmentMaster")
+      .select("name")
+      .where("Id", deptId)
+      .andWhere("OrganizationId", orgId);
+
+    if (query.length > 0) {
+      Name = query[0].name;
+      return Name;
+    } else {
+      return Name;
     }
   }
 }
