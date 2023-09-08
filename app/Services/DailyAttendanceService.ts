@@ -2286,14 +2286,13 @@ export default class DailyAttendanceService {
                   arr['act'] = 'TimeIn';
                ////////for week off ///////////
             }
-          }else{
-            const maxid1 =await Database.query().from('InterimAttendances').select('TimeIn','TimeOut').where('AttendanceMasterId',aid) 
-            //$sqlmaxid= "SELECT TimeIn,TimeOut FROM InterimAttendances WHERE AttendanceMasterId='".$row1->aid."' order by id DESC limit 0,1;";
-                                    
+          }
+          else{
+            arr['act']='TimeIn';
           }
         }
       }
     }            
-    return data;
+    return arr;
   }
 }
