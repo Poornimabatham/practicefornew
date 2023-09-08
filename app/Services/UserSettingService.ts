@@ -621,7 +621,7 @@ export default class Usersettingservice {
           if (regsts == 3) {
             res["regularizeSts"] = "pending";
             let pstatus = 0;
-            let approverid = row.ApproverId;
+             let approverid = row.ApproverId;    
 
             if (approverid != 0) {
               pstatus = approverid;
@@ -631,16 +631,23 @@ export default class Usersettingservice {
             }
 
             if (pstatus == 0) {
-              const qur = await Database.query()
+              const qur1 = await Database.query()
                 .from("RegularizationApproval")
                 .select("ApproverId")
                 .where("attendanceId", attid)
                 .andWhere("ApproverSts", regsts)
                 .andWhere("approverregularsts", 0)
-                .orderBy("Id", "asc")
-                .limit(1);
-              pstatus = qur[0].ApproverId;
+                // .orderBy("Id", "asc")
+                .limit(1)
+                if(qur1.length > 0 ){
+                  pstatus = qur1[0].ApproverId ? qur1[0].ApproverId:0;
+                  
+                }
+            
+             
             }
+             
+        
 
             const Name = await Helper.getEmpName(pstatus);
 
@@ -726,10 +733,11 @@ export default class Usersettingservice {
     const newDate = moment(new Date(data.newDate)).format("YYYY-MM-DD");
     const Time = data.selectTime;
     const cardtitle = data.cardTitle;
+    let Subject = "";
     let result: any = {};
     let response: any[] = [];
     let currentDate = moment().format("YYYY-MM-DD");
-
+    let organizationName = '';
     const Adminmail = await Helper.getAdminEmail(orgid);
     const Adminname = await Helper.getAdminNamebyOrgId(orgid);
     const empmail = await Helper.getEmpEmail(empid);
@@ -739,6 +747,19 @@ export default class Usersettingservice {
     let contactNumber;
     let CreatedDate;
     let CountryId;
+    let message = '';
+    let body ='';
+    let  PhoneNumber = 0;
+    let countryname ="";
+    var headers = "MIME-Version: 1.0" + "\r\n";
+    headers = headers + "Content-type:text/html;charset=UTF-8" + "\r\n";
+    headers = headers + "From: <noreply@ubiattendance.com>" + "\r\n";
+
+    if(cardtitle == "payRoll"){
+      Subject = "Schedule Demo Request for PayRoll";
+    }else{
+      Subject = "Shedule Demo Request";
+    }
 
     if (newDate != "") {
       const demoquery = await Database.query()
@@ -766,12 +787,12 @@ export default class Usersettingservice {
           .where("Id", orgid);
 
         if (query.length > 0) {
-          const organizationName = query[0].Name;
-          const PhoneNumber = query[0].PhoneNumber;
+          organizationName = query[0].Name;
+          PhoneNumber = query[0].PhoneNumber;
           CreatedDate = query[0].CreatedDate;
           const Email = query[0].Email;
           CountryId = query[0].Country;
-          const countryname = await Helper.getCountryNameById(CountryId);
+          countryname = await Helper.getCountryNameById(CountryId);
           contactNumber = await Helper.encode5t(PhoneNumber);
           contactemail = await Helper.encode5t(Email);
         }
@@ -788,10 +809,38 @@ export default class Usersettingservice {
           CreateDate: currentDate,
           cardTitle: cardtitle,
         });
-        result["sts"] = true;
-        response.push(result);
-        if (demoInsert) {
-          //////Email functionality
+
+        if(demoInsert) {
+           const query = await Database.query().from('All_mailers').select('Body').where('Id',34);
+           body = query[0].Body;
+           let body1 = body.replace("{Admin_Name}",Adminname);
+           let body2 = body1.replace("{Date}",currentDate);
+           let body3 = body2.replace("{Time}",Time);
+           message = body3;
+           await Helper.sendEmail(empmail, Subject,message,headers);
+
+           const query2 = await Database.query().from('All_mailers').select('Body').where('Id',35);
+           let bodyy = query[0].Body;
+           let bodi1 = bodyy.replace("{Company_Name}",organizationName);
+           let bodi2 = bodi1.replace("{Contact_Person}",Emp_Name);
+           let bodi3 = bodi2.replace("{Email_Id}",empmail);
+           let bodi4 = bodi3.replace("{Phone}",PhoneNumber);
+           let bodi5 = bodi4.replace("{Registered_Date}",CreatedDate);
+           let bodi6 = bodi5.replace("{Country}",countryname);
+           let bodi7 = bodi6.replace("{Date}",currentDate);
+           let bodi8 = bodi7.replace("{Time}",Time);
+
+           let message1 = bodi8
+
+           await Helper.sendEmail("viveksingh@ubitechsolutions.com", Subject,message1,headers);
+           await Helper.sendEmail("ubiattendance@ubitechsolutions.com", Subject,message1,headers);
+           await Helper.sendEmail("business@ubitechsolutions.com", Subject,message1,headers);
+
+           result['sts'] = 1
+           result['date'] = currentDate;
+           result['time'] = Time;
+           response.push(result);
+               
         }
       }
     } else {
