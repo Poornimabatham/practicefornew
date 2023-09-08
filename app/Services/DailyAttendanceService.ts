@@ -1006,7 +1006,7 @@ export default class DailyAttendanceService {
                     let lat = areaId12.lat;
                     let long = areaId12.long;
                     let radius = areaId12.radius;
-                    let dis = await Helper.calculateDistance(
+                    let dis = Helper.calculateDistance(
                       lat,
                       long,
                       LatitudeIn,
@@ -1329,7 +1329,7 @@ export default class DailyAttendanceService {
                     let lat = areaId12.lat;
                     let long = areaId12.long;
                     let radius = areaId12.radius;
-                    let dis = await Helper.calculateDistance(
+                    let dis = Helper.calculateDistance(
                       lat,
                       long,
                       LatitudeIn,
@@ -1920,7 +1920,7 @@ export default class DailyAttendanceService {
                 let lat = areaId12.lat;
                 let long = areaId12.long;
                 let radius = areaId12.radius;
-                let dis = await Helper.calculateDistance(
+                let dis = Helper.calculateDistance(
                   lat,
                   long,
                   LatitudeIn,
@@ -2089,24 +2089,28 @@ export default class DailyAttendanceService {
   }
 
   public static async AttendanceAct(data :any){
+   
     const uid  = data.uid ? data.uid : 0;
     const orgid  = data.refno ? data.refno : 0;
     const zone = await Helper.getTimeZone(orgid);
     const defaultZone = DateTime.now().setZone(zone);
-    const date :string =DateTime.now().toFormat("yyyy-MM-dd HH:ii");
-    const Yesterday = DateTime.now().minus({ days: 1 }).toFormat("yyyy-MM-dd HH:ii");
+    const date :string =DateTime.now().toFormat("yyyy-MM-dd");
+    const Yesterday = DateTime.now().minus({ days: 1 }).toFormat("yyyy-MM-dd");
     const ShiftId = await Helper.getShiftIdByEmpID(uid);
     const stype = await Helper.getShiftType(ShiftId);
     let arr : any = {};
     arr['act']  = "TimeIn";
+
     const MultipletimeStatus = await Helper.getshiftmultipletime_sts(uid,date,ShiftId);
+
     if(stype == 3 || (stype== 1 && MultipletimeStatus == 1))
     {
-      const query :any  = await Database.query().from('AttendanceMaster').select('id as aid','TimeOut').where('employeeid',uid).andWhere('AttendanceDate',date)
+      let query :any  = await Database.query().from('AttendanceMaster').select('id as aid', 'TimeOut').where('employeeid', uid).andWhere('AttendanceDate', date);
       if(query.length > 0){
         const aid = query[0].aid;
         const tout = query[0].Timeout;
         const query2 = await Database.query().from('InterimAttendances').select('TimeOut','TimeIn').where('AttendanceMasterId',aid).orderBy("id", "desc").limit(1);
+       
         const count2 = query2.length;
         if(count2 > 0){
           const lastTimeOut = query2[0].TimeOut;
@@ -2149,7 +2153,7 @@ export default class DailyAttendanceService {
             arr['act'] = 'TimeIn';  
           } 
         } else{
-          const query4 : any= await Database.query().from('AttendanceMaster').select('TimeIn','TimeOut','AttendanceDate').whereBetween("AttendanceDate",[Yesterday,date]).orderBy('AttendanceDate','desc').limit(1).offset(1);			
+          const query4 : any= await Database.query().from('AttendanceMaster').select('TimeIn','TimeOut','AttendanceDate').whereBetween("AttendanceDate",[Yesterday,date]).andWhere('employeeid',uid).orderBy('AttendanceDate','desc').limit(1).offset(0);			
           const count4 = query4.length;
           if(count4 > 0){
             arr['act'] = 'TimeOut';

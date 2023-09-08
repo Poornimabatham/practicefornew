@@ -933,7 +933,6 @@ export default class Helper {
     let multitime_sts = 0;
     if(count21 > 0){
       multitime_sts = query21[0].multitime_sts;
-      console.log(multitime_sts);
     }
     else{
       const query21 : any = await Database.query().from('ShiftMaster').select('MultipletimeStatus').where('Id',ShiftId);
