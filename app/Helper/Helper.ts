@@ -9,8 +9,7 @@ import ZoneMaster from "App/Models/ZoneMaster";
 import { DateTime } from "luxon";
 import moment from "moment";
 export default class Helper {
-  public static encode5t(str: string) {
-    var contactNum = str.toString();
+  public static encode5t(str: any) {
     for (let i = 0; i < 5; i++) {
       str = Buffer.from(str).toString("base64");
       str = str.split("").reverse().join("");
@@ -961,6 +960,8 @@ export default class Helper {
   }
   public static async sendEmail(email, subject, messages, headers) {
     // Create an SES client
+    
+    
     const getmail = await Mail.use("smtp").send(
       (message) => {
         message
