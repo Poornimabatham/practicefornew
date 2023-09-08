@@ -926,6 +926,24 @@ export default class Helper {
     return decTime;
   }
 
+  public static async getshiftmultipletime_sts(uid,date,ShiftId){
+    const query21 :any = await Database.query().from('AttendanceMaster').select('multitime_sts').where('EmployeeId',uid).andWhere('AttendanceDate',date);
+    const count21 = query21.length;
+    let multitime_sts = 0;
+    if(count21 > 0){
+      multitime_sts = query21[0].multitime_sts;
+    }
+    else{
+      const query21 : any = await Database.query().from('ShiftMaster').select('MultipletimeStatus').where('Id',ShiftId);
+      if(query21.length > 0){
+        multitime_sts = query21[0].MultipletimeStatus;
+      }
+    }
+    return multitime_sts;
+  }
+
+  
+
   public static async getTrialDept(orgid) {
     var Orgid = orgid;
     var dept = 0;

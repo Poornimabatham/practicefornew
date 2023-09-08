@@ -702,7 +702,6 @@ export default class ShiftsService {
     data1['status']='';
     const deptquery:any = await Database.query().select('E.Id as EmployeeId' ).from('EmployeeMaster as E').innerJoin('DesignationMaster as D','E.Designation','D.Id').where('E.OrganizationId',orgid).andWhere('D.Id',desgid);
     const affected_rows=deptquery.length;
-    console.log();
     
     if(affected_rows > 0)
     {
