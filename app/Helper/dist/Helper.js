@@ -1342,6 +1342,126 @@ var Helper = /** @class */ (function () {
             });
         });
     };
+    Helper.getDepartment = function (id) {
+        return __awaiter(this, void 0, void 0, function () {
+            var Name, selectDepartmentId;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        Name = "";
+                        return [4 /*yield*/, Database_1["default"].from("DepartmentMaster")
+                                .select("name")
+                                .where("id", id)];
+                    case 1:
+                        selectDepartmentId = _a.sent();
+                        if (selectDepartmentId.length > 0) {
+                            Name = selectDepartmentId[0].name;
+                            return [2 /*return*/, Name];
+                        }
+                        else {
+                            return [2 /*return*/, Name];
+                        }
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    Helper.getDesignation = function (id) {
+        return __awaiter(this, void 0, void 0, function () {
+            var Name, selectDesignationMasterId;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        Name = "";
+                        return [4 /*yield*/, Database_1["default"].from("DesignationMaster")
+                                .select("name")
+                                .where("id", id)];
+                    case 1:
+                        selectDesignationMasterId = _a.sent();
+                        if (selectDesignationMasterId.length > 0) {
+                            Name = selectDesignationMasterId[0].name;
+                            return [2 /*return*/, Name];
+                        }
+                        else {
+                            return [2 /*return*/, Name];
+                        }
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    Helper.getDeviceVerification_settingsts = function (orgid) {
+        return __awaiter(this, void 0, void 0, function () {
+            var data, selectDeviceVerification_settings;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        data = 0;
+                        return [4 /*yield*/, Database_1["default"].from("Organization")
+                                .select("deviceverification_setting")
+                                .where("id", orgid)];
+                    case 1:
+                        selectDeviceVerification_settings = _a.sent();
+                        if (selectDeviceVerification_settings.length > 0) {
+                            data = selectDeviceVerification_settings[0].deviceverification_setting;
+                            return [2 /*return*/, data];
+                        }
+                        else {
+                            return [2 /*return*/, data];
+                        }
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    Helper.gettimezonebyid = function (zoneid) {
+        return __awaiter(this, void 0, void 0, function () {
+            var zone, query;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        zone = "Asia/Kolkata";
+                        return [4 /*yield*/, Database_1["default"].from("ZoneMaster")
+                                .select("Name")
+                                .where("Id", zoneid)];
+                    case 1:
+                        query = _a.sent();
+                        if (query.length > 0) {
+                            return [2 /*return*/, query[0].Name];
+                        }
+                        else {
+                            return [2 /*return*/, zone];
+                        }
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    Helper.getDeptNamem = function (deptId, orgId) {
+        return __awaiter(this, void 0, void 0, function () {
+            var Name, query;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        Name = "";
+                        return [4 /*yield*/, Database_1["default"].from("DepartmentMaster")
+                                .select("name")
+                                .where("Id", deptId)
+                                .andWhere("OrganizationId", orgId)];
+                    case 1:
+                        query = _a.sent();
+                        if (query.length > 0) {
+                            Name = query[0].name;
+                            return [2 /*return*/, Name];
+                        }
+                        else {
+                            return [2 /*return*/, Name];
+                        }
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
     Helper.calculateOvertime = function (startTime, endTime) {
         var _a = startTime
             .split(":")
