@@ -8,6 +8,8 @@ import ShiftMaster from "App/Models/ShiftMaster";
 import ZoneMaster from "App/Models/ZoneMaster";
 import { DateTime } from "luxon";
 import moment from "moment";
+import axios from 'axios';
+
 export default class Helper {
   public static encode5t(str: string) {
     var contactNum = str.toString();
@@ -967,13 +969,13 @@ export default class Helper {
           .from("noreply@ubiattendance.com", "shakir")
           .to(email)
           .subject(subject)
-          .header(headers,headers)
+          .header(headers, headers)
           .html(`${messages}`);
         //message.textView('emails/welcome.plain', {})
         //.htmlView('emails/welcome', { fullName: 'Virk' })
       },
       {
-       oTags: ["signup"],
+        oTags: ["signup"],
       }
     );
     return getmail;
@@ -995,4 +997,130 @@ export default class Helper {
       return shiftid;
     }
   }
+
+  public static async sendManualPushNotification(condition, title, body, empid, orgid, pageName) {
+    var lastInsertedId: number = 0;
+    var adminSts: number = 0;
+    var currentDate;
+    var time;
+    var insertQuery
+    if (empid == 0 && orgid != 0) {
+      var zone = await Helper.getEmpTimeZone(empid, orgid);
+      const defaultZone = DateTime.now().setZone(zone);
+      time = defaultZone.toFormat("HH:mm:ss");
+      currentDate = DateTime.local().toFormat('yyyy-MM-dd');
+      adminSts = 0;
+
+      if (condition.includes('admin')) {
+        adminSts = 1;
+      }
+
+      insertQuery = await Database.table('NotificationsList').insert({
+        NotificationTitle: title
+        , NotificationBody: body
+        , NotificationData: ''
+        , EmployeeId: empid
+        , OrganizationId: orgid
+        , CreatedDate: currentDate
+        , CreatedTime: time
+        , AdminSts: adminSts
+      })
+
+    }
+
+    if (empid != 0 && orgid != 0) {
+      var zone = await Helper.getEmpTimeZone(empid, orgid);
+      const defaultZone = DateTime.now().setZone(zone);
+      time = defaultZone.toFormat("HH:mm:ss");
+      currentDate = DateTime.local().toFormat('yyyy-MM-dd');
+      adminSts = 0;
+
+      if (condition.includes('admin')) {
+        adminSts = 1;
+      }
+
+      insertQuery = await Database.table('NotificationsList').insert({
+        NotificationTitle: title
+        , NotificationBody: body
+        , NotificationData: ''
+        , EmployeeId: empid
+        , OrganizationId: orgid
+        , CreatedDate: currentDate
+        , CreatedTime: time
+        , AdminSts: adminSts
+      })
+    }
+    if (insertQuery && insertQuery[0]) {
+      lastInsertedId = insertQuery[0];
+    }
+    const urls = [
+      'https://fcm.googleapis.com/fcm/send',
+      'https://fcm.googleapis.com/fcm/send',
+      'https://fcm.googleapis.com/fcm/send',
+      'https://fcm.googleapis.com/fcm/send',
+    ];
+
+    const jsonObject = {
+      'condition': condition,
+      'priority': 'high',
+      data: {
+        'click_action': 'FLUTTER_NOTIFICATION_CLICK',
+        'screen': pageName,
+        'status': 'done'
+      },
+      'notification': { 'body': body, 'title': title, 'click_action': 'FLUTTER_NOTIFICATION_CLICK' }
+    };
+    const jsonString = JSON.stringify(jsonObject);
+
+    var headers = [
+      {
+        'authorization': 'key=AAAAsVdW418:APA91bH-KAyzItecPhs8jP95ZlFNOzDKjmzmeMd2iH1HyUpO_T-_Baed-uIkuyYlosgLStcJZBqQFZuu7UdepvKX6lJcHjU__7FV19LLGn0nbveDBcTBJRJulb5fj_iOlsVRURzsu1Ch',
+        'Content-Type': 'application/json'
+      },
+      {
+        'authorization': 'key=AAAA-BiaJfs:APA91bE1hVf8ChrWfLVTxK2T9pkK6jhGFK_1PUwHIjYwVvd3viShAoNYgFdkqr2PPlMCxGGKLAwV8gk3N01CAwQxmdo2XM7o5O_C1QWFIhyIElfv4Jx4biC3qEyMgIwfVIIXz5Whx9Vs',
+        'Content-Type': 'application/json'
+      },
+      {
+        'authorization': 'key=AAAAksjUHhg:APA91bFR2-KVdsVYHc4IHwDMHuCIt5OULa7OWZ9CD39-PT5J-RdF7CH7RcRh13Fwk8P8K-a7fapRpoyAgM0luf0yWpunE7jnUtltdqE7Vw3vZE95hugsgmhnntMSk09UbvcUr92-PK4d',
+        'Content-Type': 'application/json'
+      },
+      {
+        'authorization': 'key=AAAAI_x79EU:APA91bFae5SDovaio3lTLRTgbOz6m6mJwVkeL9dfeFtCN6P_0xpfEVzz-hjRNEpqztlQNyKlE7XbBynWyzDtAILWMN947i0p79qC5Qkrlu52NmygD7OMYhhCDI6d2U4Iu600V_dbSRvc',
+        'Content-Type': 'application/json'
+      }
+    ];
+
+    var request: {} = {};
+
+    async function sendMultipleRequests() {
+      try {
+        const requests = urls.map((url, index) => {
+          return axios.post(url, jsonObject, {
+            headers: headers[index],
+            timeout: 10000, // Set a timeout if needed
+          });
+        });
+
+        const responses = await Promise.all(requests);
+
+        // Process the responses
+        responses.forEach((response, index) => {
+          if (response.status === 200) {
+            const data = response.data;
+            console.log(`Response from ${urls[index]}:`, data);
+          } else {
+            console.error(`Error for ${urls[index]} - HTTP Status: ${response.status}`);
+          }
+        });
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    }
+
+    sendMultipleRequests();
+
+  }
 }
+
+
