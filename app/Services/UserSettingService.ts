@@ -5,6 +5,7 @@ import { DateTime } from "luxon";
 import moment from "moment-timezone";
 import databaseConfig from "Config/database";
 import { runFailedTests } from "@japa/preset-adonis";
+import LogicsOnly from "./getAttendances_service";
 
 export default class Usersettingservice {
   constructor() {}
@@ -955,51 +956,53 @@ export default class Usersettingservice {
     var phone;
     var CreatedDate;
     var username;
-    var orgname;
+    var orgname='ASI';
     var country;
-    if (emp) {
+    
+    if (emp) {      
       orgname = emp[0].Orgname;
       username = emp[0].Name;
-      empmail = Helper.decode5t(emp[0].email);
-      phone = Helper.decode5t(emp[0].PersonalNo);
+      empmail = await Helper.decode5t(emp[0].email);
+      phone = await Helper.decode5t(emp[0].PersonalNo);
       CreatedDate = emp[0].doc;
       CreatedDate = moment(CreatedDate).format("YYYY-MM-DD");
       if (CreatedDate == "0000-00-00") {
         CreatedDate = "N/A";
       }
-      country = Helper.getCountryNameById(emp[0].countrycode);
+      country = await Helper.getCountryNameById(emp[0].countrycode);
     }
-    var mlbody1 = mailbody.replace("{Company_Name}", orgname);
-    var mlbody2 = mlbody1.replace("{19/08/2022}", currentdate);
-    var mlbody3 = mlbody2.replace("{Contact_Person}", username);
-    var mlbody4 = mlbody3.replace("{adminmail}", empmail);
-    var mlbody5 = mlbody4.replace("{Created_date}", CreatedDate);
-    var mlbody6 = mlbody5.replace("{Country_name}", country);
-    var mlbody7 = mlbody6.replace("{12345}", phone);
+    else {
+      result["response"] = 0; // No user Found
+    }
 
-    var messages = mlbody7;
+    var mlbody1 = mailbody.replace("{Company_Name}", orgname); 
+    var mlbody2 = mlbody1.replace("{Company_Name}", orgname);
+    var mlbody3 = mlbody2.replace("{19/08/2022}",currentdate);
+    var mlbody4 = mlbody3.replace("{Contact_Person}", username);
+    var mlbody5 = mlbody4.replace("{adminmail}", empmail);
+    var mlbody6 = mlbody5.replace("{Created_date}", CreatedDate);
+    var mlbody7 = mlbody6.replace("{Country_name}", country);
+    var mlbody8 = mlbody7.replace("{12345}", phone);
+
+    var messages = mlbody8;
 
     var headers = "MIME-Version: 1.0" + "\r\n";
     headers = headers + "Content-type:text/html;charset=UTF-8" + "\r\n";
     headers = headers + "From: <noreply@ubiattendance.com>" + "\r\n";
-    
-    // var getrespons = sendEmail_new(
-    //   "attendancesupport@ubitechsolutions.com",
-    //   Subject,
-    //   messages,
-    //   headers 
-    // );
 
-    // ////// UNCOMPLETE waiting for sendEmail_new() /////
+    var getrespons = await Helper.sendEmail(
+      "attendancesupport@ubitechsolutions.com",
+      Subject,
+      messages,
+      headers
+    );
 
-    // if (getrespons) {
-      
-    //   result["status"] = "true";
-    // } else {
-    //   result["status"] = "false";
-    // }
+    if (getrespons!=undefined) {
+      result["status"] = "true";    //Mail send succesfully
+    } else {
+      result["status"] = "false";    
+    }
     return result;
-
   }
    
   static async getSetKioskPin(data)

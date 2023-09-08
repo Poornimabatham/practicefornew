@@ -328,7 +328,6 @@ export default class GetapprovalRegularService {
          ".${data.comment}`;
                   }
                 } else {
-                  console.log("es", data.attendance_id,data.uid, data.orgid)
                   const updateRegularizationApproval = await Database.from(
                     "RegularizationApproval"
                   )

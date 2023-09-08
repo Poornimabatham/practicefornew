@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+import Mail from "@ioc:Adonis/Addons/Mail";
 import Database from "@ioc:Adonis/Lucid/Database";
 import AttendanceMaster from "App/Models/AttendanceMaster";
 import EmployeeMaster from "App/Models/EmployeeMaster";
@@ -8,7 +9,6 @@ import ZoneMaster from "App/Models/ZoneMaster";
 import { DateTime } from "luxon";
 import moment from "moment";
 export default class Helper {
-
   public static encode5t(str: string) {
     var contactNum = str.toString();
     for (let i = 0; i < 5; i++) {
@@ -856,7 +856,6 @@ export default class Helper {
     var sts;
     var sql;
     if (empid != 0 && empid != undefined) {
-
       sql = await Database.from("EmployeeMaster")
         .select("ReportingTo", "Designation")
         .where("OrganizationId", orgid)
@@ -868,7 +867,6 @@ export default class Helper {
       });
 
       if (seniorid != 0 && designation != 0) {
-
         sql = await Database.from("ApprovalProcess")
           .select(" RuleCriteria", "Designation", "HrStatus")
           .where(" OrganizationId", orgid)
@@ -879,11 +877,9 @@ export default class Helper {
         const affected_rows = sql.length;
 
         if (affected_rows > 0) {
-
           if (row) {
             rule = row[0].RuleCriteria;
             sts = row[0].HrStatus;
-
           }
 
           var reportingto = await Helper.getSeniorId(empid, orgid);
@@ -905,7 +901,7 @@ export default class Helper {
         }
       }
     }
-    return seniorid
+    return seniorid;
   }
 
   static async getSeniorId(empid, organization) {
@@ -926,9 +922,77 @@ export default class Helper {
   }
 
   public static async time_to_decimal(time: string) {
-    const timeArr = time.split(':').map(Number);
-    let decTime = timeArr[0] * 60 + timeArr[1] + timeArr[2] / 60;  //converting time in minutes
-    return decTime
+    const timeArr = time.split(":").map(Number);
+    let decTime = timeArr[0] * 60 + timeArr[1] + timeArr[2] / 60; //converting time in minutes
+    return decTime;
   }
 
+  public static async getTrialDept(orgid) {
+    var Orgid = orgid;
+    var dept = 0;
+
+    const result = await Database.from("DepartmentMaster")
+      .select(Database.raw("min(Id) as deptid"))
+      .where("Name", "like", `%trial%`)
+      .andWhere("OrganizationId", Orgid);
+    if (result) {
+      dept = result[0].deptid;
+      return dept;
+    } else {
+      return dept;
+    }
+  }
+  public static async getTrialDesg(org_id) {
+    var Orgid = org_id;
+    var desg = 0;
+
+    const result: any = await Database.from("DesignationMaster")
+      .select(Database.raw("min(Id) as desgid"))
+      .where("Name", "like", `%trial%`)
+      .andWhere("OrganizationId", Orgid);
+
+    if (result) {
+      desg = result[0].desgid;
+      return desg;
+    } else {
+      return desg;
+    }
+
+  }
+  public static async sendEmail(email, subject, messages, headers) {
+    // Create an SES client
+    const getmail = await Mail.use("smtp").send(
+      (message) => {
+        message
+          .from("noreply@ubiattendance.com", "shakir")
+          .to(email)
+          .subject(subject)
+          .header(headers,headers)
+          .html(`${messages}`);
+        //message.textView('emails/welcome.plain', {})
+        //.htmlView('emails/welcome', { fullName: 'Virk' })
+      },
+      {
+       oTags: ["signup"],
+      }
+    );
+    return getmail;
+  }
+
+  public static async getTrialShift(org_id) {
+    var Orgid = org_id;
+    var shiftid = 0;
+
+    const result: any = await Database.from("ShiftMaster")
+      .select(Database.raw("min(Id) as  shiftid "))
+      .where("Name", "like", `%trial%`)
+      .andWhere("OrganizationId", Orgid);
+
+    if (result) {
+      shiftid = result[0].shiftid;
+      return shiftid;
+    } else {
+      return shiftid;
+    }
+  }
 }
