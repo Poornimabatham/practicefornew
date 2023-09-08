@@ -6,16 +6,16 @@ export default class GetAttActualImgService{
         const imgObj: string = reqdata['imgObj'];
         const filename: string[]  = imgObj.split('/');
         let orgId:number=0;
-        let bucketForlder: string;
+        let bucketFolder: string;
         let imgEmpId: string=filename[5];
         let newImgUrlObj: string='';
         let date:string= moment(reqdata['date']).format('YYYY-MM-DD');
         if (imgObj.includes('/public')) {
-            bucketForlder = 'public/attendance_images';
+            bucketFolder = 'public/attendance_images';
             imgEmpId = filename[6];
             orgId=Number(filename[5]);
         } else {
-            bucketForlder = 'attendance_images';
+            bucketFolder = 'attendance_images';
             imgEmpId = filename[5];
             orgId=Number(filename[4]);
         }
@@ -29,9 +29,9 @@ export default class GetAttActualImgService{
             //return false;
             const conditionAccordingToMultiOrSingleShift: string[] = useThis.split('_');
             if (conditionAccordingToMultiOrSingleShift[0] === 'GrpQR') {
-                newImgUrlObj = bucketForlder + "/" + orgId + "/"+ imgEmpId + "/" + useThis;
+                newImgUrlObj = bucketFolder + "/" + orgId + "/"+ imgEmpId + "/" + useThis;
             } else {
-                newImgUrlObj =  bucketForlder + "/" + orgId + "/"+ imgEmpId + "/" + date + "/" + useThis;
+                newImgUrlObj =  bucketFolder + "/" + orgId + "/"+ imgEmpId + "/" + date + "/" + useThis;
             }
         }
        // console.log(newImgUrlObj);
@@ -46,15 +46,15 @@ export default class GetAttActualImgService{
         const imgObj: string = reqdata['imgObj'];
         const imgArray: string[] = imgObj.split('/');
         let imgEmpId: string;
-        let bucketForlder: string;
+        let bucketFolder: string;
         let newImgUrlObj: string='';
 
         if (imgObj.includes('/public')) {
             imgEmpId = imgArray[6];
-            bucketForlder = 'public/visits/'+ reqdata['orgId']+'/'+imgEmpId+'/';
+            bucketFolder = 'public/visits/'+ reqdata['orgId']+'/'+imgEmpId+'/';
         } else {
             imgEmpId = imgArray[5];
-            bucketForlder = 'visits/'+reqdata['orgId']+'/'+ imgEmpId+ '/';
+            bucketFolder = 'visits/'+reqdata['orgId']+'/'+ imgEmpId+ '/';
         }
 
         if(imgObj){
@@ -64,9 +64,9 @@ export default class GetAttActualImgService{
             const useThis: string = str2[0];
             const conditionAccordingToMultiOrSingleShift: string[] = useThis.split('_');
             if (conditionAccordingToMultiOrSingleShift[0] === 'GrpQR') {
-                newImgUrlObj = bucketForlder + useThis;
+                newImgUrlObj = bucketFolder + useThis;
             } else {
-                newImgUrlObj =  bucketForlder + useThis;
+                newImgUrlObj =  bucketFolder + useThis;
             }
             
         }
