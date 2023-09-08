@@ -1,6 +1,6 @@
 import moment from "moment";
 import Database from "@ioc:Adonis/Lucid/Database";
-
+import Helper from "App/Helper/Helper";
 const { DateTime } = require("luxon");
 
 export default class GetDataToRegService {
@@ -18,27 +18,27 @@ export default class GetDataToRegService {
     }
 
     var Regularizecount = 0;
-    // $attendancearr=array();
-    const selectRegularizationSettings:any = await Database.from(
+    // attendancearr=array();
+    const selectRegularizationSettings: any = await Database.from(
       "RegularizationSettings"
     )
-    .select('MaxDays', 'MinTimes')
-    .where('OrganizationId', data.orgid)
-    .where('RegularizationSts', 1);
-  
-  const results = await selectRegularizationSettings;
-  
-  const count1 = results.length;
-  
-  let regularizationsettingsts = 0;
-  let MaxDays = 0;
-  let MinTimes = 0;
-  
-  if (count1 >= 1) {
-    regularizationsettingsts = 1;
-    MaxDays = results[0].MaxDays;
-    MinTimes = results[0].MinTimes;
-  }
+      .select("MaxDays", "MinTimes")
+      .where("OrganizationId", data.orgid)
+      .where("RegularizationSts", 1);
+
+    const results = await selectRegularizationSettings;
+
+    const count1 = results.length;
+
+    let regularizationsettingsts = 0;
+    let MaxDays = 0;
+    let MinTimes = 0;
+
+    if (count1 >= 1) {
+      regularizationsettingsts = 1;
+      MaxDays = results[0].MaxDays;
+      MinTimes = results[0].MinTimes;
+    }
 
     const regularizeCount: any = await Database.from("AttendanceMaster")
       .where("OrganizationId", data.orgid)
@@ -51,7 +51,9 @@ export default class GetDataToRegService {
       `)
       )
       .orderBy(" AttendanceDate", "desc")
-    .count("RegularizeSts as Regularizecount");
+
+      .count("RegularizeSts as Regularizecount")
+      
 
     const affected_rows = regularizeCount.length;
 
@@ -59,7 +61,6 @@ export default class GetDataToRegService {
       Regularizecount = regularizeCount[0].Regularizecount;
     }
 
-    // var cd =   moment().format("yyyy-MM-DD");
     const selectAttendancemasterList = Database.from("AttendanceMaster")
       .select(
         "Id",
@@ -85,7 +86,7 @@ export default class GetDataToRegService {
         Database.raw(` ("RegularizeSts" = 0 OR "RegularizeSts" = 1)
       `)
       )
-      .orderBy("AttendanceDate", "desc");
+      .orderBy("AttendanceDate", "desc")
     const attendanceData = await selectAttendancemasterList;
 
     var attendancearr: any = [];
@@ -127,7 +128,6 @@ export default class GetDataToRegService {
         res1["resultsts"] = 1;
       }
       if (MinTimes != undefined) {
-
         if (Regularizecount < MinTimes) {
           res1["Regularizessts"] = 1;
         } else {
@@ -178,13 +178,16 @@ export default class GetDataToRegService {
       )
       .where("OrganizationId", orgId)
       .andWhereNot("Is_Delete", 1)
-      .where("EmployeeId", id)
+      .andWhere("EmployeeId", id)
       .whereRaw("Month(AttendanceDate) = Month(?)", [month])
       .whereRaw("Year(AttendanceDate) = Year(?)", [month])
       .whereRaw("AttendanceDate != CURDATE()")
-      .andWhereNot("RegularizeSts", 0)
-      .andWhereNot("RegularizeSts", 1)
+      .andWhere(
+        Database.raw(` ("RegularizeSts" != 0 AND "RegularizeSts" != 1)
+      `)
+      )
       .orderBy("AttendanceDate", "desc");
+
     const row1 = AttendanceMaster[0];
     const data2 = {
       MinTimes: row1 ? parseInt(row1.MinTimes) : 0,
@@ -192,5 +195,260 @@ export default class GetDataToRegService {
     };
 
     return data2;
+  }
+
+  public static async OnSendRegularizeRequest(data) {
+    const date = data.attdate;
+    const platform = data.platform;
+    const uid = data.uid;
+    const orgid = data.orgid;
+    const remark = data.remark;
+    const Attendance_id = data.id;
+    const timeIn = data.timein;
+    const timeOut = data.timeout;
+    const attendancedate = data.attdate;
+    let email: any = 0;
+    var empname;
+    var designation;
+    let senior;
+    let Empemail;
+    var status;
+    let seniorname: any;
+    let Hrname;
+    let Hremail;
+    let msg;
+    var regularizetimein;
+    let timeincondition;
+    var orginaltimein;
+    let errorMsg;
+
+    var data2: any = {};
+    const RegularizationAppliedFrom = data.RegularizationAppliedFrom;
+
+    const currentDate = DateTime.now();
+    // const currentMonth = currentDate.toFormat("yyyy-MM-dd");
+
+    const mdate = currentDate.toFormat("yyyy-MM-dd HH:mm:ss");
+
+    const date2 = currentDate.toFormat("yyyy-MM-dd");
+
+    const selectEmployeeList = await Database.from("EmployeeMaster")
+      .select("*")
+      .select(
+        Database.raw(
+          "(SELECT div_hrsts FROM DivisionMaster WHERE Id = Division) AS divhr"
+        )
+      )
+      .where("Id", uid)
+      .where("OrganizationId", orgid);
+
+    let divhrsts;
+    let module;
+    let ActivityBy;
+    let  fetchQueryList;
+    let fetchQueryList3;
+    const result = await selectEmployeeList;
+    result.forEach(async (row) => {
+      designation = row.Designation;
+      var divid = row.Division;
+      divhrsts = row.divhr;
+      empname = row.FirstName + row.LastName;
+      var Empemail = await Helper.decode5t(row.CompanyEmail);
+    });
+
+    if (RegularizationAppliedFrom != 2) {
+      module = "ubiHRM APP";
+      ActivityBy = 0;
+
+      if (divhrsts != 0) {
+        var hrid = divhrsts;
+      } else {
+        fetchQueryList = await Database.from("UserMaster")
+          .select("EmployeeId")
+          .where(" OrganizationId", orgid)
+          .andWhere("HRSts", 1);
+
+          fetchQueryList.forEach((val) => {
+          hrid = val.EmployeeId;
+        });
+      }
+    } else {
+      module = "ubiattendance APP";
+      ActivityBy = 1;
+      fetchQueryList = await Database.from("Organization")
+        .select("Email")
+        .where("Id", orgid);
+
+      await Promise.all(
+        fetchQueryList.map(async (val) => {
+          const email1: any = await Helper.encode5t(val.Email);
+          email = email1;
+        })
+      );
+
+      var fetchQueryList2 = await Database.from("UserMaster")
+        .select("EmployeeId ")
+        .where("OrganizationId", orgid)
+        .andWhere("Username", email);
+
+        fetchQueryList2.forEach((val) => {
+        hrid = val.EmployeeId;
+      });
+      senior = hrid;
+    }
+
+    if (Attendance_id != undefined && (hrid != 0 || hrid != "")) {
+      fetchQueryList3 = await Database.from("AttendanceMaster")
+        .where("Id", Attendance_id)
+        .update({
+          RegularizationRemarks: remark,
+          RegularizeApproverRemarks: "",
+          RegularizeTimeOut: timeOut,
+          RegularizeTimeIn: timeIn,
+          RegularizeSts: 3,
+          RegularizeRequestDate: date2,
+          RegularizationAppliedFrom: RegularizationAppliedFrom,
+          LastModifiedDate: mdate,
+        });
+      try {
+        var updSts: any =  fetchQueryList3;
+        if (updSts == 1) {
+          msg = `<b>${empname}</b> requested for regularization for the attendance date of <b>${attendancedate}</b>`;
+          fetchQueryList3 = await Helper.ActivityMasterInsert(
+            date2,
+            orgid,
+            uid,
+            ActivityBy,
+            module,
+            msg,
+            module
+          );
+          fetchQueryList3 = await Database.from("AttendanceMaster ")
+            .select("RegularizeTimeIn", "TimeIn")
+            .where("Id", Attendance_id);
+
+          const count =  fetchQueryList3.length;
+
+          fetchQueryList3.forEach((val) => {
+            regularizetimein = val.RegularizeTimeIn;
+            orginaltimein = val.TimeIn;
+          });
+
+          if (RegularizationAppliedFrom != 2) {
+            const  fetchQueryList4 = await Database.from("ApprovalProcess")
+              .where("OrganizationId", orgid)
+              .where(
+                Database.raw(
+                  `(Designation = ${designation} OR Designation = 0)`
+                )
+              )
+              .andWhere(Database.raw(`(ProcessType = 13 OR ProcessType = 0)`))
+
+              .orderBy("Designation", "desc")
+              .orderBy("ProcessType", "desc");
+            const query4 =  fetchQueryList4.length;
+
+            if (query4 > 0) {
+              senior = await Helper.getApprovalLevelEmp(uid, orgid, 13);
+            } else {
+              senior = hrid;
+            }
+          }
+
+          if (senior != 0) {
+            const senior2 = `${senior}`; // Your input string
+            const temp = Array.from(senior2);
+
+            const filteredTemp = temp.filter((item) => item);
+
+            const finalTemp = [...filteredTemp];
+
+            for (let i = 0; i < temp.length; i++) {
+              if (temp[i] != "0") {
+                fetchQueryList = await Database.insertQuery()
+                  .table("RegularizationApproval")
+                  .insert({
+                    attendanceId: Attendance_id,
+                    ApproverId: temp[i],
+                    ApproverSts: 3,
+                    CreatedDate: mdate,
+                    OrganizationId: orgid,
+                    RegularizationAppliedFrom: RegularizationAppliedFrom,
+                  });
+
+                const sqlapproveremp = await Database.from("EmployeeMaster")
+                  .select("Id", "FirstName", "LastName", "CompanyEmail")
+                  .where("OrganizationId", orgid)
+                  .andWhere("Id", 4120);
+                const seniornameArray: any = [];
+                const HrnameArray: any = [];
+                const HremailArray: any = [];
+
+                for (const rapproveremp of sqlapproveremp) {
+                  seniorname = `${rapproveremp.FirstName} ${rapproveremp.LastName}`;
+                  Hrname = seniorname;
+                  Hremail = await Helper.decode5t(rapproveremp.CompanyEmail);
+
+                  seniornameArray.push(seniorname);
+                  HrnameArray.push(Hrname);
+                  HremailArray.push(Hremail);
+                }
+
+                if (i == 0) {
+                  const title = "Request for Regularization Approval";
+                  if (regularizetimein == orginaltimein) {
+                    timeincondition = "";
+                  } else {
+                    timeincondition = `"The requested timein is: ${timeIn}<br>";`;
+                  }
+                  var remarkcondition = "<br><br>";
+                  // if (remark != "") {
+                  //   remarkcondition = `Remarks: ${remark}<br><br><br>`;
+                  //   var buttoncondition;
+                  // if (RegularizationAppliedFrom != 2) {
+                  //   buttoncondition =
+                  //     "<a href='$approvelink' style='text-decoration:none;padding: 10px 15px; background: #ffffff; color:green; -webkit-border-radius: 4px; -moz-border-radius: 4px; border-radius: 4px; border: solid 1px green; text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.4); -webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 1px 1px rgba(0, 0, 0, 0.2); -moz-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 1px 1px rgba(0, 0, 0, 0.2); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 1px 1px rgba(0, 0, 0, 0.2)' >Approve</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href='$rejectlink' style='text-decoration:none;padding: 10px 15px; background: #ffffff; color: brown;-webkit-border-radius: 4px; -moz-border-radius: 4px; border-radius: 4px; border: solid 1px brown; text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.4); -webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 1px 1px rgba(0, 0, 0, 0.2); -moz-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 1px 1px rgba(0, 0, 0, 0.2); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 1px 1px rgba(0, 0, 0, 0.2)' >Reject</a>";
+                  // }
+                  // msg = `Dear $Hrname,<br><br>This is to inform you that, $empname has requested regularization for the $attendancedate. Kindly approve the request.<br>${timeincondition} The requested timeout is: $timeout<br><br><br>
+                  //  ${remarkcondition}${buttoncondition}`;
+                  // //  if(Hremail!=undefined){
+
+                  //  }
+                  // const title1 =
+                  //   "Acknowledgement of Regularization request sent";
+                  // const msg1 = `Dear $empname,<br><br>This is to inform you that your regularization request has been sent for approval.<br><br><br>Thanks & Regards<br>`;
+                  // if (Empemail != "") {
+                  //   /* $sts1=sendEmail_new($Empemail, $title1, $msg1, "");
+                  //   Trace($msg1."<br>mailsts ".$sts1." empemail ".$Empemail ); */
+                  // }
+                  // }
+                }
+              }
+            }
+          }
+
+          status = "true";
+          errorMsg = "Regularization request submitted successfully";
+          data2["status"] = status;
+          data2["msg"] = errorMsg;
+        } else {
+          status = "false";
+          errorMsg = "There is some problem while requesting regularization";
+          data2["status"] = status;
+          data2["msg"] = errorMsg;
+        }
+      } catch {}
+    } else {
+      status = "false";
+      errorMsg = "No approver found";
+      data2["status"] = status;
+      data2["msg"] = errorMsg;
+    }
+
+    if (platform == undefined) {
+      return status;
+    } else {
+      return data2;
+    }
   }
 }

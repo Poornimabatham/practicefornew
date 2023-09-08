@@ -136,8 +136,15 @@ export default class UserSettingValidator {
     schema: schema.create({
       reason: schema.string.optional(),
       refid: schema.number.optional(),
-      uid: schema.number.optional(),
+      uid: schema.number.optional(),   
       date: schema.date.optional({ format: "yyyy-MM-dd" }),
     }),
   };
+
+  static getsetkiospin = {
+     schema:schema.create({
+      empId:schema.string(),
+      orgId:schema.string()
+     })
+  }
 }

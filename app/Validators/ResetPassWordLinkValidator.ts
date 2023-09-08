@@ -21,4 +21,14 @@ export default class ResetPasswordLinkValidator extends BaseValidator {
       empid: schema.number(),
     }),
   };
+  static MoveEmpDataInExistingOrgschema = {
+    schema: schema.create({
+      uid: schema.number(),
+      orgid: schema.number(),
+      OldOrgId: schema.number(),
+      status: schema.number(),
+      Email:schema.string([rules.email()]),
+      usercontact:schema.number()
+    }),
+  };
 }

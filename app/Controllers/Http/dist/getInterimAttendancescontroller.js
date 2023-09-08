@@ -36,35 +36,26 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-var Database_1 = require("@ioc:Adonis/Lucid/Database");
-var MyAddonUserInfoService = /** @class */ (function () {
-    function MyAddonUserInfoService() {
+var getInterimAttendancesService_1 = require("App/Services/getInterimAttendancesService");
+var GetInterimAttendancesValidator_1 = require("App/Validators/GetInterimAttendancesValidator");
+var getInterimAttendancesController = /** @class */ (function () {
+    function getInterimAttendancesController() {
     }
-    MyAddonUserInfoService.getdetailsMyaddonuser = function (data) {
+    getInterimAttendancesController.prototype.getInterimAttendancesdata = function (_a) {
+        var request = _a.request, response = _a.response;
         return __awaiter(this, void 0, void 0, function () {
-            var Empid, orgidId, result, UserMaster;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        Empid = data.empid;
-                        orgidId = data.orgid;
-                        result = {};
-                        return [4 /*yield*/, Database_1["default"].from("UserMaster")
-                                .select("*")
-                                .where("EmployeeId", Empid)
-                                .where("OrganizationId", orgidId)];
+            var InputValidation, ServiceData;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0: return [4 /*yield*/, request.validate(GetInterimAttendancesValidator_1["default"].getInterimAttendancesschema)];
                     case 1:
-                        UserMaster = _a.sent();
-                        UserMaster.forEach(function (row) {
-                            result.qrKioskPin = row.kioskPin;
-                            result.LoginSts = row.LoginSts;
-                            result.username_mobile = row.username_mobile;
-                        });
-                        return [2 /*return*/, result];
+                        InputValidation = _b.sent();
+                        ServiceData = getInterimAttendancesService_1["default"].getInterimAttendances(InputValidation);
+                        return [2 /*return*/, ServiceData];
                 }
             });
         });
     };
-    return MyAddonUserInfoService;
+    return getInterimAttendancesController;
 }());
-exports["default"] = MyAddonUserInfoService;
+exports["default"] = getInterimAttendancesController;

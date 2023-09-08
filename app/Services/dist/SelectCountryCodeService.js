@@ -52,7 +52,10 @@ var SelectCountryCodeService = /** @class */ (function () {
                         return [4 /*yield*/, Helper_1["default"].myUrlEncode(country_code)];
                     case 1:
                         country_code1 = _a.sent();
-                        return [2 /*return*/, country_code1];
+                        return [4 /*yield*/, Database_1["default"].from("CountryMaster")
+                                .where("countrycode", country_code1)
+                                .andWhere("Name", countryname)
+                                .select("*")];
                     case 2:
                         selectcheckCountryCode = _a.sent();
                         return [2 /*return*/, selectcheckCountryCode];

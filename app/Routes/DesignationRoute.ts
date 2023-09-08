@@ -7,3 +7,5 @@ Route.put('/updateDesignations', 'DesignationsController.UpdateDesign')
 Route.patch('/AssignDesignation', 'DesignationsController.assignDesignation')
 Route.get("/getDesignationsstatus", "DesignationsController.DesignationsGetStatus").middleware('throttle:global');
 
+Route.delete("/deleteInActiveDesignation","DesignationsController.deleteInActiveDesignation");  
+

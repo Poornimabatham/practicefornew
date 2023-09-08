@@ -34,6 +34,7 @@ export default class AttendanceValidator extends BaseValidator{
       datafor:schema.string(),
       currentPage: schema.number.optional(), 
       perPage: schema.number.optional(),
+      csv: schema.string.optional()
       
     })
     , message: BaseValidator.messages

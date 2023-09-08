@@ -73,6 +73,7 @@ export default class DepartmentsController {
   public async getDeptEmp({request , response}:HttpContextContract){
      const validata = await request.validate(DepartmentValidator.DeptEmp)
      const res = await DepartmentService.getDeptEmp(validata);
+     response.json(res)
   }
   public async getEmpdataDepartmentWiseCount({ request, response }: HttpContextContract) {
     const requestValidate = await request.validate(
@@ -82,5 +83,15 @@ export default class DepartmentsController {
 
     return response.json(service);
   }
+
+  public async deleteInActiveDepartment({ request, response }: HttpContextContract) {
+    const valdata = await request.validate(DepartmentValidator.deleteInActiveDepartment);
+    this.data["orgId"] = valdata.orgId ? valdata.orgId : 0;
+    this.data["empId"] = valdata.empId ? valdata.empId : 0;
+    this.data["Id"] = valdata.empId ? valdata.Id : 0;
+    const serviceresp = await DepartmentService.deleteInActiveDept(this.data);
+    return response.json(serviceresp);    
+}
+
 
 }

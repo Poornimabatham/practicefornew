@@ -38,20 +38,22 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 exports.__esModule = true;
 var Database_1 = require("@ioc:Adonis/Lucid/Database");
 var moment_1 = require("moment");
+var Helper_1 = require("App/Helper/Helper");
 var StoreRatingService = /** @class */ (function () {
     function StoreRatingService() {
     }
-    StoreRatingService.StoreRatings = function (data) {
+    StoreRatingService.StoreRatings = function (get) {
         return __awaiter(this, void 0, void 0, function () {
-            var Empid, organizationId, Remark, Rating, res1, date, modifiedDate, selectUbiAttendanceRatings, result, updateUbiAttendanceRatings, insertUbiAttendanceRatings;
+            var Empid, organizationId, Remark, Rating, res1, data, date, modifiedDate, selectUbiAttendanceRatings, result, updateUbiAttendanceRatings, insertUbiAttendanceRatings;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        Empid = data.empid;
-                        organizationId = data.orgid;
-                        Remark = data.remark;
-                        Rating = data.rating;
-                        date = moment_1["default"]().format('YYYY-MM-DD');
+                        Empid = get.empid;
+                        organizationId = get.orgid;
+                        Remark = get.remark;
+                        Rating = get.rating;
+                        data = {};
+                        date = moment_1["default"]().format("YYYY-MM-DD");
                         modifiedDate = moment_1["default"]().format("YYYY-MM-DD HH:mm:ss");
                         return [4 /*yield*/, Database_1["default"].from("ubiAttendanceRatings")
                                 .where("EmployeeId", Empid)
@@ -61,7 +63,6 @@ var StoreRatingService = /** @class */ (function () {
                         selectUbiAttendanceRatings = _a.sent();
                         result = selectUbiAttendanceRatings.length;
                         if (!(result > 0)) return [3 /*break*/, 3];
-                        console.log(selectUbiAttendanceRatings.length);
                         return [4 /*yield*/, Database_1["default"].from(" ubiAttendanceRatings")
                                 .where("EmployeeId", Empid)
                                 .where("OrganizationId", organizationId)
@@ -80,29 +81,60 @@ var StoreRatingService = /** @class */ (function () {
                             data["status"] = "false";
                         }
                         return [2 /*return*/, data];
-                    case 3:
-                        console.log("kk");
-                        return [4 /*yield*/, Database_1["default"].insertQuery()
-                                .table("ubiAttendanceRatings")
-                                .insert({
-                                EmployeeId: Empid,
-                                OrganizationId: organizationId,
-                                Rating: Rating,
-                                Remark: Remark,
-                                CreatedDate: date
-                            })];
+                    case 3: return [4 /*yield*/, Database_1["default"].insertQuery()
+                            .table("ubiAttendanceRatings")
+                            .insert({
+                            EmployeeId: Empid,
+                            OrganizationId: organizationId,
+                            Rating: Rating,
+                            Remark: Remark,
+                            CreatedDate: date
+                        })];
                     case 4:
                         insertUbiAttendanceRatings = _a.sent();
                         res1 = insertUbiAttendanceRatings.length;
                         _a.label = 5;
                     case 5:
                         if (res1) {
-                            data["status"] = "1";
+                            data["status"] = "TRUE";
                         }
                         else {
-                            data["status"] = "0";
+                            data["status"] = "FALSE";
                         }
                         return [2 /*return*/, data];
+                }
+            });
+        });
+    };
+    StoreRatingService.getSelectedEmployeeShift = function (get) {
+        return __awaiter(this, void 0, void 0, function () {
+            var orgid, empid, shiftid, res, selectShiftMasterist;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        orgid = get.orgid;
+                        empid = get.empid;
+                        return [4 /*yield*/, Helper_1["default"].getShiftIdByEmpID(empid)];
+                    case 1:
+                        shiftid = _a.sent();
+                        res = [];
+                        return [4 /*yield*/, Database_1["default"].from('ShiftMaster').select('Id', 'Name', 'TimeIn', 'TimeOut', 'shifttype', 'HoursPerDay').where('Id', shiftid).where('OrganizationId', orgid)];
+                    case 2:
+                        selectShiftMasterist = _a.sent();
+                        if (selectShiftMasterist.length > 0) {
+                            selectShiftMasterist.forEach(function (row) {
+                                var data = {};
+                                data['Id'] = row.Id;
+                                data['Name'] = row.Name;
+                                data['TimeIn'] = row.TimeIn;
+                                data['TimeOut'] = row.TimeOut;
+                                data['shifttype'] = row.shifttype;
+                                data['HoursPerDay'] = row.HoursPerDay;
+                                res.push(data);
+                            });
+                            return [2 /*return*/, res];
+                        }
+                        return [2 /*return*/];
                 }
             });
         });

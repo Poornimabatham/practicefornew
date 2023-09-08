@@ -36,16 +36,45 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-var getOrignalAttendanceImgService = /** @class */ (function () {
-    function getOrignalAttendanceImgService() {
+var GetplannerWiseService_1 = require("App/Services/ReportServices/GetplannerWiseService");
+var PlannerValidator_1 = require("App/Validators/ReportValidator/PlannerValidator");
+var GetPlannerController = /** @class */ (function () {
+    function GetPlannerController() {
     }
-    getOrignalAttendanceImgService.getOrignalAttendanceImg = function (getvalue) {
+    GetPlannerController.prototype.getplannerwisesummary = function (_a) {
+        var request = _a.request, response = _a.response;
         return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                return [2 /*return*/, "a"];
+            var a, b;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0: return [4 /*yield*/, request.validate(PlannerValidator_1["default"].FetchPlannerchema)];
+                    case 1:
+                        a = _b.sent();
+                        return [4 /*yield*/, GetplannerWiseService_1["default"].Getlannerwisesummary(a)];
+                    case 2:
+                        b = _b.sent();
+                        return [2 /*return*/, response.json(b)];
+                }
             });
         });
     };
-    return getOrignalAttendanceImgService;
+    GetPlannerController.prototype.getRegSummary = function (_a) {
+        var request = _a.request, response = _a.response;
+        return __awaiter(this, void 0, void 0, function () {
+            var a, b;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0: return [4 /*yield*/, request.validate(PlannerValidator_1["default"].getRegSummarychema)];
+                    case 1:
+                        a = _b.sent();
+                        return [4 /*yield*/, GetplannerWiseService_1["default"].getRegSummary(a)];
+                    case 2:
+                        b = _b.sent();
+                        return [2 /*return*/, response.json(b)];
+                }
+            });
+        });
+    };
+    return GetPlannerController;
 }());
-exports["default"] = getOrignalAttendanceImgService;
+exports["default"] = GetPlannerController;

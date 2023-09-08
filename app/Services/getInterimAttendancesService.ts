@@ -1,8 +1,12 @@
 import Database from "@ioc:Adonis/Lucid/Database";
 export default class GetInterimAttendancesService {
-   static async getInterimAttendances(data2) {
+  public static async getInterimAttendances(data2) {
+  
     var attendanceMasterId = data2.attendanceMasterId;
-    const selectInterimAttenceslist = await Database.from("InterimAttendances")
+  
+    const selectInterimAttenceslist: any = await Database.from(
+      "InterimAttendances"
+    )
       .select(
         "id",
         "TimeIn",
@@ -54,15 +58,16 @@ export default class GetInterimAttendancesService {
           "SUBSTRING_INDEX(TimeOutImage, '.com/', -1) AS TimeOutImage"
         )
       )
-      .whereNot("AttendanceMasterId", attendanceMasterId)
+      .where("AttendanceMasterId", attendanceMasterId)
       .orderBy("id", "desc");
 
+      
     const response: any[] = [];
 
     const Output = await selectInterimAttenceslist;
 
     Output.forEach((row) => {
-      const data2: any = {};
+      let data2: any = {};
       data2["id"] = row.id;
       data2["TimeIn"] = row.TimeIn;
       if (row.TimeInImage != "") {
@@ -122,6 +127,7 @@ export default class GetInterimAttendancesService {
 
       response.push(data2);
     });
+
     return response;
   }
 }

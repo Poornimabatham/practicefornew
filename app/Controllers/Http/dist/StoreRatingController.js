@@ -58,6 +58,23 @@ var StoreRatingController = /** @class */ (function () {
             });
         });
     };
+    StoreRatingController.prototype.getSelectedEmployeeShift = function (_a) {
+        var request = _a.request, response = _a.response;
+        return __awaiter(this, void 0, void 0, function () {
+            var Validationinput, Output;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0: return [4 /*yield*/, request.validate(StoreRatingValidatore_1["default"].getSelectedEmployeeShiftScehma)];
+                    case 1:
+                        Validationinput = _b.sent();
+                        return [4 /*yield*/, StoreRatingService_1["default"].getSelectedEmployeeShift(Validationinput)];
+                    case 2:
+                        Output = _b.sent();
+                        return [2 /*return*/, Output];
+                }
+            });
+        });
+    };
     return StoreRatingController;
 }());
 exports["default"] = StoreRatingController;

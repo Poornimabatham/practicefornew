@@ -3,7 +3,7 @@ import getAppDetailService from "App/Services/getAppDetailService";
 import GetAppDetailValidator from "App/Validators/GetAppDetailValidator";
 
 export default class GetAppDetailsController {
-  private data = []
+  private data = []  
   public async getAppDetail({ request, response }: HttpContextContract) {
     const getValidData = await request.validate(
       GetAppDetailValidator.getAppDetail
