@@ -38,6 +38,24 @@ export default class DesignationValidator  extends BaseValidator{
       })
      }
 
+     static assignDesignation = {schema:schema.create({
+      Orgid:schema.number(),
+      desigid:schema.number(),
+      designame: schema.string(),
+      empid: schema.number(),
+      empname: schema.string(),
+      adminid:schema.number.optional(),
+      adminname: schema.string()
+     })
+   }
+
+
+   static DesignationStatusSchema = {
+    schema: schema.create({
+      orgid: schema.number(),
+      Id: schema.number(),
+    }),
+  };
   }
   
 

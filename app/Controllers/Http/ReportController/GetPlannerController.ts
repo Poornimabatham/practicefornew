@@ -1,7 +1,6 @@
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import GetplannerWiseSummary from "App/Services/ReportServices/GetplannerWiseService";
 import Plannervalidator from "App/Validators/ReportValidator/PlannerValidator";
-
 export default class GetplannerController {
   public async getplannerwisesummary({ request, response }: HttpContextContract) {
     const a = await request.validate(Plannervalidator.FetchPlannerchema);

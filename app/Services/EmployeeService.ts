@@ -108,5 +108,361 @@ export default class EmployeeService{
         return status;
     }
 
+    public async updateSelfistatus(reqdata:[]) {
+        var status = false;
+        const selfistatus:number = +reqdata['selfistatus'];
+        const zone = await Helper.getTimeZone(reqdata['Orgid']);
+        const currentDateTime = moment().tz(zone).format('YYYY-MM-DD HH:mm:ss');
+        const affectedrows:any = await Database.query()
+        .from("UserMaster")
+        .where("EmployeeId",reqdata['empid'])
+        .andWhere("OrganizationId",reqdata['Orgid'])
+        .update({Selfie:selfistatus,LastModifiedDate:currentDateTime,LastModifiedById:reqdata['adminid']});
+        if(affectedrows > 0){
+            status=true;
+            const module:string = "Attendance App"; 
+            const actionperformed:string = "<b>" + reqdata['empname'] + "</b> Selfie permission has been updated by <b>" + reqdata['adminname'] + "</b> from<b> Attendance App  </b>";
+            const activityby:any = '1';
+            const appmodule:string="Selfie";
+            const InsertActivity = await Database.table("ActivityHistoryMaster")
+                        .insert({
+                                LastModifiedDate: currentDateTime,
+                                LastModifiedById:reqdata['adminid'],
+                                Module: module,
+                                ActionPerformed:actionperformed,
+                                OrganizationId:reqdata['Orgid'],
+                                ActivityBy:activityby,
+                                adminid:reqdata['adminid'],
+                                AppModule:appmodule
+                            });
+
+        }
+        return status; 
+    }
+
+    public async updateAllowAttToUser(reqdata:[]) {
+        var status = false;
+        const attRestrictSts:number = +reqdata['attRestrictSts'];
+        const zone = await Helper.getTimeZone(reqdata['Orgid']);
+        const currentDateTime = moment().tz(zone).format('YYYY-MM-DD HH:mm:ss');
+        const update_permission:any = await Database.query()
+        .from("UserMaster")
+        .where("EmployeeId",reqdata['empid'])
+        .andWhere("OrganizationId",reqdata['Orgid'])
+        .update({Att_restrict:attRestrictSts,LastModifiedDate:currentDateTime,LastModifiedById:reqdata['adminid']});
+        if(update_permission > 0){
+            status=true;
+            const module:string = "Attendance App"; 
+            const actionperformed:string = "<b>" + reqdata['empname'] + "</b> Attendance Restrected By Permission has been updated by <b>" + reqdata['adminname'] + "</b> from<b> Attendance App  </b>";
+            const activityby:any = '1';
+            const appmodule:string="Attendance  Restrication";
+            const InsertActivity = await Database.table("ActivityHistoryMaster")
+                        .insert({
+                                LastModifiedDate: currentDateTime,
+                                LastModifiedById:reqdata['adminid'],
+                                Module: module,
+                                ActionPerformed:actionperformed,
+                                OrganizationId:reqdata['Orgid'],
+                                ActivityBy:activityby,
+                                adminid:reqdata['adminid'],
+                                AppModule:appmodule
+                            });
+
+        }
+        return status; 
+    }
+
+    public async FacePermissionUpdate(reqdata:[]) {
+        var status = false;
+        const faceRestrictSts:number = +reqdata['faceRestrictSts'];
+        const zone = await Helper.getTimeZone(reqdata['Orgid']);
+        const currentDateTime = moment().tz(zone).format('YYYY-MM-DD HH:mm:ss');
+        const update_permission:any = await Database.query()
+        .from("UserMaster")
+        .where("EmployeeId",reqdata['empid'])
+        .andWhere("OrganizationId",reqdata['Orgid'])
+        .update({Face_Id:faceRestrictSts,LastModifiedDate:currentDateTime,LastModifiedById:reqdata['adminid']});
+        if(update_permission > 0){
+            status=true;
+            const module:string = "Attendance App"; 
+            const actionperformed:string = "<b>" + reqdata['empname'] + "</b> Face Recognition permission has been updated by <b>" + reqdata['adminname'] + "</b> from<b> Attendance App  </b>";
+            const activityby:any = '1';
+            const appmodule:string="Face Recognition";
+            const InsertActivity = await Database.table("ActivityHistoryMaster")
+                        .insert({
+                                LastModifiedDate: currentDateTime,
+                                LastModifiedById:reqdata['adminid'],
+                                Module: module,
+                                ActionPerformed:actionperformed,
+                                OrganizationId:reqdata['Orgid'],
+                                ActivityBy:activityby,
+                                adminid:reqdata['adminid'],
+                                AppModule:appmodule
+                            });
+
+        }
+        return status; 
+    }
+    
+    public async DevicePermissionUpdate(reqdata:[]) {
+        var status = false;
+        const zone = await Helper.getTimeZone(reqdata['Orgid']);
+        const currentDateTime = moment().tz(zone).format('YYYY-MM-DD HH:mm:ss');
+        const column_value:{[key:string]:any}={}//object creation        
+        if(reqdata['DeviceRestrictSts'] == false){
+            column_value['Device_Restriction']= +reqdata['DeviceRestrictSts'];
+            column_value['Finger_Print']= 0;
+        }else{
+            column_value['Device_Restriction']= +reqdata['DeviceRestrictSts'];
+        }
+        column_value['LastModifiedDate']=currentDateTime;
+        column_value['LastModifiedById']=reqdata['adminid'];
+        const update_permission:any = await Database.query()
+        .from("UserMaster")
+        .where("EmployeeId",reqdata['empid'])
+        .andWhere("OrganizationId",reqdata['Orgid'])
+        .update(column_value);
+        if(update_permission > 0){
+            status=true;
+            const module:string =  "Attendance App";
+            const actionperformed:string = "<b>" + reqdata['empname'] + "</b> Device Restriction permission has been updated by <b>" + reqdata['adminname'] + "</b> from<b> Attendance App  </b>";
+            const activityby:any = '1';
+            const appmodule:string= "Device Restriction";
+            const InsertActivity = await Database.table("ActivityHistoryMaster")
+                        .insert({
+                                LastModifiedDate: currentDateTime,
+                                LastModifiedById:reqdata['adminid'],
+                                Module: module,
+                                ActionPerformed:actionperformed,
+                                OrganizationId:reqdata['Orgid'],
+                                ActivityBy:activityby,
+                                adminid:reqdata['adminid'],
+                                AppModule:appmodule
+                            });
+
+        }
+        return status; 
+    }
+    public async fingerPrintPermissionUpdate(reqdata:[]) {
+        var status = false;
+        const zone = await Helper.getTimeZone(reqdata['Orgid']);
+        const currentDateTime = moment().tz(zone).format('YYYY-MM-DD HH:mm:ss');
+        const Device_Restriction:number = +reqdata['DeviceRestrictSts'];
+        const FingerPrintSts:number= +reqdata['FingerPrintSts'];
+        const update_permission:any = await Database.query()
+        .from("UserMaster")
+        .where("EmployeeId",reqdata['empid'])
+        .andWhere("OrganizationId",reqdata['Orgid'])
+        .andWhere("Device_Restriction",'1')
+        .update({Device_Restriction:Device_Restriction,Finger_Print:FingerPrintSts,LastModifiedDate:currentDateTime,LastModifiedById:reqdata['adminid']});
+        if(update_permission > 0){
+            status=true;
+            const module:string =  "Attendance App";
+            const actionperformed:string = "<b>" + reqdata['empname'] + "</b> Touch ID permission has been updated by <b>" + reqdata['adminname'] + "</b> from<b> Attendance App  </b>";
+            const activityby:any = '1';
+            const appmodule:string= "Touch ID";
+            const InsertActivity = await Database.table("ActivityHistoryMaster")
+                        .insert({
+                                LastModifiedDate: currentDateTime,
+                                LastModifiedById:reqdata['adminid'],
+                                Module: module,
+                                ActionPerformed:actionperformed,
+                                OrganizationId:reqdata['Orgid'],
+                                ActivityBy:activityby,
+                                adminid:reqdata['adminid'],
+                                AppModule:appmodule
+                            });
+
+        }
+        return status; 
+    }
+    public async EmpDetailUpdate(reqdata:[]) {
+        var status = false;
+        const zone = await Helper.getTimeZone(reqdata['Orgid']);
+        const currentDateTime = moment().tz(zone).format('YYYY-MM-DD HH:mm:ss');
+        const column_value:{[key:string]:any}={}//object creation 
+        column_value['Id']=reqdata['empid'];
+        column_value['LastModifiedDate']=currentDateTime;
+        column_value['LastModifiedById']=reqdata['adminid'];
+        let update_EmpDetail:any;
+        if(reqdata['username'] != ''){
+            const username:string=Helper.encode5t(reqdata['username']); 
+            const CheckUsername:any = await Database.query().select('Id','username').from("UserMaster").where({username:username,EmployeeId:reqdata['empid']});
+            if(CheckUsername.length>0){
+                return 2;
+            }else{
+                update_EmpDetail  = await Database.query()
+                .from("UserMaster")
+                .where("EmployeeId",reqdata['empid'])
+                .andWhere("OrganizationId",reqdata['Orgid'])
+                .update({username:username});
+               
+            }
+        }
+        if(reqdata['f_name']!=''){
+            column_value['FirstName'] = Helper.FirstLettercapital(reqdata['f_name']);
+        }
+        if(reqdata['department']!=''){
+            column_value['Department']=reqdata['department'];
+        }
+        if(reqdata['designation']!=''){
+            column_value['Designation']=reqdata['designation']; 
+        }
+        if(reqdata['designation'] !=''){
+            column_value['Designation']= reqdata['designation'];
+        }
+        if(reqdata['shifts'] != '')
+        {
+            column_value['Shift']=reqdata['shifts'];
+        }
+        update_EmpDetail = await Database.query()
+        .from("EmployeeMaster")
+        .where("Id",reqdata['empid'])
+        .andWhere("OrganizationId",reqdata['Orgid'])
+        .update(column_value);
+        if(update_EmpDetail > 0){
+            status=true;
+            const module:string =  "Attendance App";
+            const actionperformed:string = "<b>" + reqdata['empname'] + "</b> Details has been Updated by<b>" + reqdata['adminname'] + "</b> from<b> Attendance App  </b>";
+            const activityby:any = '1';
+            const appmodule:string= "Employees";
+            const InsertActivity = await Database.table("ActivityHistoryMaster")
+                        .insert({
+                                LastModifiedDate: currentDateTime,
+                                LastModifiedById:reqdata['adminid'],
+                                Module: module,
+                                ActionPerformed:actionperformed,
+                                OrganizationId:reqdata['Orgid'],
+                                ActivityBy:activityby,
+                                adminid:reqdata['adminid'],
+                                AppModule:appmodule
+                            });
+
+        }
+        return status; 
+    }
+
+    public async RegitserEmpDetail(reqdata:[]) {
+        let status = false;
+        const zone = await Helper.getTimeZone(reqdata['Orgid']);
+        const currentDateTime = moment().tz(zone).format('YYYY-MM-DD HH:mm:ss');
+        //const countryId=await Helper.getCountryIdByOrg(reqdata['Orgid']);
+        var username:string="";
+        if(reqdata['username'] != '' ){
+             username=Helper.encode5t(reqdata['username']); 
+            const CheckUsername:any = await Database.query().select('Id','username').from("UserMaster").where({username:username});
+            if(CheckUsername.length > 0){
+                return 2; //email already Exist
+            }
+        }
+        var contact:number=0;
+        if(reqdata['contact'] != '' ){
+           
+            contact= Helper.encode5t(reqdata['contact'].toString()); 
+          
+            const CheckContact:any = await Database.query().select('Id','username','archive','EmployeeId','OrganizationId').from("UserMaster").where({username_mobile:contact});
+          
+            if(CheckContact.length > 0){
+                const orgid:any=CheckContact[0].OrganizationId;
+                const archive:any=CheckContact[0].archive;
+                if(reqdata['Orgid'] == orgid){
+                    if(archive == 1){
+						
+                       return 3;///Active employee with same org exist
+                       
+                   }else{
+                       
+                        return 4;///InActive employee with same org
+                       
+                   }
+                }else{
+                    return 5; //1.sign up another organization ,2. Email or msg  notification!
+                }   
+            }
+        }
+
+        if((reqdata['shifts']== '') ||(reqdata['shifts'] == 0)){
+            const CheckShift:any = await Database.query().select('Id').from("ShiftMaster").where({OrganizationId:reqdata['Orgid']}).orderBy('Id', 'asc').limit(1).offset(0); 
+            if(CheckShift.length > 0 ){
+                reqdata['shifts']= CheckShift[0].Id;
+            }
+        }
+        if((reqdata['department']== '') ||(reqdata['department'] == 0)){
+            const CheckDepartment:any = await Database.query().select('Id').from("DepartmentMaster").where({OrganizationId:reqdata['Orgid']}).orderBy('Id', 'asc').limit(1).offset(0); 
+            if(CheckDepartment.length > 0 ){
+                reqdata['department']= CheckDepartment[0].Id;
+            } 
+        }
+        if((reqdata['Designation']== '') || (reqdata['Designation'] == 0)){
+            const CheckDesignation:any = await Database.query().select('Id').from("DesignationMaster").where({OrganizationId:reqdata['Orgid']}).orderBy('Id', 'asc').limit(1).offset(0); 
+            if(CheckDesignation.length > 0 ){
+                reqdata['designation']= CheckDesignation[0].Id;
+            } 
+        }
+
+        const column_value:{[key:string]:any}={}//object creation 
+        column_value['FirstName']=reqdata['name'];
+        column_value['LastName']='';
+        column_value['PersonalNo']=contact;
+        column_value['Shift']=reqdata['shifts'];
+        column_value['OrganizationId']=reqdata['Orgid'];
+        column_value['Department']=reqdata['department'];
+        column_value['Designation']=reqdata['designation'];
+        column_value['CompanyEmail']=username;
+        column_value['countrycode']='';
+        column_value['CurrentCountry']='';
+        column_value['CreatedDate']=currentDateTime;
+        column_value['doj']='0000-00-00';
+        column_value['livelocationtrack']='';
+       
+//   console.log(column_value);
+//             return false;
+        var lastInsertedId:any = (await Database.table("EmployeeMaster").insert(column_value).returning('Id')).toString();
+       console.log("EmployeeId"+lastInsertedId);
+        if(lastInsertedId.length > 0){
+            status =true;
+            const column_value1:{[key:string]:any}={}//object creation 
+            column_value1['EmployeeId']=lastInsertedId;
+            column_value1['Password']= await Helper.encode5t(reqdata['password']);
+            column_value1['Username']=username;
+            column_value1['OrganizationId']=reqdata['Orgid'];
+            column_value1['CreatedDate']=currentDateTime;
+            column_value1['LastModifiedDate']=currentDateTime;
+            column_value1['username_mobile']=contact;
+            column_value1['LastModifiedById']=reqdata['adminid'];
+            column_value1['CreatedById']=reqdata['adminid'];
+            // console.log(column_value1);
+            // return false;
+            let lastInsertedId1 = (await Database.table("UserMaster").insert(column_value1).returning('Id')).toString();
+            if(lastInsertedId1.length > 0){
+
+                const module:string =  "Attendance App";
+                const actionperformed:string = "<b>" + reqdata['name'] + "</b>Details has been added by<b>" + reqdata['adminname'] + "</b> from<b> Attendance App  </b>";
+                const activityby:any = '1';
+                const appmodule:string= "Employees";
+                const InsertActivity = await Database.table("ActivityHistoryMaster")
+                            .insert({
+                                    LastModifiedDate: currentDateTime,
+                                    LastModifiedById:reqdata['adminid'],
+                                    Module: module,
+                                    ActionPerformed:actionperformed,
+                                    OrganizationId:reqdata['Orgid'],
+                                    ActivityBy:activityby,
+                                    adminid:reqdata['adminid'],
+                                    AppModule:appmodule
+                                });
+                return 1;//successfully added;
+            }else{
+                return 6;//not inserted  in usermaster
+            }
+
+        }else{
+            status=false
+            return 6;//not inserted in EmployeeMaster
+        }
+
+    }
+    
+
 
 }

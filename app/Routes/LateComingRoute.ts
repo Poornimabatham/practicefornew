@@ -1,3 +1,5 @@
 import Route from '@ioc:Adonis/Core/Route'
 
-Route.get('/getlatecomers','LatecomingsController.FetchLateComings')
+Route.get('/FetchLateComings','LatecomingsController.FetchLateComings')
+
+Route.get("/getlateComingsCsv", "LatecomingsController.getlateComingsCsv");

@@ -1,6 +1,6 @@
-import { schema, CustomMessages } from '@ioc:Adonis/Core/Validator'
-import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import BaseValidator from './BaseValidator'
+import { schema, CustomMessages } from "@ioc:Adonis/Core/Validator";
+import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
+import BaseValidator from "./BaseValidator";
 export default class ShiftValidator {
   constructor(protected ctx: HttpContextContract) {
     // super()
@@ -40,18 +40,8 @@ export default class ShiftValidator {
       id: schema.number(),
     }),
   };
-  static assign = {
-    schema: schema.create({
-      Orgid: schema.number(),
-      shiftid: schema.number(),
-      shiftname: schema.string(),
-      empid: schema.number(),
-      empname: schema.string(),
-      adminid: schema.number(),
-      adminname: schema.string(),
-    }),
-  };
-  static Inactiveshift={ 
+
+  static Inactiveshift = {
     schema: schema.create({
       orgId: schema.number(),
       id: schema.number(),
@@ -59,6 +49,57 @@ export default class ShiftValidator {
     }),
   };
 
+  static assignShift = {
+    schema: schema.create({
+      Orgid: schema.number(),
+      shiftid: schema.number(),
+      shiftname: schema.string(),
+      empid: schema.number(),
+      empname: schema.string(),
+      adminid: schema.number.optional(),
+      adminname: schema.string(),
+    }),
+  };
+
+  static MultiShift = {
+    schema: schema.create({
+      refno: schema.number(),
+      empid: schema.number(),
+    }),
+  };
+  static AssignShiftByDepart = {
+    schema: schema.create({
+      orgid: schema.number(),
+      shiftid: schema.number(),
+      departid: schema.number(),
+      date: schema.string(),
+      status: schema.number(),
+      WeekoffStatus: schema.number(),
+      adminid: schema.number(),
+      adminname: schema.string(),
+      departname: schema.string(),
+      shiftname: schema.string(),
+    }),
+  };
+
+  static addMultiShift={
+    schema :schema.create({
+      refno : schema.number(),
+      date: schema.date.optional({ format: 'yyyy-MM-dd HH:mm:ss' }),
+      status : schema.number(),
+      shiftid : schema.number(),
+      empid : schema.number(),
+      WeekoffStatus : schema.number(),
+      assignedbyid : schema.number()
+    })
+  }
+
+  static shiftcheck = {
+    schema: schema.create({
+      id: schema.number(),
+      orgid: schema.number(),
+    }),
+  };
   /*
    * Define schema to validate the "shape", "type", "formatting" and "integrity" of data.
    *

@@ -27,7 +27,18 @@ export default class AttendanceValidator extends BaseValidator{
    *    ```
    */
   public schema = schema.create({})
-
+  public static presentemplist = {
+    schema: schema.create({
+      emp: schema.number(),
+      refno: schema.number(),
+      datafor:schema.string(),
+      currentPage: schema.number.optional(), 
+      perPage: schema.number.optional(),
+      
+    })
+    , message: BaseValidator.messages
+  }
+ 
   /**
    * Custom messages for validation failures. You can make use of dot notation `(.)`
    * for targeting nested fields and array expressions `(*)` for targeting all

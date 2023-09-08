@@ -15,9 +15,6 @@ export default class getInfoService
        const zone =  await Helper.getEmpTimeZone(uid,orgid);
        const dayjs = require('dayjs'); // You might use a library like "dayjs" for date manipulation
        const now = dayjs(); // Current date and time
-       const yesterday = now.subtract(1, 'day'); // Previous day's date
-       console.log(yesterday);
-       
        const time = now.format('HH:mm:ss'); 
        const stypeD = 0;
        let data:any = []; // Initialize an empty object
@@ -397,7 +394,6 @@ export default class getInfoService
             empVar.area_assigned = EmpData.area_assigned;
             const formattedFirstName = empVar.FirstName.replace(/\s+/g, '-').replace(/[^A-Za-z0-9\-]/g, '');
             empVar.EmployeeTopic = formattedFirstName + EmployeeId;
-            const currentDate = new Date().toISOString().split('T')[0]; // Get current date in YYYY-MM-DD format
             empVar.TrackLocationEnabled = EmpData.livelocationtrack;
             empVar.departmentid = EmpData.Department;
             empVar.designationid = EmpData.Designation;
@@ -432,6 +428,7 @@ export default class getInfoService
           }
             empVar.departmentname = await Helper.getDepartmentName(empVar.departmentid);
             empVar.designationname = await Helper.getDesignationName(empVar.designationid);
+            empVar.MultipletimeStatus = await Helper.getshiftmultipletime_sts(uid,todayDate,empVar.shiftId);
 
          ///////////////////////Shift Info//////////////////////
             const {shifttype,ShiftTimeOut,shiftTimeIn,shiftName,minworkhrs,diffShiftTime} = await Helper.getShiftTimeByEmpID(uid) ;
@@ -444,7 +441,7 @@ export default class getInfoService
             empVar.shiftName = shiftName;
             empVar.MinimumWorkingHours = minworkhrs;
             empVar.stypeD = diffShiftTime;
-            console.log(stypeD);
+            //console.log(stypeD);
             
          ///////////////////////Attendance Act/////////////////////////////
 
@@ -453,31 +450,33 @@ export default class getInfoService
             TimeOut:'00:00:00',
             act : ''
          };
-         let attDatePastOneDay = todayDate.minus({ days: 1 }).toFormat("yyyy-MM-dd");;
-         if(empVar.ShiftType == 3)
+         const { subDays, format } = require('date-fns');
+         const yesterDate = format(subDays(new Date(), 1), 'yyyy-MM-dd');
+
+         
+         if((empVar.ShiftType == 3) || (empVar.ShiftType == 1  && empVar.MultipletimeStatus==1))
          {
 
             const ActValue = await Database.from('AttendanceMaster').select('id','TimeOut').where('EmployeeId',uid).first();
             if(ActValue)
             {
                const aid = ActValue.id ;
-
                const InterimData = await Database.from('InterimAttendances').select('TimeIn','TimeOut').where('Id',aid).first();
                if(InterimData)
                {
-                  if(InterimData.TimeOut == InterimData.TimeIn) {
-
-                     InterimData.act = 'TimeOut';
+                  if(InterimData.TimeOut == InterimData.TimeIn)
+                  {
+                     attVar.act = 'TimeOut';
                   }
                   else
                   {
-                     InterimData.act = 'TimeIn';
+                     attVar.act = 'TimeIn';
                   }
 
                }
                else
                {
-                     InterimData.act = 'TimeIn';
+                  attVar.act = 'TimeIn';
                }
             }
             else{
@@ -486,15 +485,84 @@ export default class getInfoService
                .from('AttendanceMaster')
                .select('id','TimeOut')
                .where('EmployeeId',uid)
-               .andWhere('AttendanceDate',attDatePastOneDay)
+               .andWhere('AttendanceDate', yesterDate)
                .first();
-               if(ActValue){
+               if(ActValue)
+               {
+                  const aid = ActValue.id ;
+                  const InterimData = await Database.from('InterimAttendances')
+                  .select('TimeOut','TimeIn')
+                  .where('AttendanceMasterId',aid)
+                  .andWhere('EmployeeId',uid)
+                  .first();
                   
+                  if(InterimData)
+                  {
+                     if(InterimData.TimeOut == InterimData.TimeIn) 
+                     {
+                        attVar.act = 'TimeIn';
+                     }
+
+                  }
+                  else
+                  {
+                      const InterimData = await Database
+                     .from('InterimAttendances')
+                     .select('TimeOut', 'TimeIn')
+                     .where('AttendanceMasterId', aid)
+                     .andWhere('EmployeeId', uid)
+                     .orderBy('id', 'desc')
+                     .limit(1)
+                     .first(); 
+
+                     if(InterimData)
+                     {
+                       if(InterimData.TimeOut == InterimData.TimeIn)
+                       {
+                          let Emp ='';
+                          if(empVar.ShiftType == 3)
+                          {
+                              Emp = InterimData.TimeIn;
+                          }
+                          else{
+                             Emp = empVar.EmpShiftTimeIn;
+                          }
+                           
+                           const shiftedTime = new Date(Emp);
+                           shiftedTime.setHours(shiftedTime.getHours() - 2);  
+                           const dateObj = new Date(shiftedTime);
+                           const shiftT = await Helper.dateFormate(dateObj); ////minus 2 hour with sift timeout time
+                           const currentDate = await Helper.dateFormate(dateObj);////current date
+                           shiftedTime.setHours(shiftedTime.getHours() - 2);
+                           if(shiftT < currentDate)
+                           {
+                              attVar.act = 'TimeIn';
+                           }
+                           else{
+                              attVar.act = 'TimeOut';
+                           }
+                        }else{
+                           attVar.act = 'TimeIn';
+                        }
+                  
+                     }else{
+                        attVar.act = 'TimeIn';
+                     }
+                  }
+                  
+               }else{
+                  attVar.act = 'TimeIn';
                }
             }
                
+         }///////////////flexi and sigle date multiple time in time out  condition End here//////// 
+         else
+         {   //// if shift is end whithin same date
+             if(empVar.ShiftType <= 1){
+
+             }
          }
-         //console.log(ActValue);
+         
       
       const  test = { ...data, ...preventSignupVar, ...addonVar , ...empVar , ...attVar}
       return test

@@ -1,5 +1,6 @@
  import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import DailyAttendanceService from 'App/Services/DailyAttendanceService';
+import AttendanceValidator from 'App/Validators/AttendanceValidator';
 
 export default class AttendancesController {
 
@@ -8,6 +9,11 @@ export default class AttendancesController {
        
         let allDataOfTimeInOut= await request.all();
         const serviceResult = await DailyAttendanceService.saveTimeInOut(allDataOfTimeInOut);
-        return response.json(serviceResult);
+        console.log(serviceResult)
+        let jsonData = JSON.stringify(serviceResult);
+        console.log("controller")
+        return response.json(jsonData);
     }
+
+  
 }
