@@ -2153,7 +2153,7 @@ export default class DailyAttendanceService {
             arr['act'] = 'TimeIn';  
           } 
         } else{
-          const query4 : any= await Database.query().from('AttendanceMaster').select('TimeIn','TimeOut','AttendanceDate').whereBetween("AttendanceDate",[Yesterday,date]).andWhere('employeeid',uid).orderBy('AttendanceDate','desc').limit(1).offset(0);			
+          const query4 : any= await Database.query().from('AttendanceMaster').select('TimeIn','TimeOut','AttendanceDate').whereBetween("AttendanceDate",[Yesterday,date]).andWhere('EmployeeId',uid).orderBy('AttendanceDate','asc').limit(1).offset(0);			
           const count4 = query4.length;
           if(count4 > 0){
             arr['act'] = 'TimeOut';
