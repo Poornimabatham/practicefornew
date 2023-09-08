@@ -278,7 +278,5 @@ export default class GetAttendanceEmployeewiseService{
         }else{  
             return 0;  
         }  
-  
     } 
-  
 }  
