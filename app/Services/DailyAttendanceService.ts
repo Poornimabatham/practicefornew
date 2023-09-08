@@ -211,7 +211,9 @@ export default class DailyAttendanceService {
               `SELECT Id FROM EmployeeMaster WHERE OrganizationId= ${orgId} AND Is_Delete = 0`
             )
           )
-          .orderBy("name", "asc");
+          .orderBy("name", "asc")
+          .limit(limit)
+          .offset(offset);
 
         if (departmentCondition != undefined) {
           absentCountQuery = absentCountQuery.whereRaw(departmentCondition);
@@ -563,7 +565,7 @@ export default class DailyAttendanceService {
         .whereRaw("S.shifttype!=3")
         .orderBy("E.FirstName", "asc")
         .limit(limit)
-        .offset(offset);
+        .offset(offset)
 
       if (data.DesignationId != 0 && data.DesignationId != undefined) {
         designationCondition = `Desg_id= ${data.DesignationId}`; // From AttendanceMaster
