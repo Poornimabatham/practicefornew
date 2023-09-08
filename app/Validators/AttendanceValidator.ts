@@ -39,6 +39,13 @@ export default class AttendanceValidator extends BaseValidator{
     })
     , message: BaseValidator.messages
   }
+  public static AttendanceAct = {
+    schema:schema.create({
+      uid : schema.number(),
+      refno : schema.number(),
+      platform : schema.string()
+    })
+  }
  
   /**
    * Custom messages for validation failures. You can make use of dot notation `(.)`
