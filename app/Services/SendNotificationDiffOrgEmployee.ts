@@ -45,11 +45,22 @@ export default class SendNotificationDiffOrgEmployee {
                 }
                 else {
                     var insertPreventSignupQuery = await Database.table('PreventSignup').insert({
-                      
+                        'EmployeeId': empid, 'contact': contact, 'OrganizationId': Orgid, 'OldOrgId': orgid, 'OldOrgName': orgName, 'Status': 0
                     })
-            }
-        }
+                }
 
+                var selectBodyQuery = await Database.from('All_mailers').select('Body', 'Subject').where('Id', 40);
+
+                if (selectBodyQuery.length > 0) {
+                    var body = selectBodyQuery[0].Body;
+                    var Subject = selectBodyQuery[0].Subject;
+                }
+
+                var Username = username+contact;
+                var body = ;
+            }
+            return result;
+
+        }
     }
-}
 }
