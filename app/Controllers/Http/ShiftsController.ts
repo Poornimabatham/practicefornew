@@ -7,27 +7,27 @@ export default class ShiftsController {
   private data = []
   public async index({}: HttpContextContract) {}
 
-  public async create({ request, response }: HttpContextContract) {
+  public async addShift({ request, response }: HttpContextContract) {
     const validatedparams = await request.validate(ShiftValidator.addshift);
-    const result = await ShiftsService.createdata(validatedparams);
+    const result = await ShiftsService.addShift(validatedparams);
     response.json(result);
   }
 
   public async store({}: HttpContextContract) {}
 
-  public async show({ request, response }: HttpContextContract) {
+  public async getAllShift({ request, response }: HttpContextContract) {
     const validatedparams = await request.validate(ShiftValidator.shifts);
     const result = await ShiftsService.getShiftData(validatedparams);
     response.json(result);
   }
 
-  public async update({ request, response }: HttpContextContract) {
+  public async updateShift({ request, response }: HttpContextContract) {
     const validatedparams = await request.validate(ShiftValidator.updateshift);
     const result = await ShiftsService.updateShift(validatedparams);
     response.json(result);
   }
 
-  public async destroy({ request, response }: HttpContextContract) {
+  public async deleteInActivateShift({ request, response }: HttpContextContract) {
     const validatedparams = await request.validate(
       ShiftValidator.Inactiveshift
     );
@@ -104,4 +104,7 @@ export default class ShiftsController {
     const res = await ShiftsService.AssignShiftsByDesignation(req)
     return response.json({"test":res})
   }
+
+   
+  
 }
