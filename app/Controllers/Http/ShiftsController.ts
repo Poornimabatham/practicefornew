@@ -18,13 +18,18 @@ export default class ShiftsController {
   public async getAllShift({ request, response }: HttpContextContract) {
     const validatedparams = await request.validate(ShiftValidator.shifts);
     const result = await ShiftsService.getShiftData(validatedparams);
-    response.json(result);
+    const jsonData = JSON.stringify(result)
+    return jsonData;
   }
 
   public async updateShift({ request, response }: HttpContextContract) {
     const validatedparams = await request.validate(ShiftValidator.updateshift);
     const result = await ShiftsService.updateShift(validatedparams);
-    response.json(result);
+    const jsonData = JSON.stringify(result)
+    console.log(jsonData);
+    console.log("itsworking");
+    
+    return response.json(jsonData);
   }
 
   public async deleteInActivateShift({ request, response }: HttpContextContract) {
