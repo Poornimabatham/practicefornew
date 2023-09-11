@@ -39,13 +39,15 @@ export default class ShiftsService {
     let data1: any = "";
     if (res == 1) {
       let archive: number = a.archive;
-      keyValueArray[0].archive = archive;
+      // keyValueArray[0].archive = archive;
       conditionarr = keyValueArray[0];
       data1 = await Database.query()
         .from("ShiftMaster")
         .select("*")
         .where(conditionarr)
         .orderBy("Name");
+     
+        
       // console.log(data1.toSQL().toNative());
       return data1;
     } else {
@@ -96,7 +98,7 @@ export default class ShiftsService {
     return data1;
   }
 
-  static async createdata(data) {
+  static async addShift(data) {
     const name = data.name;
     const orgid = data.org_id;
     let ti = data.ti;
