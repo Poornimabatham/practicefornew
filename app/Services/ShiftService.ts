@@ -38,7 +38,7 @@ export default class ShiftsService {
     });
     let data1: any = "";
     if (res == 1) {
-      let archive: number = a.archive;
+     // let archive: number = a.status;
       // keyValueArray[0].archive = archive;
       conditionarr = keyValueArray[0];
       data1 = await Database.query()
@@ -49,7 +49,7 @@ export default class ShiftsService {
      
         
       // console.log(data1.toSQL().toNative());
-      return data1;
+     // return data1;
     } else {
       const row = await Database.table("ShiftMaster").returning("id").insert({
         Name: "Trial Shift",
@@ -84,15 +84,15 @@ export default class ShiftsService {
           });
         }
 
-        let archive: number = a.archive;
-        keyValueArray[0].archive = archive;
+       // let archive: number = a.status;
+       // keyValueArray[0].archive = archive;
         conditionarr = keyValueArray[0];
         data1 = await Database.query()
           .from("ShiftMaster")
           .select("*")
           .where(conditionarr)
           .orderBy("Name");
-        return data1;
+       // return data1;
       }
     }
     return data1;

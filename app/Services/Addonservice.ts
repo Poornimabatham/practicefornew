@@ -9,6 +9,7 @@ export default class Addonservice{
         const addon = data.name ? data.name : 0;
         const orgname = await Helper.getOrgName(orgid);
         let result :any = {};
+        var res :any =0;
         let addon_future_enddate = data.today ? data.today : 0;
         if(addon_future_enddate == 0){
             const today1 = DateTime.now().toFormat('yyyy-MM-dd');
@@ -37,7 +38,7 @@ export default class Addonservice{
         const currency='adminpanel';
         const query123 :any = await Database.query().from('addons_master').select('Free_Trial_Status').where('OrganizationId',orgid).andWhere('Free_Trial_Status',1);
         const count123 = query123.length;
-        if(count123 > 3){
+        if(count123 < 3){
             result['status'] = 'false';
             return result;
         }else{
@@ -48,18 +49,45 @@ export default class Addonservice{
             if(count22){
                 addon_name = query22[0].addon_name;
             }
-            if(addon_name == 'Addon_BulkAttn'){
-                Addon_BulkAttn = 1;
-            }else if(addon_name == ''){
-
-            }else if(addon_name == ''){
-
-            }else if
-            return query22
-        }
+            // Define a mapping object for addon names to their respective variables
+        const addonMapping = {
+            'Addon_BulkAttn': 'Addon_BulkAttn',
+            'Addon_advancevisit': 'Addon_advancevisit',
+            'Addon_BasicLeave': 'Addon_BasicLeave',
+            'Addon_FaceRecognition': 'Addon_FaceRecognition',
+            'Addon_GeoFence': 'Addon_GeoFence',
+            'addon_livelocationtracking': 'addon_livelocationtracking',
+            'Addon_ShiftPlanner': 'Addon_ShiftPlanner',
+            'Addon_VisitPunch': 'Addon_VisitPunch',
+        };
+        
+        // Check if addon_name exists in the mapping and assign the corresponding value
+        const selectedAddon = addonMapping[addon_name];
+        if (selectedAddon !== undefined) {
+            res = [selectedAddon];
+            // Use the selectedAddon value as needed
+            const query1 = await Database.table('addons_master').returning('id').insert({
+                "Addon_name" : selectedAddon,"OrganizationId" : orgid,"created_date" : created_date,"end_date" :addon_future_enddate ,"PaymentInvoiceid" : addon_invoice_id,"Order_id" : order_id,"Payment_id" :payment_id ,"addon_amount" : addon_amount,"Currency" : currency,"Free_Trial_Status" : 1,
+            })
+            const query33 : any= await Database.query().from('licence_ubiattendance').where('OrganizationId',orgid).update({
+                [selectedAddon] : 1
+            })
+           
+            if(query33 > 0){
+                result['status'] = [selectedAddon];
+                const zone = await Helper.getEmpTimeZone(AdminId, orgid);
+                const defaultZone = DateTime.now().setZone(zone);
+                const admin = await Helper.getempnameById(AdminId);
+                const end_date_new =  '';
+             
+            }
+            
+           // console.log(`Selected Addon: ${selectedAddon}`);
+        } 
+    }
 
        
-        return data;
+        return result;
    
         
     }
