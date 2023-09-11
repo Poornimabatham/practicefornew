@@ -329,7 +329,7 @@ export default class ShiftsService {
     }
   }
 
-  static async deleteInActivateShift(data) {
+  static async deleteInActivateShift(data :any) {
     const orgid = data.orgId;
     const Id = data.id;
     const empId = data.empId;
