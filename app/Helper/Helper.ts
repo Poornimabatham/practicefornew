@@ -1378,8 +1378,6 @@ export default class Helper {
 
     const axiosInstances: any = [];
 
-
-
     // function sendRequest(url, headers) {
     //   return new Promise(async (resolve, reject) => {
     //     try {
