@@ -65,7 +65,7 @@ import "../app/Routes/GeofenceRoute";
 
 import Route from '@ioc:Adonis/Core/Route'
 
-Route.get('/sendMail', 'MailersController.SendMail')
+Route.get('/sendMail', 'MailersController.sendEmail')
 
 
 // Route.get('/', async () => {

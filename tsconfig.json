@@ -33,7 +33,8 @@
       "@adonisjs/limiter",
       "@adonisjs/redis",
       "@adonisjs/auth",
-      "@adonisjs/mail"
+      "@adonisjs/mail",
+      "@adonisjs/view"
     ]
   }
 }

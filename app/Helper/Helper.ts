@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+import Mail from "@ioc:Adonis/Addons/Mail";
 import Database from "@ioc:Adonis/Lucid/Database";
 import AttendanceMaster from "App/Models/AttendanceMaster";
 import EmployeeMaster from "App/Models/EmployeeMaster";
@@ -878,6 +879,22 @@ export default class Helper {
     const timeArr = time.split(':').map(Number);
     let decTime = timeArr[0] * 60 + timeArr[1] + timeArr[2] / 60;  //converting time in minutes
     return decTime
+  }
+
+  public static async sendEmail() {
+    let shakir="shakir Khan";
+    // Create an SES client
+    await Mail.use('smtp').send((message) => {
+        message
+        .from('noreply@ubiattendance.com',"shakir")
+        .to('shakir@ubitechsolutions.com')
+        .subject('Welcome Onboard!')
+        .html(`<html><head><meta http-equiv=Content-Type content="text/html; charset=windows-1252"><meta name=Generator content="Microsoft Word 12 (filtered)"><style></style></head><body lang=EN-US link=blue vlink=purple><hr><br><b>${shakir}</b> has punched TimeIn outside Geofence</br></hr></body></html>`)
+        //message.textView('emails/welcome.plain', {})
+        //.htmlView('emails/welcome', { fullName: 'Virk' })
+      }, {
+        oTags: ['signup'],
+      })
   }
 
 }
