@@ -10,8 +10,8 @@ export default class ShiftValidator {
       OrganizationId: schema.number(),
       archive: schema.number.optional(),
       shifttype: schema.number.optional(),
-      currentpage: schema.number(),
-      perpage: schema.number(),
+      currentpage: schema.number.optional(),
+      perpage: schema.number.optional(),
     }),
     message: BaseValidator.messages,
   };

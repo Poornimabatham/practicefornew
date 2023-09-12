@@ -6,13 +6,13 @@ import EmployeeMaster from "App/Models/EmployeeMaster";
 import Organization from "App/Models/Organization";
 import ShiftMaster from "App/Models/ShiftMaster";
 import ZoneMaster from "App/Models/ZoneMaster";
+const { format, parse,parseISO } = require('date-fns');
 import { DateTime } from "luxon";
 import moment from "moment";
 import axios from 'axios';
 
 export default class Helper {
-  public static encode5t(str: string) {
-    var contactNum = str.toString();
+  public static encode5t(str: any) {
     for (let i = 0; i < 5; i++) {
       str = Buffer.from(str).toString("base64");
       str = str.split("").reverse().join("");
@@ -491,24 +491,24 @@ export default class Helper {
     return name;
   }
 
-  public static async getShiftIdByEmpID(empid) {
-    let shift;
-    let getshiftid = await Database.from("ShiftMaster")
-      .select("Id")
-      .where(
-        "id",
-        Database.rawQuery(
-          `(SELECT Shift FROM EmployeeMaster where id=${empid})`
-        )
-      );
+  // public static async getShiftIdByEmpID(empid) {
+  //   let shift;
+  //   let getshiftid = await Database.from("ShiftMaster")
+  //     .select("Id")
+  //     .where(
+  //       "id",
+  //       Database.rawQuery(
+  //         `(SELECT Shift FROM EmployeeMaster where id=${empid})`
+  //       )
+  //     );
 
-    if (getshiftid.length > 0) {
-      shift = getshiftid[0].Id;
-      return shift;
-    } else {
-      return shift;
-    }
-  }
+  //   if (getshiftid.length > 0) {
+  //     shift = getshiftid[0].Id;
+  //     return shift;
+  //   } else {
+  //     return shift;
+  //   }
+  // }
 
   public static async getShiftByEmpID(Id: any) {
     const query: any = await Database.query()
@@ -689,8 +689,284 @@ export default class Helper {
     if (query) {
       return query.name;
     }
-    return null; // Return null or handle the case when no result is found
+    else {
+      return 0;
+    }
   }
+
+
+  static async  getCurrentOrgStatus(orgId) 
+  {
+    const todayDate = new Date().toISOString().split('T')[0];
+    let customizeOrg = 0;
+    let status = 0;
+    let endDate = '0000-00-00';
+    let deleteSts = 0;
+    let extended = 0;
+
+   const queryResult = await Database
+    .from('Organization')
+    .join('licence_ubiattendance', 'Organization.Id', '=', 'licence_ubiattendance.OrganizationId')
+    .select('Organization.customize_org AS customize_org','Organization.delete_sts AS delete_sts')
+    .select('licence_ubiattendance.status AS status','licence_ubiattendance.end_date AS end_date','licence_ubiattendance.extended AS extended')
+    .where('Organization.Id',orgId)
+   
+    const row = queryResult[0];
+
+    if (row) {
+      customizeOrg = row.customize_org;
+      status = row.status;
+      endDate = DateTime.fromJSDate(new Date(row.end_date)).toFormat('yyyy-MM-dd');
+      deleteSts = row.delete_sts;
+      extended = row.extended;
+    }
+    if (status === 0 && extended === 1 && todayDate <= endDate && customizeOrg === 0 && deleteSts === 0 ) 
+    {
+      return 'TrialOrg';
+    } 
+    else if (status === 1 && todayDate <= endDate && deleteSts === 0 && customizeOrg === 0 ) 
+    {
+      return 'PremiumStandardOrg';
+    } 
+    else if (customizeOrg === 1 && deleteSts === 0) 
+    {
+      return 'PremiumCustomizedOrg';
+    } 
+    else if ( status === 0 && todayDate > endDate && deleteSts === 0 && customizeOrg === 0  ) 
+    {
+      return 'ExpiredTrialOrg';
+    } 
+    else if ( status === 0 && extended > 1 && endDate >= todayDate && deleteSts === 0 && customizeOrg === 0)
+    {
+      return 'ExtendedTrialOrg';
+    }
+    else if ( status === 0 && todayDate > endDate && deleteSts === 0 && customizeOrg === 0 ) 
+    {
+      return 'PremiumExpiredOrg';
+    }
+  }
+
+  static async getShiftIdByEmpID(uid) 
+  {
+    const shiftId = await Database.from("EmployeeMaster")
+      .select("Shift")
+      .where("Id", uid);
+
+    const shiftIds = shiftId.map((row) => row.Shift);
+    return shiftIds[0];    
+  }
+
+  static async getAddon_Regularization(orgid) 
+  {
+    const Addon_Regularization = await Database.from("Organization")
+      .select("Addon_Regularization")
+      .where("Id", orgid);
+
+    const Addon_Regularizations = Addon_Regularization.map((row) => row.Addon_Regularization);
+    return Addon_Regularizations[0];    
+  }
+
+
+
+  static async getLeaveCountApp(orgid, empid, leavedate)
+  {
+    const fiscaldate = await this.getOrgFiscal(orgid, leavedate);
+    const fiscal = fiscaldate.split(' ');
+    const fiscalstart = fiscal[0];
+    const fiscalend = fiscal[2];
+  
+    const query = await Database.from('AppliedLeave')
+    .where('EmployeeId', empid)
+    .whereIn('ApprovalStatus', [1, 2])
+    .whereBetween('Date', [fiscalstart, fiscalend])
+    .count('Id as noofleave');
+
+      //const result = await query;
+
+      const noofleave = query[0].noofleave;
+
+      return noofleave;
+  }
+
+    static async getOrgFiscal(orgid, leavedate) 
+    {
+      const query = Database.from('Organization')
+        .where('Id', orgid)
+        .select('fiscal_start', 'fiscal_end')
+        .first();
+
+      const row = await query;
+
+      if (!row) {
+        throw new Error('Organization not found');
+      }
+
+      const f_start = row.fiscal_start;
+      const f_end = row.fiscal_end;
+
+      const leavedateFormatted = leavedate || new Date().toISOString().slice(0, 10);
+
+      const dateofjoin = new Date(leavedateFormatted);
+      const fiscalstart = new Date(f_start);
+      const fiscalend = new Date(f_end);
+
+      if (dateofjoin < fiscalstart) {
+        fiscalstart.setFullYear(fiscalstart.getFullYear() - 1);
+      }
+
+      if (dateofjoin > fiscalend) {
+        fiscalend.setFullYear(fiscalend.getFullYear() + 1);
+      }
+
+      const startDate = fiscalstart.toISOString().slice(0, 10);
+      const endDate = fiscalend.toISOString().slice(0, 10);
+
+      return `${startDate} And ${endDate}`;
+    }
+
+
+  static async getBalanceLeave(orgid, uid, date = '') 
+  {
+    const data = await Database
+    .from('EmployeeMaster as E')
+    .join('Organization as O', 'E.OrganizationId', '=', 'O.Id')
+    .select('E.FirstName','E.entitledleave','E.DOJ',)
+    .select('O.fiscal_start','O.fiscal_end','O.entitled_leave')
+    .where('O.Id',orgid)
+    .where('E.Id',uid).first()
+   
+    let entitledleave :any ,doj;
+    if (!data.entitledleave || data.entitledleave.trim() === 'undefined') {
+      entitledleave = data.entitled_leave;
+    } else {
+      entitledleave = data.entitledleave;
+    }
+
+      const todaydate = new Date();
+      const new_fiscal_start_year = todaydate.getFullYear();
+      const new_fiscal_end_year = new_fiscal_start_year + 1;
+      const startDate_year = format(parse(data.fiscal_start, 'd MMMM', new Date()), 'MM-dd');
+      const endDate_year = format(parse(data.fiscal_end, 'd MMMM', new Date()), 'MM-dd');  
+      const endDate_fnew = `${new_fiscal_end_year}-${endDate_year}`;
+      const startDate_fnew = `${new_fiscal_start_year}-${startDate_year}`;
+
+      ////////////////////fiscal start/////////////////
+       const currentDate = data.DOJ.toISOString().split('T')[0];
+       let dateofjoin:any =  format(parse(currentDate, 'yyyy-MM-dd', new Date()), 'MM/dd/Y');
+       const fiscalstart =  format(parse(startDate_fnew, 'yyyy-MM-dd', new Date()), 'MM/dd');
+       const fiscalstartmon = fiscalstart.substring(0, 2);
+       const dateofjoinmon = dateofjoin.substring(0, 2);
+       let fiscalstartdate = fiscalstart.substring(3, 2);
+       const joindate = dateofjoin.substring(3, 2);
+       
+      if (dateofjoinmon < fiscalstartmon) {
+        doj = parseInt(dateofjoin.split('/')[2]) - 1;
+        fiscalstartdate = `${fiscalstart}/${doj}`;
+      } else if (dateofjoinmon === fiscalstartmon && joindate < fiscalstart.substring(3, 5)) {
+        doj = parseInt(dateofjoin.split('/')[2]) - 1;
+        fiscalstartdate = `${fiscalstart}/${doj}`;
+      } else if (dateofjoinmon === fiscalstartmon && joindate === fiscalstart.substring(3, 5)) {
+        doj = parseInt(dateofjoin.split('/')[2]);
+        fiscalstartdate = `${fiscalstart}/${doj}`;
+      } else {
+        doj = parseInt(dateofjoin.split('/')[2]);
+        fiscalstartdate = `${fiscalstart}/${doj}`;
+      }
+      //////////////////////Fiscal End//////////////////////
+
+      const fiscalend =  format(parse(endDate_fnew, 'yyyy-MM-dd', new Date()), 'MM/dd');
+      const fiscalendmon = fiscalend.substring(0, 2);
+      let fiscalenddate = fiscalend.substring(3, 2);
+      
+      if (dateofjoinmon > fiscalendmon) {
+        doj = parseInt(dateofjoin.split('/')[2]) - 1;
+        fiscalenddate = `${fiscalend}/${doj}`;
+      } else if (dateofjoinmon === fiscalendmon && joindate > fiscalend.substring(3, 5)) {
+        doj = parseInt(dateofjoin.split('/')[2]) - 1;
+        fiscalenddate = `${fiscalend}/${doj}`;
+      } else if (dateofjoinmon === fiscalendmon && joindate === fiscalend.substring(3, 5)) {
+        doj = parseInt(dateofjoin.split('/')[2]);
+        fiscalenddate = `${fiscalend}/${doj}`;
+      } else {
+        doj = parseInt(dateofjoin.split('/')[2]);
+        fiscalenddate = `${fiscalend}/${doj}`;
+      }
+     /////////////////////////////*******/////////////////////////////////
+     const startDate = new Date(fiscalstartdate);
+     let endDate :any = new Date(fiscalenddate);
+
+      if (currentDate >= startDate && currentDate <= endDate) 
+      {
+        const diff = endDate - dateofjoin;
+        const differenceInDays = Math.abs(Math.round(diff / (1000 * 60 * 60 * 24)));
+    
+        const bal1 = entitledleave / 12;
+        const bal2 = differenceInDays / 30.4167;
+        let balanceleave1 = bal1 * bal2;
+        const str = Math.round(balanceleave1 * 100) / 100;
+    
+        let after = Math.round((str % 1) * 100);
+    
+        if (after <= 50) {
+          if (entitledleave <= 0) {
+            after = 0;
+          } else {
+            after = 5;
+          }
+          const balanceleave = parseFloat(`${Math.floor(str)}.${after}`);
+          return balanceleave;
+        } else {
+          const balanceleave = Math.round(str);
+          return balanceleave;
+        }
+      } else {
+        const balanceleave = entitledleave;
+        return balanceleave;
+      }
+    }
+
+  static async getDepartmentName(deptid) 
+  {
+    const DeptName = await Database.from("DepartmentMaster")
+      .select("Name")
+      .where("Id", deptid);
+
+    const deptName = DeptName.map((row) => row.Name);
+    return deptName[0];    
+  }
+
+  static async getDesignationName(desgid) 
+  {
+    const DesgName = await Database.from("DesignationMaster")
+      .select("Name")
+      .where("Id", desgid);
+
+    const desgName = DesgName.map((row) => row.Name);
+    return desgName[0];    
+  }
+
+  static async getShiftTimeByEmpID(uid) 
+  {
+    const shiftInfo = await Database
+    .from('ShiftMaster')
+    .select('Name','TimeIn', 'TimeOut','shifttype','HoursPerDay',Database.raw('TIMEDIFF(TimeIn, TimeOut) AS diffShiftTime'))
+    .whereIn('id', (subquery) => {
+      subquery.select('Shift').from('EmployeeMaster').where('id', uid);
+    }).first();
+     
+    if (shiftInfo) 
+    {
+        const arr:any = {};
+        arr.shiftName = shiftInfo.Name;
+        arr.shiftTimeIn = shiftInfo.TimeIn;
+        arr.ShiftTimeOut = shiftInfo.TimeOut;
+        arr.shifttype = shiftInfo.shifttype;
+        arr.minworkhrs = shiftInfo.HoursPerDay;
+        arr.diffShiftTime = shiftInfo.diffShiftTime;
+        return arr;
+    }   
+  }
+
 
   public static async getDesigName(desigId, orgId) {
     const query = await Database.from("DesignationMaster")
@@ -750,7 +1026,6 @@ export default class Helper {
         break;
       case 7:
         dayOfWeek = 1;
-
     }
 
     var weekOfMonth = Math.ceil(dateTime.day / 7);
@@ -811,8 +1086,8 @@ export default class Helper {
     let dist =
       Math.sin(this.deg2rad(lat1)) * Math.sin(this.deg2rad(lat2)) +
       Math.cos(this.deg2rad(lat1)) *
-      Math.cos(this.deg2rad(lat2)) *
-      Math.cos(this.deg2rad(theta));
+        Math.cos(this.deg2rad(lat2)) *
+        Math.cos(this.deg2rad(theta));
     dist = Math.acos(dist);
     dist = this.rad2deg(dist);
     let miles = dist * 60 * 1.1515;
@@ -905,7 +1180,15 @@ export default class Helper {
     }
     return seniorid;
   }
+ public static async dateFormate(date)
+  {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+      const day = String(date.getDate()).padStart(2, '0');
+      const formattedDate = `${year}-${month}-${day}`;
+      return formattedDate
 
+  }
   static async getSeniorId(empid, organization) {
     var id = "0";
     var parentId = empid;
@@ -928,6 +1211,24 @@ export default class Helper {
     let decTime = timeArr[0] * 60 + timeArr[1] + timeArr[2] / 60; //converting time in minutes
     return decTime;
   }
+
+  public static async getshiftmultipletime_sts(uid,date,ShiftId){
+    const query21 :any = await Database.query().from('AttendanceMaster').select('multitime_sts').where('EmployeeId',uid).andWhere('AttendanceDate',date);
+    const count21 = query21.length;
+    let multitime_sts = 0;
+    if(count21 > 0){
+      multitime_sts = query21[0].multitime_sts;
+    }
+    else{
+      const query21 : any = await Database.query().from('ShiftMaster').select('MultipletimeStatus').where('Id',ShiftId);
+      if(query21.length > 0){
+        multitime_sts = query21[0].MultipletimeStatus;
+      }
+    }
+    return multitime_sts;
+  }
+
+  
 
   public static async getTrialDept(orgid) {
     var Orgid = orgid;
@@ -959,10 +1260,11 @@ export default class Helper {
     } else {
       return desg;
     }
-
   }
   public static async sendEmail(email, subject, messages, headers) {
     // Create an SES client
+    
+    
     const getmail = await Mail.use("smtp").send(
       (message) => {
         message
@@ -1119,7 +1421,76 @@ export default class Helper {
     }
 
     sendMultipleRequests();
+  }
 
+  public static async getDepartment(id) {
+    let Name = "";
+
+    const selectDepartmentId = await Database.from("DepartmentMaster")
+      .select("name")
+      .where("id", id);
+    if (selectDepartmentId.length > 0) {
+      Name = selectDepartmentId[0].name;
+      return Name;
+    } else {
+      return Name;
+    }
+  }
+  public static async getDesignation(id) {
+    let Name = "";
+
+    const selectDesignationMasterId = await Database.from("DesignationMaster")
+      .select("name")
+      .where("id", id);
+    if (selectDesignationMasterId.length > 0) {
+      Name = selectDesignationMasterId[0].name;
+      return Name;
+    } else {
+      return Name;
+    }
+  }
+
+  public static async getDeviceVerification_settingsts(orgid) {
+    let data = 0;
+
+    const selectDeviceVerification_settings = await Database.from(
+      "Organization"
+    )
+      .select("deviceverification_setting")
+      .where("id", orgid);
+
+    if (selectDeviceVerification_settings.length > 0) {
+      data = selectDeviceVerification_settings[0].deviceverification_setting;
+      return data;
+    } else {
+      return data;
+    }
+  }
+  public static async gettimezonebyid(zoneid) {
+    var zone = "Asia/Kolkata";
+    const query = await Database.from("ZoneMaster")
+      .select("Name")
+      .where("Id", zoneid);
+    if (query.length > 0) {
+      return query[0].Name;
+    } else {
+      return zone;
+    }
+  }
+
+  public static async getDeptNamem(deptId, orgId) {
+    let Name = "";
+    const query = await Database.from("DepartmentMaster")
+      .select("name")
+      .where("Id", deptId)
+      .andWhere("OrganizationId", orgId);
+
+    if (query.length > 0) {
+      Name = query[0].name;
+      return Name;
+    } else {
+      return Name;
+    }
   }
 }
 

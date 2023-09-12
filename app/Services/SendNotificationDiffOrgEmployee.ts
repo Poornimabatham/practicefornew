@@ -1,6 +1,5 @@
 import Database from "@ioc:Adonis/Lucid/Database";
 import Helper from "App/Helper/Helper";
-
 export default class SendNotificationDiffOrgEmployee {
 
     public static async SendNotificationDiffOrgEmployee(data) {
@@ -45,11 +44,11 @@ export default class SendNotificationDiffOrgEmployee {
                 }
                 else {
                     var insertPreventSignupQuery = await Database.table('PreventSignup').insert({
-                      
-                    })
-            }
-        }
 
+                    })
+                }
+            }
+
+        }
     }
-}
 }
