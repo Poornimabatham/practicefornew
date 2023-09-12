@@ -5,7 +5,7 @@
  * file.
  */
 
-import AuthenticationTable from 'App/Models/AuthenticationTable'
+import Usertest from 'App/Models/Usertest'
 
 declare module '@ioc:Adonis/Addons/Auth' {
   /*
@@ -34,8 +34,8 @@ declare module '@ioc:Adonis/Addons/Auth' {
     |
     */
     user: {
-      implementation: LucidProviderContract<typeof AuthenticationTable>
-      config: LucidProviderConfig<typeof AuthenticationTable>
+      implementation: LucidProviderContract<typeof Usertest>
+      config: LucidProviderConfig<typeof Usertest>
     }
   }
 

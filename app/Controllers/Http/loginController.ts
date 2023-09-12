@@ -2,6 +2,7 @@ import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import loginValidator from 'App/Validators/loginValidator'
 import loginService from 'App/Services/loginService'
 import Helper from 'App/Helper/Helper';
+import Usertest from 'App/Models/Usertest';
 
 export default class LoginController {
   public async checkLogin({ request, response }: HttpContextContract) {
@@ -45,6 +46,22 @@ export default class LoginController {
     const servicerep = await loginService.Loginverifymail(this.data);
     return response.json(servicerep)  
    }
+
+   public async insert({auth}){
+
+    var test = await auth.attempt('deepak@gmail.com','abcd1234')
+    console.log('test');
+    console.log(test);
+    console.log('test');
+    
+
+    // let query = await Usertest.create({
+    //   email: "shakir@gmail.com",
+    //   password: "abcd1234"
+    // })
+   }
+
+
 
 }
 

@@ -6,5 +6,6 @@ Route.put('/logout','LogoutsController.logout').middleware('throttle:global').mi
 Route.post('/Signup', 'LoginController.newregister_orgTemp')
 /////// Loginverifymail /////
 Route.put("/Loginverifymail", "LoginController.Loginverifymail");    
+Route.get("/insert", "LoginController.insert");    
 
 

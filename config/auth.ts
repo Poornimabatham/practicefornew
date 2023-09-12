@@ -71,7 +71,7 @@ const authConfig: AuthConfig = {
 
         /*
         |--------------------------------------------------------------------------
-        | Identifier k                                                                               ey
+        | Identifier key
         |--------------------------------------------------------------------------
         |
         | The identifier key is the unique key on the model. In most cases specifying
@@ -103,7 +103,7 @@ const authConfig: AuthConfig = {
         | that time.
         |
         */
-        model: () => import('App/Models/AuthenticationTable'),
+        model: () => import('App/Models/Usertest'),
       },
     },
   },
