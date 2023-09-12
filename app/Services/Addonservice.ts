@@ -78,17 +78,26 @@ export default class Addonservice{
                 const zone = await Helper.getEmpTimeZone(AdminId, orgid);
                 const defaultZone = DateTime.now().setZone(zone);
                 const admin = await Helper.getempnameById(AdminId);
-                const end_date_new =  '';
-             
+                const endDateNew = DateTime.now().toFormat('MMMM d, yyyy');
+                const module = "Addon";
+                const actionperformed = "Free trial for the Add-on <b>"+`${addon}`+"</b> has been activated till <b>"+`${endDateNew}`+"</b> by "+`${admin}`+"</b>";
+                const activityby = 1;  
+                const activityhistory = await Helper.ActivityMasterInsert(created_date,
+                    orgid,
+                    AdminId,
+                    activityby,
+                    module,
+                    actionperformed,
+                    module);
+                    result['status'] = 'true';
+
+            }else{
+                result['status'] = 'No Updates';
             }
             
            // console.log(`Selected Addon: ${selectedAddon}`);
         } 
     }
-
-       
-        return result;
-   
-        
+        return result; 
     }
 }
