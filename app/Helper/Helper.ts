@@ -306,9 +306,11 @@ export default class Helper {
       .select("shiftid")
       .where("empid", empid)
       .andWhere("ShiftDate", ShiftDate);
-    if (getshiftid.length > 0) {
+     
+    if (getshiftid.length > 0) {      
       return getshiftid[0].shiftid;
-    } else {
+     } 
+    else {
       let getshiftid = await Database.from("ShiftMaster")
         .select("Id")
         .where(
@@ -317,10 +319,11 @@ export default class Helper {
             `(SELECT Shift FROM EmployeeMaster where id=${empid})`
           )
         );
-      if (getshiftid.length > 0) {
+      if (getshiftid.length > 0 && getshiftid[0].Id != undefined) {
         return getshiftid[0].Id;
       }
     }
+    return 0;
   }
 
   public static async getAddonPermission(orgid: number, addon: string) {
@@ -386,18 +389,18 @@ export default class Helper {
       .where("AttendanceDate", today)
       .whereNot("TimeIn", "00:00:00")
       .select("multitime_sts")
-      .first();
+      // .first()
+      if (attendanceRecord.length >0) {
 
-    if (attendanceRecord && attendanceRecord.multitime_sts) {
-      return attendanceRecord.multitime_sts;
-    } else {
+      return attendanceRecord[0].multitime_sts;
+      } else {        
       const shiftRecord = await ShiftMaster.query()
         .where("Id", shiftId)
-        .select("MultipletimeStatus")
-        .first();
-      if (shiftRecord && shiftRecord.MultipletimeStatus) {
-        return shiftRecord.MultipletimeStatus;
-      }
+        .select("MultipletimeStatus");
+      // .first();
+        if (shiftRecord.length > 0) {
+        return shiftRecord[0].MultipletimeStatus;
+      } 
     }
     return 0;
   }
@@ -748,7 +751,6 @@ export default class Helper {
         break;
       case 7:
         dayOfWeek = 1;
-
     }
 
     var weekOfMonth = Math.ceil(dateTime.day / 7);
@@ -957,7 +959,6 @@ export default class Helper {
     } else {
       return desg;
     }
-
   }
   public static async sendEmail(email, subject, messages, headers) {
     // Create an SES client
@@ -967,13 +968,13 @@ export default class Helper {
           .from("noreply@ubiattendance.com", "shakir")
           .to(email)
           .subject(subject)
-          .header(headers,headers)
+          .header(headers, headers)
           .html(`${messages}`);
         //message.textView('emails/welcome.plain', {})
         //.htmlView('emails/welcome', { fullName: 'Virk' })
       },
       {
-       oTags: ["signup"],
+        oTags: ["signup"],
       }
     );
     return getmail;
@@ -995,4 +996,61 @@ export default class Helper {
       return shiftid;
     }
   }
+
+  public static async getUbiatt_Ubihrmsts(orgid) {
+    const result = await Database.from("Organization")
+      .select("ubihrm_sts")
+      .where("Id", orgid);
+    if (result) {
+      return result[0].ubihrm_sts;
+    }
+    return 0;
+  }
+
+  public static async getAttImageStatus(orgid) {
+    const getAttnImageSts = await Database.from("admin_login")
+      .select("AttnImageStatus")
+      .where("OrganizationId", orgid);
+    if (getAttnImageSts) {
+      return getAttnImageSts[0].AttnImageStatus;
+    } else {
+      return 0;
+    }
+  }
+
+  public static async loctrackPermission(empId) {
+
+    const query = await Database.from('EmployeeMaster')
+      .select('livelocationtrack')
+      .where('Id', empId)
+
+    if (query) {
+      return query[0].livelocationtrack;
+    } else {
+      return 0;
+    }
+  }
+
+  public static async getDeviceVerification_settingsts(orgid) {
+    const query = await Database.from("Organization")
+      .select("deviceverification_setting")
+      .where("Id", orgid)
+    if (query) {
+      return query[0].deviceverification_setting;
+    } else {
+      return 0;
+    }
+  }
+
+  public static async getDesignation(Id) {    
+    const query = await Database.from("DesignationMaster")
+      .select("Name")
+      .where("Id", Id);    
+    if (query.length > 0) {
+      return query[0].Name;
+    } else {
+      return 0;
+    }
+  }
 }
+

@@ -20,5 +20,6 @@ Route.get('/GetQrKioskStatus', 'UserSettingsController.getQrKioskStatus')
 Route.get("/getReferDiscountRequest","UserSettingsController.getReferDiscountRequest");
 
 Route.put("/DeleteAccount","UserSettingsController.DeleteAccount");
-Route.get('/getSetKioskPin','UserSettingsController.getSetKioskPin');
+Route.get('/getSetKioskPin', 'UserSettingsController.getSetKioskPin');
+Route.put("/checkuseremailforgoogle", "UserSettingsController.checkuseremailforgoogle");
 
