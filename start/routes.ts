@@ -75,3 +75,4 @@ import "../app/Routes/getOrignalAttendanceImg";
 // })
 
 import "../app/Routes/ApprovalRegularizationRoute";
+import "../app/Routes/AddonServiceRoute";

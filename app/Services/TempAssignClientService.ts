@@ -32,11 +32,11 @@ export default class TempAssignClientService {
     var contactPersons: any = []; // Declare an array to store contact persons
 
     res = (await insertClientList).length;
-    data2["sts"] = res
+    data2["sts"] = res;
     var selectClientList2 = await Database.from("ClientMaster ")
       .where("Id", cid)
-      .select("Name")
-      
+      .select("Name");
+
     var Name: any = selectClientList2;
     Name.forEach((val) => {
       let contactPerson = val.Name;
@@ -66,6 +66,28 @@ export default class TempAssignClientService {
           actionPerformed,
           module
         );
+    }
+    return res;
+  }
+  public static async getServicePrivateKey() {
+    var res: any = [];
+    var data = {};
+    const selectCredentialMasterList = await Database.from("credentialsMaster")
+      .select("*")
+      .where("Status", 1)
+      .andWhere("serviceUpdateSts", 0);
+    if (selectCredentialMasterList.length) {
+      selectCredentialMasterList.forEach((val) => {
+        data["host"] = val.Host;
+        data["privateKey"] = val.PrivateKey;
+        data["serviceUpdateSts"] = false;
+        res.push(data);
+      });
+    } else {
+      data["host"] = "";
+      data["privateKey"] = "";
+      data["serviceUpdateSts"] = true;
+      res.push(data);
     }
     return res;
   }

@@ -76,10 +76,10 @@ export default class loginService {
     const userpassword = data.userpassword;
     const countrycode = data.countrycode;
     const countrycodeid = data.countrycodeid;
-    const phoneno = data.phoneno;
+    const phoneno = (data.phoneno).toString();
     const appleAuthId = data.appleAuthId;
-    const platform = data.platform;
-    const app = data.app;
+    let platform = data.platform;
+    let app = data.app;    
     const skipOTP = data.skipOTP;
     const emailVerification = data.emailVerification;
 
@@ -88,7 +88,7 @@ export default class loginService {
     const orgid = 0;
     const result: any = {};
     const email = await Helper.encode5t(useremail);
-    const phone = await Helper.encode5t(phoneno);
+    const phone = await Helper.encode5t(phoneno); 
     const Password = await Helper.encode5t(userpassword);
     const res: any = {};
     let id = 0;
@@ -114,7 +114,7 @@ export default class loginService {
 
     const query2 = await Database.query()
       .from("Organization")
-      .where("PhoneNumber", phoneno);
+      .where("PhoneNumber", `${phoneno}`);   
     if (query2.length > 0) {
       res["status"] = "false2";
       return res;
@@ -141,9 +141,9 @@ export default class loginService {
 
     const query5 = await Database.query()
       .from("Organization")
-      .where("PhoneNumber", phoneno)
+      .where("PhoneNumber", `${phoneno}`)
       .andWhereNot("cleaned_up", 1)
-      .andWhereNot("delete_sts", "1");
+      .andWhereNot("delete_sts", "1"); 
     if (query5.length > 0) {
       res["status"] = "false2";
       return res;
@@ -151,12 +151,11 @@ export default class loginService {
 
     const query6 = await Database.query()
       .from("UserMaster")
-      .where("username_mobile", phone);
+      .where("username_mobile", `${phone}`);
     if (query6.length > 0) {
       res["status"] = "false2";
       return res;
     }
-
     const insertorgquery = await Database.table("Organization")
       .insert({
         Name: Org_Name,
@@ -171,38 +170,67 @@ export default class loginService {
       })
       .returning("Id");
 
-    if (insertorgquery.length > 0) {
       id = insertorgquery[0];
+
+    if (insertorgquery.length > 0) 
+    {
+        let otp  = insertorgquery[0];
+        let potp = strlen(otp);
+        let digits = potp;
+        if(skipOTP == 1){
+          otp='00000';
+        }else{
+            let tempotp = 0;//rand(pow(10, $digits-1), pow(10, $digits)-1);
+            otp  = otp.tempotp;        
+        }
+          
+        let updatequery = await Database.query().from('Organization').where('id',id).update({OTP:otp})
+
+       if(app == "ubiAttendance"){
+          app = "ubiAttendance";
+       }else{
+          app = "ubiSales";
+       }
+
+       let Body;
+       let Subject;
+       let logo;
+       let msessage;
+       let headers ='From: <noreply@ubiattendance.com>';
+
+       let mailquery = await Database.query().from('All_mailers').select('Subject','Body').where('Id',4);
+        
+       if(mailquery){
+
+        Body = mailquery[0].Body;
+        Subject = mailquery[0].Subject; 
+       }
+
+       let maillink ='<a href="http://ubiattendance.ubihrm.com/index.php/services/activateAccount?iuser="style="color: #FF7D33;">Verify your Account</a> ';
+
+       let mailbtnlink='<a href="http://ubiattendance.ubihrm.com/index.php/services/activateAccount?iuser" style="font-family: georgia, Arial, sans-serif;font-size: 15px;text-align: justify;color: rgb(255, 255, 255);text-decoration: none;background-color: rgb(37, 182, 153);border-color: rgb(248, 249, 250);padding: 15px;font-weight: 700 !important;">Verify your Account</a>';
+      //  unsubscribe_link
+
+       if(app == "ubiSales")
+       {
+        logo="<img src='https://ubiattendance.ubiattendance.xyz/assets/images/ubisales.png' style='width: 200px;' <p style='text-align: center; line-height:1; ><br></p><p class='MsoNormal' style='text-align: center; margin-bottom: 0.0001pt; line-height: 1;'><b><span style='font-size: 24px; font-family: &quot;Times New Roman&quot'>"
+       }else{
+        logo="<img src='https://ubiattendance.ubiattendance.xyz/assets/images/ubi-Atttendance-Logo_d0bec719579677da36f94f7d3caa2d07.png' style='width: 200px;' <p style='text-align: center; line-height:1; ><br></p><p class='MsoNormal' style='text-align: center; margin-bottom: 0.0001pt; line-height: 1;'><b><span style='font-size: 24px; font-family: &quot;Times New Roman&quot'>"
+       } 
+        
+        let body1 = Body.replace("{logo}",logo)
+        let body2 = body1.replace("{appname}",app);
+        let body3 = body2.replace("{appname}",app);
+        let body4 = body3.replace("{appname}",app);
+        let body5 = body4.replace("{contact_person_name}", username);
+        let body6 = body5.replace("{Verify your Account}",maillink);
+        let body7 = body6.replace("{Verify your Account}",mailbtnlink);
+
+        msessage = body7;
+      
+        await Helper.sendEmail(useremail,Subject,msessage,headers);
+
     }
-
-    // if(query7.length > 0)
-    // {
-    //    const id = query7[0].Id;
-    //    let otp = id.length;
-    //    if(skipOTP == '1'){
-    //        otp = '0000';
-    //    }else{
-    //     $tempotp = rand(pow(10, $digits-1), pow(10, $digits)-1);
-    //     $otp = $otp.$tempotp;
-    //    }
-    // }
-
-    // query8 = await Database.query().from('Organization').where('id',id).update({OTP:otp})
-
-    // Email functionality
-
-    //  const FetchOrg = await Database.query().from('Organization').select('*').where('Id',id);
-    //  if(FetchOrg.length > 0){
-    //     const Org_Name = FetchOrg[0].Name;
-    //     const Person_Name = FetchOrg[0].smtpuser;
-    //     const email = FetchOrg[0].Email;
-    //     const password = FetchOrg[0].smtppassword;
-    //     const country_code = FetchOrg[0].countrycode;
-    //     const phone = FetchOrg[0].PhoneNumber;
-    //     const country = FetchOrg[0].Country;
-    //     const platform = FetchOrg[0].platform;
-    //     const App = FetchOrg[0].app;
-    //  }
 
     const FetchZone = await Database.query()
       .from("ZoneMaster")
@@ -241,11 +269,54 @@ export default class loginService {
         mail_varified: emailVerification,
         fiscal_start: "1 April",
         fiscal_end: "31 March",
-      });
-    if (UpdateOrg) {
-      // Email functionality
+      });      
+      
+      if(UpdateOrg){
+       if(app == "ubiAttendance"){
+          app = "ubiAttendance";
+       }else{
+          app = "ubiSales";
+       }
 
-      const insert_adminlogin = await Database.table("admin_login").insert({
+       let Body;
+       let Subject;
+       let logo;
+       let msessage;
+       let headers ='From: <noreply@ubiattendance.com>';
+
+       let mailquery = await Database.query().from('All_mailers').select('Subject','Body').where('Id',4);
+        
+       if(mailquery){
+
+        Body = mailquery[0].Body;
+        Subject = mailquery[0].Subject; 
+       }
+
+       if(app == "ubiSales")
+       {
+
+        logo="<img src='https://ubiattendance.ubiattendance.xyz/assets/images/ubisales.png' style='width: 200px;' <p style='text-align: center; line-height:1; ><br></p><p class='MsoNormal' style='text-align: center; margin-bottom: 0.0001pt; line-height: 1;'><b><span style='font-size: 24px; font-family: &quot;Times New Roman&quot'>"
+       }else{
+        logo="<img src='https://ubiattendance.ubiattendance.xyz/assets/images/ubi-Atttendance-Logo_d0bec719579677da36f94f7d3caa2d07.png' style='width: 200px;' <p style='text-align: center; line-height:1; ><br></p><p class='MsoNormal' style='text-align: center; margin-bottom: 0.0001pt; line-height: 1;'><b><span style='font-size: 24px; font-family: &quot;Times New Roman&quot'>"
+       } 
+        
+        let body1 = Body.replace("{logo}",logo)
+        let body2 = body1.replace("{appname}",app);
+        let body3 = body2.replace("{appname}",app);
+        let body4 = body3.replace("{appname}",app);
+        let body5 = body4.replace("{appname}",app);
+        let body6 = body5.replace("{appname}",app);
+        let body7 = body6.replace("{employee_number}", phoneno);
+        let body8 = body7.replace("{employee_password}",userpassword);
+
+      msessage = body8;
+      
+      const takerep = await Helper.sendEmail(useremail,Subject,msessage,headers);
+   
+    
+        //////////write Zone 
+
+       const insert_adminlogin = await Database.table("admin_login").insert({
         username: username,
         password: userpassword,
         email: useremail,
@@ -284,8 +355,7 @@ export default class loginService {
       }
 
       let insert_licence = await Database.table("licence_ubiattendance")
-        .insert(column_value)
-        .toQuery();
+        .insert(column_value);
 
       let dept_array: any = {};
 
@@ -597,6 +667,8 @@ export default class loginService {
         });
       }
       result["sts"] = true;
+      result["phone"] = phoneno;
+      result["password"] = Password;
 
       return result;
     }
@@ -739,3 +811,7 @@ export default class loginService {
     return response;
   }
 }
+function strlen($otp: any) {
+  throw new Error("Function not implemented.");
+}
+

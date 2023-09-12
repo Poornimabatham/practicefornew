@@ -14,4 +14,8 @@ export default class TempAssignClientController {
     );
     return response.json(Output);
   }
+  public async credentialsMaster({request,response}:HttpContextContract){
+    const Output = await TempAssignClientService.getServicePrivateKey()
+    return response.json(Output)
+  }
 }

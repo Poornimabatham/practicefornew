@@ -38,16 +38,18 @@ export default class ShiftsService {
     });
     let data1: any = "";
     if (res == 1) {
-      let archive: number = a.archive;
-      keyValueArray[0].archive = archive;
+     // let archive: number = a.status;
+      // keyValueArray[0].archive = archive;
       conditionarr = keyValueArray[0];
       data1 = await Database.query()
         .from("ShiftMaster")
         .select("*")
         .where(conditionarr)
         .orderBy("Name");
+     
+        
       // console.log(data1.toSQL().toNative());
-      return data1;
+     // return data1;
     } else {
       const row = await Database.table("ShiftMaster").returning("id").insert({
         Name: "Trial Shift",
@@ -82,21 +84,21 @@ export default class ShiftsService {
           });
         }
 
-        let archive: number = a.archive;
-        keyValueArray[0].archive = archive;
+       // let archive: number = a.status;
+       // keyValueArray[0].archive = archive;
         conditionarr = keyValueArray[0];
         data1 = await Database.query()
           .from("ShiftMaster")
           .select("*")
           .where(conditionarr)
           .orderBy("Name");
-        return data1;
+       // return data1;
       }
     }
     return data1;
   }
 
-  static async createdata(data) {
+  static async addShift(data) {
     const name = data.name;
     const orgid = data.org_id;
     let ti = data.ti;
@@ -327,7 +329,7 @@ export default class ShiftsService {
     }
   }
 
-  static async deleteInActivateShift(data) {
+  static async deleteInActivateShift(data :any) {
     const orgid = data.orgId;
     const Id = data.id;
     const empId = data.empId;
@@ -702,7 +704,6 @@ export default class ShiftsService {
     data1['status']='';
     const deptquery:any = await Database.query().select('E.Id as EmployeeId' ).from('EmployeeMaster as E').innerJoin('DesignationMaster as D','E.Designation','D.Id').where('E.OrganizationId',orgid).andWhere('D.Id',desgid);
     const affected_rows=deptquery.length;
-    console.log();
     
     if(affected_rows > 0)
     {
