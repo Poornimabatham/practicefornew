@@ -7,7 +7,7 @@ export default class getAppDetailService {
     var data: getAppDetail = {
       appVersion: "0",
       updateStatus: "0",
-      checkMandUpdate: "0"
+      checkMandUpdate: "0"     
     }
 
     if (get.appName == "ubiSales") {

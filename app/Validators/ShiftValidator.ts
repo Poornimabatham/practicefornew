@@ -10,8 +10,8 @@ export default class ShiftValidator {
       OrganizationId: schema.number(),
       archive: schema.number.optional(),
       shifttype: schema.number.optional(),
-      currentpage: schema.number(),
-      perpage: schema.number(),
+      currentpage: schema.number.optional(),
+      perpage: schema.number.optional(),
     }),
     message: BaseValidator.messages,
   };
@@ -99,6 +99,18 @@ export default class ShiftValidator {
       id: schema.number(),
       orgid: schema.number(),
     }),
+  };
+  static AssignShiftsByDesignation = {
+    schema: schema.create({
+      orgid: schema.number(),
+      date: schema.date.optional({ format: 'yyyy-MM-dd HH:mm:ss' }),
+      status: schema.number.optional(),
+      shiftid: schema.number(),
+      desgid: schema.number(),
+      WeekoffStatus: schema.number(),
+      assignedbyid: schema.number(),
+    }),
+    message: BaseValidator.messages,
   };
   /*
    * Define schema to validate the "shape", "type", "formatting" and "integrity" of data.

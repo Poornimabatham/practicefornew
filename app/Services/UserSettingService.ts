@@ -5,6 +5,7 @@ import { DateTime } from "luxon";
 import moment from "moment-timezone";
 import databaseConfig from "Config/database";
 import { runFailedTests } from "@japa/preset-adonis";
+import LogicsOnly from "./getAttendances_service";
 
 export default class Usersettingservice {
   constructor() {}
@@ -620,7 +621,7 @@ export default class Usersettingservice {
           if (regsts == 3) {
             res["regularizeSts"] = "pending";
             let pstatus = 0;
-            let approverid = row.ApproverId;
+             let approverid = row.ApproverId;    
 
             if (approverid != 0) {
               pstatus = approverid;
@@ -630,16 +631,23 @@ export default class Usersettingservice {
             }
 
             if (pstatus == 0) {
-              const qur = await Database.query()
+              const qur1 = await Database.query()
                 .from("RegularizationApproval")
                 .select("ApproverId")
                 .where("attendanceId", attid)
                 .andWhere("ApproverSts", regsts)
                 .andWhere("approverregularsts", 0)
-                .orderBy("Id", "asc")
-                .limit(1);
-              pstatus = qur[0].ApproverId;
+                // .orderBy("Id", "asc")
+                .limit(1)
+                if(qur1.length > 0 ){
+                  pstatus = qur1[0].ApproverId ? qur1[0].ApproverId:0;
+                  
+                }
+            
+             
             }
+             
+        
 
             const Name = await Helper.getEmpName(pstatus);
 
@@ -725,10 +733,11 @@ export default class Usersettingservice {
     const newDate = moment(new Date(data.newDate)).format("YYYY-MM-DD");
     const Time = data.selectTime;
     const cardtitle = data.cardTitle;
+    let Subject = "";
     let result: any = {};
     let response: any[] = [];
     let currentDate = moment().format("YYYY-MM-DD");
-
+    let organizationName = '';
     const Adminmail = await Helper.getAdminEmail(orgid);
     const Adminname = await Helper.getAdminNamebyOrgId(orgid);
     const empmail = await Helper.getEmpEmail(empid);
@@ -738,6 +747,19 @@ export default class Usersettingservice {
     let contactNumber;
     let CreatedDate;
     let CountryId;
+    let message = '';
+    let body ='';
+    let  PhoneNumber = 0;
+    let countryname ="";
+    var headers = "MIME-Version: 1.0" + "\r\n";
+    headers = headers + "Content-type:text/html;charset=UTF-8" + "\r\n";
+    headers = headers + "From: <noreply@ubiattendance.com>" + "\r\n";
+
+    if(cardtitle == "payRoll"){
+      Subject = "Schedule Demo Request for PayRoll";
+    }else{
+      Subject = "Shedule Demo Request";
+    }
 
     if (newDate != "") {
       const demoquery = await Database.query()
@@ -765,12 +787,12 @@ export default class Usersettingservice {
           .where("Id", orgid);
 
         if (query.length > 0) {
-          const organizationName = query[0].Name;
-          const PhoneNumber = query[0].PhoneNumber;
+          organizationName = query[0].Name;
+          PhoneNumber = query[0].PhoneNumber;
           CreatedDate = query[0].CreatedDate;
           const Email = query[0].Email;
           CountryId = query[0].Country;
-          const countryname = await Helper.getCountryNameById(CountryId);
+          countryname = await Helper.getCountryNameById(CountryId);
           contactNumber = await Helper.encode5t(PhoneNumber);
           contactemail = await Helper.encode5t(Email);
         }
@@ -787,10 +809,38 @@ export default class Usersettingservice {
           CreateDate: currentDate,
           cardTitle: cardtitle,
         });
-        result["sts"] = true;
-        response.push(result);
-        if (demoInsert) {
-          //////Email functionality
+
+        if(demoInsert) {
+           const query = await Database.query().from('All_mailers').select('Body').where('Id',34);
+           body = query[0].Body;
+           let body1 = body.replace("{Admin_Name}",Adminname);
+           let body2 = body1.replace("{Date}",currentDate);
+           let body3 = body2.replace("{Time}",Time);
+           message = body3;
+           await Helper.sendEmail(empmail, Subject,message,headers);
+
+           const query2 = await Database.query().from('All_mailers').select('Body').where('Id',35);
+           let bodyy = query[0].Body;
+           let bodi1 = bodyy.replace("{Company_Name}",organizationName);
+           let bodi2 = bodi1.replace("{Contact_Person}",Emp_Name);
+           let bodi3 = bodi2.replace("{Email_Id}",empmail);
+           let bodi4 = bodi3.replace("{Phone}",PhoneNumber);
+           let bodi5 = bodi4.replace("{Registered_Date}",CreatedDate);
+           let bodi6 = bodi5.replace("{Country}",countryname);
+           let bodi7 = bodi6.replace("{Date}",currentDate);
+           let bodi8 = bodi7.replace("{Time}",Time);
+
+           let message1 = bodi8
+
+           await Helper.sendEmail("viveksingh@ubitechsolutions.com", Subject,message1,headers);
+           await Helper.sendEmail("ubiattendance@ubitechsolutions.com", Subject,message1,headers);
+           await Helper.sendEmail("business@ubitechsolutions.com", Subject,message1,headers);
+
+           result['sts'] = 1
+           result['date'] = currentDate;
+           result['time'] = Time;
+           response.push(result);
+               
         }
       }
     } else {
@@ -923,12 +973,13 @@ export default class Usersettingservice {
   }
 
   static async DeleteAccount(getparam) {
-    const text_area = getparam.reason;
+    // const text_area = getparam.reason
     const OrganizationId = getparam.refid;
     const UserId = getparam.uid;
     const currentdate = getparam.date;
 
     var result = {};
+
     var Mail = await Database.from("All_mailers")
       .select("Subject", "Body")
       .where("Id", 32);
@@ -957,46 +1008,73 @@ export default class Usersettingservice {
     var username;
     var orgname;
     var country;
-    if (emp) {
+    
+    if (emp) {      
       orgname = emp[0].Orgname;
       username = emp[0].Name;
-      empmail = Helper.decode5t(emp[0].email);
-      phone = Helper.decode5t(emp[0].PersonalNo);
+      empmail = await Helper.decode5t(emp[0].email);
+      phone = await Helper.decode5t(emp[0].PersonalNo);
       CreatedDate = emp[0].doc;
       CreatedDate = moment(CreatedDate).format("YYYY-MM-DD");
       if (CreatedDate == "0000-00-00") {
         CreatedDate = "N/A";
       }
-      country = Helper.getCountryNameById(emp[0].countrycode);
+      country = await Helper.getCountryNameById(emp[0].countrycode);
     }
-    var mlbody1 = mailbody.replace("{Company_Name}", orgname);
-    var mlbody2 = mlbody1.replace("{19/08/2022}", currentdate);
-    var mlbody3 = mlbody2.replace("{Contact_Person}", username);
-    var mlbody4 = mlbody3.replace("{adminmail}", empmail);
-    var mlbody5 = mlbody4.replace("{Created_date}", CreatedDate);
-    var mlbody6 = mlbody5.replace("{Country_name}", country);
-    var mlbody7 = mlbody6.replace("{12345}", phone);
+    else {
+      result["response"] = 0; // No user Found
+    }
 
-    var messages = mlbody7;
+    var mlbody1 = mailbody.replace("{Company_Name}", orgname); 
+    var mlbody2 = mlbody1.replace("{Company_Name}", orgname);
+    var mlbody3 = mlbody2.replace("{19/08/2022}",currentdate);
+    var mlbody4 = mlbody3.replace("{Contact_Person}", username);
+    var mlbody5 = mlbody4.replace("{adminmail}", empmail);
+    var mlbody6 = mlbody5.replace("{Created_date}", CreatedDate);
+    var mlbody7 = mlbody6.replace("{Country_name}", country);
+    var mlbody8 = mlbody7.replace("{12345}", phone);
+
+    var messages = mlbody8;
 
     var headers = "MIME-Version: 1.0" + "\r\n";
     headers = headers + "Content-type:text/html;charset=UTF-8" + "\r\n";
     headers = headers + "From: <noreply@ubiattendance.com>" + "\r\n";
-    
-    // var respons = sendEmail_new(
-    //   "attendancesupport@ubitechsolutions.com",
-    //   Subject,
-    //   messages,
-    //   headers
-    // );
 
-    // ////// UNCOMPLETE waiting for sendEmail_new() /////
+    var getrespons = await Helper.sendEmail(
+      "attendancesupport@ubitechsolutions.com",
+      Subject,
+      messages,
+      headers
+    );
 
-    // if (respons) {
-    //   result["status"] = "true";
-    // } else {
-    //   result["status"] = "false";
-    // }
-    // return result;
+    if (getrespons!=undefined) {
+      result["status"] = "true";    //Mail send succesfully
+    } else {
+      result["status"] = "false";    
+    }
+    return result;
   }
+   
+  static async getSetKioskPin(data)
+  {
+     
+    const orgId = data.orgId;
+    const Emplid = data.empId;
+    const result = {};
+
+    const query = await Database.query().from('UserMaster').select('kioskPin').where('EmployeeId',Emplid).andWhere('OrganizationId',orgId);
+
+    if(query.length > 0)
+    {
+       result['kioskPin'] = query[0].kioskPin;
+       if(result['kioskPin']=="")
+       {
+         result['cuperButton'] = 0;
+       }else{
+         result['cuperButton'] = 1;
+       }
+    }
+    return result
+  }
+
 }

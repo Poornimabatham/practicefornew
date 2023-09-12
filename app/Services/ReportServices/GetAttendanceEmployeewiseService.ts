@@ -5,24 +5,35 @@ import Helper from "App/Helper/Helper";
   
 export default class GetAttendanceEmployeewiseService{ 
  
-    public async getPresentList(reqdata:[]) {  
-         
+    public async getPresentList(reqdata:[]) { 
+        let csv=reqdata['csv'];
         const zone = await Helper.getTimeZone(reqdata['Orgid']);  
-        const currentDateTime = moment().tz(zone).format('YYYY-MM-DD');      
-          
+        const currentDateTime = moment().tz(zone).format('YYYY-MM-DD');         
         const date =  moment(new Date()).format('YYYY-MM-DD');   
         const edate = moment(new Date()).subtract(30, 'days').format('YYYY-MM-DD');//date('Y-m-d',-30);   
-        let query1:any =  await Database.query().  
+        let getPresentListQuery:any =   Database.query().  
         select('AttendanceDate','latit_in','longi_in','latit_out','longi_out','Id','TotalLoggedHours','AttendanceStatus','ShiftId','multitime_sts',Database.raw(`IF((SELECT Count(id) FROM InterimAttendances WHERE AttendanceMasterId=Id) > 0,'true','false') as  getInterimAttAvailableSts`),  
         Database.raw(`SUBSTR(TimeIn, 1, 5) as TimeIn,SUBSTR(TimeOut, 1, 5) as TimeOut,SUBSTR(checkInLoc, 1, 40) as checkInLoc,SUBSTR(CheckOutLoc, 1, 40) as CheckOutLoc,SUBSTRING_INDEX(EntryImage, '.com/', -1) as EntryImage, SUBSTRING_INDEX(ExitImage, '.com/', -1) as ExitImage`),Database.raw(`(Select shifttype from ShiftMaster where Id=ShiftId) as shiftType`)).from('AttendanceMaster').where('EmployeeId',reqdata['empid']).andWhere('OrganizationId',reqdata['Orgid']).andWhereBetween('AttendanceDate',[edate,date]).andWhere((query)=>{  
             query.where('AttendanceStatus', '1')  
             .orWhere('AttendanceStatus','3').orWhere('AttendanceStatus','4').orWhere('AttendanceStatus','5').orWhere('AttendanceStatus','8').orWhere('AttendanceStatus','10')  
-        })  
+        })
+
+        let totalRecords:any='';
+        
+        if (csv === 'No_Csv') {
+            const countResult = await getPresentListQuery.clone().count('* as totalRecords').first();
+            totalRecords = countResult.totalRecords;
+            getPresentListQuery = getPresentListQuery.limit(reqdata['perpage']).offset(reqdata['currentPage']);
+        }
+        getPresentListQuery= await getPresentListQuery.orderBy('AttendanceDate', 'desc') 
         const result:any=[]; 
-        if(query1.length > 0){ 
+        if(getPresentListQuery.length > 0){ 
               
-            const quer= await query1.forEach(row => {  
-                const data: any = {};  
+            const quer = await getPresentListQuery.forEach(row => {  
+                const data: any = {}; 
+                if (csv === 'No_Csv') {
+                    data['totalRecords']= totalRecords;
+                }
                 data['AttendanceDate'] =   moment(row.AttendanceDate).format('YYYY-MM-DD');    
                 data['AttendanceStatus'] =  row.AttendanceStatus;    
                 data['TimeIn'] =  row.TimeIn;  
@@ -55,8 +66,10 @@ export default class GetAttendanceEmployeewiseService{
                 data['Id']  =   row.Id;  
                 data['getInterimAttAvailableSts'] = row.getInterimAttAvailableSts; 
                 data['TotalLoggedHours']  =  row.TotalLoggedHours;  
+                //console.log(data);
                 result.push(data); 
             });  
+           
             return result; 
   
         }else{  
@@ -66,18 +79,30 @@ export default class GetAttendanceEmployeewiseService{
     }  
     public async getabsentList(reqdata:[]) {  
          
+        let csv=reqdata['csv'];
         const zone = await Helper.getTimeZone(reqdata['Orgid']);  
         const currentDateTime = moment().tz(zone).format('YYYY-MM-DD');      
-          
+       
         const date =  moment(new Date()).format('YYYY-MM-DD');   
         const edate = moment(new Date()).subtract(30, 'days').format('YYYY-MM-DD');//date('Y-m-d',-30);   
         let absentListquery:any =  await Database.query().  
-        select('AttendanceDate',Database.raw(`'-' as TimeIn,'-' as TimeOut`)).from('AttendanceMaster').where('EmployeeId',reqdata['empid']).andWhere('OrganizationId',reqdata['Orgid']).andWhereBetween('AttendanceDate',[edate,date]).andWhere((query)=>{ query.where('AttendanceStatus', '2').orWhere('AttendanceStatus','7') })  
+        select('AttendanceDate',Database.raw(`'-' as TimeIn,'-' as TimeOut`)).from('AttendanceMaster').where('EmployeeId',reqdata['empid']).andWhere('OrganizationId',reqdata['Orgid']).andWhereBetween('AttendanceDate',[edate,date]).andWhere((query)=>{ query.where('AttendanceStatus', '2').orWhere('AttendanceStatus','7') })
+
+        let totalRecords:number=0;
+        if (csv === 'No_Csv') {
+            const countResult = await absentListquery.clone().count('* as totalRecords').first();
+            totalRecords = countResult.totalRecords;
+            absentListquery = absentListquery.limit(reqdata['perpage']).offset(reqdata['currentPage']);
+        }
+        absentListquery = absentListquery.orderBy('AttendanceDate', 'desc');
         const result:any=[];   
         if(absentListquery.length > 0){ 
              
             const quer= await absentListquery.forEach(row => {  
                 const data: any = {};  
+                if (csv === 'No_Csv') {
+                    data['totalRecords']= totalRecords;
+                }
                 data['AttendanceDate'] =   moment(row.AttendanceDate).format('YYYY-MM-DD');    
                 data['TimeIn'] =  row.TimeIn;  
                 data['TimeOut'] =  row.TimeOut;  
@@ -91,23 +116,33 @@ export default class GetAttendanceEmployeewiseService{
   
     }  
     public async getlatecomingList(reqdata:[]) {  
-         
+        let csv=reqdata['csv'];
         const zone = await Helper.getTimeZone(reqdata['Orgid']);  
         const currentDateTime = moment().tz(zone).format('YYYY-MM-DD');      
-          
+       
         const date =  moment(new Date()).format('YYYY-MM-DD');   
         const edate = moment(new Date()).subtract(30, 'days').format('YYYY-MM-DD');//date('Y-m-d',-30);   
-        let query1:any =  await Database.query(). 
-        select('AttendanceDate','latit_in','longi_in','latit_out','longi_out','Id','TotalLoggedHours','ShiftId','multitime_sts',Database.raw(`IF((SELECT Count(id) FROM InterimAttendances WHERE AttendanceMasterId=Id) > 0,'true','false') as  getInterimAttAvailableSts`),  
+        let getLateComingQuery:any =  await Database.query(). 
+        select('AttendanceDate','AttendanceStatus','latit_in','longi_in','latit_out','longi_out','Id','TotalLoggedHours','ShiftId','multitime_sts',Database.raw(`IF((SELECT Count(id) FROM InterimAttendances WHERE AttendanceMasterId=Id) > 0,'true','false') as  getInterimAttAvailableSts`),  
         Database.raw(`SUBSTR(TimeIn, 1, 5) as TimeIn,SUBSTR(TimeOut, 1, 5) as TimeOut,SUBSTR(checkInLoc, 1, 40) as checkInLoc,SUBSTR(CheckOutLoc, 1, 40) as CheckOutLoc,SUBSTRING_INDEX(EntryImage, '.com/', -1) as EntryImage, SUBSTRING_INDEX(ExitImage, '.com/', -1) as ExitImage`)).from('AttendanceMaster').where('EmployeeId',reqdata['empid']).andWhere('OrganizationId',reqdata['Orgid']).andWhereBetween('AttendanceDate',[edate,date]) 
-        .andWhere(Database.raw(`SUBSTRING(time(TimeIn),1,5) > SUBSTRING((select (CASE WHEN (time(TimeInGrace)!='00:00:00') THEN time(TimeInGrace) ELSE time(TimeIn) END) from ShiftMaster where ShiftMaster.Id= shiftId),1,5)`)).whereIn('AttendanceStatus', [1, 4, 8]).andWhere(Database.raw(`'3' not in (Select shifttype from ShiftMaster where Id=ShiftId)`));  
+        .andWhere(Database.raw(`SUBSTRING(time(TimeIn),1,5) > SUBSTRING((select (CASE WHEN (time(TimeInGrace)!='00:00:00') THEN time(TimeInGrace) ELSE time(TimeIn) END) from ShiftMaster where ShiftMaster.Id= shiftId),1,5)`)).whereIn('AttendanceStatus', [1, 4, 8]).andWhere(Database.raw(`'3' not in (Select shifttype from ShiftMaster where Id=ShiftId)`))
+
+        let totalRecords:any='';
+        if (csv === 'No_Csv') {
+            const countResult = await getLateComingQuery.clone().count('* as totalRecords').first();
+            totalRecords = countResult.totalRecords;
+            getLateComingQuery = getLateComingQuery.limit(reqdata['perpage']).offset(reqdata['currentPage']);
+        }
+        getLateComingQuery= getLateComingQuery.orderBy('AttendanceDate', 'desc');
+        
         const result:any=[]; 
-        if(query1.length > 0){ 
+        if(getLateComingQuery.length > 0){ 
               
-            const quer= await query1.forEach( async row => {  
-                //console.log(row); 
-                 
+            for (const row of getLateComingQuery) {  
                 const data: any = {};  
+                if (csv === 'No_Csv') {
+                    data['totalRecords']= totalRecords;
+                }
                 data['AttendanceDate'] =   moment(row.AttendanceDate).format('YYYY-MM-DD');    
                 data['AttendanceStatus'] =  row.AttendanceStatus;    
                 data['TimeIn'] =  row.TimeIn;  
@@ -140,8 +175,10 @@ export default class GetAttendanceEmployeewiseService{
                 data['AttId']  =   row.Id;  
                 data['getInterimAttAvailableSts'] = row.getInterimAttAvailableSts; 
                 data['TotalLoggedHours']  =  row.TotalLoggedHours;  
+                //console.log(result);  
                 result.push(data); 
-            });  
+            }
+           
             return result; 
   
         }else{  
@@ -150,20 +187,21 @@ export default class GetAttendanceEmployeewiseService{
   
     } 
     public async getEarlyleavingsList(reqdata:[]) {  
-         
+        let csv=reqdata['csv'];
         const zone = await Helper.getTimeZone(reqdata['Orgid']);  
         const currentDateTime = moment().tz(zone).format('YYYY-MM-DD');      
         
         const date =  moment(new Date()).format('YYYY-MM-DD');   
         const edate = moment(new Date()).subtract(30, 'days').format('YYYY-MM-DD');//date('Y-m-d',-30);   
-        const getData = await Database.query().select('A.ShiftId', 'A.EmployeeId', 'A.AttendanceDate','S.TimeIn as SIn','S.TimeOut as Sout','S.shifttype as stype').from('AttendanceMaster as A')
+        let getEarlyLeavingListQuery:any = await Database.query().select('A.ShiftId', 'A.EmployeeId', 'A.AttendanceDate','S.TimeIn as SIn','S.TimeOut as Sout','S.shifttype as stype').from('AttendanceMaster as A')
         .innerJoin('ShiftMaster as S','S.Id','A.ShiftId') 
-        .where('A.EmployeeId', reqdata['empid']).whereBetween('A.AttendanceDate', [edate, date]).where('A.TimeIn', '!=', '00:00:00').where('A.TimeOut', '!=', '00:00:00').andWhereIn('A.AttendanceStatus',[1,3,4,5,8]).andWhere('S.OrganizationId',reqdata['Orgid']).andWhere('A.OrganizationId',reqdata['Orgid']).andWhere('S.shifttype','<>','3')
+        .where('A.EmployeeId', reqdata['empid']).whereBetween('A.AttendanceDate', [edate, date]).where('A.TimeIn', '!=', '00:00:00').where('A.TimeOut', '!=', '00:00:00').andWhereIn('A.AttendanceStatus',[1,3,4,5,8]).andWhere('S.OrganizationId',reqdata['Orgid']).andWhere('A.OrganizationId',reqdata['Orgid']).andWhere('S.shifttype','<>','3').orderBy('A.AttendanceDate', 'desc')
 
        
-        if(getData.length > 0){ 
+        if(getEarlyLeavingListQuery.length > 0){ 
             const result:any[] = [];
-            for (const row of getData) { 
+            for (const row of getEarlyLeavingListQuery) { 
+
                 let Empname =  await Helper.getempnameById(row.EmployeeId);  
                 const AttDate = moment(row.AttendanceDate).format('YYYY-MM-DD');  
                 var shiftout='';
@@ -176,8 +214,19 @@ export default class GetAttendanceEmployeewiseService{
                     let getDataEarlyleave:any =  await Database.query(). 
                     select('A.AttendanceDate','A.latit_in','A.longi_in','A.latit_out','A.longi_out','A.Id','A.TotalLoggedHours','A.ShiftId','A.multitime_sts',  
                     Database.raw(`SUBSTR(A.TimeIn, 1, 5) as TimeIn,SUBSTR(A.TimeOut, 1, 5) as TimeOut,SUBSTR(A.checkInLoc, 1, 40) as checkInLoc,SUBSTR(A.CheckOutLoc, 1, 40) as CheckOutLoc,SUBSTRING_INDEX(A.EntryImage, '.com/', -1) as EntryImage, SUBSTRING_INDEX(A.ExitImage, '.com/', -1) as ExitImage`)).from('AttendanceMaster as A').where('A.EmployeeId',reqdata['empid']).andWhere('A.OrganizationId',reqdata['Orgid']).andWhere('A.AttendanceDate',AttDate).andWhere(Database.raw(`(SUBSTRING(time(A.TimeOut),1,5)  < SUBSTRING((select (CASE WHEN (time(S.TimeOutGrace)!='00:00:00') THEN time(S.TimeOutGrace) ELSE time(TimeOut) END) from ShiftMaster as S where S.Id= shiftId and S.OrganizationId=A.OrganizationId),1,5))`));
+                    let totalRecords:number=0;
+                    if (csv === 'No_Csv') {
+                        const countResult = await getDataEarlyleave.clone().count('* as totalRecords').first();
+                        totalRecords = countResult.totalRecords;
+                        getDataEarlyleave = getDataEarlyleave.limit(reqdata['perpage']).offset(reqdata['currentPage']);
+                    }
+                    
+
                     if(getDataEarlyleave.length > 0 ){ 
                         const data: any = {}; 
+                        if (csv === 'No_Csv') {
+                            data['totalRecords']= totalRecords;
+                        }
                          const Emptimeout = getDataEarlyleave[0].TimeOut+":00"
                         const shiftout =   row.Sout;
                         const {hours, minutes, seconds} = Helper.calculateOvertime(Emptimeout,shiftout)
@@ -229,7 +278,5 @@ export default class GetAttendanceEmployeewiseService{
         }else{  
             return 0;  
         }  
-  
     } 
-  
 }  

@@ -1,7 +1,6 @@
-import Route from '@ioc:Adonis/Core/Route'
+import Route from "@ioc:Adonis/Core/Route";
 
 Route.group(() => {
-    Route.get('/fetchsummary','GetplannerController.getplannerwisesummary')
-
-  }).namespace('App/Controllers/Http/ReportController')
-  
+  Route.get("/fetchsummary", "GetPlannerController.getplannerwisesummary");
+  Route.get("/getRegSummary", "GetPlannerController.getRegSummary");
+}).namespace("App/Controllers/Http/ReportController");

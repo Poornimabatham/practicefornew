@@ -8,6 +8,7 @@ Route.patch("/assignDepartment", "DepartmentsController.assignDepartment");
 Route.get("/getDepartmentstatus", "DepartmentsController.GetDepartmentStatus").middleware('throttle:global');
 Route.get("/getDeptEmp", "DepartmentsController.getDeptEmp").middleware('throttle:global');
 
-
 Route.get('getEmpdataDepartmentWiseCount', "DepartmentsController.getEmpdataDepartmentWiseCount").middleware('throttle:global')
+
+Route.delete("deleteInActiveDepartment","DepartmentsController.deleteInActiveDepartment");  
 

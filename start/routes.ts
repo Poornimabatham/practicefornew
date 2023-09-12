@@ -61,6 +61,7 @@ import "../app/Routes/getProfileImageRoute"
 import "../app/Routes/GetWeekendsRoute";
 import "../app/Routes/GetunderovertimeRoute";
 import "../app/Routes/GeofenceRoute";
+import "../app/Routes/getOrignalAttendanceImg";
 
 
 import Route from '@ioc:Adonis/Core/Route'
@@ -79,3 +80,4 @@ Route.get('/sendMail', 'MailersController.sendEmail')
 // })
 
 import "../app/Routes/ApprovalRegularizationRoute";
+import "../app/Routes/AddonServiceRoute";

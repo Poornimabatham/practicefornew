@@ -34,9 +34,17 @@ export default class AttendanceValidator extends BaseValidator{
       datafor:schema.string(),
       currentPage: schema.number.optional(), 
       perPage: schema.number.optional(),
+      csv: schema.string.optional()
       
     })
     , message: BaseValidator.messages
+  }
+  public static AttendanceAct = {
+    schema:schema.create({
+      uid : schema.number(),
+      refno : schema.number(),
+      platform : schema.string()
+    })
   }
  
   /**

@@ -10,4 +10,11 @@ export default class StoreRatingController {
     const Output = await StoreRatingService.StoreRatings(Validationinput);
     return Output;
   }
+  public async getSelectedEmployeeShift({request,response}:HttpContextContract){
+    const Validationinput = await request.validate(
+      StoreRatingValidator.getSelectedEmployeeShiftScehma
+    );
+    const Output = await StoreRatingService.getSelectedEmployeeShift(Validationinput);
+    return Output;
+  }
 }
