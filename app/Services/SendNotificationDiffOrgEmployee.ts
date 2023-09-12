@@ -40,28 +40,30 @@ export default class SendNotificationDiffOrgEmployee {
                     await Database.from('PreventSignup').whereNot('Status', 0).whereRaw(`contact like '%${contact}%'`).where('OrganizationId', Orgid).update({ Status: 0 });
                 }
                 else {
+
                     await Database.table('PreventSignup').insert({
                         'EmployeeId': empid, 'contact': contact, 'OrganizationId': Orgid, 'OldOrgId': orgid, 'OldOrgName': orgName, 'Status': 0
                     })
                 }
-
-                var selectBodyQuery = await Database.from('All_mailers').select('Body', 'Subject').where('Id', 40);
-
-                if (selectBodyQuery.length > 0) {
-                    var body = selectBodyQuery[0].Body;
-                    var Subject = selectBodyQuery[0].Subject;
-                }
-
-                var Username = username + contact;
-                var body1 = body.replace('{Admin Name}', adminName);
-                var message_body = body1.replace('{Employee name(Number)}', Username, body1);
-                var headers = "MIME-Version: 1.0" + "\r\n";
-                headers = headers + "Content-type:text/html;charset=UTF-8" + "\r\n";
-                headers = headers + "From: <noreply@ubiattendance.com>" + "\r\n";
-                await Helper.sendEmail(adminEmail, Subject, message_body, headers)
-
             }
-            return result;
+            var selectBodyQuery = await Database.from('All_mailers').select('Body', 'Subject').where('Id', 40);
+
+            if (selectBodyQuery.length > 0) {
+                var body = selectBodyQuery[0].Body;
+                var Subject = selectBodyQuery[0].Subject;
+            }
+
+            var Username = username + contact;
+            var body1 = body.replace('{Admin Name}', adminName);
+            var message_body = body1.replace('{Employee name(Number)}', Username, body1);
+            var headers = "MIME-Version: 1.0" + "\r\n";
+            headers = headers + "Content-type:text/html;charset=UTF-8" + "\r\n";
+            headers = headers + "From: <noreply@ubiattendance.com>" + "\r\n";
+            await Helper.sendEmail(adminEmail, Subject, message_body, headers)
+
         }
+        return result;
+
+
     }
 }
