@@ -148,4 +148,10 @@ export default class UserSettingsController {
      response.json(res)
      
   }
+
+  public async checkuseremailforgoogle({ request, response }: HttpContextContract) {
+     const reqData = await request.validate(UserSettingValidator.checkuseremailforgoogle)
+     const serviceRes = await UserSettingService.checkuseremailforgoogle(reqData);
+     return response.json(serviceRes); 
+  }
 }
