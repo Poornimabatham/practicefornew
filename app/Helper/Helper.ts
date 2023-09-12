@@ -310,9 +310,11 @@ export default class Helper {
       .select("shiftid")
       .where("empid", empid)
       .andWhere("ShiftDate", ShiftDate);
-    if (getshiftid.length > 0) {
+     
+    if (getshiftid.length > 0) {      
       return getshiftid[0].shiftid;
-    } else {
+     } 
+    else {
       let getshiftid = await Database.from("ShiftMaster")
         .select("Id")
         .where(
@@ -321,10 +323,11 @@ export default class Helper {
             `(SELECT Shift FROM EmployeeMaster where id=${empid})`
           )
         );
-      if (getshiftid.length > 0) {
+      if (getshiftid.length > 0 && getshiftid[0].Id != undefined) {
         return getshiftid[0].Id;
       }
     }
+    return 0;
   }
 
   public static async getAddonPermission(orgid: number, addon: string) {
@@ -390,18 +393,18 @@ export default class Helper {
       .where("AttendanceDate", today)
       .whereNot("TimeIn", "00:00:00")
       .select("multitime_sts")
-      .first();
+      // .first()
+      if (attendanceRecord.length >0) {
 
-    if (attendanceRecord && attendanceRecord.multitime_sts) {
-      return attendanceRecord.multitime_sts;
-    } else {
+      return attendanceRecord[0].multitime_sts;
+      } else {        
       const shiftRecord = await ShiftMaster.query()
         .where("Id", shiftId)
-        .select("MultipletimeStatus")
-        .first();
-      if (shiftRecord && shiftRecord.MultipletimeStatus) {
-        return shiftRecord.MultipletimeStatus;
-      }
+        .select("MultipletimeStatus");
+      // .first();
+        if (shiftRecord.length > 0) {
+        return shiftRecord[0].MultipletimeStatus;
+      } 
     }
     return 0;
   }
@@ -1378,8 +1381,6 @@ export default class Helper {
 
     const axiosInstances: any = [];
 
-
-
     // function sendRequest(url, headers) {
     //   return new Promise(async (resolve, reject) => {
     //     try {
@@ -1490,6 +1491,51 @@ export default class Helper {
 
     // sendMultipleRequests();
   }
+  public static async getUbiatt_Ubihrmsts(orgid) {
+    const result = await Database.from("Organization")
+      .select("ubihrm_sts")
+      .where("Id", orgid);
+    if (result) {
+      return result[0].ubihrm_sts;
+    }
+    return 0;
+  }
+
+  public static async getAttImageStatus(orgid) {
+    const getAttnImageSts = await Database.from("admin_login")
+      .select("AttnImageStatus")
+      .where("OrganizationId", orgid);
+    if (getAttnImageSts) {
+      return getAttnImageSts[0].AttnImageStatus;
+    } else {
+      return 0;
+    }
+  }
+
+  public static async loctrackPermission(empId) {
+
+    const query = await Database.from('EmployeeMaster')
+      .select('livelocationtrack')
+      .where('Id', empId)
+
+    if (query) {
+      return query[0].livelocationtrack;
+    } else {
+      return 0;
+    }
+  }
+
+  public static async getDesignation(Id) {    
+    const query = await Database.from("DesignationMaster")
+      .select("Name")
+      .where("Id", Id);    
+    if (query.length > 0) {
+      return query[0].Name;
+    } else {
+      return 0;
+    }
+
+  }
 
   public static async getDepartment(id) {
     let Name = "";
@@ -1504,19 +1550,7 @@ export default class Helper {
       return Name;
     }
   }
-  public static async getDesignation(id) {
-    let Name = "";
-
-    const selectDesignationMasterId = await Database.from("DesignationMaster")
-      .select("name")
-      .where("id", id);
-    if (selectDesignationMasterId.length > 0) {
-      Name = selectDesignationMasterId[0].name;
-      return Name;
-    } else {
-      return Name;
-    }
-  }
+ 
 
   public static async getDeviceVerification_settingsts(orgid) {
     let data = 0;
@@ -1561,5 +1595,4 @@ export default class Helper {
     }
   }
 }
-
 

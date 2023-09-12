@@ -1,12 +1,10 @@
 import Database from "@ioc:Adonis/Lucid/Database";
 import helper from "../Helper/Helper";
 import Helper from "../Helper/Helper";
-import { DateTime } from "luxon";
 import moment from "moment-timezone";
-import databaseConfig from "Config/database";
-import { runFailedTests } from "@japa/preset-adonis";
-import LogicsOnly from "./getAttendances_service";
-
+import { lightFormat } from "date-fns";
+import { DateTime } from "luxon";
+import { LocalFileServer } from "@adonisjs/core/build/standalone";
 export default class Usersettingservice {
   constructor() {}
 
@@ -1008,8 +1006,8 @@ export default class Usersettingservice {
     var username;
     var orgname;
     var country;
-    
-    if (emp) {      
+
+    if (emp) {
       orgname = emp[0].Orgname;
       username = emp[0].Name;
       empmail = await Helper.decode5t(emp[0].email);
@@ -1020,14 +1018,13 @@ export default class Usersettingservice {
         CreatedDate = "N/A";
       }
       country = await Helper.getCountryNameById(emp[0].countrycode);
-    }
-    else {
+    } else {
       result["response"] = 0; // No user Found
     }
 
-    var mlbody1 = mailbody.replace("{Company_Name}", orgname); 
+    var mlbody1 = mailbody.replace("{Company_Name}", orgname);
     var mlbody2 = mlbody1.replace("{Company_Name}", orgname);
-    var mlbody3 = mlbody2.replace("{19/08/2022}",currentdate);
+    var mlbody3 = mlbody2.replace("{19/08/2022}", currentdate);
     var mlbody4 = mlbody3.replace("{Contact_Person}", username);
     var mlbody5 = mlbody4.replace("{adminmail}", empmail);
     var mlbody6 = mlbody5.replace("{Created_date}", CreatedDate);
@@ -1047,34 +1044,352 @@ export default class Usersettingservice {
       headers
     );
 
-    if (getrespons!=undefined) {
-      result["status"] = "true";    //Mail send succesfully
+    if (getrespons != undefined) {
+      result["status"] = "true"; //Mail send succesfully
     } else {
-      result["status"] = "false";    
+      result["status"] = "false";
     }
     return result;
   }
-   
-  static async getSetKioskPin(data)
-  {
-     
+
+  static async getSetKioskPin(data) {
     const orgId = data.orgId;
     const Emplid = data.empId;
     const result = {};
 
-    const query = await Database.query().from('UserMaster').select('kioskPin').where('EmployeeId',Emplid).andWhere('OrganizationId',orgId);
+    const query = await Database.query()
+      .from("UserMaster")
+      .select("kioskPin")
+      .where("EmployeeId", Emplid)
+      .andWhere("OrganizationId", orgId);
 
-    if(query.length > 0)
-    {
-       result['kioskPin'] = query[0].kioskPin;
-       if(result['kioskPin']=="")
-       {
-         result['cuperButton'] = 0;
-       }else{
-         result['cuperButton'] = 1;
-       }
+    if (query.length > 0) {
+      result["kioskPin"] = query[0].kioskPin;
+      if (result["kioskPin"] == "") {
+        result["cuperButton"] = 0;
+      } else {
+        result["cuperButton"] = 1;
+      }
     }
-    return result
+    return result;
   }
 
+  static async checkuseremailforgoogle(getparam) {
+    // var decodeemail = await Helper.decode5t("=AVVGdkVuhmSWxGZxMGRGVVYWp1RaRVSwIlVaxkYEpkWSNjQWZlMG9mVWFFeNZkVpRVMwlkVu50UWFDbPpVRWxWTHJ1RWtGZPFWMahFZEp0aVpnRYRFWGNlVxoEaVxGaYJmaGVVVB1TP")
+    // console.log(decodeemail);  //// for testing
+
+    var active = 1;
+    var date = moment().format("YYYY-MM-DD");
+    var org_perm = "1,2,3";
+    var email = getparam.useremail ? getparam.useremail : " ";
+    var result: any = [];
+    var data: any = [];
+    var data12: any = {};
+    var usermail = await Helper.encode5t(email);
+    var userName = usermail;
+    var ubihrm_sts;
+    var VisibleSts;
+    var archive;
+    var is_Del;
+
+    let checkquery = await Database.from("UserMaster")
+      .select("Username")
+      .where("Username", usermail)
+      .orWhere("AuthorizationAppleID", email);
+
+    if (checkquery.length > 0) {
+      let getPass = await Database.from("UserMaster")
+        .select("Password")
+        .where("Username", usermail)
+        .orWhere("AuthorizationAppleID", email);
+
+      if (getPass.length > 0) {
+        var Password = getPass[0].Password;
+        var selectQuery = await Database.from("UserMaster as U")
+          .innerJoin("EmployeeMaster as E", "U.EmployeeId", "E.Id")
+          .select("*")
+          .where("U.Username", userName)
+          .orWhere("U.username_mobile", userName)
+          .orWhere("U.AuthorizationAppleID", email)
+          .andWhere("U.Password", Password)
+          .andWhereNotIn("E.OrganizationId", [502, 1074]);
+
+        if (selectQuery.length > 0) {
+          archive = selectQuery[0].archive;
+          is_Del = selectQuery[0].Is_Delete;
+          let orgId = selectQuery[0].OrganizationId;
+          ubihrm_sts = await Helper.getUbiatt_Ubihrmsts(orgId);
+          VisibleSts = selectQuery[0].VisibleSts;
+
+          if (
+            ubihrm_sts == "1" &&
+            (archive == "0" ||
+              is_Del == "1" ||
+              is_Del == "2" ||
+              VisibleSts == "0")
+          ) {
+            data["response"] = 2;
+            return data;
+          }
+          if (archive == "0" || is_Del == "1" || is_Del == "2") {
+            data["response"] = 2;
+            return data;
+          }
+        }
+
+        var selectQuery2 = await Database.from("UserMaster as U")
+          .innerJoin("EmployeeMaster as E", "U.EmployeeId", "E.Id")
+          .select("E.archive as E_archive", "U.archive as U_archive")
+          .where("U.Username", userName)
+          .orWhere("U.username_mobile", userName)
+          .andWhere("U.Password", Password)
+          .andWhere("Is_Delete", 0)
+          .andWhereNotIn("E.OrganizationId", [502, 1074]);
+        // console.log(selectQuery2);
+
+        if (selectQuery2.length > 0) {
+          var E_archive = selectQuery2[0].E_archive;
+          var U_archive = selectQuery2[0].U_archive;
+
+          if (E_archive == 1 && U_archive == 0) {
+            var updateQuery = await Database.from("UserMaster as U")
+              .innerJoin("EmployeeMaster as E", "U.EmployeeId", "E.ID")
+              .where("U.Username", userName)
+              .orWhere("U.username_mobile", userName)
+              .andWhere("U.Password", Password)
+              .andWhere("E.Is_Delete", 0)
+              .andWhereNotIn("E.OrganizationId", [502, 1074])
+              .update("U.archive", 1);
+          }
+        }
+
+        var query = await Database.from("UserMaster as U")
+          .innerJoin("EmployeeMaster as E", "U.EmployeeId", "E.Id")
+          .select("*")
+          .where("U.Username", userName)
+          .orWhere("U.username_mobile", userName)
+          .orWhere("AuthorizationAppleID", email)
+          .andWhere("U.Password", Password)
+          .andWhere("U.archive", 1)
+          .andWhere("E.archive", 1)
+          .andWhere("E.Is_Delete", 0)
+          .andWhereNotIn("E.OrganizationId", [502, 1074]);
+
+        if (query.length > 0) {
+          
+
+          await Promise.all(
+            query.map(async (row) => {
+              data12["response"] = 1;
+              data12["fname"] = row.FirstName;
+              data12["lname"] = row.LastName;
+              data12["empid"] = row.EmployeeId;
+              data12["areaIds"] = " ";
+              data12["attSelfie"] = row.Selfie;
+              data12["qrkioskPin"] = row.kioskPin;
+              data12["geofencerestriction"] = row.fencearea;
+              data12["attImage"] = await Helper.getAttImageStatus(
+                row.OrganizationId
+              );
+              data12["timeZoneCountry"] = await Helper.getEmpTimeZone(
+                data12["empid"],
+                row.OrganizationId
+              );
+
+              if (row.area_assigned != 0) {
+                const forGeoSetting = await Database.from("Geo_Settings")
+                  .select(
+                    Database.raw(
+                      "CONCAT('[', GROUP_CONCAT(JSON_OBJECT('lat', SUBSTRING_INDEX(Lat_Long, ',', 1), 'long', SUBSTRING_INDEX(Lat_Long, ',', -1), 'radius', Radius, 'Id', Id)), ']') as json"
+                    )
+                  )
+                  .whereRaw(
+                    `Id IN (${row.area_assigned}) AND OrganizationId = ? AND Lat_Long != ''`,
+                    [row.OrganizationId]
+                  );
+                if (forGeoSetting.length > 0) {
+                  data12["areaIds"] = forGeoSetting[0].json;
+                }
+              } else {
+                data12["areaIds"] = [];
+              }
+              data12["polyField"] = " ";
+
+              if (row.area_assigned != 0) {
+                var Id_data: any = [];
+                var getgefenseData = await Database.from(
+                  "geofence_polygon_master"
+                )
+                  .select("Id", "geo_masterId", "latit_in", "longi_in")
+                  .whereIn("geo_masterId", [row.area_assigned]);
+
+                getgefenseData.forEach((row2) => {
+                  // var data2 = {};
+                  data12["Id"] = row2.Id;
+                  data12["geo_masterId"] = row2.geo_masterId;
+                  data12["long"] = row2.long;
+                  data12["lat"] = row2.lat;
+                  Id_data.push(data12);
+                });
+                data12["polyField"] = await Helper.encode5t(Id_data);
+              } else {
+                data12["polyField"] = "[]";
+              }
+              let shiftId = await Helper.getassignedShiftTimes(
+                row.EmployeeId,
+                date
+              );
+              let shiftType = await Helper.getShiftType(shiftId);
+              let MultipletimeStatus = await Helper.getShiftMultipleTimeStatus(
+                row.EmployeeId,
+                date,
+                shiftId
+              );
+
+              data12["MultipletimeStatus"] = MultipletimeStatus;
+              data12["usrpwd"] = await Helper.decode5t(row.Password);
+              data12["shiftType"] = shiftType;
+              data12["timezone"] = await Helper.getTimeZone(row.timezone);
+              data12["deviceverificationaddon"] =
+                await Helper.getAddonPermission(
+                  row.OrganizationId,
+                  "Addon_DeviceVerification"
+                );
+              data12["deviceVerification_setting"] =
+                await Helper.getDeviceVerification_settingsts(
+                  row.OrganizationId
+                );
+              data12["addon_livelocationtracking"] =
+                await Helper.getAddonPermission(
+                  row.OrganizationId,
+                  "Addon_livelocationtracking"
+                );
+              data12["addonGeoFence"] = await Helper.getAddonPermission(
+                row.OrganizationId,
+                "Addon_GeoFence"
+              );
+              data12["addonQrAttendance	"] = await Helper.getAddonPermission(
+                row.OrganizationId,
+                "Addon_QrAttendance	"
+              );
+              data12["TrackLocationEnabled"] = row.livelocationtrack;
+              data12["persistedface"] = "0";
+
+              var queryselect = await Database.from("Persisted_Face")
+                .select("PersistedFaceId")
+                .where("EmployeeId", row.EmployeeId);
+
+              if (queryselect.length > 0) {
+                data12["persistedface"] = queryselect[0].PersistedFaceId;
+              }
+              data12["device"] = row.Device_Restriction;
+              data12["deviceandroidid"] = row.deviceandroidid;
+              data12["status"] = row.status;
+              data12["orgid"] = row.OrganizationId;
+              data12["sstatus"] = row.appSuperviserSts;
+              data12["org_perm"] = org_perm;
+              data12["imgstatus"] = 1;
+
+              var selectimg = await Database.from("admin_login")
+                .select("AttnImageStatus")
+                .where("OrganizationId", row.OrganizationId)
+                .andWhere("status", 1)
+                .limit(1);
+              if (selectimg.length > 0) {
+                data12["imgstatus"] = row.AttnImageStatus;
+              }
+
+              var selectdetails = await Database.from("Organization")
+                .select("Name", "Email", "Country", "app")
+                .where("Id", data12["orgid"]);
+
+              if (selectdetails.length > 0)
+                if (selectdetails[0].Name.length > 16)
+                  data12["org_name"] =
+                    selectdetails[0].Name.slice(0, 16) + "..";
+                else data12["org_name"] = selectdetails[0].Name;
+
+              data12["orgmail"] = selectdetails[0].Email;
+              data12["orgcountry"] = selectdetails[0].Country;
+
+              if (selectdetails[0].app == "PayPak") {
+                data12["PaypakApp"] = selectdetails[0].app;
+
+                if (data12["PaypakApp"] != "PayPak") {
+                  data12["response"] = 0;
+                }
+              }
+
+              const query333 = await Database.from("licence_ubiattendance")
+                .select("status", "end_date")
+                .where("OrganizationId", data12["orgid"])
+                .orderBy("Id", "desc")
+                .limit(1);
+
+              if (query333.length > 0) {
+                data12["trialstatus"] = query333[0].status;
+                let endDate = query333[0].end_date;
+                let enddate2 = moment(endDate).format("YYYY-MM-DD");
+                if (enddate2 < date) {
+                  data12["trialstatus"] = 2;
+                }
+                data12["buysts"] = query333[0].status;
+              }
+              let desgname: any = await Helper.getDesignation(row.Designation);
+
+              if (desgname.length > 16)
+                data12["designation"] = desgname.slice(0, 16) + "...";
+              else
+                data12["designation"] = await Helper.getDesignation(
+                  row.Designation
+                );
+
+              data12["desinationId"] = row.Designation;
+              if (row.ImageName != "") {
+                let dir =
+                  "public/uploads/" +
+                  row.OrganizationId +
+                  "../.." +
+                  row.ImageName;
+                data12["profile"] = "https://ubitech.ubihrm.com/" + dir;
+              } else {
+                data12["profile"] =
+                  "http://ubiattendance.ubihrm.com/assets/img/avatar.png";
+              }
+              data.push(data12);
+            })
+          );
+
+          let selectqueryall = await Database.from("PlayStore").select("*");
+          if (selectqueryall.length > 0) {
+            selectqueryall.forEach((row3) => {
+              if (selectQuery[0].device == "Android")
+                data12["store"] = row3.googlepath;
+              else if (selectQuery[0].device == "iOS")
+                data12["store"] = row3.applepath;
+              else data12["store"] = "https://ubiattendance.ubihrm.com";
+            });
+          }
+        } else {          
+          data12["response"] = 0;
+          data.push(data12);
+        }
+        result.push(data);
+      }
+    } else {
+      let querytocheckmail = await Database.from("Organization")
+        .select("*")
+        .where("Email", email)
+        .andWhereNot("cleaned_up", 1)
+        .andWhereNot("delete_sts", 1)
+        .andWhereNot("delete_sts", 2);
+      if (querytocheckmail.length > 0) {
+        data12["response"] = 3; // E-mail duplicacy occurs
+      } else {
+        data12["response"] = 4; // E-mail Not exist 
+      }
+      result.push(data12)
+    }
+    return result;
+  }
 }
