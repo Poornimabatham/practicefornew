@@ -292,7 +292,7 @@ export default class ResetPasswordLinkService {
         var headers = "MIME-Version: 1.0" + "\r\n";
         headers = headers + "Content-type:text/html;charset=UTF-8" + "\r\n";
         headers = headers + "From: <noreply@ubiattendance.com>" + "\r\n";
-
+      
         // AdminEmail = "pbatham21@gmail.com";       ////for testing
         // console.log(AdminEmail);
 
