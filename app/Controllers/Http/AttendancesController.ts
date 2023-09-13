@@ -20,5 +20,14 @@ public async AttendanceAct({request,response}:HttpContextContract){
     const res = await DailyAttendanceService.AttendanceAct(req)
     return response.json(res);
 }
+
+ public async saveImageGrpAttFace({request,response}:HttpContextContract){
+
+        // await request.validate(AttendanceValidator.saveImageGrpAttFace)
+
+         await SaveImageGrpAttFace.SaveImageGrpAttFace(request.all());
+
+
+    }
   
 }
