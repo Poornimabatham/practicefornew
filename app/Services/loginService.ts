@@ -5,19 +5,21 @@ import moment from "moment";
 // import Helper from "App/Helper/Helper";
 
 export default class loginService {
-  public static async checkLogin(getData,token) {
+  public static async checkLogin(getData, token) {
     let data: any = [{}];
-
-    let active: number = 1;
     let userName: string = "";
     let password: string = "";
     let Org_perm: string = "1,2,3";
     let datetime = DateTime.local();
     let date = datetime.toFormat("yyyy-MM-dd");
-
     let device = getData.device;
     let qr = getData.qr;
-   
+    let mailverified: String = "";
+    let ubiHrm_Sts: String = "";
+    let visibleSts: String = "";
+    let archive: string = "";
+    let dataarray: any[] = [];
+
     if (qr == "true") {
       userName = await Helper.encode5t(getData.userName);
       password = getData.password;
@@ -25,22 +27,20 @@ export default class loginService {
       userName = await Helper.encode5t(getData.userName);
       password = await Helper.encode5t(getData.password);
     }
-    // let mail_varified = "";
+
     let userName1 = getData.userName.trim().toLowerCase();
     let password1 = getData.password;
-    // let ubiHrm_Sts = "";
-    //let visibleSts = "";
     let getVarifiedMail: any = await Database.from("OrganizationTemp")
       .orWhereRaw("(Email = ? or phoneNumber = ?)", [userName, userName1])
       .where("password", password1);
     if (getVarifiedMail.length > 0) {
-      let mailverified = getVarifiedMail.mail_varified;
-      if (mailverified == 0) {
+      mailverified = getVarifiedMail.mail_varified;
+      if (mailverified == "0") {
         data[0].mailStatus = 1;
         return data;
       }
     }
-    let archive: string = "";
+
     let loginQuery: any = await Database.from("UserMaster as U")
       .innerJoin("EmployeeMaster as E", "E.Id", "U.EmployeeId")
       .orWhereRaw("(Username = ? or username_mobile = ?)", [userName, userName])
@@ -54,16 +54,18 @@ export default class loginService {
       );
     if (loginQuery.length > 0) {
       archive = loginQuery.archive;
-      let is_Delete = loginQuery.Is_Delete;
-      let ubihrm_sts = 1; //getUbiatt_Ubihrmsts(loginQuery.OrganizationId);
-      let VisibleSts = loginQuery.VisibleSts;
+      let is_Delete = loginQuery[0].Is_Delete;
+      ubiHrm_Sts = await Helper.getUbiatt_Ubihrmsts(
+        loginQuery[0].OrganizationId
+      );
+      visibleSts = loginQuery[0].VisibleSts;
 
       if (
-        ubihrm_sts == 1 &&
+        ubiHrm_Sts == "1" &&
         (archive == "0" ||
           is_Delete == "1" ||
           is_Delete == "2" ||
-          VisibleSts == "0")
+          visibleSts == "0")
       ) {
         data[0].response = "2";
 
@@ -93,15 +95,13 @@ export default class loginService {
       )
       .select("*");
 
-    // let arrayofareaIds = [];
-    let dataarray: any[] = [];
     if (checkloginquery.length > 0) {
       data[0].response = 1;
       data[0].fname = await Helper.ucfirst(checkloginquery[0].FirstName);
       data[0].lname = await Helper.ucfirst(checkloginquery[0].LastName);
       data[0].empid = checkloginquery[0].EmployeeId;
       data[0].geofencerestriction = checkloginquery[0].fencearea;
-      data[0].token=token.token;
+      data[0].token = token.token;
       data[0].attImage = await Helper.getAttImageStatus(
         checkloginquery[0].OrganizationId
       );
@@ -135,7 +135,7 @@ export default class loginService {
       } else {
         data[0].areaIds = "[]";
       }
-      data[0].polyField = "";
+      data[0].polyField = [];
 
       if (checkloginquery[0].area_assigned != 0) {
         let getIdData: any[] = [];
@@ -143,18 +143,19 @@ export default class loginService {
           .whereIn("geo_masterId", [`${checkloginquery[0].area_assigned}`])
           .select("Id", "geo_masterId", "latit_in", "longi_in");
 
-        Promise.all(
-          getIdDataquery.map((queryData) => {
-            let singleDataArray: any = [];
-            singleDataArray["Id"] = queryData.Id;
-            singleDataArray["geo_masterId"] = queryData.geo_masterId;
-            singleDataArray["lat"] = queryData.latit_in;
-            singleDataArray["long"] = queryData.longi_in;
-            getIdData.push(singleDataArray);
-          })
-        );
-        // dataarray.push(getIdData);
-        data[0].polyField = JSON.stringify(dataarray);
+        getIdDataquery.forEach((queryData) => {
+          let singleDataArray: any = {};
+          singleDataArray.Id = queryData.Id;
+          singleDataArray.geo_masterId = queryData.geo_masterId;
+          singleDataArray.lat = queryData.latit_in;
+          singleDataArray.long = queryData.longi_in;
+          getIdData.push(singleDataArray);
+        });
+
+        dataarray.push(getIdData);
+        // dataarray.push(getIdData)
+
+        data[0].polyField = JSON.stringify(getIdData);
 
         let shiftId = await Helper.getassignedShiftTimes(
           checkloginquery[0].EmployeeId,
@@ -211,7 +212,7 @@ export default class loginService {
           .where("EmployeeId", checkloginquery[0].EmployeeId)
           .select("PersistedFaceId");
         if (getPersistedFaceId.length > 0) {
-          data[0].persistedface = getPersistedFaceId.PersistedFaceId;
+          data[0].persistedface = getPersistedFaceId[0].PersistedFaceId;
         }
         data[0].device = checkloginquery[0].Device_Restriction;
         data[0].deviceandroidid = checkloginquery[0].DeviceId;
@@ -315,12 +316,6 @@ export default class loginService {
           }
         }
       }
-      console.log(password);
-      console.log(userName);
-
-     // const token = await auth.attempt(userName, password)
-      //console.log(token);
-      
     } else {
       data[0].response = 0;
     }
@@ -378,10 +373,10 @@ export default class loginService {
     const userpassword = data.userpassword;
     const countrycode = data.countrycode;
     const countrycodeid = data.countrycodeid;
-    const phoneno = (data.phoneno).toString();
+    const phoneno = data.phoneno.toString();
     const appleAuthId = data.appleAuthId;
     let platform = data.platform;
-    let app = data.app;    
+    let app = data.app;
     const skipOTP = data.skipOTP;
     const emailVerification = data.emailVerification;
 
@@ -390,7 +385,7 @@ export default class loginService {
     const orgid = 0;
     const result: any = {};
     const email = await Helper.encode5t(useremail);
-    const phone = await Helper.encode5t(phoneno); 
+    const phone = await Helper.encode5t(phoneno);
     const Password = await Helper.encode5t(userpassword);
     const res: any = {};
     let id = 0;
@@ -416,7 +411,7 @@ export default class loginService {
 
     const query2 = await Database.query()
       .from("Organization")
-      .where("PhoneNumber", `${phoneno}`);   
+      .where("PhoneNumber", `${phoneno}`);
     if (query2.length > 0) {
       res["status"] = "false2";
       return res;
@@ -445,7 +440,7 @@ export default class loginService {
       .from("Organization")
       .where("PhoneNumber", `${phoneno}`)
       .andWhereNot("cleaned_up", 1)
-      .andWhereNot("delete_sts", "1"); 
+      .andWhereNot("delete_sts", "1");
     if (query5.length > 0) {
       res["status"] = "false2";
       return res;
@@ -472,66 +467,72 @@ export default class loginService {
       })
       .returning("Id");
 
-      id = insertorgquery[0];
+    id = insertorgquery[0];
 
-    if (insertorgquery.length > 0) 
-    {
-        let otp  = insertorgquery[0];
-        let potp = strlen(otp);
-        let digits = potp;
-        if(skipOTP == 1){
-          otp='00000';
-        }else{
-            let tempotp = 0;//rand(pow(10, $digits-1), pow(10, $digits)-1);
-            otp  = otp.tempotp;        
-        }
-          
-        let updatequery = await Database.query().from('Organization').where('id',id).update({OTP:otp})
+    if (insertorgquery.length > 0) {
+      let otp = insertorgquery[0];
+      let potp = strlen(otp);
+      let digits = potp;
+      if (skipOTP == 1) {
+        otp = "00000";
+      } else {
+        let tempotp = 0; //rand(pow(10, $digits-1), pow(10, $digits)-1);
+        otp = otp.tempotp;
+      }
 
-       if(app == "ubiAttendance"){
-          app = "ubiAttendance";
-       }else{
-          app = "ubiSales";
-       }
+      let updatequery = await Database.query()
+        .from("Organization")
+        .where("id", id)
+        .update({ OTP: otp });
 
-       let Body;
-       let Subject;
-       let logo;
-       let msessage;
-       let headers ='From: <noreply@ubiattendance.com>';
+      if (app == "ubiAttendance") {
+        app = "ubiAttendance";
+      } else {
+        app = "ubiSales";
+      }
 
-       let mailquery = await Database.query().from('All_mailers').select('Subject','Body').where('Id',4);
-        
-       if(mailquery){
+      let Body;
+      let Subject;
+      let logo;
+      let msessage;
+      let headers = "From: <noreply@ubiattendance.com>";
 
+      let mailquery = await Database.query()
+        .from("All_mailers")
+        .select("Subject", "Body")
+        .where("Id", 4);
+
+      if (mailquery) {
         Body = mailquery[0].Body;
-        Subject = mailquery[0].Subject; 
-       }
+        Subject = mailquery[0].Subject;
+      }
 
-       let maillink ='<a href="http://ubiattendance.ubihrm.com/index.php/services/activateAccount?iuser="style="color: #FF7D33;">Verify your Account</a> ';
+      let maillink =
+        '<a href="http://ubiattendance.ubihrm.com/index.php/services/activateAccount?iuser="style="color: #FF7D33;">Verify your Account</a> ';
 
-       let mailbtnlink='<a href="http://ubiattendance.ubihrm.com/index.php/services/activateAccount?iuser" style="font-family: georgia, Arial, sans-serif;font-size: 15px;text-align: justify;color: rgb(255, 255, 255);text-decoration: none;background-color: rgb(37, 182, 153);border-color: rgb(248, 249, 250);padding: 15px;font-weight: 700 !important;">Verify your Account</a>';
+      let mailbtnlink =
+        '<a href="http://ubiattendance.ubihrm.com/index.php/services/activateAccount?iuser" style="font-family: georgia, Arial, sans-serif;font-size: 15px;text-align: justify;color: rgb(255, 255, 255);text-decoration: none;background-color: rgb(37, 182, 153);border-color: rgb(248, 249, 250);padding: 15px;font-weight: 700 !important;">Verify your Account</a>';
       //  unsubscribe_link
 
-       if(app == "ubiSales")
-       {
-        logo="<img src='https://ubiattendance.ubiattendance.xyz/assets/images/ubisales.png' style='width: 200px;' <p style='text-align: center; line-height:1; ><br></p><p class='MsoNormal' style='text-align: center; margin-bottom: 0.0001pt; line-height: 1;'><b><span style='font-size: 24px; font-family: &quot;Times New Roman&quot'>"
-       }else{
-        logo="<img src='https://ubiattendance.ubiattendance.xyz/assets/images/ubi-Atttendance-Logo_d0bec719579677da36f94f7d3caa2d07.png' style='width: 200px;' <p style='text-align: center; line-height:1; ><br></p><p class='MsoNormal' style='text-align: center; margin-bottom: 0.0001pt; line-height: 1;'><b><span style='font-size: 24px; font-family: &quot;Times New Roman&quot'>"
-       } 
-        
-        let body1 = Body.replace("{logo}",logo)
-        let body2 = body1.replace("{appname}",app);
-        let body3 = body2.replace("{appname}",app);
-        let body4 = body3.replace("{appname}",app);
-        let body5 = body4.replace("{contact_person_name}", username);
-        let body6 = body5.replace("{Verify your Account}",maillink);
-        let body7 = body6.replace("{Verify your Account}",mailbtnlink);
+      if (app == "ubiSales") {
+        logo =
+          "<img src='https://ubiattendance.ubiattendance.xyz/assets/images/ubisales.png' style='width: 200px;' <p style='text-align: center; line-height:1; ><br></p><p class='MsoNormal' style='text-align: center; margin-bottom: 0.0001pt; line-height: 1;'><b><span style='font-size: 24px; font-family: &quot;Times New Roman&quot'>";
+      } else {
+        logo =
+          "<img src='https://ubiattendance.ubiattendance.xyz/assets/images/ubi-Atttendance-Logo_d0bec719579677da36f94f7d3caa2d07.png' style='width: 200px;' <p style='text-align: center; line-height:1; ><br></p><p class='MsoNormal' style='text-align: center; margin-bottom: 0.0001pt; line-height: 1;'><b><span style='font-size: 24px; font-family: &quot;Times New Roman&quot'>";
+      }
 
-        msessage = body7;
-      
-        await Helper.sendEmail(useremail,Subject,msessage,headers);
+      let body1 = Body.replace("{logo}", logo);
+      let body2 = body1.replace("{appname}", app);
+      let body3 = body2.replace("{appname}", app);
+      let body4 = body3.replace("{appname}", app);
+      let body5 = body4.replace("{contact_person_name}", username);
+      let body6 = body5.replace("{Verify your Account}", maillink);
+      let body7 = body6.replace("{Verify your Account}", mailbtnlink);
 
+      msessage = body7;
+
+      await Helper.sendEmail(useremail, Subject, msessage, headers);
     }
 
     const FetchZone = await Database.query()
@@ -571,54 +572,60 @@ export default class loginService {
         mail_varified: emailVerification,
         fiscal_start: "1 April",
         fiscal_end: "31 March",
-      });      
-      
-      if(UpdateOrg){
-       if(app == "ubiAttendance"){
-          app = "ubiAttendance";
-       }else{
-          app = "ubiSales";
-       }
+      });
 
-       let Body;
-       let Subject;
-       let logo;
-       let msessage;
-       let headers ='From: <noreply@ubiattendance.com>';
+    if (UpdateOrg) {
+      if (app == "ubiAttendance") {
+        app = "ubiAttendance";
+      } else {
+        app = "ubiSales";
+      }
 
-       let mailquery = await Database.query().from('All_mailers').select('Subject','Body').where('Id',4);
-        
-       if(mailquery){
+      let Body;
+      let Subject;
+      let logo;
+      let msessage;
+      let headers = "From: <noreply@ubiattendance.com>";
 
+      let mailquery = await Database.query()
+        .from("All_mailers")
+        .select("Subject", "Body")
+        .where("Id", 4);
+
+      if (mailquery) {
         Body = mailquery[0].Body;
-        Subject = mailquery[0].Subject; 
-       }
+        Subject = mailquery[0].Subject;
+      }
 
-       if(app == "ubiSales")
-       {
+      if (app == "ubiSales") {
+        logo =
+          "<img src='https://ubiattendance.ubiattendance.xyz/assets/images/ubisales.png' style='width: 200px;' <p style='text-align: center; line-height:1; ><br></p><p class='MsoNormal' style='text-align: center; margin-bottom: 0.0001pt; line-height: 1;'><b><span style='font-size: 24px; font-family: &quot;Times New Roman&quot'>";
+      } else {
+        logo =
+          "<img src='https://ubiattendance.ubiattendance.xyz/assets/images/ubi-Atttendance-Logo_d0bec719579677da36f94f7d3caa2d07.png' style='width: 200px;' <p style='text-align: center; line-height:1; ><br></p><p class='MsoNormal' style='text-align: center; margin-bottom: 0.0001pt; line-height: 1;'><b><span style='font-size: 24px; font-family: &quot;Times New Roman&quot'>";
+      }
 
-        logo="<img src='https://ubiattendance.ubiattendance.xyz/assets/images/ubisales.png' style='width: 200px;' <p style='text-align: center; line-height:1; ><br></p><p class='MsoNormal' style='text-align: center; margin-bottom: 0.0001pt; line-height: 1;'><b><span style='font-size: 24px; font-family: &quot;Times New Roman&quot'>"
-       }else{
-        logo="<img src='https://ubiattendance.ubiattendance.xyz/assets/images/ubi-Atttendance-Logo_d0bec719579677da36f94f7d3caa2d07.png' style='width: 200px;' <p style='text-align: center; line-height:1; ><br></p><p class='MsoNormal' style='text-align: center; margin-bottom: 0.0001pt; line-height: 1;'><b><span style='font-size: 24px; font-family: &quot;Times New Roman&quot'>"
-       } 
-        
-        let body1 = Body.replace("{logo}",logo)
-        let body2 = body1.replace("{appname}",app);
-        let body3 = body2.replace("{appname}",app);
-        let body4 = body3.replace("{appname}",app);
-        let body5 = body4.replace("{appname}",app);
-        let body6 = body5.replace("{appname}",app);
-        let body7 = body6.replace("{employee_number}", phoneno);
-        let body8 = body7.replace("{employee_password}",userpassword);
+      let body1 = Body.replace("{logo}", logo);
+      let body2 = body1.replace("{appname}", app);
+      let body3 = body2.replace("{appname}", app);
+      let body4 = body3.replace("{appname}", app);
+      let body5 = body4.replace("{appname}", app);
+      let body6 = body5.replace("{appname}", app);
+      let body7 = body6.replace("{employee_number}", phoneno);
+      let body8 = body7.replace("{employee_password}", userpassword);
 
       msessage = body8;
-      
-      const takerep = await Helper.sendEmail(useremail,Subject,msessage,headers);
-   
-    
-        //////////write Zone 
 
-       const insert_adminlogin = await Database.table("admin_login").insert({
+      const takerep = await Helper.sendEmail(
+        useremail,
+        Subject,
+        msessage,
+        headers
+      );
+
+      //////////write Zone
+
+      const insert_adminlogin = await Database.table("admin_login").insert({
         username: username,
         password: userpassword,
         email: useremail,
@@ -656,8 +663,9 @@ export default class loginService {
         column_value["Addon_LocationTracking"] = addonlocationtrack;
       }
 
-      let insert_licence = await Database.table("licence_ubiattendance")
-        .insert(column_value);
+      let insert_licence = await Database.table("licence_ubiattendance").insert(
+        column_value
+      );
 
       let dept_array: any = {};
 
@@ -993,7 +1001,7 @@ export default class loginService {
       )
       .where("O.Id", getparam.org_id)
       .andWhere("O.mail_varified", 0);
-    
+
     var response = {};
     if (selectquery.length == 0) {
       response["response"] = 0; ///User Not exist on given org_id
@@ -1014,9 +1022,9 @@ export default class loginService {
 
         var oldmail = showdata.email;
         var email;
-        if (oldmail != emailNew) {          
-          email = emailNew;          
-          let encodeemail = await Helper.encode5t(email);          
+        if (oldmail != emailNew) {
+          email = emailNew;
+          let encodeemail = await Helper.encode5t(email);
           var COUNTER = 0;
           var orgCount;
           orgCount = await Database.from("Organization")
@@ -1034,11 +1042,10 @@ export default class loginService {
             .where("Username", encodeemail);
           COUNTER += orgCount.length;
 
-          if (COUNTER > 0) {            
+          if (COUNTER > 0) {
             response["response"] = 1; // Already exist
-          } else {   
-          
-            const updateQuery = await Database .from("Organization as o")
+          } else {
+            const updateQuery = await Database.from("Organization as o")
               .innerJoin("admin_login as a", "o.Id", "a.OrganizationId")
               .innerJoin("EmployeeMaster as e", "o.Id", "e.OrganizationId")
               .innerJoin("UserMaster as u", "o.Id", "u.OrganizationId")
@@ -1094,7 +1101,7 @@ export default class loginService {
 
         // console.log(email);
         // email = "meghwalshivam18@gmail.com";    // for testing
-        // console.log(email); 
+        // console.log(email);
 
         let getrespons = await Helper.sendEmail(
           email,
@@ -1103,7 +1110,7 @@ export default class loginService {
           headers
         );
 
-        if (getrespons !=undefined) {
+        if (getrespons != undefined) {
           response["status"] = "true"; //Mail send succesfully
         } else {
           response["status"] = "false"; ////Mail send Unsuccesfull
@@ -1116,4 +1123,3 @@ export default class loginService {
 function strlen($otp: any) {
   throw new Error("Function not implemented.");
 }
-
