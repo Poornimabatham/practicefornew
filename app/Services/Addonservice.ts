@@ -8,17 +8,17 @@ export default class Addonservice{
         const AdminId = data.uid ? data.uid : 0;
         const addon = data.name ? data.name : 0;
         const orgname = await Helper.getOrgName(orgid);
-        let result :any = {};
-        var res :any =0;
+        let result: any = {};
+        var res: any = 0;
         let addon_future_enddate = data.today ? data.today : 0;
-        if(addon_future_enddate == 0){
+        if (addon_future_enddate == 0) {
             const today1 = DateTime.now().toFormat('yyyy-MM-dd');
             const inputDate = DateTime.fromISO('2023-09-11');
             // Add three days
             const resultDate = inputDate.plus({ days: 3 });
             addon_future_enddate = resultDate.toFormat('yyyy-MM-dd');
-            
-            
+
+
         }
         let Addon_BulkAttn = 0
         const attendanceaddon = 0;
@@ -29,23 +29,23 @@ export default class Addonservice{
         const livelocationtracking = 0;
         const shiftplanner = 0;
         const visitpunch = 0;
-        const freestatus=0;
+        const freestatus = 0;
         const created_date = DateTime.now().toFormat('yyyy-MM-dd');
-        const addon_invoice_id='0';
-        const order_id='adminpanel';
-        const payment_id='adminpanel';
-        const addon_amount='adminpanel';
-        const currency='adminpanel';
-        const query123 :any = await Database.query().from('addons_master').select('Free_Trial_Status').where('OrganizationId',orgid).andWhere('Free_Trial_Status',1);
+        const addon_invoice_id = '0';
+        const order_id = 'adminpanel';
+        const payment_id = 'adminpanel';
+        const addon_amount = 'adminpanel';
+        const currency = 'adminpanel';
+        const query123: any = await Database.query().from('addons_master').select('Free_Trial_Status').where('OrganizationId', orgid).andWhere('Free_Trial_Status', 1);
         const count123 = query123.length;
-        if(count123 < 3){
+        if (count123 < 3) {
             result['status'] = 'false';
         }else{
             
             const query22 = await Database.query().from('Paid_addon_name').select('addon_name').where(Database.raw(' name Like "%'+addon+'%"')).limit(1);
             let addon_name :string = '';
             const count22 = query22.length;
-            if(count22){
+            if (count22) {
                 addon_name = query22[0].addon_name;
             }
             // Define a mapping object for addon names to their respective variables
@@ -105,5 +105,107 @@ export default class Addonservice{
                 
         }
         return result; 
+                 
+        }
+    public static async registeredFaceIDList(getData) {
+
+        var orgid = getData.refno;
+        var empid = getData.empid;
+        var dataFor = getData.dataFor;
+        var pageName = getData.pageName;
+        var perPage = getData.perPage;
+        var currentPage = getData.currentPage;
+        var begin = (currentPage - 1) * perPage;
+        var limit;
+        var offset;
+        if (currentPage != 0 && (pageName == 'RegisterEmployeeList' || pageName == 'UnregisterEmployeeList')) {
+            limit = perPage;
+            offset = begin;
+        }
+        var result: {} = {};
+        var RegisteredData: {} = {};
+        var UnRegisteredData: {} = {};
+
+        var adminStatus = await Helper.getAdminStatus(empid);
+        var departmentCondition;
+        if (adminStatus == 2) {
+            var deptId = await Helper.getDepartmentIdByEmpID(empid);
+            departmentCondition = `AND Department =${deptId}`;
+        }
+        var selectRegisteredQuery
+        if (dataFor == 'registered') {
+            selectRegisteredQuery = Database.from('Persisted_Face as PF').select(
+                Database.raw(`E.FirstName as FirstName `),
+                Database.raw(`E.LastName as LastName`),
+                Database.raw(`SUBSTRING_INDEX(profileimage, '.com/', -1) as profileimage`),
+                Database.raw(`EmployeeId as Id`)
+            )
+                .whereNot('PersistedFaceId', 0)
+                .where('PF.OrganizationId', orgid)
+                .whereRaw('1 in (SELECT archive from EmployeeMaster E Where E.Id=EmployeeId)')
+                .innerJoin('EmployeeMaster as E', 'E.Id', 'PF.EmployeeId')
+                .orderBy('FirstName')
+                .limit(limit)
+                .offset(offset)
+
+            if (departmentCondition != undefined || departmentCondition != null) {
+                selectRegisteredQuery.whereRaw(departmentCondition);
+            }
+
+            var selectRegisteredQueryResult = await selectRegisteredQuery
+
+            selectRegisteredQueryResult.forEach((row) => {
+                RegisteredData['Id'] = row.Id;
+                var FirstName = row.FirstName.trim();
+                FirstName = FirstName.replace(/\s+/g, '');
+                var LastName = row.LastName.trim();
+                LastName = LastName.replace(/\s+/g, '');
+                RegisteredData['name'] = `${FirstName} ${LastName}`;
+                RegisteredData['name'] = RegisteredData['name']
+                    .toLowerCase()
+                    .split(' ')
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                    .join(' ');
+                RegisteredData['profile'] = row.profileimage;
+                RegisteredData['orgid'] = orgid;
+                result = RegisteredData;
+            })
+
+        }
+        else if (dataFor == "unregistered") {
+            var selectUnregisteredQuery = Database.from('EmployeeMaster').select('*').where('OrganizationId', orgid)
+                .whereRaw(`Id NOT IN (Select EmployeeId from Persisted_Face where PersistedFaceId != '0' and OrganizationId= ${orgid})`)
+                .where('Is_Delete', 0)
+                .where('archive', 1)
+                .orderBy('FirstName')
+                .limit(limit)
+                .offset(offset);
+
+            if (departmentCondition != undefined || departmentCondition != null) {
+                selectUnregisteredQuery.whereRaw(departmentCondition);
+            }
+
+            var selectUnregisteredQueryResult = await selectUnregisteredQuery;
+
+            selectUnregisteredQueryResult.forEach((row) => {
+                UnRegisteredData['Id'] = row.Id;
+                var FirstName = row.FirstName.trim();
+                FirstName = FirstName.replace(/\s+/g, '');
+                var LastName = row.LastName.trim();
+                LastName = LastName.replace(/\s+/g, '');
+                UnRegisteredData['name'] = `${FirstName} ${LastName}`;
+                UnRegisteredData['name'] = UnRegisteredData['name']
+                    .toLowerCase()
+                    .split(' ')
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                    .join(' ');
+                UnRegisteredData['Profile'] = '';
+                UnRegisteredData['orgid'] = orgid;
+                result = UnRegisteredData;
+
+            })
+        }
+        return result;
+
     }
 }

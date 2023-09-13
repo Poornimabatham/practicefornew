@@ -35,4 +35,14 @@ export default class CheckUserEmailValidator extends BaseModel {
       orgId: schema.number(),
     }),
   };
+
+  static sendSignUpMailV = {
+    schema: schema.create({
+      appName: schema.string.optional(),
+      userName: schema.string.optional(),
+      password: schema.string.optional(),
+      response: schema.string.optional(),
+      phone:schema.string.optional(),
+    }),
+  };
 }
