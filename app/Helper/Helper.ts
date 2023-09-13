@@ -1366,6 +1366,28 @@ export default class Helper {
       return Name;
     }
   }
+
+  public static async ucfirst(str: string) {
+    if (typeof str !== "string" || str.length === 0) {
+      return str;
+    }
+
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  }
+
+  public static async getAttImageStatus(orgid: number) {
+    // to get the infor weather image uploading is enable or not in orgn for attn
+
+    let query: any = await Database.from("admin_login").where("OrganizationId",orgid)
+      .select("attnImageStatus")
+     
+    if (query.length > 0) {
+     
+      return query[0].attnImageStatus;
+    }
+    return 0;
+  }
+
 }
 
 

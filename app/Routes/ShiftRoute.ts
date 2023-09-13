@@ -1,5 +1,5 @@
 import Route from '@ioc:Adonis/Core/Route'
-Route.get('/getAllShift', 'ShiftsController.getAllShift')
+Route.get('/getAllShift', 'ShiftsController.getAllShift').middleware("auth")
   //.middleware('throttle:global').middleware('auth')
 Route.post('/addShift', 'ShiftsController.addShift')
   //.middleware('throttle:global').middleware('auth')

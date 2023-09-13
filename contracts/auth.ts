@@ -5,7 +5,9 @@
  * file.
  */
 
-import Usertest from 'App/Models/Usertest'
+import UserMaster from "App/Models/UserMaster"
+
+
 
 declare module '@ioc:Adonis/Addons/Auth' {
   /*
@@ -34,8 +36,8 @@ declare module '@ioc:Adonis/Addons/Auth' {
     |
     */
     user: {
-      implementation: LucidProviderContract<typeof Usertest>
-      config: LucidProviderConfig<typeof Usertest>
+      implementation: LucidProviderContract<typeof UserMaster>
+      config: LucidProviderConfig<typeof UserMaster>
     }
   }
 
