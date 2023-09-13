@@ -36,7 +36,7 @@ export default class SaveImageGrpAttFaceValidator {
       appVersion:schema.string(),
       FakeLocationStatus:schema.string(),
       uploadPath:schema.string(),
-      Q
+      
     }), message: BaseValidator.messages
   }
   /**

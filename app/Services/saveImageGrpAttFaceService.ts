@@ -7,14 +7,21 @@ export default class saveImageGrpAttFaceService {
     let FakeLocationStatusTimeOut = 0;
     let attMasterId = 0;
     let faceid = "";
-  //   personid = "";
-  //   confidence = "0";
-  //   personobj = "0";
-  //   FirstName = "";
-  //   statusatt = "0";
-  //   file = "";
-  //   successMsg = "";
-  //   errorMsg = "";
-  //   flag = "";
-  // }
+    let personid = "";
+    let confidence = "0";
+    let personobj = "0";
+    let FirstName = "";
+    let statusatt = "0";
+    let file = "";
+    let successMsg = "";
+    let errorMsg = "";
+    let flag = "";
+    let result: [] = [];
+    result['facerecog'] = '';
+    result['groupface'] = '';
+    result['status'] = ''; //for recently marked attendance
+    result['successMsg'] = '';
+    result['errorMsg'] = '';
+
+  }
 }
