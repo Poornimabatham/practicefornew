@@ -9,7 +9,6 @@ export default class saveVisitOfflineAdvanceValidator extends BaseValidator {
   static saveVisitOfflineAdvanceschema = {
     schema: schema.create({
       Id: schema.number(),
-
       EmployeeId: schema.number(),
       ClientId: schema.number.optional(),
       ClientName: schema.string(),
@@ -21,7 +20,6 @@ export default class saveVisitOfflineAdvanceValidator extends BaseValidator {
       VisitOutLocation: schema.string.optional(),
       LatitudeIn: schema.string(),
       LongitudeIn: schema.string(),
-
       LatitudeOut: schema.string.optional(),
       LongitudeOut: schema.string.optional(),
       VisitInImageName: schema.string(),
@@ -34,10 +32,8 @@ export default class saveVisitOfflineAdvanceValidator extends BaseValidator {
       IsVisitInSynced: schema.string(),
       IsVisitOutSynced: schema.string(),
       ThumbnailVisitInImageName: schema.string(),
-      
       ThumbnailVisitOutImageName: schema.string.optional(),
       ThumbnailVisitInImageBase64: schema.string.optional(),
-
       ThumbnailVisitOutImageBase64: schema.string.optional(),
       GeofenceStatusVisitIn: schema.string(),
       GeofenceStatusVisitOut: schema.string.optional(),
