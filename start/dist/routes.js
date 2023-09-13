@@ -23,7 +23,6 @@ require("../app/Routes/EmployeeRoute");
 require("../app/Routes/SignInRoute");
 require("../app/Routes/DesignationRoute");
 require("../app/Routes/GeofenceRoute");
-require("../app/Routes/GeofenceRoute");
 require("../app/Routes/UserSettingRoute");
 require("../app/Routes/DepartmentRoute");
 require("../app/Routes/GetTokenRoute");
@@ -58,6 +57,11 @@ require("../app/Routes/TempAssignClientRoute");
 require("../app/Routes/Report/GetAttendanceEmployeewise");
 require("../app/Routes/getUserMobileRoute");
 require("../app/Routes/getProfileImageRoute");
+require("../app/Routes/GetWeekendsRoute");
+require("../app/Routes/GetunderovertimeRoute");
+require("../app/Routes/GeofenceRoute");
+require("../app/Routes/getOrignalAttendanceImg");
+require("../app/Routes/SaveVisitOfflineAdvanceRoute");
 // Route.get('/', async () => {
 //     return "Working fine!"
 // })
@@ -67,3 +71,4 @@ require("../app/Routes/getProfileImageRoute");
 //     return value
 // })
 require("../app/Routes/ApprovalRegularizationRoute");
+require("../app/Routes/AddonServiceRoute");
