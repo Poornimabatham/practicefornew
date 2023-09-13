@@ -1,10 +1,8 @@
-
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
-
 import CheckUserEmailService from "App/Services/CheckuserEmailService";
 import CheckUserEmailValidator from "App/Validators/CheckuserEmailValidator";
 
-export default class CheckUserEmailController{
+export default class CheckUserEmailController {
   public async CheckUserEmaildata({ request, response }: HttpContextContract) {
     const inputValidation = await request.validate(
       CheckUserEmailValidator.CheckUserEmailSchema
@@ -23,20 +21,36 @@ export default class CheckUserEmailController{
     return response.json(result);
   }
 
-  public async verifyEmailOtpRequestdata({ request, response }: HttpContextContract) {
+  public async verifyEmailOtpRequestdata({
+    request,
+    response,
+  }: HttpContextContract) {
     const inputValidation = await request.validate(
       CheckUserEmailValidator.verifyEmailOtpRequestSchema
     );
-    const result = await CheckUserEmailService.VerifyEmailOtpRequest(inputValidation);
+    const result = await CheckUserEmailService.VerifyEmailOtpRequest(
+      inputValidation
+    );
 
     return response.json(result);
   }
-  public async updateEmailOTPRequestdata({request,response}:HttpContextContract){
+  public async updateEmailOTPRequestdata({
+    request,
+    response,
+  }: HttpContextContract) {
     const inputValidation = await request.validate(
       CheckUserEmailValidator.updateEmailOTPRequestSchema
     );
-    const result = await CheckUserEmailService.UpdateEmailOTPRequest(inputValidation);
+    const result = await CheckUserEmailService.UpdateEmailOTPRequest(
+      inputValidation
+    );
 
+    return response.json(result);
+  }
+ 
+  public async sendSignUpMail({ request, response }: HttpContextContract) {
+    const valdata = await request.validate(CheckUserEmailValidator.sendSignUpMailV)
+    const result = await CheckUserEmailService.sendSignUpMail(valdata);
     return response.json(result);
   }
 }
