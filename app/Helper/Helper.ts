@@ -310,10 +310,10 @@ export default class Helper {
       .select("shiftid")
       .where("empid", empid)
       .andWhere("ShiftDate", ShiftDate);
-     
-    if (getshiftid.length > 0) {      
+
+    if (getshiftid.length > 0) {
       return getshiftid[0].shiftid;
-     } 
+    }
     else {
       let getshiftid = await Database.from("ShiftMaster")
         .select("Id")
@@ -393,18 +393,18 @@ export default class Helper {
       .where("AttendanceDate", today)
       .whereNot("TimeIn", "00:00:00")
       .select("multitime_sts")
-      // .first()
-      if (attendanceRecord.length >0) {
+    // .first()
+    if (attendanceRecord.length > 0) {
 
       return attendanceRecord[0].multitime_sts;
-      } else {        
+    } else {
       const shiftRecord = await ShiftMaster.query()
         .where("Id", shiftId)
         .select("MultipletimeStatus");
       // .first();
-        if (shiftRecord.length > 0) {
+      if (shiftRecord.length > 0) {
         return shiftRecord[0].MultipletimeStatus;
-      } 
+      }
     }
     return 0;
   }
@@ -1525,10 +1525,10 @@ export default class Helper {
     }
   }
 
-  public static async getDesignation(Id) {    
+  public static async getDesignation(Id) {
     const query = await Database.from("DesignationMaster")
       .select("Name")
-      .where("Id", Id);    
+      .where("Id", Id);
     if (query.length > 0) {
       return query[0].Name;
     } else {
@@ -1550,7 +1550,7 @@ export default class Helper {
       return Name;
     }
   }
- 
+
 
   public static async getDeviceVerification_settingsts(orgid) {
     let data = 0;
@@ -1568,6 +1568,7 @@ export default class Helper {
       return data;
     }
   }
+  
   public static async gettimezonebyid(zoneid) {
     var zone = "Asia/Kolkata";
     const query = await Database.from("ZoneMaster")
@@ -1594,5 +1595,9 @@ export default class Helper {
       return Name;
     }
   }
+
+ 
 }
+
+
 

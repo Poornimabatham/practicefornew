@@ -48,6 +48,16 @@ export default class AddonValidator {
     }),
     message: BaseValidator.messages,
   }
+
+  public static disapprovefaceid = {
+    schema: schema.create({
+      orgid: schema.number(),
+      adminId: schema.string.optional(),
+      empid: schema.number(),
+      orgTopic: schema.string()
+    }),
+    message: BaseValidator.messages,
+  }
   /**
    * Custom messages for validation failures. You can make use of dot notation `(.)`
    * for targeting nested fields and array expressions `(*)` for targeting all
