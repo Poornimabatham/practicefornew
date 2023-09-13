@@ -44,7 +44,7 @@ var saveVisitOfflineAdvanceService = /** @class */ (function () {
     }
     saveVisitOfflineAdvanceService.saveVisitOfflineAdvance = function (data) {
         return __awaiter(this, void 0, void 0, function () {
-            var OrganizationId, GeofenceStatusVisitOut, GeofenceStatusVisitIn, EmployeeId, IsVisitInSynced, IsVisitOutSynced, VisitInImageName, VisitInImageBase64, ThumbnailVisitInImageName, VisitInLocation, LatitudeIn, LongitudeIn, VisitInTime, VisitDate, ClientName, ClientId, FakeLocationInStatus, VisitOutTime, Id, ThumbnailVisitOutImageName, VisitOutImageName, searchString, LatitudeOut, VisitOutImageBase64, insertInChekin_Master, UpdateCheckin_Master, lastVisitSyncedId, VisitOutLocation, LongitudeOut, FakeLocationOutStatus, Description, res, statusArray, AddOnSts, zone, defaultZone, time, stamp, today, selectCheckin_Master, queryVID;
+            var OrganizationId, GeofenceStatusVisitOut, GeofenceStatusVisitIn, EmployeeId, IsVisitInSynced, IsVisitOutSynced, VisitInImageName, VisitInImageBase64, ThumbnailVisitInImageName, VisitInLocation, LatitudeIn, LongitudeIn, VisitInTime, VisitDate, ClientName, ClientId, FakeLocationInStatus, VisitOutTime, Id, ThumbnailVisitOutImageName, VisitOutImageName, LatitudeOut, VisitOutImageBase64, insertInChekin_Master, UpdateCheckin_Master, lastVisitSyncedId, VisitOutLocation, LongitudeOut, FakeLocationOutStatus, Description, date, date2, res, statusArray, AddOnSts, zone, defaultZone, time, stamp, today, selectCheckin_Master, queryVID;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -52,11 +52,30 @@ var saveVisitOfflineAdvanceService = /** @class */ (function () {
                         GeofenceStatusVisitOut = data.GeofenceStatusVisitOut;
                         GeofenceStatusVisitIn = data.GeofenceStatusVisitIn;
                         EmployeeId = data.EmployeeId;
-                        IsVisitInSynced = 1;
-                        IsVisitOutSynced = 1;
-                        ThumbnailVisitInImageName = "111111114";
-                        ThumbnailVisitOutImageName = "111111114";
-                        searchString = "public";
+                        IsVisitInSynced = data.IsVisitInSynced;
+                        IsVisitOutSynced = data.IsVisitOutSynced;
+                        VisitInImageName = data.VisitInImageName;
+                        VisitInImageBase64 = data.VisitInImageBase64;
+                        ThumbnailVisitInImageName = data.ThumbnailVisitInImageName;
+                        VisitInLocation = data.VisitInLocation;
+                        LatitudeIn = data.LatitudeIn;
+                        LongitudeIn = data.LongitudeIn;
+                        VisitInTime = data.VisitInTime;
+                        VisitDate = data.VisitDate;
+                        ClientName = data.ClientName;
+                        ClientId = data.ClientId;
+                        FakeLocationInStatus = data.FakeLocationInStatus;
+                        VisitOutTime = data.VisitOutTime;
+                        Id = data.Id;
+                        ThumbnailVisitOutImageName = data.ThumbnailVisitOutImageName;
+                        VisitOutImageName = data.VisitOutImageName;
+                        LatitudeOut = data.LatitudeOut;
+                        VisitOutImageBase64 = data.VisitOutImageBase64;
+                        VisitOutLocation = data.VisitOutLocation;
+                        LongitudeOut = data.LongitudeOut;
+                        FakeLocationOutStatus = data.FakeLocationOutStatus;
+                        Description = data.Description;
+                        date = VisitDate.toFormat("yyyy-MM-dd");
                         res = [];
                         statusArray = {};
                         return [4 /*yield*/, Helper_1["default"].getAddonPermission(OrganizationId, "Addon_advancevisit")];
@@ -76,7 +95,7 @@ var saveVisitOfflineAdvanceService = /** @class */ (function () {
                         stamp = defaultZone.toFormat("yyyy-MM-dd HH:mm:ss");
                         today = defaultZone.toFormat("yyyy-MM-dd");
                         if (!(IsVisitInSynced == 1 && IsVisitOutSynced != 1)) return [3 /*break*/, 7];
-                        if (ThumbnailVisitInImageName.includes(searchString)) {
+                        if (ThumbnailVisitInImageName.includes("public")) {
                             VisitInImageName = ThumbnailVisitInImageName;
                         }
                         else {
@@ -88,7 +107,7 @@ var saveVisitOfflineAdvanceService = /** @class */ (function () {
                                     "/" +
                                     ThumbnailVisitInImageName;
                         }
-                        if (VisitInImageBase64 == undefined) {
+                        if (VisitInImageBase64 == undefined || VisitInImageBase64 == "null") {
                             VisitInImageName = "https://ubitech.ubihrm.com/public/avatars/male.png";
                         }
                         return [4 /*yield*/, Database_1["default"].from("checkin_master")
@@ -96,12 +115,10 @@ var saveVisitOfflineAdvanceService = /** @class */ (function () {
                                 .where("EmployeeId", EmployeeId)
                                 .andWhere("time_out", "00:00:00")
                                 .andWhere("time", "!=", "00:00:00")
-                                .andWhere("OrganizationId", OrganizationId)
-                                .andWhere("date", today)];
+                                .andWhere("OrganizationId", OrganizationId)];
                     case 3:
                         selectCheckin_Master = _a.sent();
                         if (!selectCheckin_Master.length) return [3 /*break*/, 5];
-                        console.log("affected_rows");
                         return [4 /*yield*/, Database_1["default"].from("checkin_master")
                                 .where("EmployeeId", EmployeeId)
                                 .andWhere("OrganizationId", OrganizationId)
@@ -126,7 +143,7 @@ var saveVisitOfflineAdvanceService = /** @class */ (function () {
                             latit: LatitudeIn,
                             longi: LongitudeIn,
                             time: VisitInTime,
-                            date: VisitDate,
+                            date: date,
                             client_name: ClientName,
                             ClientId: ClientId,
                             OrganizationId: OrganizationId,
@@ -139,7 +156,7 @@ var saveVisitOfflineAdvanceService = /** @class */ (function () {
                         statusArray["Id"] = Id;
                         statusArray["VisitInTime"] = VisitInTime;
                         statusArray["VisitOutTime"] = VisitOutTime;
-                        statusArray["VisitDate"] = VisitDate;
+                        statusArray["VisitDate"] = date;
                         statusArray["Action"] = "VisitIn";
                         statusArray["EmployeeId"] = EmployeeId;
                         statusArray["OrganizationId"] = OrganizationId;
@@ -147,9 +164,7 @@ var saveVisitOfflineAdvanceService = /** @class */ (function () {
                         return [3 /*break*/, 12];
                     case 7:
                         if (!(IsVisitInSynced == 1 && IsVisitOutSynced == 1)) return [3 /*break*/, 9];
-                        if (ThumbnailVisitInImageName.includes(searchString)) {
-                            // The string contains 'public'
-                            console.log('String contains "public"');
+                        if (ThumbnailVisitInImageName.includes("public")) {
                             VisitInImageName = ThumbnailVisitInImageName;
                         }
                         else {
@@ -161,10 +176,10 @@ var saveVisitOfflineAdvanceService = /** @class */ (function () {
                                     "/" +
                                     ThumbnailVisitInImageName;
                         }
-                        if (VisitInImageBase64 == undefined) {
+                        if (VisitInImageBase64 == undefined || VisitInImageBase64 == "null") {
                             VisitInImageName = "https://ubitech.ubihrm.com/public/avatars/male.png";
                         }
-                        if (ThumbnailVisitOutImageName.includes(searchString)) {
+                        if (ThumbnailVisitOutImageName == undefined) {
                             VisitOutImageName = ThumbnailVisitOutImageName;
                         }
                         else {
@@ -176,7 +191,7 @@ var saveVisitOfflineAdvanceService = /** @class */ (function () {
                                     "/" +
                                     ThumbnailVisitOutImageName;
                         }
-                        if (VisitOutImageBase64 == undefined) {
+                        if (VisitOutImageBase64 == undefined || VisitOutImageBase64 == "null") {
                             VisitOutImageName =
                                 "https://ubitech.ubihrm.com/public/avatars/male.png";
                         }
@@ -192,7 +207,7 @@ var saveVisitOfflineAdvanceService = /** @class */ (function () {
                                 longi_out: LongitudeOut,
                                 time: VisitInTime,
                                 time_out: VisitOutTime,
-                                date: VisitDate,
+                                date: date,
                                 client_name: ClientName,
                                 ClientId: ClientId,
                                 OrganizationId: OrganizationId,
@@ -208,7 +223,7 @@ var saveVisitOfflineAdvanceService = /** @class */ (function () {
                         statusArray["Id"] = Id;
                         statusArray["VisitInTime"] = VisitInTime;
                         statusArray["VisitOutTime"] = VisitOutTime;
-                        statusArray["VisitDate"] = VisitDate;
+                        statusArray["VisitDate"] = date;
                         statusArray["Action"] = "Both";
                         statusArray["EmployeeId"] = EmployeeId;
                         statusArray["OrganizationId"] = OrganizationId;
@@ -216,27 +231,37 @@ var saveVisitOfflineAdvanceService = /** @class */ (function () {
                         return [3 /*break*/, 12];
                     case 9:
                         if (!(IsVisitInSynced != 1 && IsVisitOutSynced == 1)) return [3 /*break*/, 12];
-                        if (ThumbnailVisitOutImageName.includes("public")) {
-                            VisitOutImageName = ThumbnailVisitOutImageName;
+                        if (ThumbnailVisitOutImageName == undefined) {
                         }
                         else {
-                            VisitOutImageName = "visits/{OrganizationId}/{EmployeeId}/{ThumbnailVisitOutImageName}";
+                            if (ThumbnailVisitOutImageName.includes("public")) {
+                                VisitOutImageName = ThumbnailVisitOutImageName;
+                            }
+                            else {
+                                VisitOutImageName =
+                                    "visits/" +
+                                        OrganizationId +
+                                        "/" +
+                                        EmployeeId +
+                                        "/" +
+                                        ThumbnailVisitOutImageName;
+                            }
                         }
                         if (VisitOutImageBase64 == undefined) {
                             VisitOutImageName =
                                 "https://ubitech.ubihrm.com/public/avatars/male.png";
                         }
                         return [4 /*yield*/, Database_1["default"].from("checkin_master")
-                                .select(Database_1["default"].raw("MAX(`id`) as `VisitId`"))
+                                .select(Database_1["default"].raw("MAX(id) as VisitId"))
                                 .where("EmployeeId", EmployeeId)
-                                .where("OrganizationId", OrganizationId)
-                                .where("date", today)
+                                .andWhere("OrganizationId", OrganizationId)
+                                .andWhere("date", date)
                                 .orderBy("id", "desc")
                                 .limit(1)];
                     case 10:
                         queryVID = _a.sent();
                         if (queryVID.length > 0) {
-                            lastVisitSyncedId = queryVID.VisitId;
+                            lastVisitSyncedId = queryVID[0].VisitId;
                         }
                         return [4 /*yield*/, Database_1["default"].from("checkin_master")
                                 .where("id", lastVisitSyncedId)
@@ -256,7 +281,7 @@ var saveVisitOfflineAdvanceService = /** @class */ (function () {
                         statusArray["Id"] = Id;
                         statusArray["VisitInTime"] = VisitInTime;
                         statusArray["VisitOutTime"] = VisitOutTime;
-                        statusArray["VisitDate"] = VisitDate;
+                        statusArray["VisitDate"] = date;
                         statusArray["Action"] = "VisitOut";
                         statusArray["EmployeeId"] = EmployeeId;
                         statusArray["OrganizationId"] = OrganizationId;

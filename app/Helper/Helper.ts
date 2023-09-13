@@ -1551,7 +1551,6 @@ export default class Helper {
     }
   }
 
-
   public static async getDeviceVerification_settingsts(orgid) {
     let data = 0;
 
@@ -1560,7 +1559,6 @@ export default class Helper {
     )
       .select("deviceverification_setting")
       .where("id", orgid);
-
     if (selectDeviceVerification_settings.length > 0) {
       data = selectDeviceVerification_settings[0].deviceverification_setting;
       return data;
@@ -1568,7 +1566,7 @@ export default class Helper {
       return data;
     }
   }
-  
+    
   public static async gettimezonebyid(zoneid) {
     var zone = "Asia/Kolkata";
     const query = await Database.from("ZoneMaster")
