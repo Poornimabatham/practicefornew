@@ -734,9 +734,6 @@ export default class DailyAttendanceService {
 
           console.log(jsonData[i][date[0]].interim[j]);
           console.log("all data of");
-          // console.log(j);
-          // console.log("all data of");
-
           const zone = await Helper.getEmpTimeZone(UserId, OrganizationId);
           const defaultZone = DateTime.now().setZone(zone);
           let shiftType = await Helper.getShiftType(ShiftId);

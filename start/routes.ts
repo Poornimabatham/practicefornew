@@ -64,6 +64,11 @@ import "../app/Routes/getOrignalAttendanceImg";
 import "../app/Routes/SaveVisitOfflineAdvanceRoute"
 import "../app/Routes/SendNotificationDiffOrgEmployeeRoute"
 
+import Route from '@ioc:Adonis/Core/Route'
+
+Route.get('/sendMail', 'MailersController.sendEmail')
+
+
 // Route.get('/', async () => {
 //     return "Working fine!"
 // })
