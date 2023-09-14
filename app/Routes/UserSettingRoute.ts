@@ -22,4 +22,5 @@ Route.get("/getReferDiscountRequest","UserSettingsController.getReferDiscountReq
 Route.put("/DeleteAccount","UserSettingsController.DeleteAccount");
 Route.get('/getSetKioskPin', 'UserSettingsController.getSetKioskPin');
 Route.put("/checkuseremailforgoogle", "UserSettingsController.checkuseremailforgoogle");
+Route.put("/updateProfilePhoto", "UserSettingsController.updateProfilePhoto");
 
