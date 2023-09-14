@@ -39,6 +39,7 @@ export default class getUsersMobile{
 
             let adata  ={};
                 adata['Id']=row.Id;
+                
                 adata['CountryCode']=row.CountryCode;
                 let firstName = row.FirstName.trim();
                 firstName = firstName.replace(/\s\s+/g, ' '); // Replace multiple spaces with a single space
@@ -66,7 +67,7 @@ export default class getUsersMobile{
                 }else{
                     adata['Designation']=row.Designation;
                 }
-                adata['Shift']=await Helper.getShiftName(row.ShiftId , orgid);
+                adata['Shift']=await Helper.getShiftName(row.ShiftId,orgid);
                 adata['DepartmentId']= row.DepartmentId;
                 adata['DesignationId']=row.DesignationId;
                 adata['ShiftId'] = row.ShiftId;
@@ -107,9 +108,6 @@ export default class getUsersMobile{
                 res.push(adata)
             })
           )
-            return res;
-           
-           
-           
+            return res;   
     }
 }
