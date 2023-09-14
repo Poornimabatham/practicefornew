@@ -44,13 +44,13 @@ var EmployeeMaster_1 = require("App/Models/EmployeeMaster");
 var Organization_1 = require("App/Models/Organization");
 var ShiftMaster_1 = require("App/Models/ShiftMaster");
 var ZoneMaster_1 = require("App/Models/ZoneMaster");
+var _a = require('date-fns'), format = _a.format, parse = _a.parse, parseISO = _a.parseISO;
 var luxon_1 = require("luxon");
 var moment_1 = require("moment");
 var Helper = /** @class */ (function () {
     function Helper() {
     }
     Helper.encode5t = function (str) {
-        var contactNum = str.toString();
         for (var i = 0; i < 5; i++) {
             str = Buffer.from(str).toString("base64");
             str = str.split("").reverse().join("");
@@ -652,28 +652,23 @@ var Helper = /** @class */ (function () {
             });
         });
     };
-    Helper.getShiftIdByEmpID = function (empid) {
-        return __awaiter(this, void 0, void 0, function () {
-            var shift, getshiftid;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, Database_1["default"].from("ShiftMaster")
-                            .select("Id")
-                            .where("id", Database_1["default"].rawQuery("(SELECT Shift FROM EmployeeMaster where id=" + empid + ")"))];
-                    case 1:
-                        getshiftid = _a.sent();
-                        if (getshiftid.length > 0) {
-                            shift = getshiftid[0].Id;
-                            return [2 /*return*/, shift];
-                        }
-                        else {
-                            return [2 /*return*/, shift];
-                        }
-                        return [2 /*return*/];
-                }
-            });
-        });
-    };
+    // public static async getShiftIdByEmpID(empid) {
+    //   let shift;
+    //   let getshiftid = await Database.from("ShiftMaster")
+    //     .select("Id")
+    //     .where(
+    //       "id",
+    //       Database.rawQuery(
+    //         `(SELECT Shift FROM EmployeeMaster where id=${empid})`
+    //       )
+    //     );
+    //   if (getshiftid.length > 0) {
+    //     shift = getshiftid[0].Id;
+    //     return shift;
+    //   } else {
+    //     return shift;
+    //   }
+    // }
     Helper.getShiftByEmpID = function (Id) {
         return __awaiter(this, void 0, void 0, function () {
             var query;
@@ -942,7 +937,316 @@ var Helper = /** @class */ (function () {
                         if (query) {
                             return [2 /*return*/, query.name];
                         }
-                        return [2 /*return*/, null]; // Return null or handle the case when no result is found
+                        else {
+                            return [2 /*return*/, 0];
+                        }
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    Helper.getCurrentOrgStatus = function (orgId) {
+        return __awaiter(this, void 0, void 0, function () {
+            var todayDate, customizeOrg, status, endDate, deleteSts, extended, queryResult, row;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        todayDate = new Date().toISOString().split('T')[0];
+                        customizeOrg = 0;
+                        status = 0;
+                        endDate = '0000-00-00';
+                        deleteSts = 0;
+                        extended = 0;
+                        return [4 /*yield*/, Database_1["default"]
+                                .from('Organization')
+                                .join('licence_ubiattendance', 'Organization.Id', '=', 'licence_ubiattendance.OrganizationId')
+                                .select('Organization.customize_org AS customize_org', 'Organization.delete_sts AS delete_sts')
+                                .select('licence_ubiattendance.status AS status', 'licence_ubiattendance.end_date AS end_date', 'licence_ubiattendance.extended AS extended')
+                                .where('Organization.Id', orgId)];
+                    case 1:
+                        queryResult = _a.sent();
+                        row = queryResult[0];
+                        if (row) {
+                            customizeOrg = row.customize_org;
+                            status = row.status;
+                            endDate = luxon_1.DateTime.fromJSDate(new Date(row.end_date)).toFormat('yyyy-MM-dd');
+                            deleteSts = row.delete_sts;
+                            extended = row.extended;
+                        }
+                        if (status === 0 && extended === 1 && todayDate <= endDate && customizeOrg === 0 && deleteSts === 0) {
+                            return [2 /*return*/, 'TrialOrg'];
+                        }
+                        else if (status === 1 && todayDate <= endDate && deleteSts === 0 && customizeOrg === 0) {
+                            return [2 /*return*/, 'PremiumStandardOrg'];
+                        }
+                        else if (customizeOrg === 1 && deleteSts === 0) {
+                            return [2 /*return*/, 'PremiumCustomizedOrg'];
+                        }
+                        else if (status === 0 && todayDate > endDate && deleteSts === 0 && customizeOrg === 0) {
+                            return [2 /*return*/, 'ExpiredTrialOrg'];
+                        }
+                        else if (status === 0 && extended > 1 && endDate >= todayDate && deleteSts === 0 && customizeOrg === 0) {
+                            return [2 /*return*/, 'ExtendedTrialOrg'];
+                        }
+                        else if (status === 0 && todayDate > endDate && deleteSts === 0 && customizeOrg === 0) {
+                            return [2 /*return*/, 'PremiumExpiredOrg'];
+                        }
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    Helper.getShiftIdByEmpID = function (uid) {
+        return __awaiter(this, void 0, void 0, function () {
+            var shiftId, shiftIds;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, Database_1["default"].from("EmployeeMaster")
+                            .select("Shift")
+                            .where("Id", uid)];
+                    case 1:
+                        shiftId = _a.sent();
+                        shiftIds = shiftId.map(function (row) { return row.Shift; });
+                        return [2 /*return*/, shiftIds[0]];
+                }
+            });
+        });
+    };
+    Helper.getAddon_Regularization = function (orgid) {
+        return __awaiter(this, void 0, void 0, function () {
+            var Addon_Regularization, Addon_Regularizations;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, Database_1["default"].from("Organization")
+                            .select("Addon_Regularization")
+                            .where("Id", orgid)];
+                    case 1:
+                        Addon_Regularization = _a.sent();
+                        Addon_Regularizations = Addon_Regularization.map(function (row) { return row.Addon_Regularization; });
+                        return [2 /*return*/, Addon_Regularizations[0]];
+                }
+            });
+        });
+    };
+    Helper.getLeaveCountApp = function (orgid, empid, leavedate) {
+        return __awaiter(this, void 0, void 0, function () {
+            var fiscaldate, fiscal, fiscalstart, fiscalend, query, noofleave;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.getOrgFiscal(orgid, leavedate)];
+                    case 1:
+                        fiscaldate = _a.sent();
+                        fiscal = fiscaldate.split(' ');
+                        fiscalstart = fiscal[0];
+                        fiscalend = fiscal[2];
+                        return [4 /*yield*/, Database_1["default"].from('AppliedLeave')
+                                .where('EmployeeId', empid)
+                                .whereIn('ApprovalStatus', [1, 2])
+                                .whereBetween('Date', [fiscalstart, fiscalend])
+                                .count('Id as noofleave')];
+                    case 2:
+                        query = _a.sent();
+                        noofleave = query[0].noofleave;
+                        return [2 /*return*/, noofleave];
+                }
+            });
+        });
+    };
+    Helper.getOrgFiscal = function (orgid, leavedate) {
+        return __awaiter(this, void 0, void 0, function () {
+            var query, row, f_start, f_end, leavedateFormatted, dateofjoin, fiscalstart, fiscalend, startDate, endDate;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        query = Database_1["default"].from('Organization')
+                            .where('Id', orgid)
+                            .select('fiscal_start', 'fiscal_end')
+                            .first();
+                        return [4 /*yield*/, query];
+                    case 1:
+                        row = _a.sent();
+                        if (!row) {
+                            throw new Error('Organization not found');
+                        }
+                        f_start = row.fiscal_start;
+                        f_end = row.fiscal_end;
+                        leavedateFormatted = leavedate || new Date().toISOString().slice(0, 10);
+                        dateofjoin = new Date(leavedateFormatted);
+                        fiscalstart = new Date(f_start);
+                        fiscalend = new Date(f_end);
+                        if (dateofjoin < fiscalstart) {
+                            fiscalstart.setFullYear(fiscalstart.getFullYear() - 1);
+                        }
+                        if (dateofjoin > fiscalend) {
+                            fiscalend.setFullYear(fiscalend.getFullYear() + 1);
+                        }
+                        startDate = fiscalstart.toISOString().slice(0, 10);
+                        endDate = fiscalend.toISOString().slice(0, 10);
+                        return [2 /*return*/, startDate + " And " + endDate];
+                }
+            });
+        });
+    };
+    Helper.getBalanceLeave = function (orgid, uid, date) {
+        if (date === void 0) { date = ''; }
+        return __awaiter(this, void 0, void 0, function () {
+            var data, entitledleave, doj, todaydate, new_fiscal_start_year, new_fiscal_end_year, startDate_year, endDate_year, endDate_fnew, startDate_fnew, currentDate, dateofjoin, fiscalstart, fiscalstartmon, dateofjoinmon, fiscalstartdate, joindate, fiscalend, fiscalendmon, fiscalenddate, startDate, endDate, diff, differenceInDays, bal1, bal2, balanceleave1, str, after, balanceleave, balanceleave, balanceleave;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, Database_1["default"]
+                            .from('EmployeeMaster as E')
+                            .join('Organization as O', 'E.OrganizationId', '=', 'O.Id')
+                            .select('E.FirstName', 'E.entitledleave', 'E.DOJ')
+                            .select('O.fiscal_start', 'O.fiscal_end', 'O.entitled_leave')
+                            .where('O.Id', orgid)
+                            .where('E.Id', uid).first()];
+                    case 1:
+                        data = _a.sent();
+                        if (!data.entitledleave || data.entitledleave.trim() === 'undefined') {
+                            entitledleave = data.entitled_leave;
+                        }
+                        else {
+                            entitledleave = data.entitledleave;
+                        }
+                        todaydate = new Date();
+                        new_fiscal_start_year = todaydate.getFullYear();
+                        new_fiscal_end_year = new_fiscal_start_year + 1;
+                        startDate_year = format(parse(data.fiscal_start, 'd MMMM', new Date()), 'MM-dd');
+                        endDate_year = format(parse(data.fiscal_end, 'd MMMM', new Date()), 'MM-dd');
+                        endDate_fnew = new_fiscal_end_year + "-" + endDate_year;
+                        startDate_fnew = new_fiscal_start_year + "-" + startDate_year;
+                        currentDate = data.DOJ.toISOString().split('T')[0];
+                        dateofjoin = format(parse(currentDate, 'yyyy-MM-dd', new Date()), 'MM/dd/Y');
+                        fiscalstart = format(parse(startDate_fnew, 'yyyy-MM-dd', new Date()), 'MM/dd');
+                        fiscalstartmon = fiscalstart.substring(0, 2);
+                        dateofjoinmon = dateofjoin.substring(0, 2);
+                        fiscalstartdate = fiscalstart.substring(3, 2);
+                        joindate = dateofjoin.substring(3, 2);
+                        if (dateofjoinmon < fiscalstartmon) {
+                            doj = parseInt(dateofjoin.split('/')[2]) - 1;
+                            fiscalstartdate = fiscalstart + "/" + doj;
+                        }
+                        else if (dateofjoinmon === fiscalstartmon && joindate < fiscalstart.substring(3, 5)) {
+                            doj = parseInt(dateofjoin.split('/')[2]) - 1;
+                            fiscalstartdate = fiscalstart + "/" + doj;
+                        }
+                        else if (dateofjoinmon === fiscalstartmon && joindate === fiscalstart.substring(3, 5)) {
+                            doj = parseInt(dateofjoin.split('/')[2]);
+                            fiscalstartdate = fiscalstart + "/" + doj;
+                        }
+                        else {
+                            doj = parseInt(dateofjoin.split('/')[2]);
+                            fiscalstartdate = fiscalstart + "/" + doj;
+                        }
+                        fiscalend = format(parse(endDate_fnew, 'yyyy-MM-dd', new Date()), 'MM/dd');
+                        fiscalendmon = fiscalend.substring(0, 2);
+                        fiscalenddate = fiscalend.substring(3, 2);
+                        if (dateofjoinmon > fiscalendmon) {
+                            doj = parseInt(dateofjoin.split('/')[2]) - 1;
+                            fiscalenddate = fiscalend + "/" + doj;
+                        }
+                        else if (dateofjoinmon === fiscalendmon && joindate > fiscalend.substring(3, 5)) {
+                            doj = parseInt(dateofjoin.split('/')[2]) - 1;
+                            fiscalenddate = fiscalend + "/" + doj;
+                        }
+                        else if (dateofjoinmon === fiscalendmon && joindate === fiscalend.substring(3, 5)) {
+                            doj = parseInt(dateofjoin.split('/')[2]);
+                            fiscalenddate = fiscalend + "/" + doj;
+                        }
+                        else {
+                            doj = parseInt(dateofjoin.split('/')[2]);
+                            fiscalenddate = fiscalend + "/" + doj;
+                        }
+                        startDate = new Date(fiscalstartdate);
+                        endDate = new Date(fiscalenddate);
+                        if (currentDate >= startDate && currentDate <= endDate) {
+                            diff = endDate - dateofjoin;
+                            differenceInDays = Math.abs(Math.round(diff / (1000 * 60 * 60 * 24)));
+                            bal1 = entitledleave / 12;
+                            bal2 = differenceInDays / 30.4167;
+                            balanceleave1 = bal1 * bal2;
+                            str = Math.round(balanceleave1 * 100) / 100;
+                            after = Math.round((str % 1) * 100);
+                            if (after <= 50) {
+                                if (entitledleave <= 0) {
+                                    after = 0;
+                                }
+                                else {
+                                    after = 5;
+                                }
+                                balanceleave = parseFloat(Math.floor(str) + "." + after);
+                                return [2 /*return*/, balanceleave];
+                            }
+                            else {
+                                balanceleave = Math.round(str);
+                                return [2 /*return*/, balanceleave];
+                            }
+                        }
+                        else {
+                            balanceleave = entitledleave;
+                            return [2 /*return*/, balanceleave];
+                        }
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    Helper.getDepartmentName = function (deptid) {
+        return __awaiter(this, void 0, void 0, function () {
+            var DeptName, deptName;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, Database_1["default"].from("DepartmentMaster")
+                            .select("Name")
+                            .where("Id", deptid)];
+                    case 1:
+                        DeptName = _a.sent();
+                        deptName = DeptName.map(function (row) { return row.Name; });
+                        return [2 /*return*/, deptName[0]];
+                }
+            });
+        });
+    };
+    Helper.getDesignationName = function (desgid) {
+        return __awaiter(this, void 0, void 0, function () {
+            var DesgName, desgName;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, Database_1["default"].from("DesignationMaster")
+                            .select("Name")
+                            .where("Id", desgid)];
+                    case 1:
+                        DesgName = _a.sent();
+                        desgName = DesgName.map(function (row) { return row.Name; });
+                        return [2 /*return*/, desgName[0]];
+                }
+            });
+        });
+    };
+    Helper.getShiftTimeByEmpID = function (uid) {
+        return __awaiter(this, void 0, void 0, function () {
+            var shiftInfo, arr;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, Database_1["default"]
+                            .from('ShiftMaster')
+                            .select('Name', 'TimeIn', 'TimeOut', 'shifttype', 'HoursPerDay', Database_1["default"].raw('TIMEDIFF(TimeIn, TimeOut) AS diffShiftTime'))
+                            .whereIn('id', function (subquery) {
+                            subquery.select('Shift').from('EmployeeMaster').where('id', uid);
+                        }).first()];
+                    case 1:
+                        shiftInfo = _a.sent();
+                        if (shiftInfo) {
+                            arr = {};
+                            arr.shiftName = shiftInfo.Name;
+                            arr.shiftTimeIn = shiftInfo.TimeIn;
+                            arr.ShiftTimeOut = shiftInfo.TimeOut;
+                            arr.shifttype = shiftInfo.shifttype;
+                            arr.minworkhrs = shiftInfo.HoursPerDay;
+                            arr.diffShiftTime = shiftInfo.diffShiftTime;
+                            return [2 /*return*/, arr];
+                        }
+                        return [2 /*return*/];
                 }
             });
         });
@@ -1205,6 +1509,18 @@ var Helper = /** @class */ (function () {
             });
         });
     };
+    Helper.dateFormate = function (date) {
+        return __awaiter(this, void 0, void 0, function () {
+            var year, month, day, formattedDate;
+            return __generator(this, function (_a) {
+                year = date.getFullYear();
+                month = String(date.getMonth() + 1).padStart(2, '0');
+                day = String(date.getDate()).padStart(2, '0');
+                formattedDate = year + "-" + month + "-" + day;
+                return [2 /*return*/, formattedDate];
+            });
+        });
+    };
     Helper.getSeniorId = function (empid, organization) {
         return __awaiter(this, void 0, void 0, function () {
             var id, parentId, query1;
@@ -1237,6 +1553,31 @@ var Helper = /** @class */ (function () {
                 timeArr = time.split(":").map(Number);
                 decTime = timeArr[0] * 60 + timeArr[1] + timeArr[2] / 60;
                 return [2 /*return*/, decTime];
+            });
+        });
+    };
+    Helper.getshiftmultipletime_sts = function (uid, date, ShiftId) {
+        return __awaiter(this, void 0, void 0, function () {
+            var query21, count21, multitime_sts, query21_1;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, Database_1["default"].query().from('AttendanceMaster').select('multitime_sts').where('EmployeeId', uid).andWhere('AttendanceDate', date)];
+                    case 1:
+                        query21 = _a.sent();
+                        count21 = query21.length;
+                        multitime_sts = 0;
+                        if (!(count21 > 0)) return [3 /*break*/, 2];
+                        multitime_sts = query21[0].multitime_sts;
+                        return [3 /*break*/, 4];
+                    case 2: return [4 /*yield*/, Database_1["default"].query().from('ShiftMaster').select('MultipletimeStatus').where('Id', ShiftId)];
+                    case 3:
+                        query21_1 = _a.sent();
+                        if (query21_1.length > 0) {
+                            multitime_sts = query21_1[0].MultipletimeStatus;
+                        }
+                        _a.label = 4;
+                    case 4: return [2 /*return*/, multitime_sts];
+                }
             });
         });
     };

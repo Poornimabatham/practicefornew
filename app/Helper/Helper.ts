@@ -6,9 +6,14 @@ import EmployeeMaster from "App/Models/EmployeeMaster";
 import Organization from "App/Models/Organization";
 import ShiftMaster from "App/Models/ShiftMaster";
 import ZoneMaster from "App/Models/ZoneMaster";
-const { format, parse, parseISO } = require("date-fns");
+
+const { format, parse, parseISO } = require('date-fns');
 import { DateTime } from "luxon";
 import moment from "moment";
+import axios from 'axios';
+const https = require('https'); // Import the 'https' module
+
+
 export default class Helper {
   public static encode5t(str: any) {
     for (let i = 0; i < 5; i++) {
@@ -306,9 +311,11 @@ export default class Helper {
       .select("shiftid")
       .where("empid", empid)
       .andWhere("ShiftDate", ShiftDate);
-    if (getshiftid.length > 0) {
+     
+    if (getshiftid.length > 0) {      
       return getshiftid[0].shiftid;
-    } else {
+     } 
+    else {
       let getshiftid = await Database.from("ShiftMaster")
         .select("Id")
         .where(
@@ -317,10 +324,11 @@ export default class Helper {
             `(SELECT Shift FROM EmployeeMaster where id=${empid})`
           )
         );
-      if (getshiftid.length > 0) {
+      if (getshiftid.length > 0 && getshiftid[0].Id != undefined) {
         return getshiftid[0].Id;
       }
     }
+    return 0;
   }
 
   public static async getAddonPermission(orgid: number, addon: string) {
@@ -386,18 +394,18 @@ export default class Helper {
       .where("AttendanceDate", today)
       .whereNot("TimeIn", "00:00:00")
       .select("multitime_sts")
-      .first();
+      // .first()
+      if (attendanceRecord.length >0) {
 
-    if (attendanceRecord && attendanceRecord.multitime_sts) {
-      return attendanceRecord.multitime_sts;
-    } else {
+      return attendanceRecord[0].multitime_sts;
+      } else {        
       const shiftRecord = await ShiftMaster.query()
         .where("Id", shiftId)
-        .select("MultipletimeStatus")
-        .first();
-      if (shiftRecord && shiftRecord.MultipletimeStatus) {
-        return shiftRecord.MultipletimeStatus;
-      }
+        .select("MultipletimeStatus");
+      // .first();
+        if (shiftRecord.length > 0) {
+        return shiftRecord[0].MultipletimeStatus;
+      } 
     }
     return 0;
   }
@@ -691,31 +699,21 @@ export default class Helper {
     }
   }
 
+
   static async getCurrentOrgStatus(orgId) {
-    const todayDate = new Date().toISOString().split("T")[0];
+    const todayDate = new Date().toISOString().split('T')[0];
     let customizeOrg = 0;
     let status = 0;
     let endDate = "0000-00-00";
     let deleteSts = 0;
     let extended = 0;
 
-    const queryResult = await Database.from("Organization")
-      .join(
-        "licence_ubiattendance",
-        "Organization.Id",
-        "=",
-        "licence_ubiattendance.OrganizationId"
-      )
-      .select(
-        "Organization.customize_org AS customize_org",
-        "Organization.delete_sts AS delete_sts"
-      )
-      .select(
-        "licence_ubiattendance.status AS status",
-        "licence_ubiattendance.end_date AS end_date",
-        "licence_ubiattendance.extended AS extended"
-      )
-      .where("Organization.Id", orgId);
+    const queryResult = await Database
+      .from('Organization')
+      .join('licence_ubiattendance', 'Organization.Id', '=', 'licence_ubiattendance.OrganizationId')
+      .select('Organization.customize_org AS customize_org', 'Organization.delete_sts AS delete_sts')
+      .select('licence_ubiattendance.status AS status', 'licence_ubiattendance.end_date AS end_date', 'licence_ubiattendance.extended AS extended')
+      .where('Organization.Id', orgId)
 
     const row = queryResult[0];
 
@@ -728,45 +726,25 @@ export default class Helper {
       deleteSts = row.delete_sts;
       extended = row.extended;
     }
-    if (
-      status === 0 &&
-      extended === 1 &&
-      todayDate <= endDate &&
-      customizeOrg === 0 &&
-      deleteSts === 0
-    ) {
-      return "TrialOrg";
-    } else if (
-      status === 1 &&
-      todayDate <= endDate &&
-      deleteSts === 0 &&
-      customizeOrg === 0
-    ) {
-      return "PremiumStandardOrg";
-    } else if (customizeOrg === 1 && deleteSts === 0) {
-      return "PremiumCustomizedOrg";
-    } else if (
-      status === 0 &&
-      todayDate > endDate &&
-      deleteSts === 0 &&
-      customizeOrg === 0
-    ) {
-      return "ExpiredTrialOrg";
-    } else if (
-      status === 0 &&
-      extended > 1 &&
-      endDate >= todayDate &&
-      deleteSts === 0 &&
-      customizeOrg === 0
-    ) {
-      return "ExtendedTrialOrg";
-    } else if (
-      status === 0 &&
-      todayDate > endDate &&
-      deleteSts === 0 &&
-      customizeOrg === 0
-    ) {
-      return "PremiumExpiredOrg";
+
+    if (status === 0 && extended === 1 && todayDate <= endDate && customizeOrg === 0 && deleteSts === 0) {
+      return 'TrialOrg';
+    }
+    else if (status === 1 && todayDate <= endDate && deleteSts === 0 && customizeOrg === 0) {
+      return 'PremiumStandardOrg';
+    }
+    else if (customizeOrg === 1 && deleteSts === 0) {
+      return 'PremiumCustomizedOrg';
+    }
+    else if (status === 0 && todayDate > endDate && deleteSts === 0 && customizeOrg === 0) {
+      return 'ExpiredTrialOrg';
+    }
+    else if (status === 0 && extended > 1 && endDate >= todayDate && deleteSts === 0 && customizeOrg === 0) {
+      return 'ExtendedTrialOrg';
+    }
+    else if (status === 0 && todayDate > endDate && deleteSts === 0 && customizeOrg === 0) {
+      return 'PremiumExpiredOrg';
+
     }
   }
 
@@ -784,11 +762,11 @@ export default class Helper {
       .select("Addon_Regularization")
       .where("Id", orgid);
 
-    const Addon_Regularizations = Addon_Regularization.map(
-      (row) => row.Addon_Regularization
-    );
+
+    const Addon_Regularizations = Addon_Regularization.map((row) => row.Addon_Regularization);
     return Addon_Regularizations[0];
   }
+
 
   static async getLeaveCountApp(orgid, empid, leavedate) {
     const fiscaldate = await this.getOrgFiscal(orgid, leavedate);
@@ -796,37 +774,40 @@ export default class Helper {
     const fiscalstart = fiscal[0];
     const fiscalend = fiscal[2];
 
-    const query = await Database.from("AppliedLeave")
-      .where("EmployeeId", empid)
-      .whereIn("ApprovalStatus", [1, 2])
-      .whereBetween("Date", [fiscalstart, fiscalend])
-      .count("Id as noofleave");
+
+    const query = await Database.from('AppliedLeave')
+      .where('EmployeeId', empid)
+      .whereIn('ApprovalStatus', [1, 2])
+      .whereBetween('Date', [fiscalstart, fiscalend])
+      .count('Id as noofleave');
 
     //const result = await query;
 
     const noofleave = query[0].noofleave;
 
+
     return noofleave;
   }
 
   static async getOrgFiscal(orgid, leavedate) {
-    const query = Database.from("Organization")
-      .where("Id", orgid)
-      .select("fiscal_start", "fiscal_end")
+
+    const query = Database.from('Organization')
+      .where('Id', orgid)
+      .select('fiscal_start', 'fiscal_end')
       .first();
 
     const row = await query;
 
     if (!row) {
-      throw new Error("Organization not found");
+
+      throw new Error('Organization not found');
     }
 
     const f_start = row.fiscal_start;
     const f_end = row.fiscal_end;
 
-    const leavedateFormatted =
-      leavedate || new Date().toISOString().slice(0, 10);
 
+    const leavedateFormatted = leavedate || new Date().toISOString().slice(0, 10);
     const dateofjoin = new Date(leavedateFormatted);
     const fiscalstart = new Date(f_start);
     const fiscalend = new Date(f_end);
@@ -854,8 +835,18 @@ export default class Helper {
       .where("E.Id", uid)
       .first();
 
+
+  static async getBalanceLeave(orgid, uid, date = '') {
+    const data = await Database
+      .from('EmployeeMaster as E')
+      .join('Organization as O', 'E.OrganizationId', '=', 'O.Id')
+      .select('E.FirstName', 'E.entitledleave', 'E.DOJ',)
+      .select('O.fiscal_start', 'O.fiscal_end', 'O.entitled_leave')
+      .where('O.Id', orgid)
+      .where('E.Id', uid).first()
+
     let entitledleave: any, doj;
-    if (!data.entitledleave || data.entitledleave.trim() === "undefined") {
+    if (!data.entitledleave || data.entitledleave.trim() === 'undefined') {
       entitledleave = data.entitled_leave;
     } else {
       entitledleave = data.entitledleave;
@@ -864,77 +855,51 @@ export default class Helper {
     const todaydate = new Date();
     const new_fiscal_start_year = todaydate.getFullYear();
     const new_fiscal_end_year = new_fiscal_start_year + 1;
-    const startDate_year = format(
-      parse(data.fiscal_start, "d MMMM", new Date()),
-      "MM-dd"
-    );
-    const endDate_year = format(
-      parse(data.fiscal_end, "d MMMM", new Date()),
-      "MM-dd"
-    );
+    const startDate_year = format(parse(data.fiscal_start, 'd MMMM', new Date()), 'MM-dd');
+    const endDate_year = format(parse(data.fiscal_end, 'd MMMM', new Date()), 'MM-dd');
     const endDate_fnew = `${new_fiscal_end_year}-${endDate_year}`;
     const startDate_fnew = `${new_fiscal_start_year}-${startDate_year}`;
 
     ////////////////////fiscal start/////////////////
-    const currentDate = data.DOJ.toISOString().split("T")[0];
-    let dateofjoin: any = format(
-      parse(currentDate, "yyyy-MM-dd", new Date()),
-      "MM/dd/Y"
-    );
-    const fiscalstart = format(
-      parse(startDate_fnew, "yyyy-MM-dd", new Date()),
-      "MM/dd"
-    );
+
+    const currentDate = data.DOJ.toISOString().split('T')[0];
+    let dateofjoin: any = format(parse(currentDate, 'yyyy-MM-dd', new Date()), 'MM/dd/Y');
+    const fiscalstart = format(parse(startDate_fnew, 'yyyy-MM-dd', new Date()), 'MM/dd');
     const fiscalstartmon = fiscalstart.substring(0, 2);
     const dateofjoinmon = dateofjoin.substring(0, 2);
     let fiscalstartdate = fiscalstart.substring(3, 2);
     const joindate = dateofjoin.substring(3, 2);
 
     if (dateofjoinmon < fiscalstartmon) {
-      doj = parseInt(dateofjoin.split("/")[2]) - 1;
+      doj = parseInt(dateofjoin.split('/')[2]) - 1;
       fiscalstartdate = `${fiscalstart}/${doj}`;
-    } else if (
-      dateofjoinmon === fiscalstartmon &&
-      joindate < fiscalstart.substring(3, 5)
-    ) {
-      doj = parseInt(dateofjoin.split("/")[2]) - 1;
+    } else if (dateofjoinmon === fiscalstartmon && joindate < fiscalstart.substring(3, 5)) {
+      doj = parseInt(dateofjoin.split('/')[2]) - 1;
       fiscalstartdate = `${fiscalstart}/${doj}`;
-    } else if (
-      dateofjoinmon === fiscalstartmon &&
-      joindate === fiscalstart.substring(3, 5)
-    ) {
-      doj = parseInt(dateofjoin.split("/")[2]);
+    } else if (dateofjoinmon === fiscalstartmon && joindate === fiscalstart.substring(3, 5)) {
+      doj = parseInt(dateofjoin.split('/')[2]);
       fiscalstartdate = `${fiscalstart}/${doj}`;
     } else {
-      doj = parseInt(dateofjoin.split("/")[2]);
+      doj = parseInt(dateofjoin.split('/')[2]);
       fiscalstartdate = `${fiscalstart}/${doj}`;
     }
     //////////////////////Fiscal End//////////////////////
 
-    const fiscalend = format(
-      parse(endDate_fnew, "yyyy-MM-dd", new Date()),
-      "MM/dd"
-    );
+    const fiscalend = format(parse(endDate_fnew, 'yyyy-MM-dd', new Date()), 'MM/dd');
     const fiscalendmon = fiscalend.substring(0, 2);
     let fiscalenddate = fiscalend.substring(3, 2);
 
     if (dateofjoinmon > fiscalendmon) {
-      doj = parseInt(dateofjoin.split("/")[2]) - 1;
+      doj = parseInt(dateofjoin.split('/')[2]) - 1;
       fiscalenddate = `${fiscalend}/${doj}`;
-    } else if (
-      dateofjoinmon === fiscalendmon &&
-      joindate > fiscalend.substring(3, 5)
-    ) {
-      doj = parseInt(dateofjoin.split("/")[2]) - 1;
+    } else if (dateofjoinmon === fiscalendmon && joindate > fiscalend.substring(3, 5)) {
+      doj = parseInt(dateofjoin.split('/')[2]) - 1;
       fiscalenddate = `${fiscalend}/${doj}`;
-    } else if (
-      dateofjoinmon === fiscalendmon &&
-      joindate === fiscalend.substring(3, 5)
-    ) {
-      doj = parseInt(dateofjoin.split("/")[2]);
+    } else if (dateofjoinmon === fiscalendmon && joindate === fiscalend.substring(3, 5)) {
+      doj = parseInt(dateofjoin.split('/')[2]);
       fiscalenddate = `${fiscalend}/${doj}`;
     } else {
-      doj = parseInt(dateofjoin.split("/")[2]);
+      doj = parseInt(dateofjoin.split('/')[2]);
       fiscalenddate = `${fiscalend}/${doj}`;
     }
     /////////////////////////////*******/////////////////////////////////
@@ -943,9 +908,7 @@ export default class Helper {
 
     if (currentDate >= startDate && currentDate <= endDate) {
       const diff = endDate - dateofjoin;
-      const differenceInDays = Math.abs(
-        Math.round(diff / (1000 * 60 * 60 * 24))
-      );
+      const differenceInDays = Math.abs(Math.round(diff / (1000 * 60 * 60 * 24)));
 
       const bal1 = entitledleave / 12;
       const bal2 = differenceInDays / 30.4167;
@@ -988,6 +951,27 @@ export default class Helper {
 
     const desgName = DesgName.map((row) => row.Name);
     return desgName[0];
+
+  }
+
+  static async getShiftTimeByEmpID(uid) {
+    const shiftInfo = await Database
+      .from('ShiftMaster')
+      .select('Name', 'TimeIn', 'TimeOut', 'shifttype', 'HoursPerDay', Database.raw('TIMEDIFF(TimeIn, TimeOut) AS diffShiftTime'))
+      .whereIn('id', (subquery) => {
+        subquery.select('Shift').from('EmployeeMaster').where('id', uid);
+      }).first();
+
+    if (shiftInfo) {
+      const arr: any = {};
+      arr.shiftName = shiftInfo.Name;
+      arr.shiftTimeIn = shiftInfo.TimeIn;
+      arr.ShiftTimeOut = shiftInfo.TimeOut;
+      arr.shifttype = shiftInfo.shifttype;
+      arr.minworkhrs = shiftInfo.HoursPerDay;
+      arr.diffShiftTime = shiftInfo.diffShiftTime;
+      return arr;
+    }
   }
 
   static async getShiftTimeByEmpID(uid) {
@@ -1135,8 +1119,8 @@ export default class Helper {
     let dist =
       Math.sin(this.deg2rad(lat1)) * Math.sin(this.deg2rad(lat2)) +
       Math.cos(this.deg2rad(lat1)) *
-        Math.cos(this.deg2rad(lat2)) *
-        Math.cos(this.deg2rad(theta));
+      Math.cos(this.deg2rad(lat2)) *
+      Math.cos(this.deg2rad(theta));
     dist = Math.acos(dist);
     dist = this.rad2deg(dist);
     let miles = dist * 60 * 1.1515;
@@ -1231,10 +1215,10 @@ export default class Helper {
   }
   public static async dateFormate(date) {
     const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are zero-based
-    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+    const day = String(date.getDate()).padStart(2, '0');
     const formattedDate = `${year}-${month}-${day}`;
-    return formattedDate;
+    return formattedDate
   }
   static async getSeniorId(empid, organization) {
     var id = "0";
@@ -1260,26 +1244,22 @@ export default class Helper {
   }
 
   public static async getshiftmultipletime_sts(uid, date, ShiftId) {
-    const query21: any = await Database.query()
-      .from("AttendanceMaster")
-      .select("multitime_sts")
-      .where("EmployeeId", uid)
-      .andWhere("AttendanceDate", date);
+    const query21: any = await Database.query().from('AttendanceMaster').select('multitime_sts').where('EmployeeId', uid).andWhere('AttendanceDate', date);
     const count21 = query21.length;
     let multitime_sts = 0;
     if (count21 > 0) {
       multitime_sts = query21[0].multitime_sts;
-    } else {
-      const query21: any = await Database.query()
-        .from("ShiftMaster")
-        .select("MultipletimeStatus")
-        .where("Id", ShiftId);
+
+    }
+    else {
+      const query21: any = await Database.query().from('ShiftMaster').select('MultipletimeStatus').where('Id', ShiftId);
       if (query21.length > 0) {
         multitime_sts = query21[0].MultipletimeStatus;
       }
     }
     return multitime_sts;
   }
+
 
   public static async getTrialDept(orgid) {
     var Orgid = orgid;
@@ -1349,6 +1329,257 @@ export default class Helper {
       return shiftid;
     }
   }
+
+  public static async sendManualPushNotification(condition, title, body, empid, orgid, pageName) {
+    var lastInsertedId: number = 0;
+    var adminSts: number = 0;
+    var currentDate;
+    var time;
+    var insertQuery;
+    if (empid == 0 && orgid != 0) {
+      var zone = await Helper.getEmpTimeZone(empid, orgid);
+      const defaultZone = DateTime.now().setZone(zone);
+      time = defaultZone.toFormat("HH:mm:ss");
+      currentDate = DateTime.local().toFormat('yyyy-MM-dd');
+      adminSts = 0;
+
+      if (condition.includes('admin')) {
+        adminSts = 1;
+      }
+
+      insertQuery = await Database.table('NotificationsList').insert({
+        NotificationTitle: title
+        , NotificationBody: body
+        , NotificationData: ''
+        , EmployeeId: empid
+        , OrganizationId: orgid
+        , CreatedDate: currentDate
+        , CreatedTime: time
+        , AdminSts: adminSts
+      })
+    }
+
+    if (empid != 0 && orgid != 0) {
+      var zone = await Helper.getEmpTimeZone(empid, orgid);
+      const defaultZone = DateTime.now().setZone(zone);
+      time = defaultZone.toFormat("HH:mm:ss");
+      currentDate = DateTime.local().toFormat('yyyy-MM-dd');
+      adminSts = 0;
+
+      if (condition.includes('admin')) {
+        adminSts = 1;
+      }
+
+      insertQuery = await Database.table('NotificationsList').insert({
+        NotificationTitle: title
+        , NotificationBody: body
+        , NotificationData: ''
+        , EmployeeId: empid
+        , OrganizationId: orgid
+        , CreatedDate: currentDate
+        , CreatedTime: time
+        , AdminSts: adminSts
+      })
+    }
+    if (insertQuery && insertQuery[0]) {
+      lastInsertedId = insertQuery[0];
+    }
+    const urls = [
+      "http://localhost:3333/SendNotificationDiffOrgEmployee?orgid=149007&contact=8527419630&adminEmail=&adminId="
+    ];
+
+    const jsonObject = {
+      'condition': condition,
+      'priority': 'high',
+      data: {
+        'click_action': 'FLUTTER_NOTIFICATION_CLICK',
+        'screen': pageName,
+        'status': 'done'
+      },
+      'notification': { 'body': body, 'title': title, 'click_action': 'FLUTTER_NOTIFICATION_CLICK' }
+    };
+
+    const jsonString = JSON.stringify(jsonObject);
+
+    var headers = [
+      {
+        'authorization': 'key=AAAAsVdW418:APA91bH-KAyzItecPhs8jP95ZlFNOzDKjmzmeMd2iH1HyUpO_T-_Baed-uIkuyYlosgLStcJZBqQFZuu7UdepvKX6lJcHjU__7FV19LLGn0nbveDBcTBJRJulb5fj_iOlsVRURzsu1Ch',
+        'Content-Type': 'application/json'
+      },
+      {
+        'authorization': 'key=AAAA-BiaJfs:APA91bE1hVf8ChrWfLVTxK2T9pkK6jhGFK_1PUwHIjYwVvd3viShAoNYgFdkqr2PPlMCxGGKLAwV8gk3N01CAwQxmdo2XM7o5O_C1QWFIhyIElfv4Jx4biC3qEyMgIwfVIIXz5Whx9Vs',
+        'Content-Type': 'application/json'
+      },
+      {
+        'authorization': 'key=AAAAksjUHhg:APA91bFR2-KVdsVYHc4IHwDMHuCIt5OULa7OWZ9CD39-PT5J-RdF7CH7RcRh13Fwk8P8K-a7fapRpoyAgM0luf0yWpunE7jnUtltdqE7Vw3vZE95hugsgmhnntMSk09UbvcUr92-PK4d',
+        'Content-Type': 'application/json'
+      },
+      {
+        'authorization': 'key=AAAAI_x79EU:APA91bFae5SDovaio3lTLRTgbOz6m6mJwVkeL9dfeFtCN6P_0xpfEVzz-hjRNEpqztlQNyKlE7XbBynWyzDtAILWMN947i0p79qC5Qkrlu52NmygD7OMYhhCDI6d2U4Iu600V_dbSRvc',
+        'Content-Type': 'application/json'
+      }
+    ];
+
+    var request: {} = {};
+
+    const axiosInstances: any = [];
+
+    // function sendRequest(url, headers) {
+    //   return new Promise(async (resolve, reject) => {
+    //     try {
+
+    //       const response = await axios.post(url, jsonString, {
+    //         headers: headers,
+    //         timeout: 10000, // 10 seconds timeout
+    //         httpsAgent: new https.Agent({ rejectUnauthorized: false }), // Disables SSL certificate verification (use with caution)
+    //         responseType: 'json',
+    //       });
+
+    //       resolve({
+    //         content: response.data,
+    //         http_code: response.status,
+    //       });
+    //     } catch (error) {
+    //       reject(error);
+    //     }
+    //   });
+    // }
+
+    // Function to send multiple requests concurrently
+    // async function sendRequests() {
+    //   const requestPromises = urls.map((url, index) => sendRequest(url, headers[index]));
+
+    //   try {
+    //     const responses = await Promise.all(requestPromises);
+
+    //     // Loop through the responses and process them
+    //     responses.forEach((response, index) => {
+    //       console.log(`Content from URL ${urls[index]}:`, response.content);
+    //       console.log(`HTTP Status Code from URL ${urls[index]}:`, response.http_code);
+    //     });
+    //   } catch (error) {
+    //     console.error('Error:', error);
+    //     // Handle errors here
+    //   }
+    // }
+
+    // // Call the function to send multiple requests concurrently
+    // sendRequests();
+    // Create separate Axios instances for each request
+    // console.log(urls.length);
+    // // return 
+    // for (let i = 0; i < urls.length; i++) {
+    //   const instance = await axios.create({
+    //     baseURL: urls[i],
+    //     timeout: 10000, // 10 seconds timeout
+    //     headers: headers[i],
+    //     httpsAgent: new https.Agent({ rejectUnauthorized: false }), // Disables SSL certificate verification (use with caution)
+    //     responseType: 'json',
+    //   });
+
+    //   axiosInstances.push(instance);
+    // }
+
+    // return
+    // const requests = urls.map(async (url) => {
+    //   // try {
+    //   // return 'hdh'
+    //   const response = await axios.get(url);
+    //   // Handle the response data for each request here
+    //   console.log(`Response from ${url}: ${response.data}`);
+    //   return {
+    //     content: response.data,
+    //     http_code: response.status
+    //   };
+    // } catch (error) {
+    //   console.error(`Error from ${url}: ${error.message}`);
+    //   throw error;
+    // }
+    // });
+    // const responses = await Promise.all(requests);
+    // responses.forEach((response, k) => {
+    //   // Process each response here
+    //   console.log(`Content from URL ${urls[k]}: ${response.content}`);
+    //   console.log(`HTTP Status Code from URL ${urls[k]}: ${response.http_code}`);
+    // });
+
+    return lastInsertedId;
+
+
+
+    // async function sendMultipleRequests() {
+    //   try {
+    //     const requests = urls.map((url, index) => {
+    //       return axios.post(url, jsonObject, {
+    //         headers: headers[index],
+    //         timeout: 10000, // Set a timeout if needed
+    //       });
+    //     });
+
+    //     const responses = await Promise.all(requests);
+
+    //     // Process the responses
+    //     responses.forEach((response, index) => {
+    //       if (response.status === 200) {
+    //         const data = response.data;
+    //         console.log(`Response from ${urls[index]}:`, data);
+    //       } else {
+    //         console.error(`Error for ${urls[index]} - HTTP Status: ${response.status}`);
+    //       }
+    //     });
+    //   } catch (error) {
+    //     console.error('Error:', error);
+    //   }
+    // }
+
+    // sendMultipleRequests();
+  }
+  public static async getUbiatt_Ubihrmsts(orgid) {
+    const result = await Database.from("Organization")
+      .select("ubihrm_sts")
+      .where("Id", orgid);
+    if (result) {
+      return result[0].ubihrm_sts;
+    }
+    return 0;
+  }
+
+  public static async getAttImageStatus(orgid) {
+    const getAttnImageSts = await Database.from("admin_login")
+      .select("AttnImageStatus")
+      .where("OrganizationId", orgid);
+    if (getAttnImageSts) {
+      return getAttnImageSts[0].AttnImageStatus;
+    } else {
+      return 0;
+    }
+  }
+
+  public static async loctrackPermission(empId) {
+
+    const query = await Database.from('EmployeeMaster')
+      .select('livelocationtrack')
+      .where('Id', empId)
+
+    if (query) {
+      return query[0].livelocationtrack;
+    } else {
+      return 0;
+    }
+  }
+
+  public static async getDesignation(Id) {    
+    const query = await Database.from("DesignationMaster")
+      .select("Name")
+      .where("Id", Id);    
+    if (query.length > 0) {
+      return query[0].Name;
+    } else {
+      return 0;
+    }
+
+  }
+
   public static async getDepartment(id) {
     let Name = "";
 
@@ -1357,19 +1588,6 @@ export default class Helper {
       .where("id", id);
     if (selectDepartmentId.length > 0) {
       Name = selectDepartmentId[0].name;
-      return Name;
-    } else {
-      return Name;
-    }
-  }
-  public static async getDesignation(id) {
-    let Name = "";
-
-    const selectDesignationMasterId = await Database.from("DesignationMaster")
-      .select("name")
-      .where("id", id);
-    if (selectDesignationMasterId.length > 0) {
-      Name = selectDesignationMasterId[0].name;
       return Name;
     } else {
       return Name;
@@ -1384,7 +1602,6 @@ export default class Helper {
     )
       .select("deviceverification_setting")
       .where("id", orgid);
-
     if (selectDeviceVerification_settings.length > 0) {
       data = selectDeviceVerification_settings[0].deviceverification_setting;
       return data;
@@ -1392,6 +1609,7 @@ export default class Helper {
       return data;
     }
   }
+    
   public static async gettimezonebyid(zoneid) {
     var zone = "Asia/Kolkata";
     const query = await Database.from("ZoneMaster")
@@ -1466,3 +1684,4 @@ export default class Helper {
     }
   }
 }
+
