@@ -36,9 +36,6 @@ export default class AuthMiddleware {
     for (let guard of guards) {
       guardLastAttempted = guard
 
-      console.log(guards);
-      
-
       if (await auth.use(guard).check()) {
         
         auth.defaultGuard = guard
@@ -66,13 +63,13 @@ export default class AuthMiddleware {
     customGuards: (keyof GuardsList)[]
   ) {
     
-    const apitoken = await Redis.get('token')
+    //const apitoken = await Redis.get('token')
     
    
    // response.header('Authorization',`bearer ${apitoken}`);
    
     const guards = customGuards.length ? customGuards : [auth.name]
-    console.log(auth);
+    //console.log(auth);
     
     
     await this.authenticate(auth, guards)

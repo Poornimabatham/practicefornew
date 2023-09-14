@@ -6,6 +6,7 @@ import EmployeeMaster from "App/Models/EmployeeMaster";
 import Organization from "App/Models/Organization";
 import ShiftMaster from "App/Models/ShiftMaster";
 import ZoneMaster from "App/Models/ZoneMaster";
+
 const { format, parse, parseISO } = require('date-fns');
 import { DateTime } from "luxon";
 import moment from "moment";
@@ -310,10 +311,10 @@ export default class Helper {
       .select("shiftid")
       .where("empid", empid)
       .andWhere("ShiftDate", ShiftDate);
-     
-    if (getshiftid.length > 0) {      
+
+    if (getshiftid.length > 0) {
       return getshiftid[0].shiftid;
-     } 
+    }
     else {
       let getshiftid = await Database.from("ShiftMaster")
         .select("Id")
@@ -393,18 +394,18 @@ export default class Helper {
       .where("AttendanceDate", today)
       .whereNot("TimeIn", "00:00:00")
       .select("multitime_sts")
-      // .first()
-      if (attendanceRecord.length >0) {
+    // .first()
+    if (attendanceRecord.length > 0) {
 
       return attendanceRecord[0].multitime_sts;
-      } else {        
+    } else {
       const shiftRecord = await ShiftMaster.query()
         .where("Id", shiftId)
         .select("MultipletimeStatus");
       // .first();
-        if (shiftRecord.length > 0) {
+      if (shiftRecord.length > 0) {
         return shiftRecord[0].MultipletimeStatus;
-      } 
+      }
     }
     return 0;
   }
@@ -693,8 +694,7 @@ export default class Helper {
 
     if (query) {
       return query.name;
-    }
-    else {
+    } else {
       return 0;
     }
   }
@@ -704,7 +704,7 @@ export default class Helper {
     const todayDate = new Date().toISOString().split('T')[0];
     let customizeOrg = 0;
     let status = 0;
-    let endDate = '0000-00-00';
+    let endDate = "0000-00-00";
     let deleteSts = 0;
     let extended = 0;
 
@@ -720,10 +720,13 @@ export default class Helper {
     if (row) {
       customizeOrg = row.customize_org;
       status = row.status;
-      endDate = DateTime.fromJSDate(new Date(row.end_date)).toFormat('yyyy-MM-dd');
+      endDate = DateTime.fromJSDate(new Date(row.end_date)).toFormat(
+        "yyyy-MM-dd"
+      );
       deleteSts = row.delete_sts;
       extended = row.extended;
     }
+
     if (status === 0 && extended === 1 && todayDate <= endDate && customizeOrg === 0 && deleteSts === 0) {
       return 'TrialOrg';
     }
@@ -741,6 +744,7 @@ export default class Helper {
     }
     else if (status === 0 && todayDate > endDate && deleteSts === 0 && customizeOrg === 0) {
       return 'PremiumExpiredOrg';
+
     }
   }
 
@@ -758,17 +762,18 @@ export default class Helper {
       .select("Addon_Regularization")
       .where("Id", orgid);
 
+
     const Addon_Regularizations = Addon_Regularization.map((row) => row.Addon_Regularization);
     return Addon_Regularizations[0];
   }
 
 
-
   static async getLeaveCountApp(orgid, empid, leavedate) {
     const fiscaldate = await this.getOrgFiscal(orgid, leavedate);
-    const fiscal = fiscaldate.split(' ');
+    const fiscal = fiscaldate.split(" ");
     const fiscalstart = fiscal[0];
     const fiscalend = fiscal[2];
+
 
     const query = await Database.from('AppliedLeave')
       .where('EmployeeId', empid)
@@ -780,10 +785,12 @@ export default class Helper {
 
     const noofleave = query[0].noofleave;
 
+
     return noofleave;
   }
 
   static async getOrgFiscal(orgid, leavedate) {
+
     const query = Database.from('Organization')
       .where('Id', orgid)
       .select('fiscal_start', 'fiscal_end')
@@ -792,14 +799,15 @@ export default class Helper {
     const row = await query;
 
     if (!row) {
+
       throw new Error('Organization not found');
     }
 
     const f_start = row.fiscal_start;
     const f_end = row.fiscal_end;
 
-    const leavedateFormatted = leavedate || new Date().toISOString().slice(0, 10);
 
+    const leavedateFormatted = leavedate || new Date().toISOString().slice(0, 10);
     const dateofjoin = new Date(leavedateFormatted);
     const fiscalstart = new Date(f_start);
     const fiscalend = new Date(f_end);
@@ -818,15 +826,16 @@ export default class Helper {
     return `${startDate} And ${endDate}`;
   }
 
+  static async getBalanceLeave(orgid, uid, date = "") {
+    const data = await Database.from("EmployeeMaster as E")
+      .join("Organization as O", "E.OrganizationId", "=", "O.Id")
+      .select("E.FirstName", "E.entitledleave", "E.DOJ")
+      .select("O.fiscal_start", "O.fiscal_end", "O.entitled_leave")
+      .where("O.Id", orgid)
+      .where("E.Id", uid)
+      .first();
 
-  static async getBalanceLeave(orgid, uid, date = '') {
-    const data = await Database
-      .from('EmployeeMaster as E')
-      .join('Organization as O', 'E.OrganizationId', '=', 'O.Id')
-      .select('E.FirstName', 'E.entitledleave', 'E.DOJ',)
-      .select('O.fiscal_start', 'O.fiscal_end', 'O.entitled_leave')
-      .where('O.Id', orgid)
-      .where('E.Id', uid).first()
+
 
     let entitledleave: any, doj;
     if (!data.entitledleave || data.entitledleave.trim() === 'undefined') {
@@ -844,6 +853,7 @@ export default class Helper {
     const startDate_fnew = `${new_fiscal_start_year}-${startDate_year}`;
 
     ////////////////////fiscal start/////////////////
+
     const currentDate = data.DOJ.toISOString().split('T')[0];
     let dateofjoin: any = format(parse(currentDate, 'yyyy-MM-dd', new Date()), 'MM/dd/Y');
     const fiscalstart = format(parse(startDate_fnew, 'yyyy-MM-dd', new Date()), 'MM/dd');
@@ -933,6 +943,7 @@ export default class Helper {
 
     const desgName = DesgName.map((row) => row.Name);
     return desgName[0];
+
   }
 
   static async getShiftTimeByEmpID(uid) {
@@ -1174,7 +1185,6 @@ export default class Helper {
     const day = String(date.getDate()).padStart(2, '0');
     const formattedDate = `${year}-${month}-${day}`;
     return formattedDate
-
   }
   static async getSeniorId(empid, organization) {
     var id = "0";
@@ -1205,6 +1215,7 @@ export default class Helper {
     let multitime_sts = 0;
     if (count21 > 0) {
       multitime_sts = query21[0].multitime_sts;
+
     }
     else {
       const query21: any = await Database.query().from('ShiftMaster').select('MultipletimeStatus').where('Id', ShiftId);
@@ -1214,7 +1225,6 @@ export default class Helper {
     }
     return multitime_sts;
   }
-
 
 
   public static async getTrialDept(orgid) {
@@ -1250,7 +1260,6 @@ export default class Helper {
   }
   public static async sendEmail(email, subject, messages, headers) {
     // Create an SES client
-
 
     const getmail = await Mail.use("smtp").send(
       (message) => {
@@ -1501,16 +1510,6 @@ export default class Helper {
     return 0;
   }
 
-  public static async getAttImageStatus(orgid) {
-    const getAttnImageSts = await Database.from("admin_login")
-      .select("AttnImageStatus")
-      .where("OrganizationId", orgid);
-    if (getAttnImageSts) {
-      return getAttnImageSts[0].AttnImageStatus;
-    } else {
-      return 0;
-    }
-  }
 
   public static async loctrackPermission(empId) {
 
@@ -1525,10 +1524,10 @@ export default class Helper {
     }
   }
 
-  public static async getDesignation(Id) {    
+  public static async getDesignation(Id) {
     const query = await Database.from("DesignationMaster")
       .select("Name")
-      .where("Id", Id);    
+      .where("Id", Id);
     if (query.length > 0) {
       return query[0].Name;
     } else {
@@ -1566,7 +1565,7 @@ export default class Helper {
       return data;
     }
   }
-    
+
   public static async gettimezonebyid(zoneid) {
     var zone = "Asia/Kolkata";
     const query = await Database.from("ZoneMaster")
@@ -1593,5 +1592,47 @@ export default class Helper {
       return Name;
     }
   }
+
+
+  public static async ucfirst(str: string) {
+    if (typeof str !== "string" || str.length === 0) {
+      return str;
+    }
+
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  }
+
+  public static async getAttImageStatus(orgid: number) {
+    // to get the infor weather image uploading is enable or not in orgn for attn
+
+    let query: any = await Database.from("admin_login")
+      .where("OrganizationId", orgid)
+      .select("attnImageStatus");
+
+    if (query.length > 0) {
+      return query[0].attnImageStatus;
+    }
+    return 0;
+  }
+
+
+  static async AutoTimeOffEndWL(empid, orgid, time, date, dateTime) {
+    let getmaxEmpidTimeoff = await Database.from("Timeoff")
+      .max("id as id")
+      .where("EmployeeId", empid)
+      .andWhere("OrganizationId", orgid);
+
+
+
+    if (getmaxEmpidTimeoff.length > 0) {
+      let id = getmaxEmpidTimeoff[0].id;
+      await Database.from("Timeoff")
+        .where("id", id)
+        .andWhere("TimeTo", "00:00:00")
+        .update({ TimeTo: time, TimeoffEndDate: date, ModifiedDate: dateTime });
+    }
+  }
 }
+
+
 

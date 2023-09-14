@@ -71,14 +71,14 @@ const authConfig: AuthConfig = {
 
         /*
         |--------------------------------------------------------------------------
-        | Identifier k                                                                               ey
+        | Identifier key
         |--------------------------------------------------------------------------
         |
         | The identifier key is the unique key on the model. In most cases specifying
         | the primary key is the right choice.
         |
         */
-        identifierKey: 'id',
+        identifierKey: 'Id',
 
         /*
         |--------------------------------------------------------------------------
@@ -90,7 +90,7 @@ const authConfig: AuthConfig = {
         | of the mentioned columns to find their user record.
         |
         */
-        uids: ['email'],
+        uids: ['username','usernamemobile'],
 
         /*
         |--------------------------------------------------------------------------
@@ -103,7 +103,7 @@ const authConfig: AuthConfig = {
         | that time.
         |
         */
-        model: () => import('App/Models/AuthenticationTable'),
+        model: () => import('App/Models/UserMaster'),
       },
     },
   },

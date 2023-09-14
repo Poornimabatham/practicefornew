@@ -19,4 +19,13 @@ export default class AddonservicesController {
         return response.json(res);
     }
 
+    public async disapprovefaceid({ request, response }: HttpContextContract) {
+
+        const validateReq = await request.validate(AddonValidator.disapprovefaceid);
+
+        const res = await Addonservice.disapprovefaceid(validateReq);
+
+        return response.json(res);
+    }
+
 }

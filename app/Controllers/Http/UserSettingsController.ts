@@ -154,4 +154,10 @@ export default class UserSettingsController {
      const serviceRes = await UserSettingService.checkuseremailforgoogle(reqData);
      return response.json(serviceRes); 
   }
+
+  public async updateProfilePhoto({ request, response }: HttpContextContract) {
+    const reqData = await request.validate(UserSettingValidator.updateProfilePhoto);
+    const serviceRes = await UserSettingService.updateProfilePhoto(reqData);
+    return response.json(serviceRes);
+  }
 }
