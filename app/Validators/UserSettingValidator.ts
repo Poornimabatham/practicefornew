@@ -150,7 +150,15 @@ export default class UserSettingValidator {
 
   static checkuseremailforgoogle = {
     schema: schema.create({
-      useremail : schema.string.optional()
+      useremail: schema.string.optional(),
+    }),
+  };
+
+  static updateProfilePhoto = {
+    schema: schema.create({
+      uid: schema.string.optional(),
+      refno: schema.string.optional(),
+      file: schema.string.optional()
     }),
   };
 }

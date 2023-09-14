@@ -2,9 +2,6 @@ import Database from "@ioc:Adonis/Lucid/Database";
 import helper from "../Helper/Helper";
 import Helper from "../Helper/Helper";
 import moment from "moment-timezone";
-import { lightFormat } from "date-fns";
-import { DateTime } from "luxon";
-import { LocalFileServer } from "@adonisjs/core/build/standalone";
 export default class Usersettingservice {
   constructor() {}
 
@@ -619,7 +616,7 @@ export default class Usersettingservice {
           if (regsts == 3) {
             res["regularizeSts"] = "pending";
             let pstatus = 0;
-             let approverid = row.ApproverId;    
+            let approverid = row.ApproverId;
 
             if (approverid != 0) {
               pstatus = approverid;
@@ -636,16 +633,11 @@ export default class Usersettingservice {
                 .andWhere("ApproverSts", regsts)
                 .andWhere("approverregularsts", 0)
                 // .orderBy("Id", "asc")
-                .limit(1)
-                if(qur1.length > 0 ){
-                  pstatus = qur1[0].ApproverId ? qur1[0].ApproverId:0;
-                  
-                }
-            
-             
+                .limit(1);
+              if (qur1.length > 0) {
+                pstatus = qur1[0].ApproverId ? qur1[0].ApproverId : 0;
+              }
             }
-             
-        
 
             const Name = await Helper.getEmpName(pstatus);
 
@@ -735,7 +727,7 @@ export default class Usersettingservice {
     let result: any = {};
     let response: any[] = [];
     let currentDate = moment().format("YYYY-MM-DD");
-    let organizationName = '';
+    let organizationName = "";
     const Adminmail = await Helper.getAdminEmail(orgid);
     const Adminname = await Helper.getAdminNamebyOrgId(orgid);
     const empmail = await Helper.getEmpEmail(empid);
@@ -745,17 +737,17 @@ export default class Usersettingservice {
     let contactNumber;
     let CreatedDate;
     let CountryId;
-    let message = '';
-    let body ='';
-    let  PhoneNumber = 0;
-    let countryname ="";
+    let message = "";
+    let body = "";
+    let PhoneNumber = 0;
+    let countryname = "";
     var headers = "MIME-Version: 1.0" + "\r\n";
     headers = headers + "Content-type:text/html;charset=UTF-8" + "\r\n";
     headers = headers + "From: <noreply@ubiattendance.com>" + "\r\n";
 
-    if(cardtitle == "payRoll"){
+    if (cardtitle == "payRoll") {
       Subject = "Schedule Demo Request for PayRoll";
-    }else{
+    } else {
       Subject = "Shedule Demo Request";
     }
 
@@ -808,37 +800,57 @@ export default class Usersettingservice {
           cardTitle: cardtitle,
         });
 
-        if(demoInsert) {
-           const query = await Database.query().from('All_mailers').select('Body').where('Id',34);
-           body = query[0].Body;
-           let body1 = body.replace("{Admin_Name}",Adminname);
-           let body2 = body1.replace("{Date}",currentDate);
-           let body3 = body2.replace("{Time}",Time);
-           message = body3;
-           await Helper.sendEmail(empmail, Subject,message,headers);
+        if (demoInsert) {
+          const query = await Database.query()
+            .from("All_mailers")
+            .select("Body")
+            .where("Id", 34);
+          body = query[0].Body;
+          let body1 = body.replace("{Admin_Name}", Adminname);
+          let body2 = body1.replace("{Date}", currentDate);
+          let body3 = body2.replace("{Time}", Time);
+          message = body3;
+          await Helper.sendEmail(empmail, Subject, message, headers);
 
-           const query2 = await Database.query().from('All_mailers').select('Body').where('Id',35);
-           let bodyy = query[0].Body;
-           let bodi1 = bodyy.replace("{Company_Name}",organizationName);
-           let bodi2 = bodi1.replace("{Contact_Person}",Emp_Name);
-           let bodi3 = bodi2.replace("{Email_Id}",empmail);
-           let bodi4 = bodi3.replace("{Phone}",PhoneNumber);
-           let bodi5 = bodi4.replace("{Registered_Date}",CreatedDate);
-           let bodi6 = bodi5.replace("{Country}",countryname);
-           let bodi7 = bodi6.replace("{Date}",currentDate);
-           let bodi8 = bodi7.replace("{Time}",Time);
+          const query2 = await Database.query()
+            .from("All_mailers")
+            .select("Body")
+            .where("Id", 35);
+          let bodyy = query[0].Body;
+          let bodi1 = bodyy.replace("{Company_Name}", organizationName);
+          let bodi2 = bodi1.replace("{Contact_Person}", Emp_Name);
+          let bodi3 = bodi2.replace("{Email_Id}", empmail);
+          let bodi4 = bodi3.replace("{Phone}", PhoneNumber);
+          let bodi5 = bodi4.replace("{Registered_Date}", CreatedDate);
+          let bodi6 = bodi5.replace("{Country}", countryname);
+          let bodi7 = bodi6.replace("{Date}", currentDate);
+          let bodi8 = bodi7.replace("{Time}", Time);
 
-           let message1 = bodi8
+          let message1 = bodi8;
 
-           await Helper.sendEmail("viveksingh@ubitechsolutions.com", Subject,message1,headers);
-           await Helper.sendEmail("ubiattendance@ubitechsolutions.com", Subject,message1,headers);
-           await Helper.sendEmail("business@ubitechsolutions.com", Subject,message1,headers);
+          await Helper.sendEmail(
+            "viveksingh@ubitechsolutions.com",
+            Subject,
+            message1,
+            headers
+          );
+          await Helper.sendEmail(
+            "ubiattendance@ubitechsolutions.com",
+            Subject,
+            message1,
+            headers
+          );
+          await Helper.sendEmail(
+            "business@ubitechsolutions.com",
+            Subject,
+            message1,
+            headers
+          );
 
-           result['sts'] = 1
-           result['date'] = currentDate;
-           result['time'] = Time;
-           response.push(result);
-               
+          result["sts"] = 1;
+          result["date"] = currentDate;
+          result["time"] = Time;
+          response.push(result);
         }
       }
     } else {
@@ -1075,9 +1087,6 @@ export default class Usersettingservice {
   }
 
   static async checkuseremailforgoogle(getparam) {
-    // var decodeemail = await Helper.decode5t("=AVVGdkVuhmSWxGZxMGRGVVYWp1RaRVSwIlVaxkYEpkWSNjQWZlMG9mVWFFeNZkVpRVMwlkVu50UWFDbPpVRWxWTHJ1RWtGZPFWMahFZEp0aVpnRYRFWGNlVxoEaVxGaYJmaGVVVB1TP")
-    // console.log(decodeemail);  //// for testing
-
     var active = 1;
     var date = moment().format("YYYY-MM-DD");
     var org_perm = "1,2,3";
@@ -1145,7 +1154,6 @@ export default class Usersettingservice {
           .andWhere("U.Password", Password)
           .andWhere("Is_Delete", 0)
           .andWhereNotIn("E.OrganizationId", [502, 1074]);
-        // console.log(selectQuery2);
 
         if (selectQuery2.length > 0) {
           var E_archive = selectQuery2[0].E_archive;
@@ -1176,8 +1184,6 @@ export default class Usersettingservice {
           .andWhereNotIn("E.OrganizationId", [502, 1074]);
 
         if (query.length > 0) {
-          
-
           await Promise.all(
             query.map(async (row) => {
               data12["response"] = 1;
@@ -1370,7 +1376,7 @@ export default class Usersettingservice {
               else data12["store"] = "https://ubiattendance.ubihrm.com";
             });
           }
-        } else {          
+        } else {
           data12["response"] = 0;
           data.push(data12);
         }
@@ -1386,10 +1392,96 @@ export default class Usersettingservice {
       if (querytocheckmail.length > 0) {
         data12["response"] = 3; // E-mail duplicacy occurs
       } else {
-        data12["response"] = 4; // E-mail Not exist 
+        data12["response"] = 4; // E-mail Not exist
       }
-      result.push(data12)
+      result.push(data12);
     }
     return result;
+  }
+
+  public static async updateProfilePhoto(getparam) {
+    const uid = getparam.uid ? getparam.uid : 0;
+    const orgid = getparam.refno ? getparam.refno : 0;
+    const new_name = uid + ".jpg";
+    var res = 0;
+    var status = false;
+
+    if (!getparam.file) {
+      console.log("HEY");
+      
+      // No file was uploaded
+      const query = await Database.from("EmployeeMaster")
+        .where("Id", uid)
+        .where("OrganizationId", orgid)
+        .update({ ImageName: "" });
+
+      if (query) {
+        const zone = await Helper.getTimeZone(orgid);
+        const date = new Date();
+        const id = uid;
+        const sna = await Helper.getEmpName(uid);
+        const module = "Attendance app";
+        const appModule = "Profile";
+        const actionperformed = `<b>${sna}'s</b> Profile has been removed from <b>${module}</b>`;
+        const activityby = 1;
+
+        await Helper.ActivityMasterInsert(
+          date,
+          orgid,
+          id,
+          activityby,
+          appModule,
+          actionperformed,
+          module
+        );
+        status = true;
+      }
+    } else {
+      //if (S3::putObject(S3::inputFile($_FILES["file"]["tmp_name"]), 'ubihrmimages',''.$orgid.'/'.$new_name, S3::ACL_PUBLIC_READ))
+      //{
+      // $tmpfile = $_FILES['file']['tmp_name'];
+      // $s3 = new Aws\S3\S3Client([
+      // 	'region'  => 'ap-south-1',
+      // 	'version' => 'latest',
+      // 	'credentials' => [
+      // 	'key'    => IAMHRM_KEY,
+      // 	'secret' => IAMHRM_SECRET,
+      // 	]
+      // ]);
+
+      // $result_save = $s3->putObject([
+      // 	'Bucket' => 'ubihrmimages',
+      // 	'Key'    => $orgid . '/' . $new_name,
+      // 	'SourceFile' => $tmpfile
+      // ]);
+
+      const query = await Database.from("EmployeeMaster")
+        .where("Id", uid)
+        .where("OrganizationId", orgid)
+        .update({ ImageName: new_name });
+
+      if (query) {
+        const zone = await Helper.getTimeZone(orgid);
+        const date = new Date();
+        const id = uid;
+        const sna = await Helper.getEmpName(uid);
+        const module = "Attendance app";
+        const appModule = "Profile";
+        const actionperformed = `<b>${sna}'s</b> Profile has been Updated from <b>${module}</b>`;
+        const activityby = 1;
+
+        await Helper.ActivityMasterInsert(
+          date,
+          orgid,
+          id,
+          activityby,
+          appModule,
+          actionperformed,
+          module
+        );
+        status = true;
+      }
+    }
+    return { status };
   }
 }
