@@ -16,6 +16,8 @@ export default class saveImageGrpAttFaceService {
     let successMsg = "";
     let errorMsg = "";
     let flag = "";
+    let attImage;
+    // let newName = IMGURL7."user_png.png"
     let result: [] = [];
     result['facerecog'] = '';
     result['groupface'] = '';
