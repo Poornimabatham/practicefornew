@@ -1667,5 +1667,21 @@ export default class Helper {
     }
     return 0;
   }
+  static async AutoTimeOffEndWL(empid, orgid, time, date, dateTime) {
+    let getmaxEmpidTimeoff = await Database.from("Timeoff")
+      .max("id as id")
+      .where("EmployeeId", empid)
+      .andWhere("OrganizationId", orgid);
+       
+      
+      
+    if (getmaxEmpidTimeoff.length > 0) {
+      let id = getmaxEmpidTimeoff[0].id;
+      await Database.from("Timeoff")
+        .where("id", id)
+        .andWhere("TimeTo", "00:00:00")
+        .update({ TimeTo: time, TimeoffEndDate: date, ModifiedDate: dateTime });
+    }
+  }
 }
 

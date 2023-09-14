@@ -1119,7 +1119,194 @@ export default class loginService {
     );
     return response;
   }
+
+
+
+
+
+  static async CreateBulkAtt(data: any) {
+
+    console.log(data);
+    let result: any[] = [],
+      count: number = 0,
+      errorMsg: string = "",
+      successMsg: string = "",
+      status: string = "",
+      dataContainer: any[] = [],
+      zone: string = "";
+      let AttData:any =JSON.parse(data.attlist)
+    
+    
+    if (data.uid != 0) {
+      zone = await Helper.getEmpTimeZone(data.uid, data.orgid); // to set the timezone by employee
+    } else {
+      zone = await Helper.getTimeZone(data.orgid);
+    }
+    const defaultZone = DateTime.now().setZone(zone);
+
+    let dateTime: string = defaultZone.toFormat("yyyy-MM-dd HH:mm:ss"),
+      currentDate: DateTime = DateTime.local(),
+      time: string = defaultZone.toFormat("HH:mm:ss"),
+      date: string = defaultZone.toFormat("yyyy-MM-dd"),
+      $skip: number = 0;
+
+    
+      AttData.forEach(async (row) => {
+
+
+
+        console.log( row["Id"],
+        data.org_id,
+        time,
+        date,
+        dateTime);
+        
+        await Helper.AutoTimeOffEndWL(
+          row["Id"],
+          data.org_id,
+          time,
+          date,
+          dateTime
+        );
+
+        let todayDate = row["data_date"] != undefined ? row["data_date"] : date;
+        count += 1;
+        console.log('row["Attid"]');
+        
+        if (row["Attid"] != undefined && row["Attid"] != "0") {
+        console.log(row["Attid"]);
+        
+          let overtime = "00:00";
+          let shifttype = await Helper.getShiftType(row["shift"]);
+          let timeoutdate = todayDate;
+          if (shifttype != 1) {
+            if (row["timein"] > row["timeout"]) {
+              const nextDay: any = currentDate.plus({ days: 1 });
+              timeoutdate = nextDay.toFormat("yyyy-MM-dd");
+
+              let getOverTime: any = await Database.from("ShiftMaster")
+                .select(
+                  Database.raw(
+                    `SUBTIME( SUBTIME( timein, timeout ) , SUBTIME(  '"${row["timein"]}"',  '"${row["timeout"]}"' ) ) AS overtime`
+                  )
+                )
+                .where("id", row["shift"]);
+              if (getOverTime.length > 0) {
+                overtime = getOverTime.overtime;
+              } else {
+                let getOverTime: any = await Database.from("ShiftMaster")
+                  .select(
+                    Database.raw(
+                      `SUBTIME( SUBTIME( timein, timeout ) , SUBTIME(  '"${row["timein"]}"',  '"${row["timeout"]}"' ) ) AS overtime`
+                    )
+                  )
+                  .where("id", row["shift"]);
+                if (getOverTime.length > 0) {
+                  overtime = getOverTime.overtime;
+                }
+                time = "24:00:00";
+                const timein = DateTime.fromISO(row.timein);
+                const timeout = DateTime.fromISO(row.timeout);
+
+                const diffInSeconds = timeout.diff(timein).as("seconds");
+                const admintotal = DateTime.fromMillis(
+                  diffInSeconds * 1000
+                ).toFormat("HH:mm");
+
+                let multitime_Sts = await Helper.getshiftmultipletime_sts(
+                  row["Id"],
+                  todayDate,
+                  row["shift"]
+                );
+                if (shifttype == 3 || multitime_Sts == 1) {
+                  await Database.from("AttendanceMaster")
+                    .where("Id", row["Attid"])
+                    .andWhere("AttendanceDate", todayDate)
+                    .update({
+                      TimeOut: row["timeout"],
+                      ExitImage:
+                        "https://ubiattendance.ubihrm.com/assets/img/managerdevice.png",
+                      timeoutdate: timeoutdate,
+                      Overtime: overtime,
+                      device: "AppManager",
+                      TimeOutDevice: "AppManager",
+                      TotalLoggedHours: admintotal,
+                    });
+
+                  await Database.from("InterimAttendances")
+                    .where("AttendanceMasterId", row["Attid"])
+                    .andWhere("OrganizationId", data.orgid)
+                    .update({
+                      TimeOut: row["timeout"],
+                      ExitImage:
+                        "https://ubiattendance.ubihrm.com/assets/img/managerdevice.png",
+                      timeoutdate: timeoutdate,
+                      Overtime: overtime,
+                      device: "AppManager",
+                      TimeOutDevice: "AppManager",
+                      TotalLoggedHours: admintotal,
+                    });
+                } else {
+                  await Database.from("AttendanceMaster")
+                    .where("Id", row["Attid"])
+                    .andWhere("AttendanceDate", todayDate)
+                    .update({
+                      TimeOut: row["timeout"],
+                      ExitImage:
+                        "https://ubiattendance.ubihrm.com/assets/img/managerdevice.png",
+                      timeoutdate: timeoutdate,
+                      Overtime: overtime,
+                      device: "AppManager",
+                      TimeOutDevice: "AppManager",
+                      TotalLoggedHours: admintotal,
+                    });
+                }
+                await Database.from("AttendanceMaster")
+                  .where("Id", row["Attid"])
+                  .andWhere("AttendanceDate", todayDate)
+                  .update({
+                    TimeOut: row["timeout"],
+                    ExitImage:
+                      "https://ubiattendance.ubihrm.com/assets/img/managerdevice.png",
+                    timeoutdate: timeoutdate,
+                    Overtime: overtime,
+                    device: "AppManager",
+                    TimeOutDevice: "TimeOutDevice",
+                  });
+              }
+            }
+          }
+        } else {
+
+          let getEmpid = await Database.from("AttendanceMaster")
+            .where("EmployeeId", row["Id"])
+            .andWhere("AttendanceDate", todayDate);
+        
+
+          let rowCount = getEmpid.length;
+          if (rowCount == 0) {
+             await Helper.getName(
+              "EmployeeMaster",
+              "Department",
+              "Id",
+              row["Id"]
+            );
+             await Helper.getName(
+              "EmployeeMaster",
+              "Designation",
+              "Id",
+              row["Id"]
+            );
+           await Helper.getName(
+              "EmployeeMaster",
+              "area_assigned",
+              "Id",
+              row["Id"]
+            );
+          }
+        }
+      })
+    
+  }
 }
-function strlen($otp: any) {
-  throw new Error("Function not implemented.");
-}
+
