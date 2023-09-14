@@ -311,10 +311,10 @@ export default class Helper {
       .select("shiftid")
       .where("empid", empid)
       .andWhere("ShiftDate", ShiftDate);
-     
-    if (getshiftid.length > 0) {      
+
+    if (getshiftid.length > 0) {
       return getshiftid[0].shiftid;
-     } 
+    }
     else {
       let getshiftid = await Database.from("ShiftMaster")
         .select("Id")
@@ -394,18 +394,18 @@ export default class Helper {
       .where("AttendanceDate", today)
       .whereNot("TimeIn", "00:00:00")
       .select("multitime_sts")
-      // .first()
-      if (attendanceRecord.length >0) {
+    // .first()
+    if (attendanceRecord.length > 0) {
 
       return attendanceRecord[0].multitime_sts;
-      } else {        
+    } else {
       const shiftRecord = await ShiftMaster.query()
         .where("Id", shiftId)
         .select("MultipletimeStatus");
       // .first();
-        if (shiftRecord.length > 0) {
+      if (shiftRecord.length > 0) {
         return shiftRecord[0].MultipletimeStatus;
-      } 
+      }
     }
     return 0;
   }
@@ -836,14 +836,6 @@ export default class Helper {
       .first();
 
 
-  static async getBalanceLeave(orgid, uid, date = '') {
-    const data = await Database
-      .from('EmployeeMaster as E')
-      .join('Organization as O', 'E.OrganizationId', '=', 'O.Id')
-      .select('E.FirstName', 'E.entitledleave', 'E.DOJ',)
-      .select('O.fiscal_start', 'O.fiscal_end', 'O.entitled_leave')
-      .where('O.Id', orgid)
-      .where('E.Id', uid).first()
 
     let entitledleave: any, doj;
     if (!data.entitledleave || data.entitledleave.trim() === 'undefined') {
@@ -974,32 +966,6 @@ export default class Helper {
     }
   }
 
-  static async getShiftTimeByEmpID(uid) {
-    const shiftInfo = await Database.from("ShiftMaster")
-      .select(
-        "Name",
-        "TimeIn",
-        "TimeOut",
-        "shifttype",
-        "HoursPerDay",
-        Database.raw("TIMEDIFF(TimeIn, TimeOut) AS diffShiftTime")
-      )
-      .whereIn("id", (subquery) => {
-        subquery.select("Shift").from("EmployeeMaster").where("id", uid);
-      })
-      .first();
-
-    if (shiftInfo) {
-      const arr: any = {};
-      arr.shiftName = shiftInfo.Name;
-      arr.shiftTimeIn = shiftInfo.TimeIn;
-      arr.ShiftTimeOut = shiftInfo.TimeOut;
-      arr.shifttype = shiftInfo.shifttype;
-      arr.minworkhrs = shiftInfo.HoursPerDay;
-      arr.diffShiftTime = shiftInfo.diffShiftTime;
-      return arr;
-    }
-  }
 
   public static async getDesigName(desigId, orgId) {
     const query = await Database.from("DesignationMaster")
@@ -1544,16 +1510,6 @@ export default class Helper {
     return 0;
   }
 
-  public static async getAttImageStatus(orgid) {
-    const getAttnImageSts = await Database.from("admin_login")
-      .select("AttnImageStatus")
-      .where("OrganizationId", orgid);
-    if (getAttnImageSts) {
-      return getAttnImageSts[0].AttnImageStatus;
-    } else {
-      return 0;
-    }
-  }
 
   public static async loctrackPermission(empId) {
 
@@ -1568,10 +1524,10 @@ export default class Helper {
     }
   }
 
-  public static async getDesignation(Id) {    
+  public static async getDesignation(Id) {
     const query = await Database.from("DesignationMaster")
       .select("Name")
-      .where("Id", Id);    
+      .where("Id", Id);
     if (query.length > 0) {
       return query[0].Name;
     } else {
@@ -1609,7 +1565,7 @@ export default class Helper {
       return data;
     }
   }
-    
+
   public static async gettimezonebyid(zoneid) {
     var zone = "Asia/Kolkata";
     const query = await Database.from("ZoneMaster")
@@ -1637,6 +1593,7 @@ export default class Helper {
     }
   }
 
+
   public static async ucfirst(str: string) {
     if (typeof str !== "string" || str.length === 0) {
       return str;
@@ -1658,23 +1615,15 @@ export default class Helper {
     return 0;
   }
 
-  public static async getUbiatt_Ubihrmsts(orgid) {
-    const result = await Database.from("Organization")
-      .select("ubihrm_sts")
-      .where("Id", orgid);
-    if (result) {
-      return result[0].ubihrm_sts;
-    }
-    return 0;
-  }
+
   static async AutoTimeOffEndWL(empid, orgid, time, date, dateTime) {
     let getmaxEmpidTimeoff = await Database.from("Timeoff")
       .max("id as id")
       .where("EmployeeId", empid)
       .andWhere("OrganizationId", orgid);
-       
-      
-      
+
+
+
     if (getmaxEmpidTimeoff.length > 0) {
       let id = getmaxEmpidTimeoff[0].id;
       await Database.from("Timeoff")
@@ -1684,4 +1633,6 @@ export default class Helper {
     }
   }
 }
+
+
 

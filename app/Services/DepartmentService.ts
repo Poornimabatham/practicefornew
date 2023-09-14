@@ -34,8 +34,9 @@ export default class DepartmentService {
       .select(
         "Id",
         Database.raw(
-          `if(LENGTH("Name") > 30, concat(SUBSTR("Name", 1, 30), '....'), Name) as Name ,'archive'`
-        )
+          `if(LENGTH("Name") > 30, concat(SUBSTR("Name", 1, 30), '....'), Name) as Name `
+        ),
+        'archive'
       )
       .where("OrganizationId", orgid)
       .orderBy("Name");
