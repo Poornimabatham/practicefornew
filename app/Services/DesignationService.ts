@@ -19,7 +19,7 @@ export default class DesignationService {
 
     if (affectedRows > 0) {
       result["status"] = -1;
-      return "user already exist in this list";
+      return  result["status"] ;
     }
 
     var insertDesignation = await Database.insertQuery()
@@ -85,10 +85,10 @@ export default class DesignationService {
       )
       .where("OrganizationId", a.orgid)
       .orderBy("Name", "asc")
-      .limit(5);
+     
 
-    if (a.currentpage != 0 && a.pagename == 0) {
-      getDesignationList = getDesignationList.offset(begin).limit(a.perpage);
+    if (a.currentPage != 0 && a.pagename == 0) {
+      getDesignationList = getDesignationList.offset(begin).limit(a.perPage);
     }
 
     if (a.status != undefined) {
@@ -126,6 +126,9 @@ export default class DesignationService {
   }
 
   public static async updateDesignation(c) {
+    const  Updateorgid = c.uid;
+    const Updateid = c.id
+    const UpdateName = c.desg
     const result: any[] = [];
 
     result["status"] = 0;
@@ -134,45 +137,45 @@ export default class DesignationService {
 
     const getDesignationList = await Database.from("DesignationMaster")
       .select("Id")
-      .where("Name", c.UpdateName)
-      .andWhere("OrganizationId", c.Updateorgid)
-      .andWhere("Id", c.Updateid);
+      .where("Name", UpdateName)
+      .andWhere("OrganizationId",Updateorgid)
+      .andWhere("Id", Updateid);
 
     const Result: any = await getDesignationList;
     const response = Result.length;
 
     if (response > 0) {
-      result["status"] = "User already exist in this is id";
+      result["status"] = "0";
       return result["status"];
     }
     const getDesignationList2 = await Database.from("DesignationMaster")
       .select("Name", "archive")
-      .where("OrganizationId", c.Updateorgid)
-      .where("Id", c.Updateid);
+      .where("OrganizationId", Updateorgid)
+      .where("Id", Updateid);
     let name = "";
     let sts1 = "";
 
     var res: any = "";
-    if (name != c.UpdateName) {
+    if (name != UpdateName) {
       res = 2;
-    } else if (name == c.UpdateName && c.sts != sts1) {
+    } else if (name == UpdateName && c.sts != sts1) {
       res = c.sts;
     }
 
     var updateDesignaion: any = await Database.query()
       .from("DesignationMaster")
-      .where("id", c.Updateid)
+      .where("id", Updateid)
       .update({
-        Name: c.UpdateName,
+        Name: UpdateName,
         LastModifiedDate: curdate,
-        LastModifiedById: c.Updateid,
+        LastModifiedById: Updateid,
         archive: c.sts,
-        OrganizationId: c.Updateorgid,
+        OrganizationId: Updateorgid,
       });
 
     const count = await updateDesignaion;
     if (count > 0) {
-      const timezone = await Helper.getTimeZone(c.Updateorgid);
+      const timezone = await Helper.getTimeZone(Updateorgid);
       var defaulttimeZone = moment().tz(timezone).toDate();
 
       const dateTime = DateTime.fromJSDate(defaulttimeZone);
@@ -183,15 +186,16 @@ export default class DesignationService {
 
       let actionperformed;
       var activityBy = 1;
-      var getempname = await Helper.getempnameById(c.Updateid);
+      var getempname = await Helper.getempnameById(Updateid);
 
       if (res == 2) {
-        actionperformed = `<b>${c.UpdateName}</b>. designation has been edited by <b>${getempname}</b> `;
+        actionperformed = `<b>${UpdateName}</b>. designation has been edited by <b>${getempname}</b> `;
       } else if (res == 1) {
-        actionperformed = `<b>${c.UpdateName}</b> designation has been active by <b>${getempname}</b>`;
+        actionperformed = `<b>${UpdateName}</b> designation has been active by <b>${getempname}</b>`;
       } else {
-        actionperformed = `<b>${c.UpdateName}</b> designation has been inactive by <b>${getempname}</b> `;
+        actionperformed = `<b>${UpdateName}</b> designation has been inactive by <b>${getempname}</b> `;
       }
+
 
       const insertActivityHistoryMaster: any =
         await Helper.ActivityMasterInsert(
@@ -203,7 +207,7 @@ export default class DesignationService {
           actionperformed,
           module
         );
-      result["status"] = "inserted in activity master";
+      result["status"] = "1";
     }
     return result["status"];
   }

@@ -1,6 +1,6 @@
-import { schema } from '@ioc:Adonis/Core/Validator'
-import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import BaseValidator from './BaseValidator'
+import { schema } from "@ioc:Adonis/Core/Validator";
+import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
+import BaseValidator from "./BaseValidator";
 
 export default class DesignationValidator extends BaseValidator {
   constructor(protected ctx: HttpContextContract) {
@@ -12,27 +12,27 @@ export default class DesignationValidator extends BaseValidator {
       uid: schema.number(),
       orgid: schema.number(),
       name: schema.string(),
-      sts: schema.number.optional(),
+      sts: schema.number(),
       desc: schema.string.optional(),
     }),
   };
-
   static Designationschema = {
     schema: schema.create({
       orgid: schema.number(),
       status: schema.number.optional(),
-      pagename: schema.number.optional(),
-      currentpage: schema.number.optional(),
-      perpage: schema.number.optional(),
+      pagename: schema.string(),
+      currentPage: schema.number(),
+      perPage: schema.number.optional(),
     }),
   };
 
   static updateDesignationschema = {
     schema: schema.create({
-      Updateid: schema.number(),
-      UpdateName: schema.string(),
-      sts: schema.number.optional(),
-      Updateorgid: schema.number.optional(),
+      uid: schema.number(),
+      UpdateName: schema.string.optional(),
+      sts: schema.string(),
+      id:schema.number(),
+      desg:schema.string()
     }),
   };
 
@@ -63,5 +63,3 @@ export default class DesignationValidator extends BaseValidator {
     }),
   };
 }
-  
-

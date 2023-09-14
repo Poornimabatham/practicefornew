@@ -14,4 +14,9 @@ export default class SaveVisitOfflineAdvanceController {
     );
     return response.json(result);
   }
+  public async checkLoginWithSyncAttQr({request,response}:HttpContextContract){
+  const input = await request.validate(saveVisitOfflineAdvanceValidator.checkLoginWithSyncAttQr)
+    const result = await saveVisitOfflineAdvanceService.checkLoginWithSyncAttQr(input);
+    return response.json(result);
+  }
 }

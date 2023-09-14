@@ -39,4 +39,10 @@ export default class saveVisitOfflineAdvanceValidator extends BaseValidator {
       GeofenceStatusVisitOut: schema.string.optional(),
     }),
   };
+
+  static checkLoginWithSyncAttQr = {
+    schema: schema.create({
+      data: schema.string(),
+    }),
+  };
 }

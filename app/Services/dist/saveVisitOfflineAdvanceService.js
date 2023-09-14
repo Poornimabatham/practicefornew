@@ -39,6 +39,7 @@ exports.__esModule = true;
 var Database_1 = require("@ioc:Adonis/Lucid/Database");
 var Helper_1 = require("App/Helper/Helper");
 var luxon_1 = require("luxon");
+var querystring = require("querystring");
 var saveVisitOfflineAdvanceService = /** @class */ (function () {
     function saveVisitOfflineAdvanceService() {
     }
@@ -288,6 +289,188 @@ var saveVisitOfflineAdvanceService = /** @class */ (function () {
                         res.push(statusArray);
                         _a.label = 12;
                     case 12: return [2 /*return*/, res];
+                }
+            });
+        });
+    };
+    saveVisitOfflineAdvanceService.checkLoginWithSyncAttQr = function (Data) {
+        return __awaiter(this, void 0, void 0, function () {
+            var jsonString, jsonWithoutSpaces, jsonObject, arrayLength, today, stamp, date, previousDay, EmployeeRecord, Dept_id, Desg_id, areaId, HourlyRateId, OwnerId, interimAttendanceId, attTimeIn, attTimeOut, statusArray, k, profileimage, persongroup_id, flag, suspiciousdevice, ssdisapp_sts, FaceRecognitionThrashhold, FaceRecognitionRestriction, attendance_sts, suspicioustimein_status, suspicioustimeout_status, timein_confidence, timeout_confidence, faceid, loggedHoursAtt, faceidin, faceidout, profileimagein, profileimageout, EmployeeName, shiftType, halfDayStatus, i, keys, j, interimAttendanceId_1, MultipletimeStatus, FakeLocationInStatus, FakeLocationOutStatus, TimeInApp, TimeOutApp, TimeInStampApp, TimeOutStampApp, TimeInRemark, TimeOutRemark, TimeInDeviceId, TimeOutDeviceId, TimeInDeviceName, TimeOutDeviceName, orgTopic, user, userName, userId, userNameByshakir, OrganizationId, AttendanceDate, TimeOutPictureBase64, TimeInPictureBase64, SyncTimeIn, SyncTimeOut, LatitudeIn, LongitudeIn, LatitudeOut, LongitudeOut, TimeInTime, TimeOutTime, GeofenceIn, GeofenceOut, TimeInDevice, TimeOutDevice, TimeInCity, TimeOutCity, TimeInDate, TimeOutDate, TimeInAddress, TimeOutAddress, ThumnailTimeOutPictureBase64, ThumnailTimeInPictureBase64, TimeInAppVersion, TimeOutAppVersion, Platform, new_name, GeofenceInAreaId, latitin, string, query, rows, UserId, ShiftId, geofencePerm, SuspiciousSelfiePerm, SuspiciousDevicePerm, zone, defaultZone, time, stamp_1, today_1, name, update;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        jsonString = Data.data;
+                        jsonWithoutSpaces = jsonString.replace(/\s/g, "");
+                        jsonObject = JSON.parse(jsonWithoutSpaces);
+                        arrayLength = jsonObject[0]["2023-06-02"]["interim"].length;
+                        today = luxon_1.DateTime.now().toFormat("yyyy-MM-dd");
+                        stamp = luxon_1.DateTime.now().toFormat("HH:mm:ss");
+                        date = "";
+                        previousDay = new Date(Date.now() - 24 * 60 * 60 * 1000)
+                            .toISOString()
+                            .slice(0, 10);
+                        EmployeeRecord = "";
+                        Dept_id = "";
+                        Desg_id = "";
+                        areaId = "";
+                        HourlyRateId = "";
+                        OwnerId = "";
+                        interimAttendanceId = 0;
+                        attTimeIn = "";
+                        attTimeOut = "";
+                        statusArray = [];
+                        k = 0;
+                        profileimage = "";
+                        persongroup_id = "";
+                        flag = "0";
+                        suspiciousdevice = 0;
+                        ssdisapp_sts = 1;
+                        FaceRecognitionThrashhold = "";
+                        FaceRecognitionRestriction = 0;
+                        attendance_sts = 1;
+                        suspicioustimein_status = "0";
+                        suspicioustimeout_status = "0";
+                        timein_confidence = "";
+                        timeout_confidence = "";
+                        faceid = "";
+                        loggedHoursAtt = "";
+                        faceidin = "";
+                        faceidout = "";
+                        profileimagein = "";
+                        profileimageout = "";
+                        ssdisapp_sts = 1;
+                        EmployeeName = "";
+                        shiftType = "";
+                        halfDayStatus = "";
+                        i = 0;
+                        _a.label = 1;
+                    case 1:
+                        if (!(i < arrayLength)) return [3 /*break*/, 17];
+                        keys = Object.keys(jsonObject[i]);
+                        console.log(keys);
+                        if (!jsonObject[i][keys[0]].hasOwnProperty("interim")) return [3 /*break*/, 16];
+                        console.log(jsonObject[i][keys[0]]["interim"].length);
+                        j = 0;
+                        _a.label = 2;
+                    case 2:
+                        if (!(j < jsonObject[i][keys[0]]["interim"].length)) return [3 /*break*/, 16];
+                        interimAttendanceId_1 = 0;
+                        MultipletimeStatus = 0;
+                        MultipletimeStatus = 0;
+                        FakeLocationInStatus = 0;
+                        FakeLocationOutStatus = 0;
+                        TimeInApp = "";
+                        TimeOutApp = "";
+                        TimeInStampApp = "";
+                        TimeOutStampApp = "";
+                        TimeInRemark = "";
+                        TimeOutRemark = "";
+                        TimeInDeviceId = "";
+                        TimeOutDeviceId = "";
+                        TimeInDeviceName = "";
+                        TimeOutDeviceName = "";
+                        orgTopic = "";
+                        user = (jsonObject[i][keys[0]].interim[j].userName !== undefined) ? jsonObject[i][keys[0]].interim[j].userName : 0;
+                        return [4 /*yield*/, Helper_1["default"].encode5t(user)];
+                    case 3:
+                        userName = _a.sent();
+                        userId = jsonObject[i][keys[0]].interim[j].UserId || "";
+                        userNameByshakir = jsonObject[i][keys[0]].interim[j].userName || 0;
+                        OrganizationId = jsonObject[i][keys[0]].interim[j].OrgId || 0;
+                        AttendanceDate = jsonObject[i][keys[0]].interim[j].AttendanceDateInOut || '';
+                        TimeOutPictureBase64 = jsonObject[i][keys[0]].interim[j].TimeInOutBase64 || '';
+                        TimeInPictureBase64 = jsonObject[i][keys[0]].interim[j].TimeInOutBase64 || '';
+                        SyncTimeIn = jsonObject[i][keys[0]].interim[j].IsTimeInOutSynced || '';
+                        SyncTimeOut = jsonObject[i][keys[0]].interim[j].IsTimeInOutSynced || '';
+                        LatitudeIn = jsonObject[i][keys[0]].interim[j].LattitudeInOut || 0;
+                        LongitudeIn = jsonObject[i][keys[0]].interim[j].LongiTudeInOut || 0;
+                        LatitudeOut = jsonObject[i][keys[0]].interim[j].LattitudeInOut || 0;
+                        LongitudeOut = jsonObject[i][keys[0]].interim[j].LongiTudeInOut || 0;
+                        TimeInTime = jsonObject[i][keys[0]].interim[j].TimeInOutTime || '';
+                        TimeOutTime = jsonObject[i][keys[0]].interim[j].TimeInOutTime || '';
+                        GeofenceIn = jsonObject[i][keys[0]].interim[j].GeofenceInOut || '';
+                        GeofenceOut = jsonObject[i][keys[0]].interim[j].GeofenceInOut || '';
+                        TimeInDevice = jsonObject[i][keys[0]].interim[j].TimeInOutDevice || '';
+                        TimeOutDevice = jsonObject[i][keys[0]].interim[j].TimeInOutDevice || '';
+                        TimeInCity = jsonObject[i][keys[0]].interim[j].TimeInOutCity || '';
+                        TimeOutCity = jsonObject[i][keys[0]].interim[j].TimeInOutCity || '';
+                        TimeInDate = jsonObject[i][keys[0]].interim[j].TimeInOutDate || '';
+                        TimeOutDate = jsonObject[i][keys[0]].interim[j].TimeInOutDate || '';
+                        TimeInAddress = jsonObject[i][keys[0]].interim[j].TimeInOutAddress || '';
+                        TimeOutAddress = jsonObject[i][keys[0]].interim[j].TimeInOutAddress || '';
+                        ThumnailTimeOutPictureBase64 = jsonObject[i][keys[0]].interim[j].TimeInOutImageName || '';
+                        ThumnailTimeInPictureBase64 = jsonObject[i][keys[0]].interim[j].TimeInOutImageName || '';
+                        TimeInAppVersion = '';
+                        TimeOutAppVersion = '';
+                        Platform = '';
+                        new_name = "https://ubitech.ubihrm.com/public/avatars/male.png";
+                        GeofenceInAreaId = '';
+                        latitin = LatitudeIn + "," + LongitudeIn;
+                        console.log(orgTopic);
+                        if (!(orgTopic == '' || orgTopic == '0' || orgTopic == 'null')) return [3 /*break*/, 15];
+                        return [4 /*yield*/, Helper_1["default"].getOrgName(OrganizationId)];
+                    case 4:
+                        string = _a.sent();
+                        return [4 /*yield*/, Helper_1["default"].FirstLettercapital(string)];
+                    case 5:
+                        string = _a.sent();
+                        string = string.replace(/ /g, '-');
+                        // Removes characters that are not alphanumeric or hyphens
+                        string = string.replace(/[^A-Za-z0-9\-]/g, string);
+                        orgTopic = string + OrganizationId;
+                        return [4 /*yield*/, Database_1["default"].from('UserMaster')
+                                .select('*')
+                                .innerJoin('EmployeeMaster', 'UserMaster.EmployeeId', 'EmployeeMaster.id').andWhere("EmployeeMaster.OrganizationId", "UserMaster.OrganizationId")
+                                .where('Username', userName)
+                                .orWhere('username_mobile', userName)
+                                .andWhere("UserMaster.OrganizationId", OrganizationId)
+                                .andWhere("UserMaster.archive", 1).andWhere("EmployeeMaster.archive", 1).andWhere("EmployeeMaster.Is_Delete", 0)
+                                .andWhereNotIn("EmployeeMaster.OrganizationId", [502, 1074, 138265, 138263, 138262, 138261, 138260, 138259, 138258, 138257, 138256, 138255, 138254,
+                                138253, 135095])];
+                    case 6:
+                        query = _a.sent();
+                        rows = query;
+                        if (!query.length) return [3 /*break*/, 15];
+                        if (!query) return [3 /*break*/, 15];
+                        UserId = rows[0].EmployeeId;
+                        return [4 /*yield*/, Helper_1["default"].getassignedShiftTimes(UserId, AttendanceDate)];
+                    case 7:
+                        ShiftId = _a.sent();
+                        return [4 /*yield*/, Helper_1["default"].getshiftmultipletime_sts(UserId, AttendanceDate, ShiftId)];
+                    case 8:
+                        MultipletimeStatus = _a.sent();
+                        return [4 /*yield*/, Helper_1["default"].getNotificationPermission(OrganizationId, 'OutsideGeofence')];
+                    case 9:
+                        geofencePerm = _a.sent();
+                        return [4 /*yield*/, Helper_1["default"].getNotificationPermission(OrganizationId, 'SuspiciousSelfie')];
+                    case 10:
+                        SuspiciousSelfiePerm = _a.sent();
+                        return [4 /*yield*/, Helper_1["default"].getNotificationPermission(OrganizationId, 'SuspiciousDevice')];
+                    case 11:
+                        SuspiciousDevicePerm = _a.sent();
+                        return [4 /*yield*/, Helper_1["default"].getEmpTimeZone(UserId, OrganizationId)];
+                    case 12:
+                        zone = _a.sent();
+                        defaultZone = luxon_1.DateTime.now().setZone(zone);
+                        time = defaultZone.toFormat("HH:mm:ss") == "00:00:00"
+                            ? "23:59:00"
+                            : defaultZone.toFormat("HH:mm:ss");
+                        stamp_1 = defaultZone.toFormat("yyyy-MM-dd HH:mm:ss");
+                        today_1 = defaultZone.toFormat("yyyy-MM-dd");
+                        return [4 /*yield*/, Helper_1["default"].getEmpName(UserId)];
+                    case 13:
+                        name = _a.sent();
+                        return [4 /*yield*/, Database_1["default"].from("AppliedLeave").where()];
+                    case 14:
+                        update = _a.sent();
+                        _a.label = 15;
+                    case 15:
+                        j++;
+                        return [3 /*break*/, 2];
+                    case 16:
+                        i++;
+                        return [3 /*break*/, 1];
+                    case 17: return [2 /*return*/];
                 }
             });
         });
