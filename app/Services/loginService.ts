@@ -1125,6 +1125,8 @@ export default class loginService {
 
 
   static async CreateBulkAtt(data: any) {
+
+    console.log(data);
     let result: any[] = [],
       count: number = 0,
       errorMsg: string = "",
@@ -1132,8 +1134,9 @@ export default class loginService {
       status: string = "",
       dataContainer: any[] = [],
       zone: string = "";
-
-    console.log(result);
+      let AttData:any =JSON.parse(data.attlist)
+    
+    
     if (data.uid != 0) {
       zone = await Helper.getEmpTimeZone(data.uid, data.orgid); // to set the timezone by employee
     } else {
@@ -1141,17 +1144,26 @@ export default class loginService {
     }
     const defaultZone = DateTime.now().setZone(zone);
 
-    let dateTime: string = defaultZone.toFormat("yyyy-MM-dd HH:ii:ss"),
+    let dateTime: string = defaultZone.toFormat("yyyy-MM-dd HH:mm:ss"),
       currentDate: DateTime = DateTime.local(),
-      time: string = defaultZone.toFormat("HH:ii:ss"),
+      time: string = defaultZone.toFormat("HH:mm:ss"),
       date: string = defaultZone.toFormat("yyyy-MM-dd"),
       $skip: number = 0;
 
-    await Promise.all(
-      data.Empdata.map(async (row) => {
+    
+      AttData.forEach(async (row) => {
+
+
+
+        console.log( row["Id"],
+        data.org_id,
+        time,
+        date,
+        dateTime);
+        
         await Helper.AutoTimeOffEndWL(
           row["Id"],
-          data.orgid,
+          data.org_id,
           time,
           date,
           dateTime
@@ -1159,7 +1171,11 @@ export default class loginService {
 
         let todayDate = row["data_date"] != undefined ? row["data_date"] : date;
         count += 1;
+        console.log('row["Attid"]');
+        
         if (row["Attid"] != undefined && row["Attid"] != "0") {
+        console.log(row["Attid"]);
+        
           let overtime = "00:00";
           let shifttype = await Helper.getShiftType(row["shift"]);
           let timeoutdate = todayDate;
@@ -1262,26 +1278,26 @@ export default class loginService {
           }
         } else {
 
-            
           let getEmpid = await Database.from("AttendanceMaster")
             .where("EmployeeId", row["Id"])
             .andWhere("AttendanceDate", todayDate);
+        
 
           let rowCount = getEmpid.length;
           if (rowCount == 0) {
-            let empDept = await Helper.getName(
+             await Helper.getName(
               "EmployeeMaster",
               "Department",
               "Id",
               row["Id"]
             );
-            let empDesig = await Helper.getName(
+             await Helper.getName(
               "EmployeeMaster",
               "Designation",
               "Id",
               row["Id"]
             );
-            let empArea_Assign = await Helper.getName(
+           await Helper.getName(
               "EmployeeMaster",
               "area_assigned",
               "Id",
@@ -1290,7 +1306,7 @@ export default class loginService {
           }
         }
       })
-    );
+    
   }
 }
 
