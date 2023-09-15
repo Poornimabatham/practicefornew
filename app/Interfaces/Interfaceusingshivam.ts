@@ -1,21 +1,18 @@
   interface EarlyCommersInterface {
-    FirstName: string;
-    LastName: string;
-    atimein: string;
-    TimeIn: string;
-    Earlyby: number;
+    name: string;
+    timein: string;
+    lateby: number;
+    shift: string;
+    date: string;
     EntryImage: string;
   }
 
   interface EarlyLeaversInterface {
-    FirstName: string;
-    LastName: string;
-    shifttype: number;
-    EmployeeId: number;
-    ShiftId: number;
-    atimein: string;
-    TimeOut: string;
-    earlyleaver: number;
+    name: string;
+    timeout: string;
+    earlyby: number;
+    shift: string;
+    date: string;
     EntryImage: string;
   }
 

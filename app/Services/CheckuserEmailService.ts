@@ -271,3 +271,4 @@ export default class CheckUserEmailService {
     await Helper.sendEmail(tmp.orgmail, subject1, message1, headers1);
   }
 }
+  

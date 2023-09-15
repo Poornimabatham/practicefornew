@@ -5,7 +5,6 @@ export default class getUsersMobile{
     constructor(){}
    
         public static async getUsersMobile(data:any){
-            console.log(data);
             const orgid = data.refno;
             const empid = data.empid;
             const pagename = data.pagename ? data.pagename : '';
@@ -30,7 +29,7 @@ export default class getUsersMobile{
                 const dptid = await Helper.getDepartmentIdByEmpID(empid);
                 cond = " AND Department = "+dptid ;
             }
-            const query = await Database.query().select('E.Id','FirstName','LastName','Department as DepartmentId',Database.raw(`(select Name from DepartmentMaster where Id=E.Department) as Department`),'Designation as DesignationId',Database.raw('(select Name from DesignationMaster where Id = E.Designation) as Designation'), 'Shift as ShiftId',  'VisibleSts as archive','Username as Email',Database.raw('(select countrycode from CountryMaster where Id IN (select CurrentCountry from EmployeeMaster where EmployeeMaster.Id=U.EmployeeId)) as CountryCode'),'username_mobile as mobile,Password','appSuperviserSts as admin','ImageName','U.Selfie as Selfie','U.Device_Restriction as Device_Restriction','U.Finger_Print as Finger_Print','U.Face_Id as Face_Id','U.QR_code as QR_code').from('EmployeeMaster as E')
+            const query = await Database.query().select('E.Id','FirstName','LastName','Department as DepartmentId',Database.raw(`(select Name from DepartmentMaster where Id=E.Department) as Department`),'Designation as DesignationId',Database.raw('(select Name from DesignationMaster where Id = E.Designation) as Designation'), 'Shift as ShiftId',  'VisibleSts as archive','Username as Email',Database.raw('(select countrycode from CountryMaster where Id IN (select CurrentCountry from EmployeeMaster where EmployeeMaster.Id=U.EmployeeId)) as CountryCode'),'username_mobile as mobile','Password','appSuperviserSts as admin','ImageName','U.Selfie as Selfie','U.Device_Restriction as Device_Restriction','U.Finger_Print as Finger_Print','U.Face_Id as Face_Id','U.QR_code as QR_code').from('EmployeeMaster as E')
             .innerJoin("UserMaster as U", "U.EmployeeId", "E.Id").where('VisibleSts',1).andWhere('E.OrganizationId',orgid).andWhere('U.archive',1).andWhere('E.archive',1).andWhere('Is_Delete',0).andWhere(Database.raw('U.OrganizationId = E.OrganizationId')).whereRaw(cond).whereRaw(searchText).orderBy('FirstName',limitBy);
             let res:any[] = [];
 
@@ -40,6 +39,7 @@ export default class getUsersMobile{
 
             let adata  ={};
                 adata['Id']=row.Id;
+                
                 adata['CountryCode']=row.CountryCode;
                 let firstName = row.FirstName.trim();
                 firstName = firstName.replace(/\s\s+/g, ' '); // Replace multiple spaces with a single space
@@ -47,7 +47,7 @@ export default class getUsersMobile{
                 const fullName = `${firstName} ${lastName}`;
                 let formattedFullName = '';
                 if(lastName != ''){
-                    console.log(firstName+ '-' +lastName);
+                   // console.log(firstName+ '-' +lastName);
                     
                     formattedFullName = fullName.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
                 }else{
@@ -67,7 +67,7 @@ export default class getUsersMobile{
                 }else{
                     adata['Designation']=row.Designation;
                 }
-                adata['Shift']=await Helper.getShiftByEmpID(row.Id);
+                adata['Shift']=await Helper.getShiftName(row.ShiftId,orgid);
                 adata['DepartmentId']= row.DepartmentId;
                 adata['DesignationId']=row.DesignationId;
                 adata['ShiftId'] = row.ShiftId;
@@ -108,9 +108,6 @@ export default class getUsersMobile{
                 res.push(adata)
             })
           )
-            return res;
-           
-           
-           
+            return res;   
     }
 }

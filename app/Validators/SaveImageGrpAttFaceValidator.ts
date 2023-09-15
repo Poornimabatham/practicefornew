@@ -1,12 +1,8 @@
 import { schema, CustomMessages } from '@ioc:Adonis/Core/Validator'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import BaseValidator from './BaseValidator'
-
-export default class AddonValidator {
-  constructor(protected ctx: HttpContextContract) {
-
-  }
-
+import BaseValidator from './BaseValidator';
+export default class SaveImageGrpAttFaceValidator {
+  constructor(protected ctx: HttpContextContract) { }
 
   /*
    * Define schema to validate the "shape", "type", "formatting" and "integrity" of data.
@@ -27,36 +23,21 @@ export default class AddonValidator {
    *     ])
    *    ```
    */
-  public schema = schema.create({})
-  public static tryfreeaddon = {
+  static saveImageGrpAttFace = {
     schema: schema.create({
-      uid: schema.number(),
-      refno: schema.number(),
-      name: schema.string()
-    }),
-    message: BaseValidator.messages,
-  }
-
-  public static registeredFaceIDList = {
-    schema: schema.create({
-      refno: schema.number(),
-      dataFor: schema.string(),
-      empid: schema.number(),
-      currentPage: schema.number.optional(),
-      perPage: schema.string.optional(),
-      pageName: schema.string.optional()
-    }),
-    message: BaseValidator.messages,
-  }
-
-  public static disapprovefaceid = {
-    schema: schema.create({
-      orgid: schema.number(),
-      adminId: schema.string.optional(),
-      empid: schema.number(),
-      orgTopic: schema.string()
-    }),
-    message: BaseValidator.messages,
+      userid: schema.number(),
+      LoginUserEmployeeId: schema.number(),
+      location:schema.string(),
+      refid:schema.number(),
+      appName:schema.string(),
+      latit:schema.string(),
+      longi:schema.string(),
+      platform:schema.string(),
+      appVersion:schema.string(),
+      FakeLocationStatus:schema.string(),
+      uploadPath:schema.string(),
+      
+    }), message: BaseValidator.messages
   }
   /**
    * Custom messages for validation failures. You can make use of dot notation `(.)`

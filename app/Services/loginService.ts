@@ -1,28 +1,325 @@
 import Database from "@ioc:Adonis/Lucid/Database";
 import Helper from "App/Helper/Helper";
+import { DateTime } from "luxon";
 import moment from "moment";
 // import Helper from "App/Helper/Helper";
 
 export default class loginService {
-  public static async login(getData) {
-    let userName1: string = getData.userName;
-    let password1: string = getData.password;
-    const query = await Database.from("OrganizationTemp")
-      .where("Email", userName1)
-      .andWhere("password", password1)
+  public static async checkLogin(getData, token) {
+    let data: any = [{}];
+    let userName: string = "";
+    let password: string = "";
+    let Org_perm: string = "1,2,3";
+    let datetime = DateTime.local();
+    let date = datetime.toFormat("yyyy-MM-dd");
+    let device = getData.device;
+    let qr = getData.qr;
+    let mailverified: String = "";
+    let ubiHrm_Sts: String = "";
+    let visibleSts: String = "";
+    let archive: string = "";
+    let dataarray: any[] = [];
+
+    if (qr == "true") {
+      userName = await Helper.encode5t(getData.userName);
+      password = getData.password;
+    } else {
+      userName = await Helper.encode5t(getData.userName);
+      password = await Helper.encode5t(getData.password);
+    }
+
+    let userName1 = getData.userName.trim().toLowerCase();
+    let password1 = getData.password;
+    let getVarifiedMail: any = await Database.from("OrganizationTemp")
+      .orWhereRaw("(Email = ? or phoneNumber = ?)", [userName, userName1])
+      .where("password", password1);
+    if (getVarifiedMail.length > 0) {
+      mailverified = getVarifiedMail.mail_varified;
+      if (mailverified == "0") {
+        data[0].mailStatus = 1;
+        return data;
+      }
+    }
+
+    let loginQuery: any = await Database.from("UserMaster as U")
+      .innerJoin("EmployeeMaster as E", "E.Id", "U.EmployeeId")
+      .orWhereRaw("(Username = ? or username_mobile = ?)", [userName, userName])
+      .where("password", password1)
+      .andWhereNotIn(
+        "E.OrganizationId",
+        [
+          502, 1074, 138265, 138263, 138262, 138261, 138260, 138259, 138258,
+          138257, 138256, 138255, 138254, 138253, 135095,
+        ]
+      );
+    if (loginQuery.length > 0) {
+      archive = loginQuery.archive;
+      let is_Delete = loginQuery[0].Is_Delete;
+      ubiHrm_Sts = await Helper.getUbiatt_Ubihrmsts(
+        loginQuery[0].OrganizationId
+      );
+      visibleSts = loginQuery[0].VisibleSts;
+
+      if (
+        ubiHrm_Sts == "1" &&
+        (archive == "0" ||
+          is_Delete == "1" ||
+          is_Delete == "2" ||
+          visibleSts == "0")
+      ) {
+        data[0].response = "2";
+
+        return data;
+      }
+
+      if (archive == "0" || is_Delete == "1" || is_Delete == "2") {
+        data[0].response = "2";
+
+        return data;
+      }
+    }
+
+    let checkloginquery: any = await Database.from("UserMaster")
+      .innerJoin("EmployeeMaster", "UserMaster.EmployeeId", "EmployeeMaster.id")
+      .orWhereRaw("(Username = ? or username_mobile = ?)", [userName, userName])
+      .where("Password", password)
+      .andWhere("UserMaster.archive", 1)
+      .andWhere("EmployeeMaster.archive", 1)
+      .andWhere("EmployeeMaster.Is_Delete", 0)
+      .andWhereNotIn(
+        "EmployeeMaster.OrganizationId",
+        [
+          502, 1074, 138265, 138263, 138262, 138261, 138260, 138259, 138258,
+          138257, 138256, 138255, 138254, 138253, 135095,
+        ]
+      )
       .select("*");
 
-    if (query.length > 0) {
-      const arr: any = [];
-      arr.push(query[0].Name);
-      arr.push(query[0].Email);
-      arr.push(query[0].password);
-      arr.push(query[0].Id);
-      arr.push(10);
-      return arr;
+    if (checkloginquery.length > 0) {
+      data[0].response = 1;
+      data[0].fname = await Helper.ucfirst(checkloginquery[0].FirstName);
+      data[0].lname = await Helper.ucfirst(checkloginquery[0].LastName);
+      data[0].empid = checkloginquery[0].EmployeeId;
+      data[0].geofencerestriction = checkloginquery[0].fencearea;
+      data[0].token = token.token;
+      data[0].attImage = await Helper.getAttImageStatus(
+        checkloginquery[0].OrganizationId
+      );
+
+      data[0].attSelfie = checkloginquery[0].Selfie;
+      data[0].qrkioskPin = checkloginquery[0].kioskPin;
+      data[0].timeZoneCountry = await Helper.getEmpTimeZone(
+        data[0].empid,
+        checkloginquery[0].OrganizationId
+      );
+      data[0].allowToPunchAtt = checkloginquery[0].Att_restrict;
+
+      data[0].areaIds = "";
+      if (checkloginquery[0].area_assigned == "") {
+        checkloginquery[0].area_assigned = 0;
+      }
+      if (checkloginquery[0].area_assigned != 0) {
+        let geoFenceSettingquery: any = await Database.from("Geo_Settings")
+          .whereIn("Id", [checkloginquery[0].area_assigned])
+          .andWhere("OrganizationId", checkloginquery[0].OrganizationId)
+          .andWhereNot("Lat_Long", "")
+          .select(
+            Database.raw(
+              "CONCAT('[',GROUP_CONCAT(JSON_OBJECT('lat', SUBSTRING_INDEX(Lat_Long, ',', 1),'long', SUBSTRING_INDEX(Lat_Long, ',', -1),'radius', Radius,'Id', Id)),']') as json"
+            )
+          );
+
+        if (geoFenceSettingquery.length > 0) {
+          data[0].areaIds = geoFenceSettingquery[0].json;
+        }
+      } else {
+        data[0].areaIds = "[]";
+      }
+      data[0].polyField = [];
+
+      if (checkloginquery[0].area_assigned != 0) {
+        let getIdData: any[] = [];
+        let getIdDataquery = await Database.from("geofence_polygon_master")
+          .whereIn("geo_masterId", [`${checkloginquery[0].area_assigned}`])
+          .select("Id", "geo_masterId", "latit_in", "longi_in");
+
+        getIdDataquery.forEach((queryData) => {
+          let singleDataArray: any = {};
+          singleDataArray.Id = queryData.Id;
+          singleDataArray.geo_masterId = queryData.geo_masterId;
+          singleDataArray.lat = queryData.latit_in;
+          singleDataArray.long = queryData.longi_in;
+          getIdData.push(singleDataArray);
+        });
+
+        dataarray.push(getIdData);
+        // dataarray.push(getIdData)
+
+        data[0].polyField = JSON.stringify(getIdData);
+
+        let shiftId = await Helper.getassignedShiftTimes(
+          checkloginquery[0].EmployeeId,
+          date
+        );
+
+        let shiftType = await Helper.getShiftType(shiftId);
+
+        let MultipletimeStatusq: any = await Helper.getshiftmultipletime_sts(
+          checkloginquery[0].EmployeeId,
+          date,
+          shiftId
+        );
+
+        data[0].MultipletimeStatus = MultipletimeStatusq;
+        data[0].usrpwd = await Helper.decode5t(checkloginquery[0].Password);
+        data[0].ShiftType = shiftType;
+        // let loctrackpermission = await Helper.loctrackpermission(
+        //   checkloginquery[0].EmployeeId
+        // );
+        data[0].timeZone = await Helper.gettimezonebyid(
+          checkloginquery[0].timezone
+        );
+        data[0].deviceverificationaddon = await Helper.getAddonPermission(
+          checkloginquery[0].OrganizationId,
+          "Addon_DeviceVerification"
+        );
+
+        data[0].deviceverification_setting =
+          await Helper.getDeviceVerification_settingsts(
+            checkloginquery[0].OrganizationId
+          );
+        data[0].addon_livelocationtracking = await Helper.getAddonPermission(
+          checkloginquery[0].OrganizationId,
+          "addon_livelocationtracking"
+        );
+        data[0].addonGeoFence = await Helper.getAddonPermission(
+          checkloginquery[0].OrganizationId,
+          "Addon_GeoFence"
+        );
+        data[0].Geofence_visit = await Helper.getAddonPermission(
+          checkloginquery[0].OrganizationId,
+          "Geofence_visit"
+        );
+
+        data[0].addon_qrAttendance = await Helper.getAddonPermission(
+          checkloginquery[0].OrganizationId,
+          "addon_qrAttendance"
+        );
+
+        data[0].TrackLocationEnabled = checkloginquery[0].livelocationtrack;
+        data[0].persistedface = "0";
+        let getPersistedFaceId: any = await Database.from("Persisted_Face")
+          .where("EmployeeId", checkloginquery[0].EmployeeId)
+          .select("PersistedFaceId");
+        if (getPersistedFaceId.length > 0) {
+          data[0].persistedface = getPersistedFaceId[0].PersistedFaceId;
+        }
+        data[0].device = checkloginquery[0].Device_Restriction;
+        data[0].deviceandroidid = checkloginquery[0].DeviceId;
+
+        data[0].status = checkloginquery[0].VisibleSts;
+        data[0].orgid = checkloginquery[0].OrganizationId;
+        data[0].sstatus = checkloginquery[0].appSuperviserSts;
+        data[0].org_perm = Org_perm;
+        data[0].imgstatus = 1;
+        let getAttnImageStatus: any = await Database.from("admin_login")
+          .where("OrganizationId", checkloginquery[0].OrganizationId)
+          .andWhere("status", 1)
+          .select("AttnImageStatus")
+          .limit(1);
+        if (getAttnImageStatus.length > 0) {
+          data[0].imgstatus = getAttnImageStatus[0].AttnImageStatus;
+        }
+        let getOrgData: any = await Database.from("Organization")
+          .where("id", data[0].orgid)
+          .select("Name", "Email", "Country", "app");
+
+        if (getOrgData.length > 0)
+          if (getOrgData[0].Name.length > 16) {
+            data[0].org_name = getOrgData[0].Name.substr(0, 40) + "..";
+          } else {
+            data[0].org_name = getOrgData[0].Name;
+          }
+        data[0].orgmail = getOrgData[0].Email;
+
+        data[0].orgcountry = getOrgData[0].Country;
+        if (getData.app == "PayPak") {
+          data[0].PaypakApp = getOrgData[0].app; //for paypak
+          if (data[0].PaypakApp != "PayPak") {
+            data[0].response = 0;
+            return JSON.stringify(data);
+          }
+        }
+        let getLicence_UbiAttendanceData: any = await Database.from(
+          "licence_ubiattendance"
+        )
+          .where("OrganizationId", data[0].orgid)
+          .select("status", "end_date")
+          .orderBy("id", "desc")
+          .limit(1);
+
+        if (getLicence_UbiAttendanceData.length > 0) {
+          data[0].trialstatus = getLicence_UbiAttendanceData[0].status;
+          let end_Date = getLicence_UbiAttendanceData[0].end_date;
+          if (moment(end_Date).format("yyyy-MM-dd") < date) {
+            data[0].trialstatus = "2";
+          }
+          data[0].buysts = getLicence_UbiAttendanceData[0].status;
+        }
+        let desgname: any = await Helper.getDesignation(
+          checkloginquery[0].Designation
+        );
+
+        if (desgname.length > 16) {
+          data[0].desination = desgname.substr(0, 40) + "..";
+        } else
+          data[0].desination = await Helper.getDesignation(
+            checkloginquery[0].Designation
+          );
+
+        data[0].desinationId = checkloginquery[0].Designation;
+
+        let deptgname: any = await Helper.getDeptNamem(
+          checkloginquery[0].Department,
+          data[0].orgid
+        );
+
+        if (deptgname.length > 16) {
+          data[0].departmentName = deptgname.substr(0, 40) + "..";
+        } else {
+          data[0].departmentName = deptgname;
+        }
+
+        if (checkloginquery[0].ImageName != "") {
+          let dir =
+            "public/uploads/" +
+            checkloginquery[0].OrganizationId +
+            "/" +
+            checkloginquery[0].ImageName;
+          data[0].profile = "https://ubitech.ubihrm.com/" + dir;
+        } else {
+          data[0].profile =
+            "http://ubiattendance.ubihrm.com/assets/img/avatar.png";
+        }
+
+        let result1: any = await Database.from("PlayStore")
+          .select("*")
+          .limit(1);
+
+        if (result1.length > 0) {
+          if (device == "Android") {
+            data[0].store = result1.googlepath;
+          } else if (device == "iOS") {
+            data[0].store = result1.applepath;
+          } else {
+            data[0].store = "https://ubiattendance.ubihrm.com";
+          }
+        }
+      }
     } else {
-      return 0;
+      data[0].response = 0;
     }
+    return JSON.stringify(data[0]);
   }
   public static async storetoken(arr: any = {}) {
     const query1 = await Database.query()
@@ -76,10 +373,10 @@ export default class loginService {
     const userpassword = data.userpassword;
     const countrycode = data.countrycode;
     const countrycodeid = data.countrycodeid;
-    const phoneno = (data.phoneno).toString();
+    const phoneno = data.phoneno.toString();
     const appleAuthId = data.appleAuthId;
     let platform = data.platform;
-    let app = data.app;    
+    let app = data.app;
     const skipOTP = data.skipOTP;
     const emailVerification = data.emailVerification;
 
@@ -88,7 +385,7 @@ export default class loginService {
     const orgid = 0;
     const result: any = {};
     const email = await Helper.encode5t(useremail);
-    const phone = await Helper.encode5t(phoneno); 
+    const phone = await Helper.encode5t(phoneno);
     const Password = await Helper.encode5t(userpassword);
     const res: any = {};
     let id = 0;
@@ -114,7 +411,7 @@ export default class loginService {
 
     const query2 = await Database.query()
       .from("Organization")
-      .where("PhoneNumber", `${phoneno}`);   
+      .where("PhoneNumber", `${phoneno}`);
     if (query2.length > 0) {
       res["status"] = "false2";
       return res;
@@ -143,7 +440,7 @@ export default class loginService {
       .from("Organization")
       .where("PhoneNumber", `${phoneno}`)
       .andWhereNot("cleaned_up", 1)
-      .andWhereNot("delete_sts", "1"); 
+      .andWhereNot("delete_sts", "1");
     if (query5.length > 0) {
       res["status"] = "false2";
       return res;
@@ -170,66 +467,72 @@ export default class loginService {
       })
       .returning("Id");
 
-      id = insertorgquery[0];
+    id = insertorgquery[0];
 
-    if (insertorgquery.length > 0) 
-    {
-        let otp  = insertorgquery[0];
-        let potp = strlen(otp);
-        let digits = potp;
-        if(skipOTP == 1){
-          otp='00000';
-        }else{
-            let tempotp = 0;//rand(pow(10, $digits-1), pow(10, $digits)-1);
-            otp  = otp.tempotp;        
-        }
-          
-        let updatequery = await Database.query().from('Organization').where('id',id).update({OTP:otp})
+    if (insertorgquery.length > 0) {
+      let otp = insertorgquery[0];
+      let potp = strlen(otp);
+      let digits = potp;
+      if (skipOTP == 1) {
+        otp = "00000";
+      } else {
+        let tempotp = 0; //rand(pow(10, $digits-1), pow(10, $digits)-1);
+        otp = otp.tempotp;
+      }
 
-       if(app == "ubiAttendance"){
-          app = "ubiAttendance";
-       }else{
-          app = "ubiSales";
-       }
+      let updatequery = await Database.query()
+        .from("Organization")
+        .where("id", id)
+        .update({ OTP: otp });
 
-       let Body;
-       let Subject;
-       let logo;
-       let msessage;
-       let headers ='From: <noreply@ubiattendance.com>';
+      if (app == "ubiAttendance") {
+        app = "ubiAttendance";
+      } else {
+        app = "ubiSales";
+      }
 
-       let mailquery = await Database.query().from('All_mailers').select('Subject','Body').where('Id',4);
-        
-       if(mailquery){
+      let Body;
+      let Subject;
+      let logo;
+      let msessage;
+      let headers = "From: <noreply@ubiattendance.com>";
 
+      let mailquery = await Database.query()
+        .from("All_mailers")
+        .select("Subject", "Body")
+        .where("Id", 4);
+
+      if (mailquery) {
         Body = mailquery[0].Body;
-        Subject = mailquery[0].Subject; 
-       }
+        Subject = mailquery[0].Subject;
+      }
 
-       let maillink ='<a href="http://ubiattendance.ubihrm.com/index.php/services/activateAccount?iuser="style="color: #FF7D33;">Verify your Account</a> ';
+      let maillink =
+        '<a href="http://ubiattendance.ubihrm.com/index.php/services/activateAccount?iuser="style="color: #FF7D33;">Verify your Account</a> ';
 
-       let mailbtnlink='<a href="http://ubiattendance.ubihrm.com/index.php/services/activateAccount?iuser" style="font-family: georgia, Arial, sans-serif;font-size: 15px;text-align: justify;color: rgb(255, 255, 255);text-decoration: none;background-color: rgb(37, 182, 153);border-color: rgb(248, 249, 250);padding: 15px;font-weight: 700 !important;">Verify your Account</a>';
+      let mailbtnlink =
+        '<a href="http://ubiattendance.ubihrm.com/index.php/services/activateAccount?iuser" style="font-family: georgia, Arial, sans-serif;font-size: 15px;text-align: justify;color: rgb(255, 255, 255);text-decoration: none;background-color: rgb(37, 182, 153);border-color: rgb(248, 249, 250);padding: 15px;font-weight: 700 !important;">Verify your Account</a>';
       //  unsubscribe_link
 
-       if(app == "ubiSales")
-       {
-        logo="<img src='https://ubiattendance.ubiattendance.xyz/assets/images/ubisales.png' style='width: 200px;' <p style='text-align: center; line-height:1; ><br></p><p class='MsoNormal' style='text-align: center; margin-bottom: 0.0001pt; line-height: 1;'><b><span style='font-size: 24px; font-family: &quot;Times New Roman&quot'>"
-       }else{
-        logo="<img src='https://ubiattendance.ubiattendance.xyz/assets/images/ubi-Atttendance-Logo_d0bec719579677da36f94f7d3caa2d07.png' style='width: 200px;' <p style='text-align: center; line-height:1; ><br></p><p class='MsoNormal' style='text-align: center; margin-bottom: 0.0001pt; line-height: 1;'><b><span style='font-size: 24px; font-family: &quot;Times New Roman&quot'>"
-       } 
-        
-        let body1 = Body.replace("{logo}",logo)
-        let body2 = body1.replace("{appname}",app);
-        let body3 = body2.replace("{appname}",app);
-        let body4 = body3.replace("{appname}",app);
-        let body5 = body4.replace("{contact_person_name}", username);
-        let body6 = body5.replace("{Verify your Account}",maillink);
-        let body7 = body6.replace("{Verify your Account}",mailbtnlink);
+      if (app == "ubiSales") {
+        logo =
+          "<img src='https://ubiattendance.ubiattendance.xyz/assets/images/ubisales.png' style='width: 200px;' <p style='text-align: center; line-height:1; ><br></p><p class='MsoNormal' style='text-align: center; margin-bottom: 0.0001pt; line-height: 1;'><b><span style='font-size: 24px; font-family: &quot;Times New Roman&quot'>";
+      } else {
+        logo =
+          "<img src='https://ubiattendance.ubiattendance.xyz/assets/images/ubi-Atttendance-Logo_d0bec719579677da36f94f7d3caa2d07.png' style='width: 200px;' <p style='text-align: center; line-height:1; ><br></p><p class='MsoNormal' style='text-align: center; margin-bottom: 0.0001pt; line-height: 1;'><b><span style='font-size: 24px; font-family: &quot;Times New Roman&quot'>";
+      }
 
-        msessage = body7;
-      
-        await Helper.sendEmail(useremail,Subject,msessage,headers);
+      let body1 = Body.replace("{logo}", logo);
+      let body2 = body1.replace("{appname}", app);
+      let body3 = body2.replace("{appname}", app);
+      let body4 = body3.replace("{appname}", app);
+      let body5 = body4.replace("{contact_person_name}", username);
+      let body6 = body5.replace("{Verify your Account}", maillink);
+      let body7 = body6.replace("{Verify your Account}", mailbtnlink);
 
+      msessage = body7;
+
+      await Helper.sendEmail(useremail, Subject, msessage, headers);
     }
 
     const FetchZone = await Database.query()
@@ -269,54 +572,60 @@ export default class loginService {
         mail_varified: emailVerification,
         fiscal_start: "1 April",
         fiscal_end: "31 March",
-      });      
-      
-      if(UpdateOrg){
-       if(app == "ubiAttendance"){
-          app = "ubiAttendance";
-       }else{
-          app = "ubiSales";
-       }
+      });
 
-       let Body;
-       let Subject;
-       let logo;
-       let msessage;
-       let headers ='From: <noreply@ubiattendance.com>';
+    if (UpdateOrg) {
+      if (app == "ubiAttendance") {
+        app = "ubiAttendance";
+      } else {
+        app = "ubiSales";
+      }
 
-       let mailquery = await Database.query().from('All_mailers').select('Subject','Body').where('Id',4);
-        
-       if(mailquery){
+      let Body;
+      let Subject;
+      let logo;
+      let msessage;
+      let headers = "From: <noreply@ubiattendance.com>";
 
+      let mailquery = await Database.query()
+        .from("All_mailers")
+        .select("Subject", "Body")
+        .where("Id", 4);
+
+      if (mailquery) {
         Body = mailquery[0].Body;
-        Subject = mailquery[0].Subject; 
-       }
+        Subject = mailquery[0].Subject;
+      }
 
-       if(app == "ubiSales")
-       {
+      if (app == "ubiSales") {
+        logo =
+          "<img src='https://ubiattendance.ubiattendance.xyz/assets/images/ubisales.png' style='width: 200px;' <p style='text-align: center; line-height:1; ><br></p><p class='MsoNormal' style='text-align: center; margin-bottom: 0.0001pt; line-height: 1;'><b><span style='font-size: 24px; font-family: &quot;Times New Roman&quot'>";
+      } else {
+        logo =
+          "<img src='https://ubiattendance.ubiattendance.xyz/assets/images/ubi-Atttendance-Logo_d0bec719579677da36f94f7d3caa2d07.png' style='width: 200px;' <p style='text-align: center; line-height:1; ><br></p><p class='MsoNormal' style='text-align: center; margin-bottom: 0.0001pt; line-height: 1;'><b><span style='font-size: 24px; font-family: &quot;Times New Roman&quot'>";
+      }
 
-        logo="<img src='https://ubiattendance.ubiattendance.xyz/assets/images/ubisales.png' style='width: 200px;' <p style='text-align: center; line-height:1; ><br></p><p class='MsoNormal' style='text-align: center; margin-bottom: 0.0001pt; line-height: 1;'><b><span style='font-size: 24px; font-family: &quot;Times New Roman&quot'>"
-       }else{
-        logo="<img src='https://ubiattendance.ubiattendance.xyz/assets/images/ubi-Atttendance-Logo_d0bec719579677da36f94f7d3caa2d07.png' style='width: 200px;' <p style='text-align: center; line-height:1; ><br></p><p class='MsoNormal' style='text-align: center; margin-bottom: 0.0001pt; line-height: 1;'><b><span style='font-size: 24px; font-family: &quot;Times New Roman&quot'>"
-       } 
-        
-        let body1 = Body.replace("{logo}",logo)
-        let body2 = body1.replace("{appname}",app);
-        let body3 = body2.replace("{appname}",app);
-        let body4 = body3.replace("{appname}",app);
-        let body5 = body4.replace("{appname}",app);
-        let body6 = body5.replace("{appname}",app);
-        let body7 = body6.replace("{employee_number}", phoneno);
-        let body8 = body7.replace("{employee_password}",userpassword);
+      let body1 = Body.replace("{logo}", logo);
+      let body2 = body1.replace("{appname}", app);
+      let body3 = body2.replace("{appname}", app);
+      let body4 = body3.replace("{appname}", app);
+      let body5 = body4.replace("{appname}", app);
+      let body6 = body5.replace("{appname}", app);
+      let body7 = body6.replace("{employee_number}", phoneno);
+      let body8 = body7.replace("{employee_password}", userpassword);
 
       msessage = body8;
-      
-      const takerep = await Helper.sendEmail(useremail,Subject,msessage,headers);
-   
-    
-        //////////write Zone 
 
-       const insert_adminlogin = await Database.table("admin_login").insert({
+      const takerep = await Helper.sendEmail(
+        useremail,
+        Subject,
+        msessage,
+        headers
+      );
+
+      //////////write Zone
+
+      const insert_adminlogin = await Database.table("admin_login").insert({
         username: username,
         password: userpassword,
         email: useremail,
@@ -354,8 +663,9 @@ export default class loginService {
         column_value["Addon_LocationTracking"] = addonlocationtrack;
       }
 
-      let insert_licence = await Database.table("licence_ubiattendance")
-        .insert(column_value);
+      let insert_licence = await Database.table("licence_ubiattendance").insert(
+        column_value
+      );
 
       let dept_array: any = {};
 
@@ -691,7 +1001,7 @@ export default class loginService {
       )
       .where("O.Id", getparam.org_id)
       .andWhere("O.mail_varified", 0);
-    
+
     var response = {};
     if (selectquery.length == 0) {
       response["response"] = 0; ///User Not exist on given org_id
@@ -712,9 +1022,9 @@ export default class loginService {
 
         var oldmail = showdata.email;
         var email;
-        if (oldmail != emailNew) {          
-          email = emailNew;          
-          let encodeemail = await Helper.encode5t(email);          
+        if (oldmail != emailNew) {
+          email = emailNew;
+          let encodeemail = await Helper.encode5t(email);
           var COUNTER = 0;
           var orgCount;
           orgCount = await Database.from("Organization")
@@ -732,11 +1042,10 @@ export default class loginService {
             .where("Username", encodeemail);
           COUNTER += orgCount.length;
 
-          if (COUNTER > 0) {            
+          if (COUNTER > 0) {
             response["response"] = 1; // Already exist
-          } else {   
-          
-            const updateQuery = await Database .from("Organization as o")
+          } else {
+            const updateQuery = await Database.from("Organization as o")
               .innerJoin("admin_login as a", "o.Id", "a.OrganizationId")
               .innerJoin("EmployeeMaster as e", "o.Id", "e.OrganizationId")
               .innerJoin("UserMaster as u", "o.Id", "u.OrganizationId")
@@ -792,7 +1101,7 @@ export default class loginService {
 
         // console.log(email);
         // email = "meghwalshivam18@gmail.com";    // for testing
-        // console.log(email); 
+        // console.log(email);
 
         let getrespons = await Helper.sendEmail(
           email,
@@ -801,7 +1110,7 @@ export default class loginService {
           headers
         );
 
-        if (getrespons !=undefined) {
+        if (getrespons != undefined) {
           response["status"] = "true"; //Mail send succesfully
         } else {
           response["status"] = "false"; ////Mail send Unsuccesfull
@@ -810,8 +1119,232 @@ export default class loginService {
     );
     return response;
   }
+
+
+  static async CreateBulkAtt(data: any) {
+
+    // console.log(data);
+    // return false
+    let result: any[] = [],
+      count: number = 0,
+      errorMsg: string = "",
+      successMsg: string = "",
+      status: string = "",
+      dataContainer: any[] = [],
+      zone: string = "";
+      let AttData =JSON.parse(data.attlist)    
+    
+    if (data.uid != 0) {
+      zone = await Helper.getEmpTimeZone(data.uid, data.orgid); // to set the timezone by employee
+    } else {
+      zone = await Helper.getTimeZone(data.orgid);
+    }
+    const defaultZone = DateTime.now().setZone(zone);
+
+    let dateTime: string = defaultZone.toFormat("yyyy-MM-dd HH:mm:ss"),
+      currentDate: DateTime = DateTime.local(),
+      time: string = defaultZone.toFormat("HH:mm:ss"),
+      date: string = defaultZone.toFormat("yyyy-MM-dd"),
+      $skip: number = 0;
+    
+      AttData.forEach(async (row) => {
+        // console.log( row["Id"],
+        // data.org_id,
+        // time,
+        // date,
+        // dateTime);
+        
+        await Helper.AutoTimeOffEndWL(
+          row["Id"],
+          data.org_id,
+          time,
+          date,
+          dateTime
+        );
+
+        let todayDate = row["data_date"] != undefined ? row["data_date"] : date;
+        count += 1;
+        // console.log(row["Attid"]);        
+        if (row["Attid"] != undefined && row["Attid"] != "0") {
+                  
+          let overtime = "00:00";
+          let shifttype = await Helper.getShiftType(row["shift"]);
+          let timeoutdate = todayDate;
+          if (shifttype != 1) {
+            if (row["timein"] > row["timeout"]) {
+              const nextDay: any = currentDate.plus({ days: 1 });
+              timeoutdate = nextDay.toFormat("yyyy-MM-dd");
+
+              let getOverTime: any = await Database.from("ShiftMaster")
+                .select(
+                  Database.raw(
+                    `SUBTIME( SUBTIME( timein, timeout ) , SUBTIME(  '"${row["timein"]}"',  '"${row["timeout"]}"' ) ) AS overtime`
+                  )
+                )
+                .where("id", row["shift"]);
+              if (getOverTime.length > 0) {
+                overtime = getOverTime.overtime;
+              } else {
+                let getOverTime: any = await Database.from("ShiftMaster")
+                  .select(
+                    Database.raw(
+                      `SUBTIME( SUBTIME( timein, timeout ) , SUBTIME(  '"${row["timein"]}"',  '"${row["timeout"]}"' ) ) AS overtime`
+                    )
+                  )
+                  .where("id", row["shift"]);
+                if (getOverTime.length > 0) {
+                  overtime = getOverTime.overtime;
+                }
+                time = "24:00:00";
+                const timein = DateTime.fromISO(row.timein);
+                const timeout = DateTime.fromISO(row.timeout);
+
+                const diffInSeconds = timeout.diff(timein).as("seconds");
+                const admintotal = DateTime.fromMillis(
+                  diffInSeconds * 1000
+                ).toFormat("HH:mm");
+
+                let multitime_Sts = await Helper.getshiftmultipletime_sts(
+                  row["Id"],
+                  todayDate,
+                  row["shift"]
+                );
+                if (shifttype == 3 || multitime_Sts == 1) {
+                  await Database.from("AttendanceMaster")
+                    .where("Id", row["Attid"])
+                    .andWhere("AttendanceDate", todayDate)
+                    .update({
+                      TimeOut: row["timeout"],
+                      ExitImage:
+                        "https://ubiattendance.ubihrm.com/assets/img/managerdevice.png",
+                      timeoutdate: timeoutdate,
+                      Overtime: overtime,
+                      device: "AppManager",
+                      TimeOutDevice: "AppManager",
+                      TotalLoggedHours: admintotal,
+                    });
+
+                  await Database.from("InterimAttendances")
+                    .where("AttendanceMasterId", row["Attid"])
+                    .andWhere("OrganizationId", data.orgid)
+                    .update({
+                      TimeOut: row["timeout"],
+                      ExitImage:
+                        "https://ubiattendance.ubihrm.com/assets/img/managerdevice.png",
+                      timeoutdate: timeoutdate,
+                      Overtime: overtime,
+                      device: "AppManager",
+                      TimeOutDevice: "AppManager",
+                      TotalLoggedHours: admintotal,
+                    });
+                } else {
+                  await Database.from("AttendanceMaster")
+                    .where("Id", row["Attid"])
+                    .andWhere("AttendanceDate", todayDate)
+                    .update({
+                      TimeOut: row["timeout"],
+                      ExitImage:
+                        "https://ubiattendance.ubihrm.com/assets/img/managerdevice.png",
+                      timeoutdate: timeoutdate,
+                      Overtime: overtime,
+                      device: "AppManager",
+                      TimeOutDevice: "AppManager",
+                      TotalLoggedHours: admintotal,
+                    });
+                }
+                await Database.from("AttendanceMaster")
+                  .where("Id", row["Attid"])
+                  .andWhere("AttendanceDate", todayDate)
+                  .update({
+                    TimeOut: row["timeout"],
+                    ExitImage:
+                      "https://ubiattendance.ubihrm.com/assets/img/managerdevice.png",
+                    timeoutdate: timeoutdate,
+                    Overtime: overtime,
+                    device: "AppManager",
+                    TimeOutDevice: "TimeOutDevice",
+                  });
+              }
+            }
+          }
+        } else {
+
+          let getEmpid = await Database.from("AttendanceMaster")
+            .where("EmployeeId", row["Id"])
+            .andWhere("AttendanceDate", todayDate);
+        
+
+          var rowCount = getEmpid.length;
+          rowCount = 0;
+      
+          if (rowCount == 0) {                 
+             const empdept = await Helper.getName(
+              "EmployeeMaster",
+              "Department",
+              "Id",
+              row["Id"]
+            );
+             const empdesig = await Helper.getName(
+              "EmployeeMaster",
+              "Designation",
+              "Id",
+              row["Id"]
+            );
+           const emparea_assign = await Helper.getName(
+              "EmployeeMaster",
+              "area_assigned",
+              "Id",
+              row["Id"]
+            );
+
+
+            if (row["Attid"] == 2) {
+              
+              const dataContainer = {
+                EmployeeId: row.Id,
+                AttendanceDate: todayDate,
+                AttendanceStatus: row.attsts,
+                ShiftId: row.shift,
+                Dept_id: empdept,
+                Desg_id: empdesig,
+                areaId: emparea_assign,
+                OrganizationId: data.org_id,
+                CreatedDate: dateTime,
+                CreatedById: data.uid,
+                LastModifiedDate: date,
+                LastModifiedById: data.uid,
+                OwnerId: data.uid,
+                device: "AppManager",
+                timeoutdate: row.todate,
+                platform: data.platform,
+                TimeInDevice: "AppManager",
+              };
+              // console.log(dataContainer);
+              let insertQuery = await Database.table("AttendanceMaster").insert(dataContainer);              
+            }
+            else {
+              if (row['timein'] == "0:0" || row['timein'] == "00:00:00" || row['timein'] == "00:00")
+                row["timein"] = "00:01:00";
+              console.log(row["timein"]);
+              if (row['timeout'] == "00:00" || row['timeout'] == "0:0")
+                row["timeout"] = "23:59:00";
+
+              const timeout = DateTime.fromISO(row["timein"]);
+
+               
+               console.log("Formatted timein:", timeout);
+              
+            }
+
+          }
+        }
+      })
+    
+  }
 }
-function strlen($otp: any) {
+
+
+function strlen(otp: any) {
   throw new Error("Function not implemented.");
 }
 
