@@ -5,15 +5,14 @@ export default class LatecomingValidator extends BaseValidator {
   constructor(protected ctx: HttpContextContract) {
     super();
   }
-
   static fetchlatecomingsschema = {
     schema: schema.create({
-      Orgid: schema.number(),
-      Date: schema.date.optional({ format: "yyyy-MM-dd" }),
-      Empid: schema.number(),
-      Csv: schema.number.optional(),
-      Currentpage: schema.number(),
-      Perpage: schema.number(),
+      orgid: schema.number(),
+      cdate: schema.string(),
+      empid: schema.number(),
+      csv: schema.number.optional(),
+      currentPage: schema.number(),
+      perPage: schema.number(),
     }),
   };
 

@@ -1,14 +1,11 @@
 import Database from "@ioc:Adonis/Lucid/Database";
 import Helper from "App/Helper/Helper";
-import { lastDayOfMonth } from "date-fns";
-import LogicsOnly from "./getAttendances_service";
 
 export default class CheckUserEmailService {
   public static async CheckUserEmail(data) {
-    var email = data.email;
-
+    var email = data.useremail;
     var result: any = {};
-    var usermail = await Helper.encode5t(data.email);
+    var usermail = await Helper.encode5t(email);
     const checkquery = await Database.from("UserMaster")
       .where("Username", usermail)
       .limit(2);
@@ -22,13 +19,14 @@ export default class CheckUserEmailService {
   }
 
   public static async CheckUserPhone(data) {
-    var phone = data.phone;
+    var phone = data.phoneno;
     var result: any = {};
     var userphone = await Helper.encode5t(phone);
 
     var selectOrganizationList = await Database.from("Organization")
       .where("PhoneNumber", phone)
-      .select("Id as OId", "Name as OName");
+      .select("Id as Id", "Name as Name")
+      
 
     const Organization_num_rows = selectOrganizationList;
     const selectUserMasterList = await Database.from("UserMaster")
@@ -45,8 +43,7 @@ export default class CheckUserEmailService {
         "E.OrganizationId"
       )
       .from("UserMaster as U")
-      .andWhere("U.username_mobile", userphone);
-
+      .andWhere("U.username_mobile", userphone)
     var checkquery_num_row = selectUserMasterList;
     if (checkquery_num_row.length > 0 || Organization_num_rows.length > 0) {
       if (checkquery_num_row.length > 0) {
@@ -174,39 +171,52 @@ export default class CheckUserEmailService {
   }
 
   public static async sendSignUpMail(getparam) {
-    const app= getparam.appName ? getparam.appName : "";
+    const app = getparam.appName ? getparam.appName : "";
     const username = getparam.userName ? getparam.userName : "";
     const password = getparam.password ? getparam.password : "";
     const loginResp = getparam.response ? getparam.response : "";
     const phone = getparam.phone ? getparam.phone : 0;
-    const tmp = JSON.parse(loginResp);   
+    const tmp = JSON.parse(loginResp);
     const orgid = tmp.OrganizationId;
-    const empId = await Helper.encode5t(tmp.EmployeeId.toString());    
+    const empId = await Helper.encode5t(tmp.EmployeeId.toString());
 
     var logo;
     if (app == "ubiAttendance") {
       logo =
-        '<img src="https://ubiattendance.ubiattendance.xyz/index.php/../assets/img/newlogo.png" alt = "Ubitech" style = "width: 130px; margin-left: 50px; margin-right: 50px;" >';        
+        '<img src="https://ubiattendance.ubiattendance.xyz/index.php/../assets/img/newlogo.png" alt = "Ubitech" style = "width: 130px; margin-left: 50px; margin-right: 50px;" >';
     } else {
       logo =
-        "<img src='https://ubihrmimages.s3.ap-south-1.amazonaws.com/ubisalesAssets/ubisales-logo-circle-final.png'style='width: 100px;' <p style='text-align: center; line-height:1;'><br></p><p class='MsoNormal' style='text-align: center; margin-bottom: 0.0001pt; line-height: 1;'><b><span style='font-size: 24px; font-family: &quot;Times New Roman&quot;'>";	
+        "<img src='https://ubihrmimages.s3.ap-south-1.amazonaws.com/ubisalesAssets/ubisales-logo-circle-final.png'style='width: 100px;' <p style='text-align: center; line-height:1;'><br></p><p class='MsoNormal' style='text-align: center; margin-bottom: 0.0001pt; line-height: 1;'><b><span style='font-size: 24px; font-family: &quot;Times New Roman&quot;'>";
     }
 
     let subject = "UbiAttendance- Account verification";
-    var querytest = await Database.from("All_mailers").select("Body").where("Id", 2);
-    
-    var namebody = "";    
+    var querytest = await Database.from("All_mailers")
+      .select("Body")
+      .where("Id", 2);
+
+    var namebody = "";
     if (querytest.length > 0) {
       namebody = querytest[0].Body;
     }
 
     var message = namebody;
-    
-    const maillink ='<a href="http://ubiattendance.ubihrm.com/index.php/services/activateAccount?iuser='+empId+'" style="color: #FF7D33;">Verify your Account</a> ';
 
-    const mailbtnlink = '<a href="http://ubiattendance.ubihrm.com/index.php/services/activateAccount?iuser=' + empId + '" style="font-family: georgia, Arial, sans-serif;font-size: 15px;text-align: justify;color: rgb(255, 255, 255);text-decoration: none;background-color: rgb(37, 182, 153);border-color: rgb(248, 249, 250);padding: 15px;font-weight: 700 !important;">Verify your Account</a>';
-    
-    const unsubscribe_link = '<a href="' + "URL" + 'cron/unsubscribeOrgMails/' + orgid + '" target="_top">unsubscribe </a>';
+    const maillink =
+      '<a href="http://ubiattendance.ubihrm.com/index.php/services/activateAccount?iuser=' +
+      empId +
+      '" style="color: #FF7D33;">Verify your Account</a> ';
+
+    const mailbtnlink =
+      '<a href="http://ubiattendance.ubihrm.com/index.php/services/activateAccount?iuser=' +
+      empId +
+      '" style="font-family: georgia, Arial, sans-serif;font-size: 15px;text-align: justify;color: rgb(255, 255, 255);text-decoration: none;background-color: rgb(37, 182, 153);border-color: rgb(248, 249, 250);padding: 15px;font-weight: 700 !important;">Verify your Account</a>';
+
+    const unsubscribe_link =
+      '<a href="' +
+      "URL" +
+      "cron/unsubscribeOrgMails/" +
+      orgid +
+      '" target="_top">unsubscribe </a>';
 
     message = message.replace("{contact_person_name}", tmp.ClientName);
     message = message.replace("{Verify your Account}", maillink);
@@ -216,34 +226,38 @@ export default class CheckUserEmailService {
     message = message.replace("{ubiAttendance}", app);
     message = message.replace("{ubiAttendance}", app);
     message = message.replace("{Unsubscribe_link}", unsubscribe_link);
-    
-    const headers = " ";    
-    
-    // await Helper.sendEmail("meghwalshivam18@gmail.com",subject + "testMail",message,headers); 
+
+    const headers = " ";
+
+    // await Helper.sendEmail("meghwalshivam18@gmail.com",subject + "testMail",message,headers);
     await Helper.sendEmail(tmp.orgmail, subject, message, headers);
-    
-    var  querytest2 = await Database.from("All_mailers").select("Body").where("Id", 4);
+
+    var querytest2 = await Database.from("All_mailers")
+      .select("Body")
+      .where("Id", 4);
     var namebody2 = "";
     if (querytest2) {
-    namebody2 = querytest2[0].Body;
+      namebody2 = querytest2[0].Body;
     }
 
     var message1 = namebody2;
-    
+
     var platFormName = app == "ubiAttendance" ? "ubiAttendance" : "ubiSales";
-    
-    var subject1 = "Please share the circular to the Employees for starting with " + platFormName;    
+
+    var subject1 =
+      "Please share the circular to the Employees for starting with " +
+      platFormName;
 
     var headers1 = "From: <noreply@ubiattendance.com>" + "\r\n";
 
-    if (platFormName == "ubiSales") {       
-      logo ="<img src='https://ubihrmimages.s3.ap-south-1.amazonaws.com/ubisalesAssets/ubisales-logo-circle-final.png'style='width: 100px;' <p style='text-align: center; line-height:1;'><br></p><p class='MsoNormal' style='text-align: center; margin-bottom: 0.0001pt; line-height: 1;'><b><span style='font-size: 24px; font-family: &quot;Times New Roman&quot;'>";      
+    if (platFormName == "ubiSales") {
+      logo =
+        "<img src='https://ubihrmimages.s3.ap-south-1.amazonaws.com/ubisalesAssets/ubisales-logo-circle-final.png'style='width: 100px;' <p style='text-align: center; line-height:1;'><br></p><p class='MsoNormal' style='text-align: center; margin-bottom: 0.0001pt; line-height: 1;'><b><span style='font-size: 24px; font-family: &quot;Times New Roman&quot;'>";
+    } else {
+      logo =
+        '<img src="https://ubiattendance.ubiattendance.xyz/index.php/../assets/img/newlogo.png" alt = "Ubitech" style = "width: 130px; margin-left: 50px; margin-right: 50px;" >';
     }
-    else {                
-      logo = '<img src="https://ubiattendance.ubiattendance.xyz/index.php/../assets/img/newlogo.png" alt = "Ubitech" style = "width: 130px; margin-left: 50px; margin-right: 50px;" >'; 
-      
-    }
-    
+
     message1 = message1.replace("{employee_number}", username);
     message1 = message1.replace("{employee_password}", password);
     message1 = message1.replace("{logo}", logo);
@@ -254,10 +268,7 @@ export default class CheckUserEmailService {
     message1 = message1.replace("ubiAttendance", platFormName);
 
     // await Helper.sendEmail("meghwalshivam18@gmail.com",subject1 + "testMail",message1,headers1);
-    await Helper.sendEmail(tmp.orgmail,subject1,message1,headers1);
-    
-    }
+    await Helper.sendEmail(tmp.orgmail, subject1, message1, headers1);
   }
+}
   
-
-

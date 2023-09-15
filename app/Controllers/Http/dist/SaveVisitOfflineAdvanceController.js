@@ -58,6 +58,23 @@ var SaveVisitOfflineAdvanceController = /** @class */ (function () {
             });
         });
     };
+    SaveVisitOfflineAdvanceController.prototype.checkLoginWithSyncAttQr = function (_a) {
+        var request = _a.request, response = _a.response;
+        return __awaiter(this, void 0, void 0, function () {
+            var input, result;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0: return [4 /*yield*/, request.validate(saveVisitOfflineAdvanceValidator_1["default"].checkLoginWithSyncAttQr)];
+                    case 1:
+                        input = _b.sent();
+                        return [4 /*yield*/, saveVisitOfflineAdvanceService_1["default"].checkLoginWithSyncAttQr(input)];
+                    case 2:
+                        result = _b.sent();
+                        return [2 /*return*/, response.json(result)];
+                }
+            });
+        });
+    };
     return SaveVisitOfflineAdvanceController;
 }());
 exports["default"] = SaveVisitOfflineAdvanceController;

@@ -6,7 +6,7 @@ import EmployeeMaster from "App/Models/EmployeeMaster";
 export default class DesignationService {
   public static async AddDesignation(a) {
     const currentDate = new Date();
-
+var  uid= a.empid
     var designationList = await Database.query()
       .from("DesignationMaster")
       .where("Name", a.name)
@@ -19,7 +19,7 @@ export default class DesignationService {
 
     if (affectedRows > 0) {
       result["status"] = -1;
-      return "user already exist in this list";
+      return result["status"];
     }
 
     var insertDesignation = await Database.insertQuery()
@@ -30,8 +30,8 @@ export default class DesignationService {
         CreatedDate: currentDate,
         CreatedById: a.uid,
         LastModifiedDate: currentDate,
-        LastModifiedById: a.uid,
-        OwnerId: a.uid,
+        LastModifiedById: uid,
+        OwnerId: uid,
         Code: 8,
         RoleId: 9,
         Description: a.desc,
@@ -52,7 +52,7 @@ export default class DesignationService {
       const module = "Attendance app";
       const appModule = "Designation";
       const activityby = 1;
-      const actionPerformed = await Helper.getempnameById(a.uid);
+      const actionPerformed = await Helper.getEmpName(uid);
 
       const actionperformed2 = `<b>${a.name}</b> Designation  has been Added by 
        <b>${actionPerformed}</b>from Attendance App`;
@@ -60,13 +60,13 @@ export default class DesignationService {
       const insertActivityHistoryMaster = await Helper.ActivityMasterInsert(
         formattedDate,
         a.orgid,
-        a.uid,
+        uid,
         activityby,
         module,
         actionperformed2,
         appModule
       );
-      result["status"] = "Successfully Inserted in ActivityMasterInsert";
+      result["status"] = "1";
     }
     return result["status"];
   }
@@ -84,11 +84,10 @@ export default class DesignationService {
         "archive"
       )
       .where("OrganizationId", a.orgid)
-      .orderBy("Name", "asc")
-      .limit(5);
+      .orderBy("Name", "asc");
 
-    if (a.currentpage != 0 && a.pagename == 0) {
-      getDesignationList = getDesignationList.offset(begin).limit(a.perpage);
+    if (a.currentPage != 0 && a.pagename == 0) {
+      getDesignationList = getDesignationList.offset(begin).limit(a.perPage);
     }
 
     if (a.status != undefined) {
@@ -126,53 +125,67 @@ export default class DesignationService {
   }
 
   public static async updateDesignation(c) {
-    const result: any[] = [];
-
-    result["status"] = 0;
+    const UpdatadminId = c.adminId;
+    const Updateid = c.id;
+    const UpdateName = c.desg;
+    var result = [];
+    var orgid = await Helper.getName(
+      "EmployeeMaster",
+      "OrganizationId",
+      "Id",
+      UpdatadminId
+    );
+    result["status"] = "0";
 
     let curdate = new Date();
 
     const getDesignationList = await Database.from("DesignationMaster")
       .select("Id")
-      .where("Name", c.UpdateName)
-      .andWhere("OrganizationId", c.Updateorgid)
-      .andWhere("Id", c.Updateid);
+      .where("Name", UpdateName)
+      .andWhere("OrganizationId", orgid)
+      .andWhere("Id", Updateid);
 
     const Result: any = await getDesignationList;
     const response = Result.length;
 
     if (response > 0) {
-      result["status"] = "User already exist in this is id";
+      result["status"] = "-1";
       return result["status"];
+      
     }
     const getDesignationList2 = await Database.from("DesignationMaster")
       .select("Name", "archive")
-      .where("OrganizationId", c.Updateorgid)
-      .where("Id", c.Updateid);
-    let name = "";
-    let sts1 = "";
+      .where("OrganizationId", orgid)
+      .where("Id", Updateid)
+    var name = "";
+  var  sts1
+    var res
+    var row = getDesignationList2.length;
+    if (row) {
+      name = row[0].Name;
+      sts1 = row[0].archive;
+    }
 
-    var res: any = "";
-    if (name != c.UpdateName) {
+    if (name != UpdateName) {
       res = 2;
-    } else if (name == c.UpdateName && c.sts != sts1) {
+    } else if (name == UpdateName && c.sts != sts1) {
       res = c.sts;
     }
 
     var updateDesignaion: any = await Database.query()
       .from("DesignationMaster")
-      .where("id", c.Updateid)
+      .where("id", Updateid)
       .update({
-        Name: c.UpdateName,
+        Name: UpdateName,
         LastModifiedDate: curdate,
-        LastModifiedById: c.Updateid,
+        LastModifiedById: UpdatadminId,
         archive: c.sts,
-        OrganizationId: c.Updateorgid,
+        OrganizationId: Updateid,
       });
 
     const count = await updateDesignaion;
     if (count > 0) {
-      const timezone = await Helper.getTimeZone(c.Updateorgid);
+      const timezone = await Helper.getTimeZone(orgid);
       var defaulttimeZone = moment().tz(timezone).toDate();
 
       const dateTime = DateTime.fromJSDate(defaulttimeZone);
@@ -183,29 +196,29 @@ export default class DesignationService {
 
       let actionperformed;
       var activityBy = 1;
-      var getempname = await Helper.getempnameById(c.Updateid);
+      var getempname = await Helper.getEmpName(UpdatadminId);
 
       if (res == 2) {
-        actionperformed = `<b>${c.UpdateName}</b>. designation has been edited by <b>${getempname}</b> `;
+        actionperformed = `<b>${UpdateName}</b>. designation has been edited by <b>${getempname}</b> `;
       } else if (res == 1) {
-        actionperformed = `<b>${c.UpdateName}</b> designation has been active by <b>${getempname}</b>`;
+        actionperformed = `<b>${UpdateName}</b> designation has been active by <b>${getempname}</b>`;
       } else {
-        actionperformed = `<b>${c.UpdateName}</b> designation has been inactive by <b>${getempname}</b> `;
+        actionperformed = `<b>${UpdateName}</b> designation has been inactive by <b>${getempname}</b> `;
       }
 
       const insertActivityHistoryMaster: any =
         await Helper.ActivityMasterInsert(
           formattedDate,
-          c.orgid,
-          c.uid,
+          orgid,
+          UpdatadminId,
           activityBy,
           appModule,
           actionperformed,
           module
         );
-      result["status"] = "inserted in activity master";
+      result["status"] = "1";
     }
-    return result["status"];
+    return result["status"] ;
   }
 
   ///////////// AssignDesignation //////////
@@ -227,7 +240,7 @@ export default class DesignationService {
       const appModule = "Update Successfully";
       const actionperformed = `<b>${get.designame}</b>. Designation has been assigned to <b>${get.empname}</b> by <b>${get.adminname}</b> from <b>${module}</b>`;
 
-      var getresult = await Helper.ActivityMasterInsert(  
+      var getresult = await Helper.ActivityMasterInsert(
         date,
         orgid,
         uid,
@@ -246,7 +259,7 @@ export default class DesignationService {
     }
   }
 
-    // GetDesignationStatus
+  // GetDesignationStatus
 
   public static async DesignationStatus(get) {
     var Orgid = get.orgid;
@@ -255,7 +268,7 @@ export default class DesignationService {
     const selectEmployeeList = await Database.from("EmployeeMaster")
       .select(Database.raw("COUNT(*) as num"))
       .where("OrganizationId", Orgid)
-      .andWhere(" Designation", DesigId)
+      .andWhere(" Designation", DesigId);
 
     const result = await selectEmployeeList;
     const selectAttendanceMasterList = await Database.from("AttendanceMaster")
@@ -280,7 +293,8 @@ export default class DesignationService {
     var query = await Database.from("DesignationMaster")
       .where("OrganizationId", orgid)
       .andWhere("Id", desigInactiveid)
-      .andWhere("archive", 0).delete();
+      .andWhere("archive", 0)
+      .delete();
     if (query) {
       data["status"] = "true"; //Designation  Delete successfully
       const zone = await Helper.getTimeZone(getparam.orgId);
@@ -290,7 +304,7 @@ export default class DesignationService {
 
       const orgid = getparam.orgId;
       const uid = Adminid;
-      const module = "Attendance app";  
+      const module = "Attendance app";
       const activityBy = 1;
       const appModule = "Delete Designation";
       const actionperformed = `<b>${DesigName}</b>. designation has been deleted by <b>${empName}</b> from <b>${module}</b>`;
@@ -314,5 +328,4 @@ export default class DesignationService {
     }
     return data;
   }
-
 }

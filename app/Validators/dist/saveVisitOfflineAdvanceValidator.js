@@ -55,6 +55,11 @@ var saveVisitOfflineAdvanceValidator = /** @class */ (function (_super) {
             GeofenceStatusVisitOut: Validator_1.schema.string.optional()
         })
     };
+    saveVisitOfflineAdvanceValidator.checkLoginWithSyncAttQr = {
+        schema: Validator_1.schema.create({
+            data: Validator_1.schema.string()
+        })
+    };
     return saveVisitOfflineAdvanceValidator;
 }(BaseValidator_1["default"]));
 exports["default"] = saveVisitOfflineAdvanceValidator;
