@@ -63,12 +63,16 @@ import "../app/Routes/GeofenceRoute";
 import "../app/Routes/getOrignalAttendanceImg";
 import "../app/Routes/SaveVisitOfflineAdvanceRoute"
 import "../app/Routes/SendNotificationDiffOrgEmployeeRoute"
+<<<<<<< HEAD
+import "../app/Routes/saveImageGrpAttFaceRoute";
+=======
 
 import Route from '@ioc:Adonis/Core/Route'
 
 Route.get('/sendMail', 'MailersController.sendEmail')
 
 
+>>>>>>> e84e15fd5d143c72ac78412e30d0a502865fc468
 // Route.get('/', async () => {
 //     return "Working fine!"
 // })
