@@ -601,17 +601,17 @@ export default class Helper {
     }
   }
 
-  public static async getShiftTimes(id) {
+  public static async getShiftTimes(id) {        
     let query = await Database.query()
       .from("ShiftMaster")
       .select("TimeIn", "TimeOut", "HoursPerDay")
       .where("Id", id);
 
-    if (query.length > 0) {
+    if (query) {
       if (query[0].TimeIn == "00:00:00" || query[0].TimeIn == "") {
         return query[0].HoursPerDay;
       } else {
-        return query[0].TimeIn + "-" + query[0].TimeOut;
+        return query[0].TimeIn.substr(0, 5) + " - " + query[0].TimeOut.substr(0, 5);
       }
     }
   }
@@ -834,8 +834,6 @@ export default class Helper {
       .where("O.Id", orgid)
       .where("E.Id", uid)
       .first();
-
-
 
     let entitledleave: any, doj;
     if (!data.entitledleave || data.entitledleave.trim() === 'undefined') {
@@ -1500,6 +1498,7 @@ export default class Helper {
 
     // sendMultipleRequests();
   }
+
   public static async getUbiatt_Ubihrmsts(orgid) {
     const result = await Database.from("Organization")
       .select("ubihrm_sts")
@@ -1509,7 +1508,6 @@ export default class Helper {
     }
     return 0;
   }
-
 
   public static async loctrackPermission(empId) {
 

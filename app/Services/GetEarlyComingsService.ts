@@ -2,8 +2,8 @@ import Database from "@ioc:Adonis/Lucid/Database";
 import Helper from "App/Helper/Helper";
 import { DateTime } from "luxon";
 export default class GetEarlyComingsService {
+
   static async EarlyCommers(getData) {
-   
     const sendResponse: EarlyCommersInterface[] = [];
     const Begin = (getData.currentPage - 1) * getData.perPage;
     var limit;
@@ -12,9 +12,8 @@ export default class GetEarlyComingsService {
     } else {
       limit;
     }
-
     var currDate = DateTime.now().setZone(timeZone);
-    var getDate = getData.date ? getData.date : currDate;
+    var getDate = getData.cdate ? getData.cdate : currDate;
     var zone = await Helper.getTimeZone(getData.orgid);
     var timeZone = zone[0]?.name;
     var formattedDate1 = getDate.toFormat("yyyy-MM-dd");
@@ -22,17 +21,14 @@ export default class GetEarlyComingsService {
     var dateTimeInTimeZone = dateTimeUTC.setZone(timeZone);
     var Date = dateTimeInTimeZone.toFormat("yyyy-MM-dd");
 
-    let getEarlyComingsdata = Database.from("AttendanceMaster as A")
+    var getEarlyComingsdata = Database.from("AttendanceMaster as A")
       .innerJoin("EmployeeMaster as E", "A.EmployeeId", "E.Id")
       .innerJoin("ShiftMaster as S", "A.shiftId", "S.Id")
       .select(
         "E.FirstName",
         "E.LastName",
         "A.TimeIn as atimein",
-        "S.TimeInGrace",
-        "S.TimeIn",
-        "A.AttendanceDate",
-        "S.shifttype",
+        "A.ShiftId",
         Database.raw(`SUBSTRING_INDEX(A.EntryImage, '.com/', -1) as EntryImage,
        TIMEDIFF(
         CASE WHEN(S.TimeInGrace!='00:00:00') THEN S.TimeInGrace ELSE S.TimeIn END,A.TimeIn) as Earlyby`)
@@ -54,36 +50,24 @@ export default class GetEarlyComingsService {
       .whereNot("S.shifttype", 3)
       .orderBy("Earlyby", "desc")
       .limit(limit);
-
-    const adminStatus = await Helper.getAdminStatus(getData.empid);
-    var ConditionForadminStatus = "";
-
+     
+    const adminStatus = await Helper.getAdminStatus(getData.uid);
+    var deptId;
+    
     if (adminStatus === 2) {
-      const deptId = getData.deptId;
-      ConditionForadminStatus = `A.Dept_id = ${deptId}`;
-      getEarlyComingsdata = getEarlyComingsdata.where(
-        "A.Dept_id",
-        ConditionForadminStatus
-      );
-    }
-    if (getData.empid !== 0) {
-      getEarlyComingsdata = getEarlyComingsdata.where("E.Id", getData.empid);
-    }
-    if (getData.orgid !== 0) {
-      getEarlyComingsdata = getEarlyComingsdata.where(
-        "A.OrganizationId",
-        getData.orgid
-      );
+      deptId = await Helper.getDepartmentIdByEmpID(getData.uid);
+      getEarlyComingsdata = getEarlyComingsdata.where("A.Dept_id", deptId);
     }
 
     const queryResult = await getEarlyComingsdata;
+    const ShiftTio = await Helper.getShiftTimes(queryResult[0].ShiftId);
     queryResult.forEach(function (val) {
       const data: EarlyCommersInterface = {
-        FirstName: val.FirstName,
-        LastName: val.LastName,
-        atimein: val.atimein,
-        TimeIn: val.TimeIn,
-        Earlyby: val.Earlyby,
+        lateby: val.Earlyby.substr(0, 5),
+        name: val.FirstName + " " + val.LastName,
+        timein: val.atimein.substr(0, 5),
+        shift: ShiftTio,
+        date: Date,
         EntryImage: val.EntryImage,
       };
       sendResponse.push(data);
@@ -92,10 +76,11 @@ export default class GetEarlyComingsService {
   }
 
   static async EarlyCommersCsv(getData) {
+    
     const sendResponse: EarlyCommersInterface[] = [];
 
     var currDate = DateTime.now().setZone(timeZone);
-    var getDate = getData.date ? getData.date : currDate;
+    var getDate = getData.cdate ? getData.cdate : currDate;
     var zone = await Helper.getTimeZone(getData.orgid);
     var timeZone = zone[0]?.name;
     var formattedDate1 = getDate.toFormat("yyyy-MM-dd");
@@ -103,17 +88,14 @@ export default class GetEarlyComingsService {
     var dateTimeInTimeZone = dateTimeUTC.setZone(timeZone);
     var Date = dateTimeInTimeZone.toFormat("yyyy-MM-dd");
 
-    let getEarlyComingsdata = Database.from("AttendanceMaster as A")
+    var getEarlyComingsdata = Database.from("AttendanceMaster as A")
       .innerJoin("EmployeeMaster as E", "A.EmployeeId", "E.Id")
       .innerJoin("ShiftMaster as S", "A.shiftId", "S.Id")
       .select(
         "E.FirstName",
         "E.LastName",
         "A.TimeIn as atimein",
-        "S.TimeInGrace",
-        "S.TimeIn",
-        "A.AttendanceDate",
-        "S.shifttype",
+        "A.ShiftId",
         Database.raw(`SUBSTRING_INDEX(A.EntryImage, '.com/', -1) as EntryImage,
        TIMEDIFF(
         CASE WHEN(S.TimeInGrace!='00:00:00') THEN S.TimeInGrace ELSE S.TimeIn END,A.TimeIn) as Earlyby`)
@@ -134,36 +116,24 @@ export default class GetEarlyComingsService {
       .whereNotIn("A.AttendanceStatus", [2, 3, 5])
       .whereNot("S.shifttype", 3)
       .orderBy("Earlyby", "desc")
-
-    const adminStatus = await Helper.getAdminStatus(getData.empid);
-    var ConditionForadminStatus = "";
-
+     
+    const adminStatus = await Helper.getAdminStatus(getData.uid);
+    var deptId;
+    
     if (adminStatus === 2) {
-      const deptId = getData.deptId;
-      ConditionForadminStatus = `A.Dept_id = ${deptId}`;
-      getEarlyComingsdata = getEarlyComingsdata.where(
-        "A.Dept_id",
-        ConditionForadminStatus
-      );
-    }
-    if (getData.empid !== 0) {
-      getEarlyComingsdata = getEarlyComingsdata.where("E.Id", getData.empid);
-    }
-    if (getData.orgid !== 0) {
-      getEarlyComingsdata = getEarlyComingsdata.where(
-        "A.OrganizationId",
-        getData.orgid
-      );
+      deptId = await Helper.getDepartmentIdByEmpID(getData.uid);
+      getEarlyComingsdata = getEarlyComingsdata.where("A.Dept_id", deptId);
     }
 
     const queryResult = await getEarlyComingsdata;
+    const ShiftTio = await Helper.getShiftTimes(queryResult[0].ShiftId);
     queryResult.forEach(function (val) {
       const data: EarlyCommersInterface = {
-        FirstName: val.FirstName,
-        LastName: val.LastName,
-        atimein: val.atimein,
-        TimeIn: val.TimeIn,
-        Earlyby: val.Earlyby,
+        lateby: val.Earlyby.substr(0, 5),
+        name: val.FirstName + " " + val.LastName,
+        timein: val.atimein.substr(0, 5),
+        shift: ShiftTio,
+        date: Date,
         EntryImage: val.EntryImage,
       };
       sendResponse.push(data);
