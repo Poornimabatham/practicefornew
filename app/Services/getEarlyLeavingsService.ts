@@ -13,7 +13,7 @@ export default class getEarlyLeavingsService {
     }
 
     var currDate = DateTime.now().setZone(timeZone);
-    var getDate = getData.date ? getData.date : currDate;
+    var getDate = getData.cdate ? getData.cdate : currDate;
     var zone = await Helper.getTimeZone(getData.orgid);
     var timeZone = zone[0]?.name;
     var formattedDate1 = getDate.toFormat("yyyy-MM-dd");
@@ -87,36 +87,28 @@ export default class getEarlyLeavingsService {
       .whereNot("S.shifttype", 3)
       .orderBy("E.FirstName", "asc")
       .limit(limit);
-
-    const adminStatus = await Helper.getAdminStatus(getData.empid);
-
-    var ConditionForadminStatus = "";
+    
+    const adminStatus = await Helper.getAdminStatus(getData.uid);    
+    var deptId;
 
     if (adminStatus === 2) {
-      const deptId = getData.deptId;
-      ConditionForadminStatus = `A.Dept_id = ${deptId}`;
-      getEarlyLeaversdata = getEarlyLeaversdata.where(
-        "A.Dept_id",
-        ConditionForadminStatus
-      );
-    }
-    if (getData.empid !== 0) {
-      getEarlyLeaversdata = getEarlyLeaversdata.where("E.Id", getData.empid);
+      deptId = await Helper.getDepartmentIdByEmpID(getData.uid);
+      getEarlyLeaversdata = getEarlyLeaversdata.where("A.Dept_id", deptId);
     }
 
     var sendResponse: EarlyLeaversInterface[] = [];
-    var queryResult = await getEarlyLeaversdata;
+    var queryResult = await getEarlyLeaversdata;    
+    console.log(queryResult[0].ShiftId);
+    
+    const ShiftTio = await Helper.getShiftTimes(queryResult[0].ShiftId);     
     queryResult.forEach(function (val) {
       var data: EarlyLeaversInterface = {
-        FirstName: val.FirstName,
-        LastName: val.LastName,
-        EmployeeId: val.EmployeeId,
-        ShiftId: val.ShiftId,
-        shifttype: val.shifttype,
-        atimein: val.atimein,
-        TimeOut: val.TimeOut,
-        earlyleaver: val.earlyleaver,
+        earlyby: val.earlyleaver.substr(0, 5),
+        name: val.FirstName + " " + val.LastName,
+        timeout: val.TimeOut.substr(0, 5),
+        shift: ShiftTio,
         EntryImage: val.EntryImage,
+        date: Date,
       };
       sendResponse.push(data);
     });
@@ -124,9 +116,9 @@ export default class getEarlyLeavingsService {
   }
 
   static async EarlyLeaversCsv(getData) {
-
+   
     var currDate = DateTime.now().setZone(timeZone);
-    var getDate = getData.date ? getData.date : currDate;
+    var getDate = getData.cdate ? getData.cdate : currDate;
     var zone = await Helper.getTimeZone(getData.orgid);
     var timeZone = zone[0]?.name;
     var formattedDate1 = getDate.toFormat("yyyy-MM-dd");
@@ -200,35 +192,25 @@ export default class getEarlyLeavingsService {
       .whereNot("S.shifttype", 3)
       .orderBy("E.FirstName", "asc")
 
-    const adminStatus = await Helper.getAdminStatus(getData.empid);
-
-    var ConditionForadminStatus = "";
+    const adminStatus = await Helper.getAdminStatus(getData.uid);
+    var deptId;
 
     if (adminStatus === 2) {
-      const deptId = getData.deptId;
-      ConditionForadminStatus = `A.Dept_id = ${deptId}`;
-      getEarlyLeaversdata = getEarlyLeaversdata.where(
-        "A.Dept_id",
-        ConditionForadminStatus
-      );
-    }
-    if (getData.empid !== 0) {
-      getEarlyLeaversdata = getEarlyLeaversdata.where("E.Id", getData.empid);
+      deptId = await Helper.getDepartmentIdByEmpID(getData.uid);
+      getEarlyLeaversdata = getEarlyLeaversdata.where("A.Dept_id", deptId);
     }
 
     var sendResponse: EarlyLeaversInterface[] = [];
     var queryResult = await getEarlyLeaversdata;
+    const ShiftTio = await Helper.getShiftTimes(queryResult[0].ShiftId);
     queryResult.forEach(function (val) {
       var data: EarlyLeaversInterface = {
-        FirstName: val.FirstName,
-        LastName: val.LastName,
-        EmployeeId: val.EmployeeId,
-        ShiftId: val.ShiftId,
-        shifttype: val.shifttype,
-        atimein: val.atimein,
-        TimeOut: val.TimeOut,
-        earlyleaver: val.earlyleaver,
+        earlyby: val.earlyleaver.substr(0, 5),
+        name: val.FirstName + " " + val.LastName,
+        timeout: val.TimeOut.substr(0, 5),
+        shift: ShiftTio,
         EntryImage: val.EntryImage,
+        date: Date,
       };
       sendResponse.push(data);
     });

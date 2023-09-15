@@ -1121,12 +1121,10 @@ export default class loginService {
   }
 
 
-
-
-
   static async CreateBulkAtt(data: any) {
 
-    console.log(data);
+    // console.log(data);
+    // return false
     let result: any[] = [],
       count: number = 0,
       errorMsg: string = "",
@@ -1134,8 +1132,7 @@ export default class loginService {
       status: string = "",
       dataContainer: any[] = [],
       zone: string = "";
-      let AttData:any =JSON.parse(data.attlist)
-    
+      let AttData =JSON.parse(data.attlist)    
     
     if (data.uid != 0) {
       zone = await Helper.getEmpTimeZone(data.uid, data.orgid); // to set the timezone by employee
@@ -1149,17 +1146,13 @@ export default class loginService {
       time: string = defaultZone.toFormat("HH:mm:ss"),
       date: string = defaultZone.toFormat("yyyy-MM-dd"),
       $skip: number = 0;
-
     
       AttData.forEach(async (row) => {
-
-
-
-        console.log( row["Id"],
-        data.org_id,
-        time,
-        date,
-        dateTime);
+        // console.log( row["Id"],
+        // data.org_id,
+        // time,
+        // date,
+        // dateTime);
         
         await Helper.AutoTimeOffEndWL(
           row["Id"],
@@ -1171,11 +1164,9 @@ export default class loginService {
 
         let todayDate = row["data_date"] != undefined ? row["data_date"] : date;
         count += 1;
-        console.log('row["Attid"]');
-        
+        // console.log(row["Attid"]);        
         if (row["Attid"] != undefined && row["Attid"] != "0") {
-        console.log(row["Attid"]);
-        
+                  
           let overtime = "00:00";
           let shifttype = await Helper.getShiftType(row["shift"]);
           let timeoutdate = todayDate;
@@ -1283,30 +1274,77 @@ export default class loginService {
             .andWhere("AttendanceDate", todayDate);
         
 
-          let rowCount = getEmpid.length;
-          if (rowCount == 0) {
-             await Helper.getName(
+          var rowCount = getEmpid.length;
+          rowCount = 0;
+      
+          if (rowCount == 0) {                 
+             const empdept = await Helper.getName(
               "EmployeeMaster",
               "Department",
               "Id",
               row["Id"]
             );
-             await Helper.getName(
+             const empdesig = await Helper.getName(
               "EmployeeMaster",
               "Designation",
               "Id",
               row["Id"]
             );
-           await Helper.getName(
+           const emparea_assign = await Helper.getName(
               "EmployeeMaster",
               "area_assigned",
               "Id",
               row["Id"]
             );
+
+
+            if (row["Attid"] == 2) {
+              
+              const dataContainer = {
+                EmployeeId: row.Id,
+                AttendanceDate: todayDate,
+                AttendanceStatus: row.attsts,
+                ShiftId: row.shift,
+                Dept_id: empdept,
+                Desg_id: empdesig,
+                areaId: emparea_assign,
+                OrganizationId: data.org_id,
+                CreatedDate: dateTime,
+                CreatedById: data.uid,
+                LastModifiedDate: date,
+                LastModifiedById: data.uid,
+                OwnerId: data.uid,
+                device: "AppManager",
+                timeoutdate: row.todate,
+                platform: data.platform,
+                TimeInDevice: "AppManager",
+              };
+              // console.log(dataContainer);
+              let insertQuery = await Database.table("AttendanceMaster").insert(dataContainer);              
+            }
+            else {
+              if (row['timein'] == "0:0" || row['timein'] == "00:00:00" || row['timein'] == "00:00")
+                row["timein"] = "00:01:00";
+              console.log(row["timein"]);
+              if (row['timeout'] == "00:00" || row['timeout'] == "0:0")
+                row["timeout"] = "23:59:00";
+
+              const timeout = DateTime.fromISO(row["timein"]);
+
+               
+               console.log("Formatted timein:", timeout);
+              
+            }
+
           }
         }
       })
     
   }
+}
+
+
+function strlen(otp: any) {
+  throw new Error("Function not implemented.");
 }
 

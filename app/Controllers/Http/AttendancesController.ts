@@ -1,4 +1,3 @@
- import { Response } from '@adonisjs/core/build/standalone';
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import DailyAttendanceService from 'App/Services/DailyAttendanceService';
 import loginService from 'App/Services/loginService';
@@ -27,7 +26,6 @@ public async AttendanceAct({request,response}:HttpContextContract){
         // await request.validate(AttendanceValidator.saveImageGrpAttFace)
 
          await loginService.CreateBulkAtt(request.all());
-
 
     }
   

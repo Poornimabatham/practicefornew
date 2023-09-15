@@ -601,17 +601,17 @@ export default class Helper {
     }
   }
 
-  public static async getShiftTimes(id) {
+  public static async getShiftTimes(id) {        
     let query = await Database.query()
       .from("ShiftMaster")
       .select("TimeIn", "TimeOut", "HoursPerDay")
       .where("Id", id);
 
-    if (query.length > 0) {
+    if (query) {
       if (query[0].TimeIn == "00:00:00" || query[0].TimeIn == "") {
         return query[0].HoursPerDay;
       } else {
-        return query[0].TimeIn + "-" + query[0].TimeOut;
+        return query[0].TimeIn.substr(0, 5) + " - " + query[0].TimeOut.substr(0, 5);
       }
     }
   }
@@ -826,16 +826,6 @@ export default class Helper {
     return `${startDate} And ${endDate}`;
   }
 
-  static async getBalanceLeave(orgid, uid, date = "") {
-    const data = await Database.from("EmployeeMaster as E")
-      .join("Organization as O", "E.OrganizationId", "=", "O.Id")
-      .select("E.FirstName", "E.entitledleave", "E.DOJ")
-      .select("O.fiscal_start", "O.fiscal_end", "O.entitled_leave")
-      .where("O.Id", orgid)
-      .where("E.Id", uid)
-      .first();
-
-
   static async getBalanceLeave(orgid, uid, date = '') {
     const data = await Database
       .from('EmployeeMaster as E')
@@ -974,32 +964,6 @@ export default class Helper {
     }
   }
 
-  static async getShiftTimeByEmpID(uid) {
-    const shiftInfo = await Database.from("ShiftMaster")
-      .select(
-        "Name",
-        "TimeIn",
-        "TimeOut",
-        "shifttype",
-        "HoursPerDay",
-        Database.raw("TIMEDIFF(TimeIn, TimeOut) AS diffShiftTime")
-      )
-      .whereIn("id", (subquery) => {
-        subquery.select("Shift").from("EmployeeMaster").where("id", uid);
-      })
-      .first();
-
-    if (shiftInfo) {
-      const arr: any = {};
-      arr.shiftName = shiftInfo.Name;
-      arr.shiftTimeIn = shiftInfo.TimeIn;
-      arr.ShiftTimeOut = shiftInfo.TimeOut;
-      arr.shifttype = shiftInfo.shifttype;
-      arr.minworkhrs = shiftInfo.HoursPerDay;
-      arr.diffShiftTime = shiftInfo.diffShiftTime;
-      return arr;
-    }
-  }
 
   public static async getDesigName(desigId, orgId) {
     const query = await Database.from("DesignationMaster")
@@ -1533,26 +1497,6 @@ export default class Helper {
     // }
 
     // sendMultipleRequests();
-  }
-  public static async getUbiatt_Ubihrmsts(orgid) {
-    const result = await Database.from("Organization")
-      .select("ubihrm_sts")
-      .where("Id", orgid);
-    if (result) {
-      return result[0].ubihrm_sts;
-    }
-    return 0;
-  }
-
-  public static async getAttImageStatus(orgid) {
-    const getAttnImageSts = await Database.from("admin_login")
-      .select("AttnImageStatus")
-      .where("OrganizationId", orgid);
-    if (getAttnImageSts) {
-      return getAttnImageSts[0].AttnImageStatus;
-    } else {
-      return 0;
-    }
   }
 
   public static async loctrackPermission(empId) {
