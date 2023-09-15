@@ -24,9 +24,9 @@ var LatecomingValidator = /** @class */ (function (_super) {
     }
     LatecomingValidator.fetchlatecomingsschema = {
         schema: Validator_1.schema.create({
-            refno: Validator_1.schema.number(),
+            orgid: Validator_1.schema.number(),
             cdate: Validator_1.schema.string(),
-            uid: Validator_1.schema.number(),
+            empid: Validator_1.schema.number(),
             csv: Validator_1.schema.number.optional(),
             currentPage: Validator_1.schema.number(),
             perPage: Validator_1.schema.number()

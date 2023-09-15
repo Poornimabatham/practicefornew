@@ -47,6 +47,7 @@ var ZoneMaster_1 = require("App/Models/ZoneMaster");
 var _a = require('date-fns'), format = _a.format, parse = _a.parse, parseISO = _a.parseISO;
 var luxon_1 = require("luxon");
 var moment_1 = require("moment");
+var https = require('https'); // Import the 'https' module
 var Helper = /** @class */ (function () {
     function Helper() {
     }
@@ -459,11 +460,11 @@ var Helper = /** @class */ (function () {
                             .where("id", Database_1["default"].rawQuery("(SELECT Shift FROM EmployeeMaster where id=" + empid + ")"))];
                     case 3:
                         getshiftid_1 = _a.sent();
-                        if (getshiftid_1.length > 0) {
+                        if (getshiftid_1.length > 0 && getshiftid_1[0].Id != undefined) {
                             return [2 /*return*/, getshiftid_1[0].Id];
                         }
                         _a.label = 4;
-                    case 4: return [2 /*return*/];
+                    case 4: return [2 /*return*/, 0];
                 }
             });
         });
@@ -574,19 +575,20 @@ var Helper = /** @class */ (function () {
                             .where("AttendanceDate", today)
                             .whereNot("TimeIn", "00:00:00")
                             .select("multitime_sts")
-                            .first()];
+                        // .first()
+                    ];
                     case 1:
                         attendanceRecord = _a.sent();
-                        if (!(attendanceRecord && attendanceRecord.multitime_sts)) return [3 /*break*/, 2];
-                        return [2 /*return*/, attendanceRecord.multitime_sts];
+                        if (!(attendanceRecord.length > 0)) return [3 /*break*/, 2];
+                        return [2 /*return*/, attendanceRecord[0].multitime_sts];
                     case 2: return [4 /*yield*/, ShiftMaster_1["default"].query()
                             .where("Id", shiftId)
-                            .select("MultipletimeStatus")
-                            .first()];
+                            .select("MultipletimeStatus")];
                     case 3:
                         shiftRecord = _a.sent();
-                        if (shiftRecord && shiftRecord.MultipletimeStatus) {
-                            return [2 /*return*/, shiftRecord.MultipletimeStatus];
+                        // .first();
+                        if (shiftRecord.length > 0) {
+                            return [2 /*return*/, shiftRecord[0].MultipletimeStatus];
                         }
                         _a.label = 4;
                     case 4: return [2 /*return*/, 0];
@@ -1683,6 +1685,257 @@ var Helper = /** @class */ (function () {
             });
         });
     };
+    Helper.sendManualPushNotification = function (condition, title, body, empid, orgid, pageName) {
+        return __awaiter(this, void 0, void 0, function () {
+            var lastInsertedId, adminSts, currentDate, time, insertQuery, zone, defaultZone, zone, defaultZone, urls, jsonObject, jsonString, headers, request, axiosInstances;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        lastInsertedId = 0;
+                        adminSts = 0;
+                        if (!(empid == 0 && orgid != 0)) return [3 /*break*/, 3];
+                        return [4 /*yield*/, Helper.getEmpTimeZone(empid, orgid)];
+                    case 1:
+                        zone = _a.sent();
+                        defaultZone = luxon_1.DateTime.now().setZone(zone);
+                        time = defaultZone.toFormat("HH:mm:ss");
+                        currentDate = luxon_1.DateTime.local().toFormat('yyyy-MM-dd');
+                        adminSts = 0;
+                        if (condition.includes('admin')) {
+                            adminSts = 1;
+                        }
+                        return [4 /*yield*/, Database_1["default"].table('NotificationsList').insert({
+                                NotificationTitle: title,
+                                NotificationBody: body,
+                                NotificationData: '',
+                                EmployeeId: empid,
+                                OrganizationId: orgid,
+                                CreatedDate: currentDate,
+                                CreatedTime: time,
+                                AdminSts: adminSts
+                            })];
+                    case 2:
+                        insertQuery = _a.sent();
+                        _a.label = 3;
+                    case 3:
+                        if (!(empid != 0 && orgid != 0)) return [3 /*break*/, 6];
+                        return [4 /*yield*/, Helper.getEmpTimeZone(empid, orgid)];
+                    case 4:
+                        zone = _a.sent();
+                        defaultZone = luxon_1.DateTime.now().setZone(zone);
+                        time = defaultZone.toFormat("HH:mm:ss");
+                        currentDate = luxon_1.DateTime.local().toFormat('yyyy-MM-dd');
+                        adminSts = 0;
+                        if (condition.includes('admin')) {
+                            adminSts = 1;
+                        }
+                        return [4 /*yield*/, Database_1["default"].table('NotificationsList').insert({
+                                NotificationTitle: title,
+                                NotificationBody: body,
+                                NotificationData: '',
+                                EmployeeId: empid,
+                                OrganizationId: orgid,
+                                CreatedDate: currentDate,
+                                CreatedTime: time,
+                                AdminSts: adminSts
+                            })];
+                    case 5:
+                        insertQuery = _a.sent();
+                        _a.label = 6;
+                    case 6:
+                        if (insertQuery && insertQuery[0]) {
+                            lastInsertedId = insertQuery[0];
+                        }
+                        urls = [
+                            "http://localhost:3333/SendNotificationDiffOrgEmployee?orgid=149007&contact=8527419630&adminEmail=&adminId="
+                        ];
+                        jsonObject = {
+                            'condition': condition,
+                            'priority': 'high',
+                            data: {
+                                'click_action': 'FLUTTER_NOTIFICATION_CLICK',
+                                'screen': pageName,
+                                'status': 'done'
+                            },
+                            'notification': { 'body': body, 'title': title, 'click_action': 'FLUTTER_NOTIFICATION_CLICK' }
+                        };
+                        jsonString = JSON.stringify(jsonObject);
+                        headers = [
+                            {
+                                'authorization': 'key=AAAAsVdW418:APA91bH-KAyzItecPhs8jP95ZlFNOzDKjmzmeMd2iH1HyUpO_T-_Baed-uIkuyYlosgLStcJZBqQFZuu7UdepvKX6lJcHjU__7FV19LLGn0nbveDBcTBJRJulb5fj_iOlsVRURzsu1Ch',
+                                'Content-Type': 'application/json'
+                            },
+                            {
+                                'authorization': 'key=AAAA-BiaJfs:APA91bE1hVf8ChrWfLVTxK2T9pkK6jhGFK_1PUwHIjYwVvd3viShAoNYgFdkqr2PPlMCxGGKLAwV8gk3N01CAwQxmdo2XM7o5O_C1QWFIhyIElfv4Jx4biC3qEyMgIwfVIIXz5Whx9Vs',
+                                'Content-Type': 'application/json'
+                            },
+                            {
+                                'authorization': 'key=AAAAksjUHhg:APA91bFR2-KVdsVYHc4IHwDMHuCIt5OULa7OWZ9CD39-PT5J-RdF7CH7RcRh13Fwk8P8K-a7fapRpoyAgM0luf0yWpunE7jnUtltdqE7Vw3vZE95hugsgmhnntMSk09UbvcUr92-PK4d',
+                                'Content-Type': 'application/json'
+                            },
+                            {
+                                'authorization': 'key=AAAAI_x79EU:APA91bFae5SDovaio3lTLRTgbOz6m6mJwVkeL9dfeFtCN6P_0xpfEVzz-hjRNEpqztlQNyKlE7XbBynWyzDtAILWMN947i0p79qC5Qkrlu52NmygD7OMYhhCDI6d2U4Iu600V_dbSRvc',
+                                'Content-Type': 'application/json'
+                            }
+                        ];
+                        request = {};
+                        axiosInstances = [];
+                        // function sendRequest(url, headers) {
+                        //   return new Promise(async (resolve, reject) => {
+                        //     try {
+                        //       const response = await axios.post(url, jsonString, {
+                        //         headers: headers,
+                        //         timeout: 10000, // 10 seconds timeout
+                        //         httpsAgent: new https.Agent({ rejectUnauthorized: false }), // Disables SSL certificate verification (use with caution)
+                        //         responseType: 'json',
+                        //       });
+                        //       resolve({
+                        //         content: response.data,
+                        //         http_code: response.status,
+                        //       });
+                        //     } catch (error) {
+                        //       reject(error);
+                        //     }
+                        //   });
+                        // }
+                        // Function to send multiple requests concurrently
+                        // async function sendRequests() {
+                        //   const requestPromises = urls.map((url, index) => sendRequest(url, headers[index]));
+                        //   try {
+                        //     const responses = await Promise.all(requestPromises);
+                        //     // Loop through the responses and process them
+                        //     responses.forEach((response, index) => {
+                        //       console.log(`Content from URL ${urls[index]}:`, response.content);
+                        //       console.log(`HTTP Status Code from URL ${urls[index]}:`, response.http_code);
+                        //     });
+                        //   } catch (error) {
+                        //     console.error('Error:', error);
+                        //     // Handle errors here
+                        //   }
+                        // }
+                        // // Call the function to send multiple requests concurrently
+                        // sendRequests();
+                        // Create separate Axios instances for each request
+                        // console.log(urls.length);
+                        // // return 
+                        // for (let i = 0; i < urls.length; i++) {
+                        //   const instance = await axios.create({
+                        //     baseURL: urls[i],
+                        //     timeout: 10000, // 10 seconds timeout
+                        //     headers: headers[i],
+                        //     httpsAgent: new https.Agent({ rejectUnauthorized: false }), // Disables SSL certificate verification (use with caution)
+                        //     responseType: 'json',
+                        //   });
+                        //   axiosInstances.push(instance);
+                        // }
+                        // return
+                        // const requests = urls.map(async (url) => {
+                        //   // try {
+                        //   // return 'hdh'
+                        //   const response = await axios.get(url);
+                        //   // Handle the response data for each request here
+                        //   console.log(`Response from ${url}: ${response.data}`);
+                        //   return {
+                        //     content: response.data,
+                        //     http_code: response.status
+                        //   };
+                        // } catch (error) {
+                        //   console.error(`Error from ${url}: ${error.message}`);
+                        //   throw error;
+                        // }
+                        // });
+                        // const responses = await Promise.all(requests);
+                        // responses.forEach((response, k) => {
+                        //   // Process each response here
+                        //   console.log(`Content from URL ${urls[k]}: ${response.content}`);
+                        //   console.log(`HTTP Status Code from URL ${urls[k]}: ${response.http_code}`);
+                        // });
+                        return [2 /*return*/, lastInsertedId];
+                }
+            });
+        });
+    };
+    Helper.getUbiatt_Ubihrmsts = function (orgid) {
+        return __awaiter(this, void 0, void 0, function () {
+            var result;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, Database_1["default"].from("Organization")
+                            .select("ubihrm_sts")
+                            .where("Id", orgid)];
+                    case 1:
+                        result = _a.sent();
+                        if (result) {
+                            return [2 /*return*/, result[0].ubihrm_sts];
+                        }
+                        return [2 /*return*/, 0];
+                }
+            });
+        });
+    };
+    Helper.getAttImageStatus = function (orgid) {
+        return __awaiter(this, void 0, void 0, function () {
+            var getAttnImageSts;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, Database_1["default"].from("admin_login")
+                            .select("AttnImageStatus")
+                            .where("OrganizationId", orgid)];
+                    case 1:
+                        getAttnImageSts = _a.sent();
+                        if (getAttnImageSts) {
+                            return [2 /*return*/, getAttnImageSts[0].AttnImageStatus];
+                        }
+                        else {
+                            return [2 /*return*/, 0];
+                        }
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    Helper.loctrackPermission = function (empId) {
+        return __awaiter(this, void 0, void 0, function () {
+            var query;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, Database_1["default"].from('EmployeeMaster')
+                            .select('livelocationtrack')
+                            .where('Id', empId)];
+                    case 1:
+                        query = _a.sent();
+                        if (query) {
+                            return [2 /*return*/, query[0].livelocationtrack];
+                        }
+                        else {
+                            return [2 /*return*/, 0];
+                        }
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    Helper.getDesignation = function (Id) {
+        return __awaiter(this, void 0, void 0, function () {
+            var query;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, Database_1["default"].from("DesignationMaster")
+                            .select("Name")
+                            .where("Id", Id)];
+                    case 1:
+                        query = _a.sent();
+                        if (query.length > 0) {
+                            return [2 /*return*/, query[0].Name];
+                        }
+                        else {
+                            return [2 /*return*/, 0];
+                        }
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
     Helper.getDepartment = function (id) {
         return __awaiter(this, void 0, void 0, function () {
             var Name, selectDepartmentId;
@@ -1697,30 +1950,6 @@ var Helper = /** @class */ (function () {
                         selectDepartmentId = _a.sent();
                         if (selectDepartmentId.length > 0) {
                             Name = selectDepartmentId[0].name;
-                            return [2 /*return*/, Name];
-                        }
-                        else {
-                            return [2 /*return*/, Name];
-                        }
-                        return [2 /*return*/];
-                }
-            });
-        });
-    };
-    Helper.getDesignation = function (id) {
-        return __awaiter(this, void 0, void 0, function () {
-            var Name, selectDesignationMasterId;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        Name = "";
-                        return [4 /*yield*/, Database_1["default"].from("DesignationMaster")
-                                .select("name")
-                                .where("id", id)];
-                    case 1:
-                        selectDesignationMasterId = _a.sent();
-                        if (selectDesignationMasterId.length > 0) {
-                            Name = selectDesignationMasterId[0].name;
                             return [2 /*return*/, Name];
                         }
                         else {

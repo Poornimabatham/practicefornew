@@ -4,11 +4,11 @@ import moment from "moment";
 
 export default class LateComingService {
   public static async getLateComing(data) {
-    var Orgid = data.refno;
+    var Orgid = data.orgid;
     var Currentpage = data.currentPage;
     var Date3 = data.cdate;
     var Perpage = data.perPage;
-    var Empid = data.uid;
+    var Empid = data.empid;
     var csv = data.csv;
     var limit: any = "";
     var offset;

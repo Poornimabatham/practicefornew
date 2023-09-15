@@ -7,9 +7,9 @@ export default class LatecomingValidator extends BaseValidator {
   }
   static fetchlatecomingsschema = {
     schema: schema.create({
-      refno: schema.number(),
+      orgid: schema.number(),
       cdate: schema.string(),
-      uid: schema.number(),
+      empid: schema.number(),
       csv: schema.number.optional(),
       currentPage: schema.number(),
       perPage: schema.number(),

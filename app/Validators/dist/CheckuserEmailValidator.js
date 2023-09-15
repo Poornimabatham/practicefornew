@@ -24,12 +24,12 @@ var CheckUserEmailValidator = /** @class */ (function (_super) {
     }
     CheckUserEmailValidator.CheckUserEmailSchema = {
         schema: Validator_1.schema.create({
-            email: Validator_1.schema.string()
+            useremail: Validator_1.schema.string()
         })
     };
     CheckUserEmailValidator.CheckUserPhoneSchema = {
         schema: Validator_1.schema.create({
-            phone: Validator_1.schema.string()
+            phoneno: Validator_1.schema.string()
         })
     };
     CheckUserEmailValidator.verifyEmailOtpRequestSchema = {
@@ -45,6 +45,15 @@ var CheckUserEmailValidator = /** @class */ (function (_super) {
             oldEmail: Validator_1.schema.string([Validator_1.rules.email()]),
             empId: Validator_1.schema.number(),
             orgId: Validator_1.schema.number()
+        })
+    };
+    CheckUserEmailValidator.sendSignUpMailV = {
+        schema: Validator_1.schema.create({
+            appName: Validator_1.schema.string.optional(),
+            userName: Validator_1.schema.string.optional(),
+            password: Validator_1.schema.string.optional(),
+            response: Validator_1.schema.string.optional(),
+            phone: Validator_1.schema.string.optional()
         })
     };
     return CheckUserEmailValidator;

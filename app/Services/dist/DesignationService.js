@@ -46,11 +46,12 @@ var DesignationService = /** @class */ (function () {
     }
     DesignationService.AddDesignation = function (a) {
         return __awaiter(this, void 0, void 0, function () {
-            var currentDate, designationList, result, affectedRows, insertDesignation, affectedRows2, timezone, defaulttimeZone, dateTime, formattedDate, module, appModule, activityby, actionPerformed, actionperformed2, insertActivityHistoryMaster;
+            var currentDate, uid, designationList, result, affectedRows, insertDesignation, affectedRows2, timezone, defaulttimeZone, dateTime, formattedDate, module, appModule, activityby, actionPerformed, actionperformed2, insertActivityHistoryMaster;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         currentDate = new Date();
+                        uid = a.empid;
                         return [4 /*yield*/, Database_1["default"].query()
                                 .from("DesignationMaster")
                                 .where("Name", a.name)
@@ -72,8 +73,8 @@ var DesignationService = /** @class */ (function () {
                                 CreatedDate: currentDate,
                                 CreatedById: a.uid,
                                 LastModifiedDate: currentDate,
-                                LastModifiedById: a.uid,
-                                OwnerId: a.uid,
+                                LastModifiedById: uid,
+                                OwnerId: uid,
                                 Code: 8,
                                 RoleId: 9,
                                 Description: a.desc,
@@ -94,14 +95,14 @@ var DesignationService = /** @class */ (function () {
                         module = "Attendance app";
                         appModule = "Designation";
                         activityby = 1;
-                        return [4 /*yield*/, Helper_1["default"].getempnameById(a.uid)];
+                        return [4 /*yield*/, Helper_1["default"].getEmpName(uid)];
                     case 4:
                         actionPerformed = _a.sent();
                         actionperformed2 = "<b>" + a.name + "</b> Designation \u00A0has been Added by \n      \u00A0<b>" + actionPerformed + "</b>from Attendance App";
-                        return [4 /*yield*/, Helper_1["default"].ActivityMasterInsert(formattedDate, a.orgid, a.uid, activityby, module, actionperformed2, appModule)];
+                        return [4 /*yield*/, Helper_1["default"].ActivityMasterInsert(formattedDate, a.orgid, uid, activityby, module, actionperformed2, appModule)];
                     case 5:
                         insertActivityHistoryMaster = _a.sent();
-                        result["status"] = "Successfully Inserted in ActivityMasterInsert";
+                        result["status"] = "1";
                         _a.label = 6;
                     case 6: return [2 /*return*/, result["status"]];
                 }
@@ -152,40 +153,46 @@ var DesignationService = /** @class */ (function () {
     };
     DesignationService.updateDesignation = function (c) {
         return __awaiter(this, void 0, void 0, function () {
-            var Updateorgid, Updateid, UpdateName, result, curdate, getDesignationList, Result, response, getDesignationList2, name, sts1, res, updateDesignaion, count, timezone, defaulttimeZone, dateTime, formattedDate, module, appModule, actionperformed, activityBy, getempname, insertActivityHistoryMaster;
+            var UpdatadminId, Updateid, UpdateName, result, orgid, curdate, getDesignationList, Result, response, getDesignationList2, name, sts1, res, row, updateDesignaion, count, timezone, defaulttimeZone, dateTime, formattedDate, module, appModule, actionperformed, activityBy, getempname, insertActivityHistoryMaster;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        Updateorgid = c.uid;
+                        UpdatadminId = c.adminId;
                         Updateid = c.id;
                         UpdateName = c.desg;
                         result = [];
-                        result["status"] = 0;
+                        return [4 /*yield*/, Helper_1["default"].getName("EmployeeMaster", "OrganizationId", "Id", UpdatadminId)];
+                    case 1:
+                        orgid = _a.sent();
+                        result["status"] = "0";
                         curdate = new Date();
                         return [4 /*yield*/, Database_1["default"].from("DesignationMaster")
                                 .select("Id")
                                 .where("Name", UpdateName)
-                                .andWhere("OrganizationId", Updateorgid)
+                                .andWhere("OrganizationId", orgid)
                                 .andWhere("Id", Updateid)];
-                    case 1:
+                    case 2:
                         getDesignationList = _a.sent();
                         return [4 /*yield*/, getDesignationList];
-                    case 2:
+                    case 3:
                         Result = _a.sent();
                         response = Result.length;
                         if (response > 0) {
-                            result["status"] = "0";
+                            result["status"] = "-1";
                             return [2 /*return*/, result["status"]];
                         }
                         return [4 /*yield*/, Database_1["default"].from("DesignationMaster")
                                 .select("Name", "archive")
-                                .where("OrganizationId", Updateorgid)
+                                .where("OrganizationId", orgid)
                                 .where("Id", Updateid)];
-                    case 3:
+                    case 4:
                         getDesignationList2 = _a.sent();
                         name = "";
-                        sts1 = "";
-                        res = "";
+                        row = getDesignationList2.length;
+                        if (row) {
+                            name = row[0].Name;
+                            sts1 = row[0].archive;
+                        }
                         if (name != UpdateName) {
                             res = 2;
                         }
@@ -198,18 +205,18 @@ var DesignationService = /** @class */ (function () {
                                 .update({
                                 Name: UpdateName,
                                 LastModifiedDate: curdate,
-                                LastModifiedById: Updateid,
+                                LastModifiedById: UpdatadminId,
                                 archive: c.sts,
-                                OrganizationId: Updateorgid
+                                OrganizationId: Updateid
                             })];
-                    case 4:
+                    case 5:
                         updateDesignaion = _a.sent();
                         return [4 /*yield*/, updateDesignaion];
-                    case 5:
-                        count = _a.sent();
-                        if (!(count > 0)) return [3 /*break*/, 9];
-                        return [4 /*yield*/, Helper_1["default"].getTimeZone(Updateorgid)];
                     case 6:
+                        count = _a.sent();
+                        if (!(count > 0)) return [3 /*break*/, 10];
+                        return [4 /*yield*/, Helper_1["default"].getTimeZone(orgid)];
+                    case 7:
                         timezone = _a.sent();
                         defaulttimeZone = moment().tz(timezone).toDate();
                         dateTime = luxon_1.DateTime.fromJSDate(defaulttimeZone);
@@ -218,8 +225,8 @@ var DesignationService = /** @class */ (function () {
                         appModule = "Designation";
                         actionperformed = void 0;
                         activityBy = 1;
-                        return [4 /*yield*/, Helper_1["default"].getempnameById(Updateid)];
-                    case 7:
+                        return [4 /*yield*/, Helper_1["default"].getEmpName(UpdatadminId)];
+                    case 8:
                         getempname = _a.sent();
                         if (res == 2) {
                             actionperformed = "<b>" + UpdateName + "</b>. designation has been edited by <b>" + getempname + "</b> ";
@@ -230,12 +237,12 @@ var DesignationService = /** @class */ (function () {
                         else {
                             actionperformed = "<b>" + UpdateName + "</b> designation has been inactive by <b>" + getempname + "</b> ";
                         }
-                        return [4 /*yield*/, Helper_1["default"].ActivityMasterInsert(formattedDate, c.orgid, c.uid, activityBy, appModule, actionperformed, module)];
-                    case 8:
+                        return [4 /*yield*/, Helper_1["default"].ActivityMasterInsert(formattedDate, orgid, UpdatadminId, activityBy, appModule, actionperformed, module)];
+                    case 9:
                         insertActivityHistoryMaster = _a.sent();
                         result["status"] = "1";
-                        _a.label = 9;
-                    case 9: return [2 /*return*/, result["status"]];
+                        _a.label = 10;
+                    case 10: return [2 /*return*/, result["status"]];
                 }
             });
         });

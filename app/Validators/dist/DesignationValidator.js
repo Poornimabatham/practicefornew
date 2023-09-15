@@ -24,7 +24,7 @@ var DesignationValidator = /** @class */ (function (_super) {
     }
     DesignationValidator.AddDesignationschema = {
         schema: Validator_1.schema.create({
-            uid: Validator_1.schema.number(),
+            empid: Validator_1.schema.number(),
             orgid: Validator_1.schema.number(),
             name: Validator_1.schema.string(),
             sts: Validator_1.schema.number(),
@@ -42,7 +42,7 @@ var DesignationValidator = /** @class */ (function (_super) {
     };
     DesignationValidator.updateDesignationschema = {
         schema: Validator_1.schema.create({
-            uid: Validator_1.schema.number(),
+            adminId: Validator_1.schema.number(),
             UpdateName: Validator_1.schema.string.optional(),
             sts: Validator_1.schema.string(),
             id: Validator_1.schema.number(),

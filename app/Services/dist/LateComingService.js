@@ -48,11 +48,11 @@ var LateComingService = /** @class */ (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        Orgid = data.refno;
+                        Orgid = data.orgid;
                         Currentpage = data.currentPage;
                         Date3 = data.cdate;
                         Perpage = data.perPage;
-                        Empid = data.uid;
+                        Empid = data.empid;
                         csv = data.csv;
                         limit = "";
                         Begin = (Currentpage - 1) * Perpage;

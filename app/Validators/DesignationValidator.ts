@@ -9,7 +9,7 @@ export default class DesignationValidator extends BaseValidator {
 
   static AddDesignationschema = {
     schema: schema.create({
-      uid: schema.number(),
+      empid: schema.number(),
       orgid: schema.number(),
       name: schema.string(),
       sts: schema.number(),
@@ -28,7 +28,7 @@ export default class DesignationValidator extends BaseValidator {
 
   static updateDesignationschema = {
     schema: schema.create({
-      uid: schema.number(),
+    adminId: schema.number(),
       UpdateName: schema.string.optional(),
       sts: schema.string(),
       id:schema.number(),
