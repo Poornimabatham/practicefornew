@@ -28,7 +28,7 @@ var  uid= a.empid
         Name: a.name,
         OrganizationId: a.orgid,
         CreatedDate: currentDate,
-        CreatedById: a.uid,
+        CreatedById: uid,
         LastModifiedDate: currentDate,
         LastModifiedById: uid,
         OwnerId: uid,
