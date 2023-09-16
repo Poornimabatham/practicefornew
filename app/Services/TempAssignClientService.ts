@@ -4,9 +4,9 @@ import moment from "moment";
 import { DateTime } from "luxon";
 export default class TempAssignClientService {
   public static async TempAssignClient(data) {
-    var id = data.uid;
+    var id = data.empid;
     var cid = data.cid;
-    var orgid = data.cid;
+    var orgid = data.orgid;
     var date = new Date();
     var res;
     const selectClientList = await Database.from("clientlist")
@@ -14,8 +14,10 @@ export default class TempAssignClientService {
       .where("employeeid", id)
       .andWhere("clientid", cid)
       .andWhere("OrganizationId", orgid)
-      .andWhere("AssignStatus", 1);
+      .andWhere("AssignStatus", 1)
+      
     res = selectClientList.length;
+
     const data2 = {};
 
     if (res > 0) {

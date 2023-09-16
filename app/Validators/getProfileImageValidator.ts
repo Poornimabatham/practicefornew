@@ -16,9 +16,9 @@ export default class getProfileImageValidator extends BaseValidator {
 
   static sendBrodCastNotificationFromService = {
     schema: schema.create({
-      refno: schema.number(),
+      Orgid: schema.number(),
       title: schema.string(),
-      uid: schema.number(),
+      empid: schema.number(),
       body: schema.string(),
       topic: schema.string.optional(),
       PageName: schema.string(),

@@ -10,7 +10,7 @@ export default class GetDataToRegService {
 
     var currentMonth = data.month;
 
-    if (data.month != undefined) {
+    if (data.month != "null" || data.month != undefined) {
       var month1 = new Date(data.month);
       currentMonth = moment(month1).format("yyyy-MM-DD");
     } else {
@@ -24,43 +24,42 @@ export default class GetDataToRegService {
     )
       .select("MaxDays", "MinTimes")
       .where("OrganizationId", data.orgid)
-      .where("RegularizationSts", 1);
+      .andWhere("RegularizationSts", 1);
 
     const results = await selectRegularizationSettings;
 
     const count1 = results.length;
 
-    let regularizationsettingsts = 0;
-    let MaxDays = 0;
-    let MinTimes = 0;
+    var  regularizationsettingsts=0;
+  var MaxDays=0;
+    var MinTimes=0;
 
     if (count1 >= 1) {
       regularizationsettingsts = 1;
-      MaxDays = results[0].MaxDays;
-      MinTimes = results[0].MinTimes;
+      MaxDays = selectRegularizationSettings[0].MaxDays;
+      MinTimes = selectRegularizationSettings[0].MinTimes;
     }
+ 
 
     const regularizeCount: any = await Database.from("AttendanceMaster")
       .where("OrganizationId", data.orgid)
-      .andWhereNot("Is_Delete", 1)
-      .andWhere("EmployeeId", data.uid)
+      .andWhere("Is_Delete", "!=", 1)
+      .andWhere("EmployeeId", data.empid)
       .whereRaw(`MONTH(AttendanceDate) = MONTH('${currentMonth}')`)
-      .andWhere("AttendanceDate", Database.raw("CURDATE()"))
+      .andWhereNot("AttendanceDate", Database.raw("CURDATE()"))
       .andWhere(
-        Database.raw(` ("RegularizeSts" = 0 OR "RegularizeSts" = 1)
+        Database.raw(` (RegularizeSts != 0 AND RegularizeSts != 1)
       `)
       )
       .orderBy(" AttendanceDate", "desc")
 
-      .count("RegularizeSts as Regularizecount")
-      
+      .count("RegularizeSts as Regularizecount");
 
     const affected_rows = regularizeCount.length;
 
     if (affected_rows) {
       Regularizecount = regularizeCount[0].Regularizecount;
     }
-
     const selectAttendancemasterList = Database.from("AttendanceMaster")
       .select(
         "Id",
@@ -71,22 +70,22 @@ export default class GetDataToRegService {
         "TimeOut"
       )
       .where("OrganizationId", data.orgid)
-      .andWhereNot("Is_Delete", 1)
+      .andWhere("Is_Delete", "!=", 1)
       .andWhere(
         Database.raw(`((device ='Auto Time Out'  and (TimeIn=TimeOut or TimeOut='00:00:00')) or 
       (device ='Absentee Cron' and  TimeIn='00:00:00' and TimeOut='00:00:00') or 
       (device ='Cron' and  TimeIn='00:00:00' and TimeOut='00:00:00' and AttendanceStatus=8) or 
       (device ='Cron' and  (TimeIn=TimeOut or TimeOut='00:00:00') and AttendanceStatus in (4,10))) `)
       )
-      .andWhere("EmployeeId", data.uid)
+      .andWhere("EmployeeId", data.empid)
       .whereRaw(`MONTH(AttendanceDate) = MONTH('${currentMonth}')`)
       .andWhereRaw(`YEAR(AttendanceDate) = YEAR('${currentMonth}')`)
       .andWhereNot("AttendanceDate", Database.raw("CURDATE()"))
       .andWhere(
-        Database.raw(` ("RegularizeSts" = 0 OR "RegularizeSts" = 1)
+        Database.raw(` (RegularizeSts = 0 OR RegularizeSts = 1)
       `)
       )
-      .orderBy("AttendanceDate", "desc")
+      .orderBy("AttendanceDate", "desc");
     const attendanceData = await selectAttendancemasterList;
 
     var attendancearr: any = [];
@@ -127,6 +126,7 @@ export default class GetDataToRegService {
       } else {
         res1["resultsts"] = 1;
       }
+
       if (MinTimes != undefined) {
         if (Regularizecount < MinTimes) {
           res1["Regularizessts"] = 1;
@@ -159,10 +159,10 @@ export default class GetDataToRegService {
 
   public static async FetchRegularizationCount(data) {
     var orgId = data.orgid;
-    var id = data.uid;
+    var id = data.empid;
     var month = data.month;
 
-    if (month != undefined) {
+    if (month != "null" || month != undefined) {
       var month1 = new Date(data.month);
       month = moment(month1).format("yyyy-MM-DD");
     } else {
@@ -177,21 +177,20 @@ export default class GetDataToRegService {
         Database.raw(`count(RegularizeSts) as Regularizecount`)
       )
       .where("OrganizationId", orgId)
-      .andWhereNot("Is_Delete", 1)
+      .andWhere("Is_Delete", "!=", 1)
       .andWhere("EmployeeId", id)
       .whereRaw("Month(AttendanceDate) = Month(?)", [month])
       .whereRaw("Year(AttendanceDate) = Year(?)", [month])
       .whereRaw("AttendanceDate != CURDATE()")
       .andWhere(
-        Database.raw(` ("RegularizeSts" != 0 AND "RegularizeSts" != 1)
+        Database.raw(` (RegularizeSts != 0 AND RegularizeSts!= 1)
       `)
       )
       .orderBy("AttendanceDate", "desc");
-
     const row1 = AttendanceMaster[0];
     const data2 = {
-      MinTimes: row1 ? parseInt(row1.MinTimes) : 0,
-      Regularizecount: row1 ? parseInt(row1.Regularizecount) : 0,
+      MinTimes: row1.MinTimes,
+      Regularizecount: row1.Regularizecount,
     };
 
     return data2;
@@ -245,7 +244,7 @@ export default class GetDataToRegService {
     let divhrsts;
     let module;
     let ActivityBy;
-    let  fetchQueryList;
+    let fetchQueryList;
     let fetchQueryList3;
     const result = await selectEmployeeList;
     result.forEach(async (row) => {
@@ -268,7 +267,7 @@ export default class GetDataToRegService {
           .where(" OrganizationId", orgid)
           .andWhere("HRSts", 1);
 
-          fetchQueryList.forEach((val) => {
+        fetchQueryList.forEach((val) => {
           hrid = val.EmployeeId;
         });
       }
@@ -291,7 +290,7 @@ export default class GetDataToRegService {
         .where("OrganizationId", orgid)
         .andWhere("Username", email);
 
-        fetchQueryList2.forEach((val) => {
+      fetchQueryList2.forEach((val) => {
         hrid = val.EmployeeId;
       });
       senior = hrid;
@@ -311,7 +310,7 @@ export default class GetDataToRegService {
           LastModifiedDate: mdate,
         });
       try {
-        var updSts: any =  fetchQueryList3;
+        var updSts: any = fetchQueryList3;
         if (updSts == 1) {
           msg = `<b>${empname}</b> requested for regularization for the attendance date of <b>${attendancedate}</b>`;
           fetchQueryList3 = await Helper.ActivityMasterInsert(
@@ -327,7 +326,7 @@ export default class GetDataToRegService {
             .select("RegularizeTimeIn", "TimeIn")
             .where("Id", Attendance_id);
 
-          const count =  fetchQueryList3.length;
+          const count = fetchQueryList3.length;
 
           fetchQueryList3.forEach((val) => {
             regularizetimein = val.RegularizeTimeIn;
@@ -335,7 +334,7 @@ export default class GetDataToRegService {
           });
 
           if (RegularizationAppliedFrom != 2) {
-            const  fetchQueryList4 = await Database.from("ApprovalProcess")
+            const fetchQueryList4 = await Database.from("ApprovalProcess")
               .where("OrganizationId", orgid)
               .where(
                 Database.raw(
@@ -346,7 +345,7 @@ export default class GetDataToRegService {
 
               .orderBy("Designation", "desc")
               .orderBy("ProcessType", "desc");
-            const query4 =  fetchQueryList4.length;
+            const query4 = fetchQueryList4.length;
 
             if (query4 > 0) {
               senior = await Helper.getApprovalLevelEmp(uid, orgid, 13);

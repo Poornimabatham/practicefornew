@@ -11,7 +11,7 @@ export default class TempAssignClientValidator extends BaseValidator {
   static TempAssignClientschema = {
     schema: schema.create({
       cid: schema.number(),
-      uid: schema.number(),
+      empid: schema.number(),
       orgid: schema.number(),
     }),
   };

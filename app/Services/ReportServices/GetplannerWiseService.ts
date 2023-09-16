@@ -316,12 +316,13 @@ export default class GetplannerWiseSummary {
   public static async getRegSummary(get) {
     const Orgid = get.orgid;
     const Uid = get.uid;
+    var pendingapprover;
 
     var attid;
     var selectAttendanceMasterList;
     var currentMonth = get.month;
     let res: any[] = [];
-    if (get.month != undefined) {
+    if (get.month != undefined || get.month != "null") {
       var month1 = new Date(get.month);
       currentMonth = moment(month1).format("yyyy-MM-DD");
     } else {
@@ -332,27 +333,28 @@ export default class GetplannerWiseSummary {
       // You don't need to parse the DateTime object; it's already in the desired format.
       const currentMonth = currentTime.toFormat("yyyy-MM-dd");
     }
-    try {
-      selectAttendanceMasterList = await Database.from("AttendanceMaster as AM")
-        .innerJoin("EmployeeMaster", "AM.EmployeeId", "EmployeeMaster.Id")
-        .select(
-          "*",
-          Database.raw(
-            `IF(LastName != '', CONCAT(FirstName, ' ', LastName), FirstName) as Name`
-          ),
-          "AM.Id AS Id"
-        )
-        .where("AM.OrganizationId", Orgid)
-        .whereRaw(`Month(RegularizeRequestDate) = Month('${currentMonth}')`)
-        .whereRaw(`Year(RegularizeRequestDate) = Year('${currentMonth}')`)
-        .andWhere("AM.EmployeeId", Uid)
-        .andWhereNot("RegularizeSts", 0)
-        .orderBy("RegularizeRequestDate", "desc");
-      const count1 = selectAttendanceMasterList.length;
 
-      if (count1 >= 1) {
-        var status = true;
-        selectAttendanceMasterList.forEach(async (val) => {
+    selectAttendanceMasterList = await Database.from("AttendanceMaster as AM")
+      .innerJoin("EmployeeMaster", "AM.EmployeeId", "EmployeeMaster.Id")
+      .select(
+        "*",
+        Database.raw(
+          `IF(LastName != '', CONCAT(FirstName, ' ', LastName), FirstName) as Name`
+        ),
+        "AM.Id AS Id"
+      )
+      .where("AM.OrganizationId", Orgid)
+      .whereRaw(`Month(RegularizeRequestDate) = Month('${currentMonth}')`)
+      .whereRaw(`Year(RegularizeRequestDate) = Year('${currentMonth}')`)
+      .andWhere("AM.EmployeeId", Uid)
+      .andWhere("RegularizeSts", "!=", 0)
+      .orderBy("RegularizeRequestDate", "desc");
+    var count = 0;
+    const count1 = await selectAttendanceMasterList.length;
+    if (count1 >= 1) {
+      var status = true;
+      await Promise.all(
+        selectAttendanceMasterList.map(async (val) => {
           let data: any = {};
           attid = val.Id;
           data["id"] = val.Id;
@@ -364,59 +366,57 @@ export default class GetplannerWiseSummary {
 
           if (val.device == "Auto Time Out") {
             data["deviceid"] = 1;
-            data["empRemarks"] = val.RegularizationRemarks;
-            data["approverRemarks"] = val.RegularizeApproverRemarks;
-            const date = new Date(val.AttendanceDate);
-            data["attendanceDate"] = moment(date).format("YYYY/MM/DD");
-            const date2 = new Date(val.RegularizeRequestDate);
-            data["regApplyDate"] = moment(date2).format("YYYY/MM/DD");
-            data["requestedtimeout"] = val.RegularizeTimeOut;
-            data["requestedtimein"] = val.RegularizeTimeIn;
-            var approverid = val.ApproverId;
-            var pendingapprover;
-
-            if (regsts == 3) {
-              if (approverid != 0) {
-                pendingapprover = val.ApproverId;
-              }
-              if (pendingapprover == undefined) {
-                selectAttendanceMasterList = await Database.from(
-                  " RegularizationApproval"
-                )
-                  .select("ApproverId")
-                  .where("attendanceId", attid)
-                  .andWhere("ApproverSts", regsts)
-                  .andWhere("approverregularsts", 0)
-                  .orderBy("Id", "asc")
-                  .limit(1);
-                const resut1 = await selectAttendanceMasterList;
-
-                if (resut1.length) {
-                  pendingapprover = val.ApproverId;
-                }
-              }
-
-              if (pendingapprover != undefined) {
-                var pendingapp = await Helper.getEmpName(pendingapprover);
-                data["Pstatus"] = "Pending";
-              }
-              if (pendingapp != undefined) {
-                data["Pstatus"] = "Pending at " + pendingapp;
-              }
-              if (regsts == 2) {
-                data["Pstatus"] = "Approved";
-              }
-              if (regsts == 1) {
-                data["Pstatus"] = "Rejected";
-              }
-              res["regsts"] = regsts;
-            }
           }
 
+          data["empRemarks"] = val.RegularizationRemarks;
+          data["approverRemarks"] = val.RegularizeApproverRemarks;
+          const date = new Date(val.AttendanceDate);
+          data["attendanceDate"] = moment(date).format("YYYY/MM/DD");
+          const date2 = new Date(val.RegularizeRequestDate);
+          data["regApplyDate"] = moment(date2).format("YYYY/MM/DD");
+          data["requestedtimeout"] = val.RegularizeTimeOut;
+          data["requestedtimein"] = val.RegularizeTimeIn;
+          var approverid = val.ApproverId;
+
+          if (regsts == 3) {
+            if (approverid != 0) {
+              pendingapprover = val.ApproverId;
+            }
+            if (pendingapprover == undefined) {
+              selectAttendanceMasterList = await Database.from(
+                " RegularizationApproval"
+              )
+                .select("ApproverId")
+                .where("attendanceId", attid)
+                .andWhere("ApproverSts", regsts)
+                .andWhere("approverregularsts", 0)
+                .orderBy("Id", "asc")
+                .limit(1);
+              const resut1 = await selectAttendanceMasterList;
+              if (resut1.length) {
+                pendingapprover = selectAttendanceMasterList[0].ApproverId;
+              }
+            }
+            var pendingapp = "";
+            if (pendingapprover != undefined)
+              pendingapp = await Helper.getEmpName(pendingapprover);
+
+            data["Pstatus"] = "Pending";
+
+            if (pendingapp != "") data["Pstatus"] = "Pending at " + pendingapp;
+          }
+          if (regsts == 2) {
+            data["Pstatus"] = "Approved";
+          }
+          if (regsts == 1) {
+            data["Pstatus"] = "Rejected";
+          }
+
+          data["regsts"] = regsts;
           res.push(data);
-        });
-      }
-    } catch {}
+        })
+      );
+    }
     return res;
   }
 }

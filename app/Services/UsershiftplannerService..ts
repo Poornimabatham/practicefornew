@@ -3,9 +3,8 @@ import moment from "moment";
 import Helper from "App/Helper/Helper";
 export default class UsershiftplannerService {
   public static async usershiftplanner(getvalue) {
-    const userid = getvalue.uid;
+    const userid = getvalue.empid;
     const organizationId = getvalue.orgid;
-
     var selectAttendanceMasterList = await Database.from(
       "AttendanceMaster as A"
     )
@@ -69,8 +68,8 @@ export default class UsershiftplannerService {
   }
 
   public static async getShiftDetailsdata(inputdata) {
-    const userid = inputdata.uid;
-    const refno = inputdata.refno;
+    const userid = inputdata.empid;
+    const refno = inputdata.orgid;
     const attDate = inputdata.attDate;
     const Date = attDate.toFormat("yyyy-MM-dd");
 

@@ -15,36 +15,33 @@ var __extends = (this && this.__extends) || (function () {
 exports.__esModule = true;
 var Validator_1 = require("@ioc:Adonis/Core/Validator");
 var BaseValidator_1 = require("./BaseValidator");
-var getProfileImageValidator = /** @class */ (function (_super) {
-    __extends(getProfileImageValidator, _super);
-    function getProfileImageValidator(ctx) {
+var UsershiftplannerValidator = /** @class */ (function (_super) {
+    __extends(UsershiftplannerValidator, _super);
+    function UsershiftplannerValidator(ctx) {
         var _this = _super.call(this) || this;
         _this.ctx = ctx;
         return _this;
     }
-    getProfileImageValidator.getProfileImageServicesschema = {
+    UsershiftplannerValidator.fetchUsershiftplannerschema = {
         schema: Validator_1.schema.create({
-            orgId: Validator_1.schema.number(),
-            empId: Validator_1.schema.number()
-        })
-    };
-    getProfileImageValidator.sendBrodCastNotificationFromService = {
-        schema: Validator_1.schema.create({
-            Orgid: Validator_1.schema.number(),
-            title: Validator_1.schema.string(),
             empid: Validator_1.schema.number(),
-            body: Validator_1.schema.string(),
-            topic: Validator_1.schema.string.optional(),
-            PageName: Validator_1.schema.string()
+            orgid: Validator_1.schema.number()
         })
     };
-    getProfileImageValidator.generateNumericOTPschema = {
+    UsershiftplannerValidator.InsertdeviceInfochema = {
         schema: Validator_1.schema.create({
-            emailId: Validator_1.schema.string([Validator_1.rules.email()]),
-            empId: Validator_1.schema.number(),
-            orgId: Validator_1.schema.number()
+            empid: Validator_1.schema.number(),
+            devicename: Validator_1.schema.string(),
+            deviceid: Validator_1.schema.string([Validator_1.rules.alphaNum()])
         })
     };
-    return getProfileImageValidator;
+    UsershiftplannerValidator.getShiftDetailsShiftPlanner = {
+        schema: Validator_1.schema.create({
+            empid: Validator_1.schema.number(),
+            orgid: Validator_1.schema.number(),
+            attDate: Validator_1.schema.date.optional({ format: "yyyy-MM-dd" })
+        })
+    };
+    return UsershiftplannerValidator;
 }(BaseValidator_1["default"]));
-exports["default"] = getProfileImageValidator;
+exports["default"] = UsershiftplannerValidator;

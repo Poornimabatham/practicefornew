@@ -29,7 +29,7 @@ export default class changePasswordOTPService {
         result["status"] = "5";
       }
     }
-    return result
+    return result;
   }
 
   public static async newchangepass(data) {
@@ -91,12 +91,14 @@ export default class changePasswordOTPService {
   }
 
   public static async changepass(inp) {
-    var uid = inp.uid;
-    var orgid = inp.refno;
+    var uid = inp.empid;
+    var orgid = inp.orgid;
     var pwd = inp.pwd;
     var npwd = inp.npwd;
     var email = inp.email;
-    const data2 = {};
+
+    const data2: any = [];
+
     const res: any = [];
     let querysts: number = 0;
     let sts = 0;
@@ -106,6 +108,7 @@ export default class changePasswordOTPService {
       .where("EmployeeId", uid)
       .whereRaw("BINARY Password =?", pwd)
       .andWhere("OrganizationId", orgid);
+
     var rows = selectUserList.length;
 
     if (rows) {
@@ -165,7 +168,8 @@ export default class changePasswordOTPService {
             module
           );
       }
-      return data2;
     }
+    
+    return data2["status"];
   }
 }

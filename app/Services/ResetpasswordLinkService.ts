@@ -127,7 +127,6 @@ export default class ResetPasswordLinkService {
     const OldOrg = data.OldOrgId;
     const Status = data.status;
     const Contact = data.usercontact;
-
     var Admin_Name = await Helper.getAdminNamebyOrgId(OldOrg);
     var AdminEmail = data.Email;
     const FirstName = await Helper.getEmpName(Empid);
@@ -157,6 +156,7 @@ export default class ResetPasswordLinkService {
       if (selectUsermasterlist) {
         eid = selectUsermasterlist[0].Id;
         EmpSts = selectUsermasterlist[0].appSuperviserSts;
+console.log("er")
         dept = await Helper.getTrialDept(OldOrg);
         desg = await Helper.getTrialDesg(OldOrg);
         shift = await Helper.getTrialShift(OldOrg);

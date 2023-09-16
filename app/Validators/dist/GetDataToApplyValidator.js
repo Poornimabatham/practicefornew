@@ -24,14 +24,14 @@ var GetDataToRegValidator = /** @class */ (function (_super) {
     }
     GetDataToRegValidator.GetDataTOapplyRegschema = {
         schema: Validator_1.schema.create({
-            uid: Validator_1.schema.number(),
+            empid: Validator_1.schema.number(),
             orgid: Validator_1.schema.number(),
             month: Validator_1.schema.date.optional({ format: "yyyy-MM-dd" })
         })
     };
     GetDataToRegValidator.GetDataTOCountRegschema = {
         schema: Validator_1.schema.create({
-            uid: Validator_1.schema.number(),
+            empid: Validator_1.schema.number(),
             orgid: Validator_1.schema.number(),
             month: Validator_1.schema.date.optional({ format: "yyyy-MM-dd" })
         })

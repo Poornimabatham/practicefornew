@@ -9,7 +9,7 @@ export default class UsershiftplannerValidator extends BaseValidator {
 
   static fetchUsershiftplannerschema = {
     schema: schema.create({
-      uid: schema.number(),
+      empid: schema.number(),
       orgid: schema.number(),
     }),
   };
@@ -23,8 +23,8 @@ export default class UsershiftplannerValidator extends BaseValidator {
   };
   static getShiftDetailsShiftPlanner = {
     schema: schema.create({
-      uid: schema.number(),
-      refno: schema.number(),
+      empid: schema.number(),
+      orgid: schema.number(),
       attDate: schema.date.optional({ format: "yyyy-MM-dd" }),
     }),
   };

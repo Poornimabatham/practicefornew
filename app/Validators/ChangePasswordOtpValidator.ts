@@ -42,8 +42,8 @@ export default class ChangePasswordOtpValidator {
 
   static Changepass = {
     schema: schema.create({
-      uid: schema.number(),
-      refno: schema.number(),
+      empid: schema.number(),
+      orgid: schema.number(),
       pwd: schema.string(),
       npwd: schema.string(),
       email:schema.string([rules.email()])

@@ -184,6 +184,7 @@ var ResetPasswordLinkService = /** @class */ (function () {
                         if (!selectUsermasterlist) return [3 /*break*/, 23];
                         eid = selectUsermasterlist[0].Id;
                         EmpSts = selectUsermasterlist[0].appSuperviserSts;
+                        console.log("er");
                         return [4 /*yield*/, Helper_1["default"].getTrialDept(OldOrg)];
                     case 4:
                         dept = _a.sent();

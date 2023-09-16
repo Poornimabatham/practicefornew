@@ -49,9 +49,9 @@ var TempAssignClientService = /** @class */ (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        id = data.uid;
+                        id = data.empid;
                         cid = data.cid;
-                        orgid = data.cid;
+                        orgid = data.orgid;
                         date = new Date();
                         return [4 /*yield*/, Database_1["default"].from("clientlist")
                                 .select("id")

@@ -40,13 +40,12 @@ export default class getProfileImageService {
   }
 
   public static async sendBrodCastNotificationFromService(get) {
-    const Orgid = get.refno;
-    const Empid = get.uid;
+    const Orgid = get.Orgid;
+    const Empid = get.empid;
     const Title = get.title;
     const Body = get.body;
     const Topic = get.topic;
     const PageName = get.PageName;
-
     var Zone = await Helper.getEmpTimeZone(Empid, Orgid);
     const currentDate = DateTime.now().setZone(Zone).toString();
     const [datePart, timePart] = currentDate.split("T");
@@ -84,7 +83,7 @@ export default class getProfileImageService {
     var name = "";
     var EncodeEmailForCheck = Helper.encode5t(EmailId);
     const data2: any[] = [];
-    const resresultOTP = {}; 
+    const resresultOTP = {};
     const nameQuery = await Database.from("EmployeeMaster")
       .select("*")
       .where("Id", Empid);
@@ -111,13 +110,12 @@ export default class getProfileImageService {
       result += generator.charAt(randomIndex);
     }
 
-    let  message; ////////// write mailer functionality
+    let message; ////////// write mailer functionality
     var headers = "";
     var subject = "ubiAttendance- Email verification";
 
-    var mailresponse = null;  
-    if (mailresponse == null) 
-    {  
+    var mailresponse = null;
+    if (mailresponse == null) {
       const selectEmailOtp_Auth: any = await Database.from(
         "EmailOtp_Authentication"
       )
@@ -126,51 +124,33 @@ export default class getProfileImageService {
         .andWhere("empId", Empid);
 
       const affected_rows = selectEmailOtp_Auth.length;
-      if (affected_rows >0) 
-      {
-       
+      if (affected_rows > 0) {
         const updateEmaiOTPEmail = await Database.from(
           "EmailOtp_Authentication"
         )
           .where("orgId", Orgid)
           .andWhere("empId", Empid)
           .update({ email_id: EncodeEmailForCheck, otp: result });
+      } else {
+        var insertEmailOtp_Authentication = await Database.insertQuery()
+          .table("EmailOtp_Authentication")
+          .insert({
+            empId: Empid,
+            orgId: Orgid,
+            email_id: EncodeEmailForCheck,
+            otp: result,
+            status: 0,
+          });
+        Count = insertEmailOtp_Authentication.length;
       }
-      else
-      {
-       
-            var insertEmailOtp_Authentication = await Database.insertQuery()
-                .table("EmailOtp_Authentication")
-                .insert({
-                  empId: Empid,
-                  orgId: Orgid,
-                  email_id: EncodeEmailForCheck,
-                  otp: result,
-                  status: 0,
-                });
-              Count = insertEmailOtp_Authentication.length;
+      if (Count) {
+        resresultOTP["resultOTP"] = 1;
+        data2.push(resresultOTP);
       }
-          if (Count) 
-          {
-            resresultOTP["resultOTP"] = 1;
-            data2.push(resresultOTP);
-          }
-    } 
-    else 
-    {
+    } else {
       resresultOTP["resultOTP"] = 0;
       data2.push(resresultOTP);
     }
     return data2;
   }
-  
-
-
-
-
-
-
-
-
-
 }

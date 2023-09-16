@@ -265,8 +265,7 @@ export default class Helper {
     const query = await Database.from("EmployeeMaster")
       .select("FirstName", "LastName")
       .where("Id", Id)
-      .where("Is_Delete", 0);
-
+      .where("Is_Delete", 0)
     if (query.length > 0) {
       return query[0].FirstName;
     } else {

@@ -797,12 +797,12 @@ var Helper = /** @class */ (function () {
                             .where("Id", id)];
                     case 1:
                         query = _a.sent();
-                        if (query.length > 0) {
+                        if (query) {
                             if (query[0].TimeIn == "00:00:00" || query[0].TimeIn == "") {
                                 return [2 /*return*/, query[0].HoursPerDay];
                             }
                             else {
-                                return [2 /*return*/, query[0].TimeIn + "-" + query[0].TimeOut];
+                                return [2 /*return*/, query[0].TimeIn.substr(0, 5) + " - " + query[0].TimeOut.substr(0, 5)];
                             }
                         }
                         return [2 /*return*/];
@@ -956,7 +956,7 @@ var Helper = /** @class */ (function () {
                         todayDate = new Date().toISOString().split('T')[0];
                         customizeOrg = 0;
                         status = 0;
-                        endDate = '0000-00-00';
+                        endDate = "0000-00-00";
                         deleteSts = 0;
                         extended = 0;
                         return [4 /*yield*/, Database_1["default"]
@@ -971,7 +971,7 @@ var Helper = /** @class */ (function () {
                         if (row) {
                             customizeOrg = row.customize_org;
                             status = row.status;
-                            endDate = luxon_1.DateTime.fromJSDate(new Date(row.end_date)).toFormat('yyyy-MM-dd');
+                            endDate = luxon_1.DateTime.fromJSDate(new Date(row.end_date)).toFormat("yyyy-MM-dd");
                             deleteSts = row.delete_sts;
                             extended = row.extended;
                         }
@@ -1038,7 +1038,7 @@ var Helper = /** @class */ (function () {
                     case 0: return [4 /*yield*/, this.getOrgFiscal(orgid, leavedate)];
                     case 1:
                         fiscaldate = _a.sent();
-                        fiscal = fiscaldate.split(' ');
+                        fiscal = fiscaldate.split(" ");
                         fiscalstart = fiscal[0];
                         fiscalend = fiscal[2];
                         return [4 /*yield*/, Database_1["default"].from('AppliedLeave')
@@ -1090,18 +1090,18 @@ var Helper = /** @class */ (function () {
         });
     };
     Helper.getBalanceLeave = function (orgid, uid, date) {
-        if (date === void 0) { date = ''; }
+        if (date === void 0) { date = ""; }
         return __awaiter(this, void 0, void 0, function () {
             var data, entitledleave, doj, todaydate, new_fiscal_start_year, new_fiscal_end_year, startDate_year, endDate_year, endDate_fnew, startDate_fnew, currentDate, dateofjoin, fiscalstart, fiscalstartmon, dateofjoinmon, fiscalstartdate, joindate, fiscalend, fiscalendmon, fiscalenddate, startDate, endDate, diff, differenceInDays, bal1, bal2, balanceleave1, str, after, balanceleave, balanceleave, balanceleave;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, Database_1["default"]
-                            .from('EmployeeMaster as E')
-                            .join('Organization as O', 'E.OrganizationId', '=', 'O.Id')
-                            .select('E.FirstName', 'E.entitledleave', 'E.DOJ')
-                            .select('O.fiscal_start', 'O.fiscal_end', 'O.entitled_leave')
-                            .where('O.Id', orgid)
-                            .where('E.Id', uid).first()];
+                    case 0: return [4 /*yield*/, Database_1["default"].from("EmployeeMaster as E")
+                            .join("Organization as O", "E.OrganizationId", "=", "O.Id")
+                            .select("E.FirstName", "E.entitledleave", "E.DOJ")
+                            .select("O.fiscal_start", "O.fiscal_end", "O.entitled_leave")
+                            .where("O.Id", orgid)
+                            .where("E.Id", uid)
+                            .first()];
                     case 1:
                         data = _a.sent();
                         if (!data.entitledleave || data.entitledleave.trim() === 'undefined') {
@@ -1873,27 +1873,6 @@ var Helper = /** @class */ (function () {
             });
         });
     };
-    Helper.getAttImageStatus = function (orgid) {
-        return __awaiter(this, void 0, void 0, function () {
-            var getAttnImageSts;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, Database_1["default"].from("admin_login")
-                            .select("AttnImageStatus")
-                            .where("OrganizationId", orgid)];
-                    case 1:
-                        getAttnImageSts = _a.sent();
-                        if (getAttnImageSts) {
-                            return [2 /*return*/, getAttnImageSts[0].AttnImageStatus];
-                        }
-                        else {
-                            return [2 /*return*/, 0];
-                        }
-                        return [2 /*return*/];
-                }
-            });
-        });
-    };
     Helper.loctrackPermission = function (empId) {
         return __awaiter(this, void 0, void 0, function () {
             var query;
@@ -2028,6 +2007,59 @@ var Helper = /** @class */ (function () {
                             return [2 /*return*/, Name];
                         }
                         return [2 /*return*/];
+                }
+            });
+        });
+    };
+    Helper.ucfirst = function (str) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                if (typeof str !== "string" || str.length === 0) {
+                    return [2 /*return*/, str];
+                }
+                return [2 /*return*/, str.charAt(0).toUpperCase() + str.slice(1)];
+            });
+        });
+    };
+    Helper.getAttImageStatus = function (orgid) {
+        return __awaiter(this, void 0, void 0, function () {
+            var query;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, Database_1["default"].from("admin_login")
+                            .where("OrganizationId", orgid)
+                            .select("attnImageStatus")];
+                    case 1:
+                        query = _a.sent();
+                        if (query.length > 0) {
+                            return [2 /*return*/, query[0].attnImageStatus];
+                        }
+                        return [2 /*return*/, 0];
+                }
+            });
+        });
+    };
+    Helper.AutoTimeOffEndWL = function (empid, orgid, time, date, dateTime) {
+        return __awaiter(this, void 0, void 0, function () {
+            var getmaxEmpidTimeoff, id;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, Database_1["default"].from("Timeoff")
+                            .max("id as id")
+                            .where("EmployeeId", empid)
+                            .andWhere("OrganizationId", orgid)];
+                    case 1:
+                        getmaxEmpidTimeoff = _a.sent();
+                        if (!(getmaxEmpidTimeoff.length > 0)) return [3 /*break*/, 3];
+                        id = getmaxEmpidTimeoff[0].id;
+                        return [4 /*yield*/, Database_1["default"].from("Timeoff")
+                                .where("id", id)
+                                .andWhere("TimeTo", "00:00:00")
+                                .update({ TimeTo: time, TimeoffEndDate: date, ModifiedDate: dateTime })];
+                    case 2:
+                        _a.sent();
+                        _a.label = 3;
+                    case 3: return [2 /*return*/];
                 }
             });
         });

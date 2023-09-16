@@ -111,17 +111,20 @@ var DesignationService = /** @class */ (function () {
     };
     DesignationService.getDesignation = function (a) {
         return __awaiter(this, void 0, void 0, function () {
-            var begin, getDesignationList, result, res;
+            var begin, currentDate, limit, offset, getDesignationList, result, res;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        begin = (a.currentpage - 1) * a.perpage;
+                        begin = (a.currentPage - 1) * a.perPage;
+                        currentDate = new Date();
+                        limit = "";
                         getDesignationList = Database_1["default"].from("DesignationMaster")
                             .select("Id", "OrganizationId", Database_1["default"].raw("IF(LENGTH(`Name`) > 30, CONCAT(SUBSTR(`Name`, 1, 30), '...'), `Name`) AS `Name`"), "archive")
                             .where("OrganizationId", a.orgid)
                             .orderBy("Name", "asc");
-                        if (a.currentPage != 0 && a.pagename == 0) {
-                            getDesignationList = getDesignationList.offset(begin).limit(a.perPage);
+                        if (a.currentPage != 0 && a.pagename == "DesignationList") {
+                            limit = a.perPage;
+                            offset = begin;
                         }
                         if (a.status != undefined) {
                             getDesignationList = getDesignationList.where("Archive", a.status);
@@ -136,17 +139,38 @@ var DesignationService = /** @class */ (function () {
                             data["archive"] = val.archive;
                             var Name = data["name"];
                             var archive = data["archive"];
-                            if (Name.toUpperCase() == "TRIAL DESIGNATION" && archive === 1) {
+                            if (Name.toUpperCase() == "TRIAL DESIGNATION" && archive == 1) {
                                 res = 1;
                             }
                         });
-                        if (res == 1) {
-                            getDesignationList = Database_1["default"].from("DesignationMaster")
-                                .select("Id", Database_1["default"].raw("IF(LENGTH(`Name`) > 30, CONCAT(SUBSTR(`Name`, 1, 30), '...'), `Name`) AS `Name`"), "archive")
-                                .where("OrganizationId", a.orgid)
-                                .orderBy("name", "asc");
-                        }
-                        return [2 /*return*/, getDesignationList];
+                        if (!(res == 1)) return [3 /*break*/, 2];
+                        getDesignationList = Database_1["default"].from("DesignationMaster")
+                            .select("Id", Database_1["default"].raw("IF(LENGTH(`Name`) > 30, CONCAT(SUBSTR(`Name`, 1, 30), '...'), `Name`) AS `Name`"), "archive")
+                            .where("OrganizationId", a.orgid)
+                            .orderBy("name", "asc");
+                        return [3 /*break*/, 4];
+                    case 2: return [4 /*yield*/, Database_1["default"].insertQuery()
+                            .table("DesignationMaster")
+                            .insert({
+                            Name: "Trial Designation",
+                            OrganizationId: a.orgid,
+                            CreatedDate: currentDate,
+                            CreatedById: 0,
+                            LastModifiedDate: currentDate,
+                            LastModifiedById: 0,
+                            OwnerId: 0,
+                            Description: "0",
+                            archive: 1
+                        })];
+                    case 3:
+                        getDesignationList = _a.sent();
+                        getDesignationList = Database_1["default"].from("DesignationMaster")
+                            .select("Id", Database_1["default"].raw("IF(LENGTH(`Name`) > 30, CONCAT(SUBSTR(`Name`, 1, 30), '...'), `Name`) AS `Name`"), "archive")
+                            .where("OrganizationId", a.orgid)
+                            .orderBy("name", "asc").limit(limit)
+                            .offset(begin);
+                        _a.label = 4;
+                    case 4: return [2 /*return*/, getDesignationList];
                 }
             });
         });

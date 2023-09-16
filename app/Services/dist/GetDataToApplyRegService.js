@@ -59,7 +59,7 @@ var GetDataToRegService = /** @class */ (function () {
                         count = 0;
                         status = false;
                         currentMonth = data.month;
-                        if (data.month != undefined) {
+                        if (data.month != "null" || data.month != undefined) {
                             month1 = new Date(data.month);
                             currentMonth = moment_1["default"](month1).format("yyyy-MM-DD");
                         }
@@ -70,7 +70,7 @@ var GetDataToRegService = /** @class */ (function () {
                         return [4 /*yield*/, Database_1["default"].from("RegularizationSettings")
                                 .select("MaxDays", "MinTimes")
                                 .where("OrganizationId", data.orgid)
-                                .where("RegularizationSts", 1)];
+                                .andWhere("RegularizationSts", 1)];
                     case 1:
                         selectRegularizationSettings = _a.sent();
                         return [4 /*yield*/, selectRegularizationSettings];
@@ -82,16 +82,16 @@ var GetDataToRegService = /** @class */ (function () {
                         MinTimes = 0;
                         if (count1 >= 1) {
                             regularizationsettingsts = 1;
-                            MaxDays = results[0].MaxDays;
-                            MinTimes = results[0].MinTimes;
+                            MaxDays = selectRegularizationSettings[0].MaxDays;
+                            MinTimes = selectRegularizationSettings[0].MinTimes;
                         }
                         return [4 /*yield*/, Database_1["default"].from("AttendanceMaster")
                                 .where("OrganizationId", data.orgid)
-                                .andWhereNot("Is_Delete", 1)
-                                .andWhere("EmployeeId", data.uid)
+                                .andWhere("Is_Delete", "!=", 1)
+                                .andWhere("EmployeeId", data.empid)
                                 .whereRaw("MONTH(AttendanceDate) = MONTH('" + currentMonth + "')")
-                                .andWhere("AttendanceDate", Database_1["default"].raw("CURDATE()"))
-                                .andWhere(Database_1["default"].raw(" (\"RegularizeSts\" = 0 OR \"RegularizeSts\" = 1)\n      "))
+                                .andWhereNot("AttendanceDate", Database_1["default"].raw("CURDATE()"))
+                                .andWhere(Database_1["default"].raw(" (RegularizeSts != 0 AND RegularizeSts != 1)\n      "))
                                 .orderBy(" AttendanceDate", "desc")
                                 .count("RegularizeSts as Regularizecount")];
                     case 3:
@@ -103,13 +103,13 @@ var GetDataToRegService = /** @class */ (function () {
                         selectAttendancemasterList = Database_1["default"].from("AttendanceMaster")
                             .select("Id", "AttendanceStatus", "AttendanceDate", "device", "TimeIn", "TimeOut")
                             .where("OrganizationId", data.orgid)
-                            .andWhereNot("Is_Delete", 1)
+                            .andWhere("Is_Delete", "!=", 1)
                             .andWhere(Database_1["default"].raw("((device ='Auto Time Out'  and (TimeIn=TimeOut or TimeOut='00:00:00')) or \n      (device ='Absentee Cron' and  TimeIn='00:00:00' and TimeOut='00:00:00') or \n      (device ='Cron' and  TimeIn='00:00:00' and TimeOut='00:00:00' and AttendanceStatus=8) or \n      (device ='Cron' and  (TimeIn=TimeOut or TimeOut='00:00:00') and AttendanceStatus in (4,10))) "))
-                            .andWhere("EmployeeId", data.uid)
+                            .andWhere("EmployeeId", data.empid)
                             .whereRaw("MONTH(AttendanceDate) = MONTH('" + currentMonth + "')")
                             .andWhereRaw("YEAR(AttendanceDate) = YEAR('" + currentMonth + "')")
                             .andWhereNot("AttendanceDate", Database_1["default"].raw("CURDATE()"))
-                            .andWhere(Database_1["default"].raw(" (\"RegularizeSts\" = 0 OR \"RegularizeSts\" = 1)\n      "))
+                            .andWhere(Database_1["default"].raw(" (RegularizeSts = 0 OR RegularizeSts = 1)\n      "))
                             .orderBy("AttendanceDate", "desc");
                         return [4 /*yield*/, selectAttendancemasterList];
                     case 4:
@@ -184,9 +184,9 @@ var GetDataToRegService = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         orgId = data.orgid;
-                        id = data.uid;
+                        id = data.empid;
                         month = data.month;
-                        if (month != undefined) {
+                        if (month != "null" || month != undefined) {
                             month1 = new Date(data.month);
                             month = moment_1["default"](month1).format("yyyy-MM-DD");
                         }
@@ -196,19 +196,19 @@ var GetDataToRegService = /** @class */ (function () {
                         return [4 /*yield*/, Database_1["default"].from("AttendanceMaster")
                                 .select(Database_1["default"].raw("(SELECT MinTimes FROM RegularizationSettings WHERE OrganizationId = " + orgId + " and RegularizationSts = 1)\n           as MinTimes"), Database_1["default"].raw("count(RegularizeSts) as Regularizecount"))
                                 .where("OrganizationId", orgId)
-                                .andWhereNot("Is_Delete", 1)
+                                .andWhere("Is_Delete", "!=", 1)
                                 .andWhere("EmployeeId", id)
                                 .whereRaw("Month(AttendanceDate) = Month(?)", [month])
                                 .whereRaw("Year(AttendanceDate) = Year(?)", [month])
                                 .whereRaw("AttendanceDate != CURDATE()")
-                                .andWhere(Database_1["default"].raw(" (\"RegularizeSts\" != 0 AND \"RegularizeSts\" != 1)\n      "))
+                                .andWhere(Database_1["default"].raw(" (RegularizeSts != 0 AND RegularizeSts!= 1)\n      "))
                                 .orderBy("AttendanceDate", "desc")];
                     case 1:
                         AttendanceMaster = _a.sent();
                         row1 = AttendanceMaster[0];
                         data2 = {
-                            MinTimes: row1 ? parseInt(row1.MinTimes) : 0,
-                            Regularizecount: row1 ? parseInt(row1.Regularizecount) : 0
+                            MinTimes: row1.MinTimes,
+                            Regularizecount: row1.Regularizecount
                         };
                         return [2 /*return*/, data2];
                 }

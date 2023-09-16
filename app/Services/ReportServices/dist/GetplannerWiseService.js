@@ -289,43 +289,44 @@ var GetplannerWiseSummary = /** @class */ (function () {
     };
     GetplannerWiseSummary.getRegSummary = function (get) {
         return __awaiter(this, void 0, void 0, function () {
-            var Orgid, Uid, attid, selectAttendanceMasterList, currentMonth, res, month1, timeZone, currentTime, currentMonth_1, count1, status, _a;
+            var Orgid, Uid, pendingapprover, attid, selectAttendanceMasterList, currentMonth, res, month1, timeZone, currentTime, currentMonth_1, count, count1, status;
             var _this = this;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
                     case 0:
                         Orgid = get.orgid;
                         Uid = get.uid;
                         currentMonth = get.month;
                         res = [];
-                        if (!(get.month != undefined)) return [3 /*break*/, 1];
+                        if (!(get.month != undefined || get.month != "null")) return [3 /*break*/, 1];
                         month1 = new Date(get.month);
                         currentMonth = moment(month1).format("yyyy-MM-DD");
                         return [3 /*break*/, 3];
                     case 1: return [4 /*yield*/, Helper_1["default"].getTimeZone(Orgid)];
                     case 2:
-                        timeZone = _b.sent();
+                        timeZone = _a.sent();
                         currentTime = DateTime.now().setZone(timeZone);
                         currentMonth_1 = currentTime.toFormat("yyyy-MM-dd");
-                        _b.label = 3;
-                    case 3:
-                        _b.trys.push([3, 5, , 6]);
-                        return [4 /*yield*/, Database_1["default"].from("AttendanceMaster as AM")
-                                .innerJoin("EmployeeMaster", "AM.EmployeeId", "EmployeeMaster.Id")
-                                .select("*", Database_1["default"].raw("IF(LastName != '', CONCAT(FirstName, ' ', LastName), FirstName) as Name"), "AM.Id AS Id")
-                                .where("AM.OrganizationId", Orgid)
-                                .whereRaw("Month(RegularizeRequestDate) = Month('" + currentMonth + "')")
-                                .whereRaw("Year(RegularizeRequestDate) = Year('" + currentMonth + "')")
-                                .andWhere("AM.EmployeeId", Uid)
-                                .andWhereNot("RegularizeSts", 0)
-                                .orderBy("RegularizeRequestDate", "desc")];
+                        _a.label = 3;
+                    case 3: return [4 /*yield*/, Database_1["default"].from("AttendanceMaster as AM")
+                            .innerJoin("EmployeeMaster", "AM.EmployeeId", "EmployeeMaster.Id")
+                            .select("*", Database_1["default"].raw("IF(LastName != '', CONCAT(FirstName, ' ', LastName), FirstName) as Name"), "AM.Id AS Id")
+                            .where("AM.OrganizationId", Orgid)
+                            .whereRaw("Month(RegularizeRequestDate) = Month('" + currentMonth + "')")
+                            .whereRaw("Year(RegularizeRequestDate) = Year('" + currentMonth + "')")
+                            .andWhere("AM.EmployeeId", Uid)
+                            .andWhere("RegularizeSts", "!=", 0)
+                            .orderBy("RegularizeRequestDate", "desc")];
                     case 4:
-                        selectAttendanceMasterList = _b.sent();
-                        count1 = selectAttendanceMasterList.length;
-                        if (count1 >= 1) {
-                            status = true;
-                            selectAttendanceMasterList.forEach(function (val) { return __awaiter(_this, void 0, void 0, function () {
-                                var data, regsts, date, date2, approverid, pendingapprover, resut1, pendingapp;
+                        selectAttendanceMasterList = _a.sent();
+                        count = 0;
+                        return [4 /*yield*/, selectAttendanceMasterList.length];
+                    case 5:
+                        count1 = _a.sent();
+                        if (!(count1 >= 1)) return [3 /*break*/, 7];
+                        status = true;
+                        return [4 /*yield*/, Promise.all(selectAttendanceMasterList.map(function (val) { return __awaiter(_this, void 0, void 0, function () {
+                                var data, regsts, date, date2, approverid, resut1, pendingapp;
                                 return __generator(this, function (_a) {
                                     switch (_a.label) {
                                         case 0:
@@ -337,8 +338,9 @@ var GetplannerWiseSummary = /** @class */ (function () {
                                             data["device"] = val.device;
                                             data["deviceid"] = 0;
                                             regsts = val.RegularizeSts;
-                                            if (!(val.device == "Auto Time Out")) return [3 /*break*/, 6];
-                                            data["deviceid"] = 1;
+                                            if (val.device == "Auto Time Out") {
+                                                data["deviceid"] = 1;
+                                            }
                                             data["empRemarks"] = val.RegularizationRemarks;
                                             data["approverRemarks"] = val.RegularizeApproverRemarks;
                                             date = new Date(val.AttendanceDate);
@@ -366,40 +368,38 @@ var GetplannerWiseSummary = /** @class */ (function () {
                                         case 2:
                                             resut1 = _a.sent();
                                             if (resut1.length) {
-                                                pendingapprover = val.ApproverId;
+                                                pendingapprover = selectAttendanceMasterList[0].ApproverId;
                                             }
                                             _a.label = 3;
                                         case 3:
+                                            pendingapp = "";
                                             if (!(pendingapprover != undefined)) return [3 /*break*/, 5];
                                             return [4 /*yield*/, Helper_1["default"].getEmpName(pendingapprover)];
                                         case 4:
                                             pendingapp = _a.sent();
-                                            data["Pstatus"] = "Pending";
                                             _a.label = 5;
                                         case 5:
-                                            if (pendingapp != undefined) {
+                                            data["Pstatus"] = "Pending";
+                                            if (pendingapp != "")
                                                 data["Pstatus"] = "Pending at " + pendingapp;
-                                            }
+                                            _a.label = 6;
+                                        case 6:
                                             if (regsts == 2) {
                                                 data["Pstatus"] = "Approved";
                                             }
                                             if (regsts == 1) {
                                                 data["Pstatus"] = "Rejected";
                                             }
-                                            res["regsts"] = regsts;
-                                            _a.label = 6;
-                                        case 6:
+                                            data["regsts"] = regsts;
                                             res.push(data);
                                             return [2 /*return*/];
                                     }
                                 });
-                            }); });
-                        }
-                        return [3 /*break*/, 6];
-                    case 5:
-                        _a = _b.sent();
-                        return [3 /*break*/, 6];
-                    case 6: return [2 /*return*/, res];
+                            }); }))];
+                    case 6:
+                        _a.sent();
+                        _a.label = 7;
+                    case 7: return [2 /*return*/, res];
                 }
             });
         });

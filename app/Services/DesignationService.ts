@@ -6,7 +6,7 @@ import EmployeeMaster from "App/Models/EmployeeMaster";
 export default class DesignationService {
   public static async AddDesignation(a) {
     const currentDate = new Date();
-var  uid= a.empid
+    var uid = a.empid;
     var designationList = await Database.query()
       .from("DesignationMaster")
       .where("Name", a.name)
@@ -72,9 +72,11 @@ var  uid= a.empid
   }
 
   public static async getDesignation(a) {
-    const begin = (a.currentpage - 1) * a.perpage;
-
-    let getDesignationList: any = Database.from("DesignationMaster")
+    var begin = (a.currentPage - 1) * a.perPage;
+    const currentDate = new Date();
+    let limit: any = "";
+    let offset;
+    var getDesignationList: any = Database.from("DesignationMaster")
       .select(
         "Id",
         "OrganizationId",
@@ -85,11 +87,18 @@ var  uid= a.empid
       )
       .where("OrganizationId", a.orgid)
       .orderBy("Name", "asc");
+     
+    if (a.currentPage != 0 && a.pagename == "DesignationList")
+     {
+      
+      limit = a.perPage;
+      offset = begin;
+    
 
-    if (a.currentPage != 0 && a.pagename == 0) {
-      getDesignationList = getDesignationList.offset(begin).limit(a.perPage);
+      
+    
+      
     }
-
     if (a.status != undefined) {
       getDesignationList = getDesignationList.where("Archive", a.status);
     }
@@ -103,7 +112,7 @@ var  uid= a.empid
       const Name = data["name"];
 
       const archive = data["archive"];
-      if (Name.toUpperCase() == "TRIAL DESIGNATION" && archive === 1) {
+      if (Name.toUpperCase() == "TRIAL DESIGNATION" && archive == 1) {
         res = 1;
       }
     });
@@ -119,8 +128,32 @@ var  uid= a.empid
         )
         .where("OrganizationId", a.orgid)
         .orderBy("name", "asc");
+    } else {
+      getDesignationList = await Database.insertQuery()
+        .table("DesignationMaster")
+        .insert({
+          Name: "Trial Designation",
+          OrganizationId: a.orgid,
+          CreatedDate: currentDate,
+          CreatedById: 0,
+          LastModifiedDate: currentDate,
+          LastModifiedById: 0,
+          OwnerId: 0,
+          Description: "0",
+          archive: 1,
+        });
+      getDesignationList = Database.from("DesignationMaster")
+        .select(
+          "Id",
+          Database.raw(
+            "IF(LENGTH(`Name`) > 30, CONCAT(SUBSTR(`Name`, 1, 30), '...'), `Name`) AS `Name`"
+          ),
+          "archive"
+        )
+        .where("OrganizationId", a.orgid)
+        .orderBy("name", "asc").limit(limit)
+        .offset(begin)
     }
-
     return getDesignationList;
   }
 
@@ -151,15 +184,14 @@ var  uid= a.empid
     if (response > 0) {
       result["status"] = "-1";
       return result["status"];
-      
     }
     const getDesignationList2 = await Database.from("DesignationMaster")
       .select("Name", "archive")
       .where("OrganizationId", orgid)
-      .where("Id", Updateid)
+      .where("Id", Updateid);
     var name = "";
-  var  sts1
-    var res
+    var sts1;
+    var res;
     var row = getDesignationList2.length;
     if (row) {
       name = row[0].Name;
@@ -218,7 +250,7 @@ var  uid= a.empid
         );
       result["status"] = "1";
     }
-    return result["status"] ;
+    return result["status"];
   }
 
   ///////////// AssignDesignation //////////

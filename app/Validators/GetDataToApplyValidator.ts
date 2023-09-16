@@ -8,7 +8,7 @@ export default class GetDataToRegValidator extends BaseValidator {
 
   static GetDataTOapplyRegschema = {
     schema: schema.create({
-      uid: schema.number(),
+      empid: schema.number(),
       orgid: schema.number(),
       month: schema.date.optional({ format: "yyyy-MM-dd" }),
     }),
@@ -16,7 +16,7 @@ export default class GetDataToRegValidator extends BaseValidator {
 
   static GetDataTOCountRegschema = {
     schema: schema.create({
-      uid: schema.number(),
+      empid: schema.number(),
       orgid: schema.number(),
       month: schema.date.optional({ format: "yyyy-MM-dd" }),
     }),
