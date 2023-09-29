@@ -30,3 +30,15 @@ Route.get('/','UsersController.show'
 )
 
 
+Route.get('/s','UsersController.edit'
+
+)
+Route.get('/t','UsersController.destroy'
+
+)
+
+// Route.get('dashboard', async ({ auth, response }) => {
+//     await auth.authenticate()
+  
+//     // business logic
+//   })

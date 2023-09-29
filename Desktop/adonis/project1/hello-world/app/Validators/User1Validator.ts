@@ -1,41 +1,58 @@
 import { schema,rules } from '@ioc:Adonis/Core/Validator'
 
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import BaseValidator from './Basevalidator'
 
 // import Basevalidator from  './Basevalidator'
 
-export default class User1Validator  {
+export default class User1Validator extends BaseValidator {
   constructor(public ctx: HttpContextContract) {
-    // super();             
+    super();             
   }
 
     
   
-    static n = {schema:schema.create({
+    static postSchema= {schema:schema.create({
 
-  //   empid: schema.number(),
+   
+  
+    
+     
+    // empid: schema.number(),
+    fname: schema.string.optional([
+      rules.alpha()
+    ]
 
-  // fname: schema.string(),
-  // lname: schema.string(),
+      
+    ),
+    lname: schema.string([
+      rules.alpha()
+    ]),
+  
+    
+    password: schema.string([
+      rules.minLength(4),rules.minLength(2)
+    ]) , email: schema.string([
+      rules.email(),rules.unique({table:'employee',column:'email'})
 
-  password: schema.string([
-    rules.confirmed(),
-    rules.minLength(4)
-  ]) , email: schema.string([
-    rules.email()
-  ]),  phone:schema.number(),
-  }),
+
+    ]),  phone:schema.string([rules.mobile(),rules.maxLength(10),rules.minLength(10)]),
+    }),
+    
+
+    
+ message:BaseValidator.messages
 
 
   
-  messages: {
-    required: 'The {{ field }} is required to create a new account',
-    'fname.unique': 'Username not available',
-    'lname.unique':'lastname is available'
-  }
+  // messages: {
+  //   required: 'The {{ field }} is required to create a new account',
+  //   'fname.unique': 'Username not available',
+  //   'lname.unique':'lastname is available'
+  // }
   
 
-  // message:Basevalidator.messages
+ 
  
 
   // const load = await request.validate({schema:this.n})
