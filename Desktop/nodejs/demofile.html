@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Data Table Example</title>
+</head>
+<body>
+    <h1>Data Table Example</h1>
+
+    <div id="dataTable"></div>
+
+    <script>
+        // Load data from the file
+        const dataFromFile = fetch('datatable.json')
+            .then(response => response.json())
+            .then(data => {
+                // Now, you can work with the loaded DataTable
+                console.log('Loaded DataTable:', data);
+                displayDataTable(data);
+            })
+            .catch(error => console.error('Error loading data:', error));
+
+        function displayDataTable(data) {
+            const dataTableDiv = document.getElementById('dataTable');
+            const table = document.createElement('table');
+
+            // Create table header
+            const headerRow = table.insertRow();
+            Object.keys(data[0]).forEach(key => {
+                const headerCell = document.createElement('th');
+                headerCell.textContent = key;
+                headerRow.appendChild(headerCell);
+            });
+
+            // Create table rows and cells
+            data.forEach(rowData => {
+                const row = table.insertRow();
+                Object.values(rowData).forEach(value => {
+                    const cell = row.insertCell();
+                    cell.textContent = value;
+                });
+            });
+
+            dataTableDiv.appendChild(table);
+        }
+
+
+
+        
+    </script>
+</body>
+</html>
