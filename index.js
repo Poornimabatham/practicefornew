@@ -26,3 +26,26 @@ for (let i = 0; i < a.length; i++) {
 }
 
 console.log(results); // Output: ['s-h-u-b-a-m', 'p-o-o-r-n-i-m-a', 'O-m', 'm-a-n-s-h-i']
+
+
+const myVehicle = {
+  brand: 'Ford',
+  model: 'Mustang',
+  color: 'red'
+}
+
+const updateMyVehicle = {
+  type: 'car',
+  year: 2021, 
+  color: 'yellow'
+}
+let name2 = ["shubam", "poornima", "Om", "manshi"];
+//Spread Operator
+const myUpdatedVehicle = {...myVehicle, ...updateMyVehicle,...name2}
+
+//Check the result object in the console:
+console.log(myUpdatedVehicle);
+
+let name1 = ["shubam", "poornima", "Om", "manshi"];
+
+console.log((name1[0]).split("h").join("."))
