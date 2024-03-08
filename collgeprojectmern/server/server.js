@@ -1,13 +1,18 @@
 const express = require('express');
-const app = express()
+const app = express();
+const router = require('./router/auth-router')
+app.use(express.json());
 
-app.get('/', (req, res) => {
-    res.status(200).send('welcome to world of mern')
-})
-
-app.get('/register', (req, res) => {
-    res.status(200).send('welcome to the register page')
-})
+app.use("/api/auth",router);
 
 
-app.listen(8000)
+// app.get('/', (req, res) => {
+//     res.status(200).send('welcome to world of')
+// })
+
+// app.get('/register', (req, res) => {
+//     res.status(200).send('welcome to the register page')
+// })
+
+
+app.listen(8080)
