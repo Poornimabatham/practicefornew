@@ -1,10 +1,16 @@
 const express = require('express');
 const app = express();
 const router = require('./router/auth-router')
+const add = require('./math')
+const FileSystem = require("./File")
+const findAreaOfTrianle = require("./PracticeQuestion")
 app.use(express.json());
 
 app.use("/api/auth",router);
 
+console.log(`The sum of two number is ${add(0,5)}`)
+console.log("Synchronous read: " + (FileSystem));
+console.log("Synchronous read: " + findAreaOfTrianle(2,24));
 
 // app.get('/', (req, res) => {
 //     res.status(200).send('welcome to world of')
@@ -15,4 +21,4 @@ app.use("/api/auth",router);
 // })
 
 
-app.listen(8080)
+app.listen(3000)
