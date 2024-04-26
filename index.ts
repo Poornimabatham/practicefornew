@@ -48,7 +48,7 @@ const justine: User = {
 const isJustineAnAdult: boolean = isAdult(justine);
 console.log(isJustineAnAdult)
 
-
+//Example No-3
 type ProfileType ={
   ProfileName:string,
   AdminSts:number
@@ -63,3 +63,45 @@ const profileObj:ProfileType = {
 let output:boolean = profile(profileObj)
 console.log(`The AdmnsSts of ${profileObj.ProfileName} is ${output} `)
 
+// Example no 4
+// Function that returns a string representing a cup of green tea
+const prepareTea = () => 'greenTea';
+
+/*
+Given a function (representing the tea type) and number of cups needed, the
+following function returns an array of strings (each representing a cup of
+a specific type of tea).
+*/
+const getTea = (numOfCups) => {
+  const teaCups:any[] = [];
+console.log(numOfCups.TypeofTea,)
+let countofTea = numOfCups.Quanity
+  for(let cups = 1; cups <= countofTea; cups += 1) {
+    const teaCup = prepareTea();
+    console.log(numOfCups.TypeofTea ==teaCup)
+    if(numOfCups.TypeofTea ==teaCup){
+      console.log(teaCup,"teaCup")
+      teaCups.push(teaCup);
+    }
+    
+  }
+  return teaCups;
+};
+let Details = {
+Quanity:5,
+TypeofTea:'green Tea'
+}
+let howmuchdrinkisprepared= getTea(Details)
+console.log(howmuchdrinkisprepared)
+
+//Example No-5
+function checkScope() {
+  var i = 'function scope';
+  if (false) {
+    i = 'block scope';
+    console.log('Block scope i is: ', i);
+  }
+  console.log('Function scope i is: ', i);
+  return i;
+}
+console.log(checkScope())

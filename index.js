@@ -35,3 +35,42 @@ var profileObj = {
 };
 var output = profile(profileObj);
 console.log("The AdmnsSts of ".concat(profileObj.ProfileName, " is ").concat(output, " "));
+// Example no 4
+// Function that returns a string representing a cup of green tea
+var prepareTea = function () { return 'greenTea'; };
+/*
+Given a function (representing the tea type) and number of cups needed, the
+following function returns an array of strings (each representing a cup of
+a specific type of tea).
+*/
+var getTea = function (numOfCups) {
+    var teaCups = [];
+    console.log(numOfCups.TypeofTea);
+    var countofTea = numOfCups.Quanity;
+    for (var cups = 1; cups <= countofTea; cups += 1) {
+        var teaCup = prepareTea();
+        console.log(numOfCups.TypeofTea == teaCup);
+        if (numOfCups.TypeofTea == teaCup) {
+            console.log(teaCup, "teaCup");
+            teaCups.push(teaCup);
+        }
+    }
+    return teaCups;
+};
+var Details = {
+    Quanity: 5,
+    TypeofTea: 'green Tea'
+};
+var howmuchdrinkisprepared = getTea(Details);
+console.log(howmuchdrinkisprepared);
+//Example No-5
+function checkScope() {
+    var i = 'function scope';
+    if (false) {
+        i = 'block scope';
+        console.log('Block scope i is: ', i);
+    }
+    console.log('Function scope i is: ', i);
+    return i;
+}
+console.log(checkScope());
