@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<style>
+    /* Style the checkboxes */
+    .custom-checkbox {
+        /* Set the initial color of the checkbox */
+        border: 2px solid grey;
+    }
+
+    /* Style the labels for better visibility */
+    label {
+        /* You can add styles to label as needed */
+        margin-left: 5px;
+    }
+
+    /* Style the form for better spacing */
+    form {
+        /* You can add styles to the form as needed */
+        margin: 20px;
+    }
+</style>
+<title>Checkbox Color Change with JavaScript</title>
+</head>
+<body>
+<form action="/action_page.php">
+    <input type="checkbox" id="vehicle1" name="vehicle1" class="custom-checkbox" value="Bike">
+    <label for="vehicle1"> I have a bike</label><br>
+    <input type="checkbox" id="vehicle2" name="vehicle2" class="custom-checkbox" value="Car">
+    <label for="vehicle2"> I have a car</label><br>
+    <input type="checkbox" id="vehicle3" name="vehicle3" class="custom-checkbox" value="Boat">
+    <label for="vehicle3"> I have a boat</label><br><br>
+    <input type="submit" value="Submit">
+</form>
+
+<script>
+    // Get all checkboxes with the class "custom-checkbox"
+    var checkboxes = document.querySelectorAll('.custom-checkbox');
+
+    // Add a click event listener to each checkbox
+    checkboxes.forEach(function(checkbox) {
+        
+        checkbox.addEventListener('click', function() {
+            // Change the border color of the clicked checkbox
+            if (checkbox.checked) {
+                checkbox.style.border = '2px solid green'; // Change to desired color when checked
+            } else {
+                checkbox.style.border = '2px solid grey'; // Change to desired color when not checked
+            }
+        });
+    });
+</script>
+</body>
+</html>

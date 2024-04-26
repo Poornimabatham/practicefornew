@@ -1,0 +1,20 @@
+
+
+   /* Style the checkboxes */
+   input[type="checkbox"]{
+    /* Set the color of the checkbox to grey when not checked */
+    background-color: green;
+    border: 2px solid grey;
+}
+
+/* Style the labels for better visibility */
+label {
+    /* You can add styles to label as needed */
+    margin-left: 5px;
+}
+
+/* Style the form for better spacing */
+form {
+    /* You can add styles to the form as needed */
+    margin: 20px;
+}
