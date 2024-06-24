@@ -1,0 +1,112 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>appendChild Example</title>
+</head>
+<body>
+    <div id="parent">
+        <p>Existing paragraph.</p>
+    </div>
+
+    <script>
+        // Create a new element
+        let newParagraph = document.createElement('p');
+        newParagraph.textContent = 'This is a new paragraph.';
+
+        // Get the parent element
+        let parentDiv = document.getElementById('parent');
+
+        // Append the new element to the parent
+        parentDiv.appendChild(newParagraph);
+
+        // Create another new element
+        newParagraph = document.createElement('p');
+        newParagraph.textContent = 'This is a new .';
+
+        // Append the new element to the parent
+        parentDiv.appendChild(newParagraph);
+        newParagraph = document.createElement('p');
+        newParagraph.textContent = 'This is me here'
+        parentDiv.appendChild(newParagraph);
+        n
+    </script>
+</body>
+</html> -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Open Nested Forms Example</title>
+    <style>
+        /* Initially hide the forms */
+        #form1, #form2 {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Button to open the first form -->
+     <input type="text" name="" id="add1">
+    <button id="openForm1Button">Open Form 1</button>
+
+    <!-- First form -->
+    <div id="form1">
+        <h2>Form 1</h2>
+        <form>
+            <label for="name1">Name:</label><br>
+            <input type="text" id="name1" name="name1"><br><br>
+            <label for="email1">Email:</label><br>
+            <input type="email" id="email1" name="email1"><br><br>
+            <input type="submit" value="Submit Form 1">
+            <!-- Button to open the second form -->
+            <button type="button" id="openForm2Button">Open Form 2</button>
+        </form>
+    </div>
+
+    <!-- Second form -->
+    <div id="form2">
+        <h2>Form 2</h2>
+        <form>
+            <label for="name2">Name:</label><br>
+            <input type="text" id="name2" name="name2"><br><br>
+            <label for="email2">Email:</label><br>
+            <input type="email" id="email2" name="email2"><br><br>
+            <input type="submit" value="Submit Form 2">
+        </form>
+    </div>
+
+    <script>
+        // Get the button and form elements
+        const openForm1Button = document.getElementById('openForm1Button');
+        const openForm2Button = document.getElementById('openForm2Button');
+        const form1 = document.getElementById('form1');
+        const form2 = document.getElementById('form2');
+
+        // Function to toggle the visibility of a form
+        function toggleForm(form) {
+            if (form.style.display === 'none' || form.style.display === '') {
+                form.style.display = 'block';
+            } else {
+                form.style.display = 'none';
+            }
+        }
+
+        // Add event listeners to the buttons
+        openForm1Button.addEventListener('click', function() {
+            toggleForm(form1);
+        });
+
+        openForm2Button.addEventListener('click', function() {
+            toggleForm(form2);
+        });
+
+        const add1 = document.getElementById('add1');
+        add1.addEventListener('click', function() {
+            let newParagraph = document.createElement('p');
+                        })
+        
+
+    </script>
+</body>
+</html>

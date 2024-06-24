@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Input Field Example</title>
+</head>
+<body>
+    <div id="inputContainer">
+        <!-- Initial input field -->
+        <input type="text">
+    </div>
+    <button id="addInputButton">Add Input Field</button>
+
+    <script>
+        // JavaScript code
+        const inputContainer = document.getElementById('inputContainer');
+        const addInputButton = document.getElementById('addInputButton');
+
+        addInputButton.addEventListener('click', function() {
+            // Create a new input element
+            const newInput = document.createElement('input');
+            const button = document.createElement('button');
+            newInput.type = 'text'; // Set input type if needed
+            newInput.placeholder = 'Enter text'; // Optional: set placeholder text
+
+            // Append the new input element to the container
+            inputContainer.appendChild(newInput);
+           let btn1= inputContainer.appendChild(button);
+           btn1.addEventListener('click', function(e) {
+            const newInput = document.createElement('input');
+            const button = document.createElement('button');
+            newInput.type = 'text'; // Set input type if needed
+            newInput.placeholder = 'Enter text'; // Optional: set placeholder text
+
+            // Append the new input element to the container
+            inputContainer.appendChild(newInput);
+           }
+        )
+
+        });
+    </script>
+</body>
+</html>
