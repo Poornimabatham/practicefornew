@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<body onclick="x(this)">
+<h1>JavaScript HTML Events</h1>
+<h2>The onmouseover Attribute</h2>
+
+<div onmouseover="mOver(this)" onmouseout="mOut(this)"  onclick="changecolour(this)"
+style="background-color:#D94A38;width:120px;height:20px;padding:40px;">
+Mouse Over Me</div>
+
+<script>
+function mOver(obj) {
+    console.log(obj)
+  obj.innerHTML = "Thank You"
+  obj.style.backgroundColor='yellow'
+  obj.style.color='black'
+}
+
+function x(obj) {
+  
+  obj.style.backgroundColor='black'
+  z.style.backgroundColor='white'
+  
+}
+function mOut(obj) {
+  obj.innerHTML = "Mouse Over Me"
+    obj.style.backgroundColor='red'
+  obj.style.color='white'
+}
+
+function changecolour(obj) {
+    
+  obj.innerHTML = "Bye bye"
+    obj.style.backgroundColor='green'
+  obj.style.color='white'
+  x(z)
+}
+</script>
+
+</body>
+</html> 
