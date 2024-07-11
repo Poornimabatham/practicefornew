@@ -34,7 +34,13 @@
             newInput.placeholder = 'Enter text'; // Optional: set placeholder text
 
             // Append the new input element to the container
-            inputContainer.appendChild(newInput);
+            let btn12=inputContainer.appendChild(newInput);
+            btn12.addEventListener('click', function(e) {
+            const newInput = document.createElement('input');
+            const button = document.createElement('button');
+            newInput.type = 'text'; // Set input type if needed
+            newInput.placeholder = 'Enter text'; // Optional: set placeholder text
+            })
            }
         )
 
