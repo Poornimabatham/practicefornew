@@ -170,3 +170,53 @@ while(true){
     break
   }
 }
+
+
+function findAdjacentDuplicates(arr) {
+  const result = [];
+
+  for (let i = 0; i < arr.length - 1; i++) {
+      if (arr[i] === arr[i + 1]) {
+          result.push(arr[i]);
+      }
+  }
+
+  return result;
+}
+
+// Example usage
+const arr1 = [32, 39, 48, 56];
+const arr2 = [22, 65, 65, 39];
+
+console.log(findAdjacentDuplicates(arr1)); // []
+console.log(findAdjacentDuplicates(arr2)); // [65]
+
+
+
+let af = 90
+
+function test(){
+  console.log(af)
+   af = 90
+}
+
+test()
+
+
+function sortArray(arr) {
+  for (let i = 0; i < arr.length; i++) {
+      for (let j = i + 1; j < arr.length; j++) {
+          if (arr[i] > arr[j]) {
+              // swap elements
+              let temp = arr[i];
+              arr[i] = arr[j];
+              arr[j] = temp;
+          }
+      }
+  }
+  return arr;
+}
+
+let arr = [21, 45, 5, 7];
+let sortedArr = sortArray(arr);
+console.log(sortedArr); // Output: [5, 7, 21, 45]
